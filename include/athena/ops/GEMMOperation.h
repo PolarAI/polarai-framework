@@ -44,6 +44,15 @@ class GEMMOperation : public core::Operation {
     size_t getOperandsCount() const override {
         return 2;
     }
+    std::string serialize() const override;
+
+    static Operation *deserialize(const std::string &data) {
+        std::stringstream stream(data);
+        bool transpA, transpB;
+        stream >> transpA;
+        stream >> transpB;
+        return new GEMMOperation(transpA, transpB);
+    };
 };
 }  // namespace athena::ops
 

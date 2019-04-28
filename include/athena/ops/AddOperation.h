@@ -45,6 +45,14 @@ class AddOperation : public core::Operation {
     size_t getOperandsCount() const override {
         return 2;
     }
+
+    std::string serialize() const override {
+        return "";
+    }
+
+    static Operation *deserialize(const std::string &) {
+        return new AddOperation();
+    };
 };
 }  // namespace athena::ops
 #endif  // ATHENA_ADDOPERATION_H

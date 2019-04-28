@@ -32,15 +32,15 @@ class Operation {
     std::string mName;
 
     public:
-    explicit Operation(std::string name)
-        :
-          mName(std::move(name)){};
+    explicit Operation(std::string name) : mName(std::move(name)){};
     virtual inner::Tensor* getResultTensor(
         core::Context& context, std::vector<inner::Tensor*> args) const = 0;
-    virtual inner::Tensor* getErrorTensor(core::Context& context, std::vector<inner::Tensor*> args,
+    virtual inner::Tensor* getErrorTensor(core::Context& context,
+                                          std::vector<inner::Tensor*> args,
                                           int derivativeOrder) const = 0;
     virtual inner::Tensor* getDerivativeTensor(core::Context& context,
-        std::vector<inner::Tensor*> args, int argNo) const = 0;
+                                               std::vector<inner::Tensor*> args,
+                                               int argNo) const = 0;
 
     /**
      * Generate code for Operation
@@ -73,6 +73,12 @@ class Operation {
     std::string getName() const;
 
     virtual size_t getOperandsCount() const = 0;
+
+    virtual std::string serialize() const = 0;
+
+    static Operation* deserialize(const std::string& data) {
+        return nullptr;
+    };
 };
 
 class OperationDummy : public Operation {
@@ -80,16 +86,19 @@ class OperationDummy : public Operation {
     explicit OperationDummy(std::string name) : Operation(std::move(name)){};
 
     inner::Tensor* getResultTensor(
-        core::Context& context, std::vector<inner::Tensor*> args) const override {
+        core::Context& context,
+        std::vector<inner::Tensor*> args) const override {
         return inner::getNullTensor(context);
     }
 
-    inner::Tensor* getErrorTensor(core::Context& context, std::vector<inner::Tensor*>,
+    inner::Tensor* getErrorTensor(core::Context& context,
+                                  std::vector<inner::Tensor*>,
                                   int) const override {
         return inner::getNullTensor(context);
     }
 
-    inner::Tensor* getDerivativeTensor(core::Context& context, std::vector<inner::Tensor*> args,
+    inner::Tensor* getDerivativeTensor(core::Context& context,
+                                       std::vector<inner::Tensor*> args,
                                        int argNo) const override {
         return inner::getNullTensor(context);
     }
@@ -112,6 +121,14 @@ class OperationDummy : public Operation {
     size_t getOperandsCount() const override {
         return 0;
     }
+
+    std::string serialize() const override {
+        return "";
+    }
+
+    static Operation* deserialize(const std::string&) {
+        return new OperationDummy("dummy");
+    };
 };
 }  // namespace athena::core
 

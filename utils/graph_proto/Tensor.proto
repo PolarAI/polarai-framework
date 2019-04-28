@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package proto_graph;
+
+message Tensor {
+    repeated uint64 dimensions = 1;
+    enum DataType {
+        UNDEFINED = 0;
+        FLOAT = 1;
+        DOUBLE = 2;
+        HALF = 3;
+    }
+    DataType data_type = 2;
+}

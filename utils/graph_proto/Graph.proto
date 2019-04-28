@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+import "Node.proto";
+import "InputNode.proto";
+import "OutputNode.proto";
+import "LossNode.proto";
+import "Edge.proto";
+
+package proto_graph;
+
+message Graph {
+    repeated Node nodes = 1;
+    repeated InputNode input_nodes = 2;
+    repeated OutputNode output_nodes = 3;
+    repeated LossNode loss_nodes = 4;
+    repeated Edge edges = 5;
+}

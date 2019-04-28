@@ -13,6 +13,7 @@ add_subdirectory(backend)
 add_subdirectory(core)
 add_subdirectory(ops)
 add_subdirectory(loaders)
+add_subdirectory(model)
 
 # Define headers for this library. PUBLIC headers are used for
 # compiling the library, and will be added to consumers' build
@@ -38,6 +39,7 @@ target_link_libraries(athena
         backend-llvm
         athena-core
         athena-ops
+        athena-model
         ${NOWHOLE_ARCHIVE})
 
 target_compile_features(athena

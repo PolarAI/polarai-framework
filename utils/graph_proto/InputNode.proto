@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package proto_graph;
+
+import "Tensor.proto";
+import "Loader.proto";
+
+message InputNode {
+    uint64 index = 1;
+    string name = 2;
+    Tensor tensor = 3;
+    Loader loader = 4;
+    bool is_frozen = 5;
+}

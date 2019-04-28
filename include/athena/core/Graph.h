@@ -19,6 +19,7 @@
 #include <athena/core/inner/Settings.h>
 #include <athena/core/inner/Table.h>
 
+#include <ostream>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>

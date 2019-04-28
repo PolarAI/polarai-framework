@@ -89,4 +89,9 @@ core::inner::Tensor *GEMMOperation::getErrorTensor(core::Context& context,
     // todo higher orders not supported
     return getResultTensor(context, args);
 }
+std::string GEMMOperation::serialize() const {
+    std::stringstream stringstream;
+    stringstream << mTransposeA << std::endl << mTransposeB << std::endl;
+    return stringstream.str();
+}
 }

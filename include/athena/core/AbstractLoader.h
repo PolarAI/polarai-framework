@@ -29,7 +29,7 @@ class AbstractLoader {
     /**
      * Do actual data load
      */
-    virtual void load(Allocator *, inner::Tensor *) = 0;
+    virtual void load(Allocator*, inner::Tensor*) = 0;
     /**
      * Get C-style function name that does actual load
      * For backend usage only
@@ -42,6 +42,19 @@ class AbstractLoader {
      * @return C-style function name string
      */
     virtual std::string getCreateCName() const = 0;
+
+    template <typename T>
+    static std::string getLoaderName() {
+        new FatalError(-1, "Not implemented");
+    };
+
+    virtual std::string getName() const = 0;
+
+    virtual std::string serialize() const = 0;
+
+    static AbstractLoader* deserialize(const std::string& data) {
+        new FatalError(-1, "Not implemented");
+    }
 };
 
 /**
@@ -49,7 +62,7 @@ class AbstractLoader {
  */
 class DummyLoader : public AbstractLoader {
     public:
-    void load(Allocator *, inner::Tensor *tensor) override {}
+    void load(Allocator*, inner::Tensor* tensor) override {}
     std::string getLoadCName() const override {
         static const std::string loadName = "DummyLoad";
         return loadName;
@@ -57,6 +70,18 @@ class DummyLoader : public AbstractLoader {
     virtual std::string getCreateCName() const override {
         static const std::string createName = "DummyCreate";
         return createName;
+    }
+
+    virtual std::string serialize() const override {
+        return "";
+    }
+
+    virtual std::string getName() const override {
+        return "dummy";
+    }
+
+    static AbstractLoader* deserialize(const std::string& data) {
+        return new DummyLoader();
     }
 };
 }  // namespace athena::core

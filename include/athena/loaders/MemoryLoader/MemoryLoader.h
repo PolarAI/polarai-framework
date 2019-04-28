@@ -43,6 +43,16 @@ class MemoryLoader : public core::AbstractLoader {
         static const std::string createName = "CreateMemoryLoader";
         return createName;
     };
+
+    virtual std::string getName() const override {
+        return "MemoryLoader";
+    }
+
+    std::string serialize() const override;
+
+    static AbstractLoader *deserialize(const std::string &data) {
+        new core::FatalError(-1, "MemoryLoader is not serializable");
+    }
 };
 }  // namespace athena::loaders
 

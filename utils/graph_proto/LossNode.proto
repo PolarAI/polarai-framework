@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package proto_graph;
+
+import "Tensor.proto";
+import "Operation.proto";
+
+message LossNode {
+    uint64 index = 1;
+    string name = 2;
+    Tensor tensor = 3;
+    uint64 inputs_count = 4;
+    Operation operation = 5;
+    uint64 criterion = 6;
+}

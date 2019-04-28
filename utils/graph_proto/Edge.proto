@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package proto_graph;
+
+message Edge {
+    uint64 start = 1;
+    uint64 end = 2;
+    uint64 mark = 3;
+}

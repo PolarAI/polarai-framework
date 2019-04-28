@@ -49,8 +49,19 @@ void MemoryLoader::load(core::Allocator *allocator,
 #endif
     std::memmove(pointer, mData, mSize);
 }
+std::string MemoryLoader::serialize() const {
+    new core::FatalError(-1, "Not serializable");
+}
 
 }  // namespace athena::loaders
+
+namespace athena::core {
+template <>
+std::string
+core::AbstractLoader::getLoaderName<athena::loaders::MemoryLoader>() {
+    return "MemoryLoader";
+}
+}  // namespace athena::core
 
 extern "C" {
 void MemoryLoaderLoad(void *loader, void *allocator, void *tensor) {

@@ -42,6 +42,11 @@ class MSELossFunction : public core::Operation {
     size_t getOperandsCount() const override {
         return 2;
     }
+    std::string serialize() const override;
+
+    static Operation *deserialize(const std::string &) {
+        return new MSELossFunction();
+    };
 };
 }  // namespace athena::ops
 #endif  // ATHENA_MSELOSSFUNCTION_H

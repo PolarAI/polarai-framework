@@ -77,4 +77,7 @@ core::inner::Tensor *MSELossFunction::getErrorTensor(core::Context& context,
     // todo refactor me
     return nullptr;
 }
+std::string MSELossFunction::serialize() const {
+    return "";
+}
 }  // namespace athena::ops

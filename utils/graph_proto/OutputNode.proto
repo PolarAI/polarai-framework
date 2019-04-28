@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package proto_graph;
+
+message OutputNode {
+    uint64 index = 1;
+    string name = 2;
+    uint64 inputs_count = 3;
+}
