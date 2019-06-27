@@ -2,9 +2,5 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/build/ninja/third_party/googletest-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/build/ninja_manual/third_party/googletest-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/build/ubuntu/third_party/yaml-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/build/uclang/third_party/yaml-src" vcs="Git" />
   </component>
 </project>

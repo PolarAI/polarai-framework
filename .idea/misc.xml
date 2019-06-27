@@ -17,9 +17,6 @@
   <component name="JavaScriptSettings">
     <option name="languageLevel" value="JSX" />
   </component>
-  <component name="TaskProjectConfiguration">
-    <server type="YouTrack" url="https://youtrack.athenaframework.ml/youtrack" />
-  </component>
   <component name="elmot.OpenOcdPlugin">
     <option name="openOcdHome" value="/usr/local" />
   </component>
