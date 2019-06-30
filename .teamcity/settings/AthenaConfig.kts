@@ -43,22 +43,17 @@ To debug in IntelliJ Idea, open the 'Maven Projects' tool window (View
 'Debug' option is available in the context menu for the task.
 */
 
-version = "2019.1"
-
-project {
-
+object AthenaProject : Project({
     vcsRoot(HttpsGithubComAthenamlAthenamlGithubIoRefsHeadsMaster)
     vcsRoot(AthenaAlex)
     vcsRoot(AthenaPublic)
-    vcsRoot(HttpsGithubComAlexbatashevAthenaRefsHeadsMaster)
-    vcsRoot(HttpsGitlabAthenaframeworkMlAthenamlAthenaGitRefsHeadsMaster)
     vcsRoot(GithubGenericRepo)
-    vcsRoot(HttpsGithubComAthenamlAthenaRefsHeadsMaster)
 
     buildType(LinuxGcc8Release)
     buildType(LinuxGcc8Debug)
     buildType(Daily)
     buildType(AlexFork)
+    buildType(AndreyFork)
     buildType(MandatoryChecks)
     buildType(StaticChecks)
     buildType(LinuxClang8Release)
@@ -121,7 +116,7 @@ project {
             param("username", "")
         }
     }
-}
+})
 
 object AlexFork : BuildType({
     name = "Alex Fork"
@@ -181,13 +176,59 @@ object AlexFork : BuildType({
     }
 })
 
+object AndreyFork : BuildType({
+    name = "Andrey Fork"
+
+    type = BuildTypeSettings.Type.COMPOSITE
+
+    params {
+        param("reverse.dep.*.repo", "masdevas/athena")
+        param("reverse.dep.Athena_StaticChecks.target_branch", "develop")
+    }
+
+    vcs {
+        root(AthenaAlex)
+
+        showDependenciesChanges = true
+    }
+
+    triggers {
+        vcs {
+            quietPeriodMode = VcsTrigger.QuietPeriodMode.USE_DEFAULT
+            triggerRules = "+:root=${AthenaAndrey.id}:**"
+
+            branchFilter = """
+                +:*
+                -:develop
+                -:master
+                -:refs/pull*
+            """.trimIndent()
+            watchChangesInDependencies = true
+            enableQueueOptimization = false
+        }
+    }
+
+    dependencies {
+        snapshot(LinuxClang8Debug) {
+        }
+        snapshot(LinuxClang8Release) {
+        }
+        snapshot(LinuxGcc8Debug) {
+        }
+        snapshot(LinuxGcc8Release) {
+        }
+        snapshot(StaticChecks) {
+        }
+    }
+})
+
 object Daily : BuildType({
     name = "Daily"
 
     type = BuildTypeSettings.Type.COMPOSITE
 
     vcs {
-        root(HttpsGithubComAthenamlAthenaRefsHeadsMaster)
+        root(AthenaPublic)
 
         showDependenciesChanges = true
     }
@@ -207,10 +248,6 @@ object Daily : BuildType({
     features {
         investigationsAutoAssigner {
             defaultAssignee = "abatashev"
-        }
-        vcsLabeling {
-            vcsRootId = "${HttpsGitlabAthenaframeworkMlAthenamlAthenaGitRefsHeadsMaster.id}"
-            labelingPattern = "daily-%system.build.number%"
         }
     }
 
@@ -509,7 +546,7 @@ object UpdateDocs : BuildType({
     publishArtifacts = PublishMode.ALWAYS
 
     vcs {
-        root(HttpsGithubComAthenamlAthenaRefsHeadsMaster)
+        root(AthenaPublic)
         root(HttpsGithubComAthenamlWebsiteRefsHeadsMaster, "+:. => website")
     }
 
@@ -576,14 +613,14 @@ object UpdateDocs : BuildType({
             teamcitySshKey = "teamcity_github"
         }
         pullRequests {
-            vcsRootExtId = "${HttpsGithubComAthenamlAthenaRefsHeadsMaster.id}"
+            vcsRootExtId = "${AthenaPublic.id}"
             provider = github {
                 authType = vcsRoot()
                 filterAuthorRole = PullRequests.GitHubRoleFilter.MEMBER
             }
         }
         pullRequests {
-            vcsRootExtId = "${HttpsGithubComAlexbatashevAthenaRefsHeadsMaster.id}"
+            vcsRootExtId = "${AthenaAlex.id}"
             provider = github {
                 authType = vcsRoot()
                 filterAuthorRole = PullRequests.GitHubRoleFilter.MEMBER
@@ -663,6 +700,12 @@ object AthenaAlex : GitVcsRoot({
     }
 })
 
+object AthenaAndrey : GitVcsRoot({
+    name = "athena_alex"
+    url = "https://github.com/masdevas/athena"
+    branch = "refs/heads/develop"
+})
+
 object AthenaPublic : GitVcsRoot({
     name = "athena_public"
     url = "https://github.com/athenaml/athena"
@@ -677,24 +720,6 @@ object GithubGenericRepo : GitVcsRoot({
     name = "Github Generic Repo"
     url = "https://github.com/%repo%"
     branch = "refs/heads/develop"
-})
-
-object HttpsGithubComAlexbatashevAthenaRefsHeadsMaster : GitVcsRoot({
-    name = "https://github.com/alexbatashev/athena#refs/heads/master"
-    url = "https://github.com/alexbatashev/athena"
-    authMethod = password {
-        userName = "alexbatashev"
-        password = "zxx5e5775d46ed7c8556a3f134a9241268dc7430c2b41e16c8755c4d1e1696fb2b54131b2cc0bc2468c775d03cbe80d301b"
-    }
-})
-
-object HttpsGithubComAthenamlAthenaRefsHeadsMaster : GitVcsRoot({
-    name = "https://github.com/athenaml/athena#refs/heads/master"
-    url = "https://github.com/athenaml/athena"
-    authMethod = password {
-        userName = "alexbatashev"
-        password = "zxx5e5775d46ed7c8556a3f134a9241268dc7430c2b41e16c8755c4d1e1696fb2b54131b2cc0bc2468c775d03cbe80d301b"
-    }
 })
 
 object HttpsGithubComAthenamlAthenamlGithubIoRefsHeadsMaster : GitVcsRoot({

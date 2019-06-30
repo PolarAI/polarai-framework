@@ -37,7 +37,8 @@
     </pluginRepositories>
 
     <build>
-        <sourceDirectory>.</sourceDirectory>
+        <testSourceDirectory>tests</testSourceDirectory>
+        <sourceDirectory>settings</sourceDirectory>
         <plugins>
             <plugin>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -99,6 +100,11 @@
             <artifactId>kotlin-script-runtime</artifactId>
             <version>${kotlin.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
         </dependency>
     </dependencies>
 </project>

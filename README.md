@@ -1,5 +1,7 @@
 # [WIP] Athena
 
+[![Build Status](https://travis-ci.org/athenaml/athena.svg?branch=master)](https://travis-ci.org/athenaml/athena)
+
 **Warning** The project is still heavy work in progress. Not suitable for production use.
 
 ## What is Athena?
@@ -18,8 +20,9 @@ Prerequisites:
 - Python 3 (optional)
 
 Building from source
-0. Checkout repository
-0. `path/to/source/scripts/build.py --build-type Release --disable-tests path/to/build/dest path/to/source`
+
+1. Checkout repository
+2. `path/to/source/scripts/build.py --build-type Release --disable-tests path/to/build/dest path/to/source`
 
 To see other build options use `scripts/build.py --help`
 
