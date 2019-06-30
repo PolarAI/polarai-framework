@@ -30,9 +30,9 @@ class DefaultBuild(private val buildConfig: String, private val compiler: String
     }
 
     params {
-        param("cc", (if (compiler == "Clang") "clang-8" else "gcc"))
+        param("cc", (if (compiler == "Clang") "clang-8" else "gcc-8"))
         param("image_name", (if (compiler == "Clang") "llvm8" else "gcc"))
-        param("cxx", (if (compiler == "Clang") "clang++-8" else "g++"))
+        param("cxx", (if (compiler == "Clang") "clang++-8" else "g++-8"))
         param("env.BUILD_TYPE", "%build_type%")
         param("repo", "athenaml/athena")
         param("env.SRC_DIR", "%system.teamcity.build.checkoutDir%")
