@@ -11,23 +11,13 @@
  * the License.
  */
 
-#ifndef ATHENA_FORWARDDECLARATIONS_H
-#define ATHENA_FORWARDDECLARATIONS_H
+#ifndef ATHENA_SETTINGS_H
+#define ATHENA_SETTINGS_H
 
-#include <vector>
+#if __has_cpp_attribute(clang::reinitializes)
+#define ATHENA_REINITIALIZE [[clang::reinitializes]]
+#else
+#define ATHENA_REINITIALIZE
+#endif
 
-namespace athena::core {
-class AbstractNode;
-class Node;
-class InputNode;
-class OutputNode;
-class LossNode;
-class Graph;
-class Traversal;
-namespace inner {
-struct Cluster;
-using Clusters = std::vector<Cluster>;
-}  // namespace inner
-}  // namespace athena::core
-
-#endif  // ATHENA_FORWARDDECLARATIONS_H
+#endif //ATHENA_SETTINGS_H

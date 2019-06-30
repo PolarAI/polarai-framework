@@ -14,20 +14,13 @@
 #ifndef ATHENA_GRAPH_H
 #define ATHENA_GRAPH_H
 
-#include <athena/core/InputNode.h>
-#include <athena/core/Node.h>
 #include <athena/core/Traversal.h>
 #include <athena/core/inner/Table.h>
+#include <athena/core/inner/Settings.h>
 
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
-
-#if __has_cpp_attribute(clang::reinitializes)
-#define REINITIALIZE [[clang::reinitializes]]
-#else
-#define REINITIALIZE
-#endif
 
 namespace athena::core {
 namespace inner {
@@ -51,7 +44,7 @@ struct Edge {
 
 using SyncStorage = std::unordered_set<size_t>;
 using OwningStorage =
-    inner::TupleContainers<std::vector, Node, InputNode>::Holder;
+    inner::TupleContainers<std::vector, Node, InputNode, OutputNode, LossNode>::Holder;
 using Topology = std::vector<inner::Edge>;
 
 /**
@@ -70,7 +63,7 @@ class Graph {
                       bool isRepairedNode,
                       bool isErase);
     void saveNode(AbstractNode& node, bool isRepairedNode, bool isErase);
-    REINITIALIZE void fullClear();
+    ATHENA_REINITIALIZE void fullClear();
 
     public:
     Graph();

@@ -13,6 +13,10 @@
 
 #include <athena/core/Graph.h>
 #include <athena/core/Traversal.h>
+#include <athena/core/InputNode.h>
+#include <athena/core/Node.h>
+#include <athena/core/OutputNode.h>
+#include <athena/core/LossNode.h>
 #include <athena/core/inner/GlobalTables.h>
 #include <athena/core/inner/InnerFunctions.h>
 
@@ -39,6 +43,8 @@ void initVisits(std::unordered_map<size_t, inner::NodeState>& visits,
     initVisitsOf(syncStorage, visits);
     initVisitsOf<InputNode>(owningStorage, visits);
     initVisitsOf<Node>(owningStorage, visits);
+    initVisitsOf<OutputNode>(owningStorage, visits);
+    initVisitsOf<LossNode>(owningStorage, visits);
 }
 void initQueue(std::queue<size_t>& queue,
                const OwningStorage& owningStorage,
@@ -95,7 +101,6 @@ void Graph::saveRealNode(TemplateNodeType& node,
         node = std::move(newNode);
     }
 }
-
 void Graph::fullClear() {
     clear();
     mGraphIndex = inner::kKUndefinedIndex;
@@ -134,6 +139,13 @@ void Graph::saveNode(AbstractNode& node, bool isRepairedNode, bool isErase) {
             saveRealNode(static_cast<InputNode&>(node), isRepairedNode,
                          isErase);
             break;
+        case NodeType::OUTPUT:
+            saveRealNode(static_cast<OutputNode&>(node), isRepairedNode,
+                         isErase);
+            break;
+        case NodeType::LOSS:
+            saveRealNode(static_cast<LossNode&>(node), isRepairedNode,
+                         isErase);
         default:
             FatalError(1, "saveNode() in Graph : ", this,
                        ". GraphIndex : ", mGraphIndex, ". Undefined node type");
@@ -253,6 +265,17 @@ const Traversal& Graph::traverse() {
                         node->getNodeIndex(),
                         std::move(visits[nodeIndex].input),
                         std::move(visits[nodeIndex].output));
+                    break;
+                case NodeType::OUTPUT:
+                    cluster.get<OutputNode>().emplace_back(
+                            node->getNodeIndex(),
+                            std::move(visits[nodeIndex].input),
+                            std::move(visits[nodeIndex].output));
+                case NodeType::LOSS:
+                    cluster.get<LossNode>().emplace_back(
+                            node->getNodeIndex(),
+                            std::move(visits[nodeIndex].input),
+                            std::move(visits[nodeIndex].output));
                     break;
                 default:
                     FatalError(1, "Undefined NodeType in traverse()");

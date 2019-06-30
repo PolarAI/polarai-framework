@@ -31,7 +31,7 @@ class ShapeView {
     ShapeView(const ShapeView& shapeView) = default;
     ShapeView(ShapeView&& shapeView) = default;
     ShapeView(Iterator begin, Iterator end);
-    ShapeView(const TensorShape& shape);
+    explicit ShapeView(const TensorShape& shape);
     ~ShapeView() = default;
 
     ShapeView& operator=(const ShapeView& shapeView) = default;

@@ -41,6 +41,7 @@ class Tensor {
     DataType getDataType() const;
     ShapeView getShapeView() const;
     ShapeView getSubShapeView(size_t offset = 1) const;
+    const TensorShape& getShape() const;
     size_t getVirtualAddress() const;
     size_t getSize() const;
     void setShape(const TensorShape& shape);

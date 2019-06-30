@@ -22,9 +22,6 @@ namespace athena::core {
  * Node holds Operation and Tensors to perform computation
  */
 class Node : public AbstractNode {
-    private:
-    void fullClear();
-
     protected:
     Operation* mOperation;
     std::vector<inner::Tensor> mDerivativeTensors;
@@ -48,6 +45,7 @@ class Node : public AbstractNode {
     const Operation& getOperation() const;
     const Operation* getOperationPtr() const;
     Operation& operation();
+    const Operation& operation() const;
     void setOperation(Operation& operation);
     void clear() override;
 };

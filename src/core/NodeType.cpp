@@ -29,4 +29,12 @@ template <>
 NodeType getNodeType<InputNode>() {
     return NodeType::INPUT;
 }
+template <>
+NodeType getNodeType<OutputNode>() {
+    return NodeType::OUTPUT;
+}
+template <>
+NodeType getNodeType<LossNode>() {
+    return NodeType::LOSS;
+}
 }  // namespace athena::core

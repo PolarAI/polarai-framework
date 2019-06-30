@@ -18,8 +18,7 @@
 
 namespace athena::core::inner {
 template <template <typename, typename...> typename Container,
-          template <typename>
-          typename Wrapper,
+          template <typename> typename Wrapper,
           typename... Args>
 struct TupleContainersWithWrappers {
     using Holder = std::tuple<Container<Wrapper<Args>>...>;

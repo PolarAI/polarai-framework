@@ -32,8 +32,6 @@ using EdgeMark = size_t;
 class AbstractNode {
     private:
     void fullClear();
-
-    protected:
     inner::Tensor mTensor;
     std::string mName;
     size_t mGraphIndex;
@@ -54,7 +52,8 @@ class AbstractNode {
     void before(const AbstractNode& node, EdgeMark mark) const;
     ShapeView getShapeView() const;
     ShapeView getSubShapeView(size_t offset = 1) const;
-
+    const TensorShape& getShape() const;
+    size_t getTensorAddress() const;
     DataType getDataType() const;
     virtual NodeType getType() const = 0;
     size_t getNodeIndex() const;
@@ -62,6 +61,7 @@ class AbstractNode {
     size_t getInputsCount() const;
     std::string_view getName() const;
     std::string& name();
+    const std::string& name() const;
     void setShape(const TensorShape& shape);
     void removeFromGraph();
     void saveInGraph(bool isRepairedNode = true);

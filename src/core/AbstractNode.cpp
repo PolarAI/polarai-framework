@@ -48,7 +48,6 @@ AbstractNode& AbstractNode::operator=(const AbstractNode& rhs) {
     return *this;
 }
 AbstractNode& AbstractNode::operator=(AbstractNode&& rhs) noexcept {
-    // saveInGraph(false);
     if (mGraphIndex != inner::kKUndefinedIndex) {
         FatalError(1, "Move into node, which belongs to graph");
     }
@@ -60,6 +59,9 @@ AbstractNode& AbstractNode::operator=(AbstractNode&& rhs) noexcept {
     inner::getNodeTable()[mNodeIndex] = this;
     rhs.fullClear();
     return *this;
+}
+size_t AbstractNode::getTensorAddress() const {
+    return mTensor.getVirtualAddress();
 }
 void AbstractNode::fullClear() {
     AbstractNode::clear();
@@ -87,6 +89,9 @@ ShapeView AbstractNode::getShapeView() const {
 ShapeView AbstractNode::getSubShapeView(size_t offset) const {
     return mTensor.getSubShapeView(offset);
 }
+const TensorShape& AbstractNode::getShape() const {
+    return mTensor.getShape();
+}
 DataType AbstractNode::getDataType() const {
     return mTensor.getDataType();
 }
@@ -105,7 +110,13 @@ std::string_view AbstractNode::getName() const {
 std::string& AbstractNode::name() {
     return mName;
 }
+const std::string& AbstractNode::name() const {
+    return mName;
+}
 void AbstractNode::setShape(const TensorShape& shape) {
+    if (mGraphIndex != inner::kKUndefinedIndex) {
+        FatalError(1, "It is forbidden to change shapes of nodes which belongs to graph");
+    }
     mTensor.setShape(shape);
 }
 void AbstractNode::clear() {

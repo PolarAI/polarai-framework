@@ -16,6 +16,7 @@
 
 #include <athena/core/InputNode.h>
 #include <athena/core/Node.h>
+#include <athena/core/OutputNode.h>
 #include <athena/core/inner/TupleContainers.h>
 
 namespace athena::core {
@@ -50,7 +51,9 @@ struct Cluster {
     using Content = inner::TupleContainersWithWrappers<std::vector,
                                                        inner::NodeDependencies,
                                                        Node,
-                                                       InputNode>::Holder;
+                                                       InputNode,
+                                                       OutputNode,
+                                                       LossNode>::Holder;
     size_t nodeCount;
     Content content;
     template <typename TemplateNodeType>

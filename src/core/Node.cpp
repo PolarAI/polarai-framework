@@ -15,8 +15,8 @@
 
 namespace athena::core {
 Node::Node(Node&& rhs) noexcept
-    : AbstractNode(std::move(rhs)), mOperation(rhs.mOperation) {
-    rhs.fullClear();
+    : AbstractNode(std::move(rhs)), mOperation(rhs.mOperation), mDerivativeTensors(std::move(rhs.mDerivativeTensors)) {
+    rhs.mOperation = nullptr;
 }
 Node::Node(TensorShape shape,
            DataType dataType,
@@ -28,13 +28,11 @@ Node::~Node() {
     saveInGraph(false);
 }
 Node& Node::operator=(Node&& rhs) noexcept {
-    AbstractNode::operator=(std::move(rhs));
     mOperation = rhs.mOperation;
-    rhs.fullClear();
+    rhs.mOperation = nullptr;
+    mDerivativeTensors = std::move(rhs.mDerivativeTensors);
+    AbstractNode::operator=(std::move(rhs));
     return *this;
-}
-void Node::fullClear() {
-    Node::clear();
 }
 NodeType Node::getType() const {
     return NodeType::DEFAULT;
@@ -46,6 +44,9 @@ const Operation* Node::getOperationPtr() const {
     return mOperation;
 }
 Operation& Node::operation() {
+    return *mOperation;
+}
+const Operation& Node::operation() const {
     return *mOperation;
 }
 void Node::setOperation(Operation& operation) {

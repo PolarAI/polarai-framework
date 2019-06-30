@@ -11,23 +11,16 @@
  * the License.
  */
 
-#ifndef ATHENA_FORWARDDECLARATIONS_H
-#define ATHENA_FORWARDDECLARATIONS_H
-
-#include <vector>
+#include <athena/core/OutputNode.h>
 
 namespace athena::core {
-class AbstractNode;
-class Node;
-class InputNode;
-class OutputNode;
-class LossNode;
-class Graph;
-class Traversal;
-namespace inner {
-struct Cluster;
-using Clusters = std::vector<Cluster>;
-}  // namespace inner
-}  // namespace athena::core
-
-#endif  // ATHENA_FORWARDDECLARATIONS_H
+OutputNode::OutputNode(DataType dataType, std::string name)
+    : AbstractNode({}, dataType, std::move(name)) {
+}
+OutputNode::~OutputNode() {
+    saveInGraph(false);
+}
+NodeType OutputNode::getType() const {
+    return NodeType::OUTPUT;
+}
+}

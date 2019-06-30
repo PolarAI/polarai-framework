@@ -63,6 +63,12 @@ ShapeView Tensor::getSubShapeView(size_t offset) const {
     return getAllocationTable()[mRecordIndex].getShapeView(mShapeOffset +
                                                            offset);
 }
+const TensorShape& Tensor::getShape() const {
+    if (mShapeOffset != 0) {
+        FatalError(1, "getShape is not supported for subtensors");
+    }
+    return getAllocationTable()[mRecordIndex].getShape();
+}
 size_t Tensor::getVirtualAddress() const {
     return mVirtualAddress;
 }

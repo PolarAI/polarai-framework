@@ -22,9 +22,6 @@ namespace athena::core {
  * Special type of Node that can not have predecessors
  */
 class InputNode : public AbstractNode {
-    private:
-    void fullClear();
-
     protected:
     AbstractLoader* mLoader;
 
@@ -45,6 +42,7 @@ class InputNode : public AbstractNode {
     const AbstractLoader& getLoader() const;
     const AbstractLoader* getLoaderPtr() const;
     AbstractLoader& loader();
+    const AbstractLoader& loader() const;
     void setLoader(AbstractLoader& loader);
     void clear() override;
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Athena. All rights reserved.
+ * Copyright (c) 2019 Athena. All rights reserved.
  * https://getathena.ml
  *
  * Licensed under MIT license.
@@ -11,14 +11,13 @@
  * the License.
  */
 
-#ifndef ATHENA_NODETYPE_H
-#define ATHENA_NODETYPE_H
+#ifndef ATHENA_CRITERION_H
+#define ATHENA_CRITERION_H
 
 namespace athena::core {
-enum class NodeType { UNDEFINED = 0, INPUT = 1, DEFAULT = 2, OUTPUT = 3, LOSS = 4 };
+enum class Criterion {
+    UNDEFINED = 0, MAX = 1, MIN = 2
+};
+}
 
-template <typename TemplateNodeType>
-NodeType getNodeType();
-}  // namespace athena::core
-
-#endif  // ATHENA_NODETYPE_H
+#endif //ATHENA_CRITERION_H
