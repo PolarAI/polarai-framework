@@ -22,7 +22,7 @@ using path = boost::filesystem::path;
 
 bool isCi() {
     return std::getenv("ATHENA_TEST_ENVIRONMENT") &&
-           strcmp(std::getenv("ATHENA_TEST_ENVIRONMENT"), "True") == 0;
+           strncmp(std::getenv("ATHENA_TEST_ENVIRONMENT"), "ci", 2) == 0;
 }
 
 std::string replaceAll(std::string where, std::string what, std::string with) {

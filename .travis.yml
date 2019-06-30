@@ -33,4 +33,4 @@ jobs:
         - ATHENA_BUILD_TYPE=Debug
         - ATHENA_BUILD_TYPE=Release
       script:
-        - docker run -v $TRAVIS_BUILD_DIR:/opt/src athenaml/build /opt/src/scripts/test.sh /opt/src/build_$ATHENA_BUILD_TYPE
+        - docker run -e ATHENA_TEST_ENVIRONMENT=ci -v $TRAVIS_BUILD_DIR:/opt/src athenaml/build /opt/src/scripts/test.sh /opt/src/build_$ATHENA_BUILD_TYPE
