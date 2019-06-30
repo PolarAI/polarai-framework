@@ -2,7 +2,7 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
     <name>Athena Config DSL Script</name>
-    <groupId>Athena</groupId>
+    <groupId>athena</groupId>
     <artifactId>Athena_dsl</artifactId>
     <version>1.0-SNAPSHOT</version>
 
@@ -37,7 +37,6 @@
     </pluginRepositories>
 
     <build>
-        <testSourceDirectory>tests</testSourceDirectory>
         <sourceDirectory>settings</sourceDirectory>
         <plugins>
             <plugin>
