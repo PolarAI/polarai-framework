@@ -31,15 +31,13 @@ val buildConfigs = listOf("Release", "Debug")
 val repos = listOf(AthenaPublic, AthenaAlex, AthenaAndrey)
 
 object AthenaProject : Project({
-    vcsRoot(HttpsGithubComAthenamlAthenamlGithubIoRefsHeadsMaster)
-    vcsRoot(HttpsGithubComAthenamlWebsiteRefsHeadsMaster)
-    vcsRoot(AthenaAlex)
-    vcsRoot(AthenaAndrey)
-    vcsRoot(AthenaPublic)
 
     subProject {
         id("AthenaPublicRepo")
         name = "Athena Public"
+        vcsRoot(AthenaPublic)
+        vcsRoot(HttpsGithubComAthenamlWebsiteRefsHeadsMaster)
+        vcsRoot(HttpsGithubComAthenamlAthenamlGithubIoRefsHeadsMaster)
         for (compiler in compilers) {
             for (buildConfig in buildConfigs) {
                 buildType(DefaultBuild(AthenaPublic, buildConfig, compiler))
@@ -54,6 +52,7 @@ object AthenaProject : Project({
     subProject {
         id("AthenaAlexFork")
         name = "Alex Fork"
+        vcsRoot(AthenaAlex)
         for (compiler in compilers) {
             for (buildConfig in buildConfigs) {
                 buildType(DefaultBuild(AthenaAlex, buildConfig, compiler))
@@ -66,6 +65,7 @@ object AthenaProject : Project({
     subProject {
         id("AthenaAndreyFork")
         name = "Andrey Fork"
+        vcsRoot(AthenaAndrey)
         for (compiler in compilers) {
             for (buildConfig in buildConfigs) {
                 buildType(DefaultBuild(AthenaAndrey, buildConfig, compiler))
