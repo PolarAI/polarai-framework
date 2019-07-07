@@ -31,9 +31,9 @@ class DefaultBuild(private val repo: GitVcsRoot, private val buildConfig: String
     }
 
     params {
-        param("cc", (if (compiler == "Clang") "clang-8" else "gcc"))
+        param("cc", (if (compiler == "Clang") "clang-8" else "gcc-8"))
         param("image_name", (if (compiler == "Clang") "llvm8" else "gcc"))
-        param("cxx", (if (compiler == "Clang") "clang++-8" else "g++"))
+        param("cxx", (if (compiler == "Clang") "clang++-8" else "g++-8"))
         param("env.BUILD_TYPE", "%build_type%")
         param("repo", "athenaml/athena")
         param("env.SRC_DIR", "%system.teamcity.build.checkoutDir%")
@@ -62,6 +62,7 @@ class DefaultBuild(private val repo: GitVcsRoot, private val buildConfig: String
 
     vcs {
         root(repo)
+        checkoutMode = CheckoutMode.ON_SERVER
     }
 
     features {
@@ -90,7 +91,7 @@ object Daily : BuildType({
 
     vcs {
         root(AthenaPublic)
-
+        checkoutMode = CheckoutMode.ON_SERVER
         showDependenciesChanges = true
     }
 
@@ -130,6 +131,7 @@ class MandatoryChecks(private val repo: GitVcsRoot) : BuildType({
 
     vcs {
         root(repo)
+        checkoutMode = CheckoutMode.ON_SERVER
         showDependenciesChanges = true
     }
 
@@ -295,6 +297,7 @@ object UpdateDocs : BuildType({
     vcs {
         root(AthenaPublic)
         root(HttpsGithubComAthenamlWebsiteRefsHeadsMaster, "+:. => website")
+        checkoutMode = CheckoutMode.ON_AGENT
     }
 
     steps {
