@@ -28,6 +28,7 @@ To debug in IntelliJ Idea, open the 'Maven Projects' tool window (View
 
 val compilers = listOf("Clang", "GCC")
 val buildConfigs = listOf("Release", "Debug")
+val repos = listOf(AthenaPublic, AthenaAlex, AthenaAndrey)
 
 object AthenaProject : Project({
     vcsRoot(HttpsGithubComAthenamlAthenamlGithubIoRefsHeadsMaster)
@@ -35,22 +36,44 @@ object AthenaProject : Project({
     vcsRoot(AthenaAlex)
     vcsRoot(AthenaAndrey)
     vcsRoot(AthenaPublic)
-    vcsRoot(GithubGenericRepo)
 
-
-    for (compiler in compilers) {
-        for (buildConfig in buildConfigs) {
-            buildType(DefaultBuild(buildConfig, compiler))
+    subProject {
+        id("AthenaPublicRepo")
+        name = "Athena Public"
+        for (compiler in compilers) {
+            for (buildConfig in buildConfigs) {
+                buildType(DefaultBuild(AthenaPublic, buildConfig, compiler))
+            }
         }
+        buildType(Daily)
+        buildType(StaticChecks(AthenaPublic))
+        buildType(MandatoryChecks(AthenaPublic))
+        buildType(UpdateDocs)
     }
 
-    buildType(StaticChecks)
+    subProject {
+        id("AthenaAlexFork")
+        name = "Alex Fork"
+        for (compiler in compilers) {
+            for (buildConfig in buildConfigs) {
+                buildType(DefaultBuild(AthenaAlex, buildConfig, compiler))
+            }
+        }
+        buildType(StaticChecks(AthenaAlex))
+        buildType(MandatoryChecks(AthenaAlex))
+    }
 
-    buildType(Daily)
-    buildType(AlexFork)
-    buildType(AndreyFork)
-    buildType(MandatoryChecks)
-    buildType(UpdateDocs)
+    subProject {
+        id("AthenaAndreyFork")
+        name = "Andrey Fork"
+        for (compiler in compilers) {
+            for (buildConfig in buildConfigs) {
+                buildType(DefaultBuild(AthenaAndrey, buildConfig, compiler))
+            }
+        }
+        buildType(StaticChecks(AthenaAndrey))
+        buildType(MandatoryChecks(AthenaAndrey))
+    }
 
     features {
         feature {

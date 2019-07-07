@@ -14,9 +14,10 @@ import jetbrains.buildServer.configs.kotlin.v2018_2.failureConditions.failOnText
 import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.VcsTrigger
 import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.schedule
 import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.vcs
+import jetbrains.buildServer.configs.kotlin.v2018_2.vcs.GitVcsRoot
 
-class DefaultBuild(private val buildConfig: String, private val compiler: String) : BuildType({
-    id("AthenaBuild_${buildConfig}_$compiler".toExtId())
+class DefaultBuild(private val repo: GitVcsRoot, private val buildConfig: String, private val compiler: String) : BuildType({
+    id("AthenaBuild_${repo.name}_${buildConfig}_$compiler".toExtId())
     name = "[$buildConfig][$compiler] Build"
 
     var buildOptions = "--ninja"
@@ -60,7 +61,7 @@ class DefaultBuild(private val buildConfig: String, private val compiler: String
     }
 
     vcs {
-        root(GithubGenericRepo)
+        root(repo)
     }
 
     features {
@@ -73,108 +74,12 @@ class DefaultBuild(private val buildConfig: String, private val compiler: String
         feature {
             type = "xml-report-plugin"
             param("xmlReportParsing.reportType", "ctest")
-            param("xmlReportParsing.reportDirs", "+:build/Testing/**/*.xml")
+            param("xmlReportParsing.reportDirs", "+:build_${buildConfig}_${compiler}/Testing/**/*.xml")
         }
     }
 
     requirements {
         equals("docker.server.osType", "linux")
-    }
-})
-
-object AlexFork : BuildType({
-    name = "Alex Fork"
-
-    type = Type.COMPOSITE
-
-    params {
-        param("reverse.dep.*.repo", "alexbatashev/athena")
-        param("reverse.dep.Athena_StaticChecks.target_branch", "develop")
-    }
-
-    vcs {
-        root(AthenaAlex)
-
-        showDependenciesChanges = true
-    }
-
-    triggers {
-        vcs {
-            quietPeriodMode = VcsTrigger.QuietPeriodMode.USE_DEFAULT
-
-            branchFilter = """
-                +:*
-                -:develop
-                -:master
-                -:refs/pull*
-            """.trimIndent()
-            watchChangesInDependencies = true
-            enableQueueOptimization = false
-        }
-    }
-
-    features {
-        commitStatusPublisher {
-            vcsRootExtId = "${AthenaAlex.id}"
-            publisher = github {
-                githubUrl = "https://api.github.com"
-                authType = personalToken {
-                    token = "zxx1bfacd1e0d69bcbff375fbbc5dfdcebcf0b349a3e1c4d89ea8a537816b12b1fd074ca14f942bc176775d03cbe80d301b"
-                }
-            }
-        }
-    }
-
-    dependencies {
-        for (compiler in compilers) {
-            for (buildConfig in buildConfigs) {
-                snapshot(DefaultBuild(buildConfig, compiler)) {}
-            }
-        }
-        snapshot(StaticChecks) {
-        }
-    }
-})
-
-object AndreyFork : BuildType({
-    name = "Andrey Fork"
-
-    type = Type.COMPOSITE
-
-    params {
-        param("reverse.dep.*.repo", "masdevas/athena")
-        param("reverse.dep.Athena_StaticChecks.target_branch", "develop")
-    }
-
-    vcs {
-        root(AthenaAndrey)
-
-        showDependenciesChanges = true
-    }
-
-    triggers {
-        vcs {
-            quietPeriodMode = VcsTrigger.QuietPeriodMode.USE_DEFAULT
-
-            branchFilter = """
-                +:*
-                -:develop
-                -:master
-                -:refs/pull*
-            """.trimIndent()
-            watchChangesInDependencies = true
-            enableQueueOptimization = false
-        }
-    }
-
-    dependencies {
-        for (compiler in compilers) {
-            for (buildConfig in buildConfigs) {
-                snapshot(DefaultBuild(buildConfig, compiler)) {}
-            }
-        }
-        snapshot(StaticChecks) {
-        }
     }
 })
 
@@ -210,27 +115,21 @@ object Daily : BuildType({
     dependencies {
         for (compiler in compilers) {
             for (buildConfig in buildConfigs) {
-                snapshot(DefaultBuild(buildConfig, compiler)) {}
+                snapshot(DefaultBuild(AthenaPublic, buildConfig, compiler)) {}
             }
         }
-        snapshot(StaticChecks) {
-        }
+        snapshot(StaticChecks(AthenaPublic)) {}
     }
 })
 
-object MandatoryChecks : BuildType({
+class MandatoryChecks(private val repo: GitVcsRoot) : BuildType({
     name = "Pull Request / Post commit"
+    id("AthenaMandatoryChecks_${repo.name}")
 
     type = Type.COMPOSITE
 
-    params {
-        param("reverse.dep.*.repo", "athenaml/athena")
-        param("reverse.dep.Athena_StaticChecks.target_branch", "develop")
-    }
-
     vcs {
-        root(AthenaPublic)
-
+        root(repo)
         showDependenciesChanges = true
     }
 
@@ -240,6 +139,7 @@ object MandatoryChecks : BuildType({
             triggerRules = "+:root=${AthenaPublic.id}:**"
 
             branchFilter = """
+                +:pull/*
                 +:develop
                 +:master
             """.trimIndent()
@@ -279,16 +179,16 @@ object MandatoryChecks : BuildType({
     dependencies {
         for (compiler in compilers) {
             for (buildConfig in buildConfigs) {
-                snapshot(DefaultBuild(buildConfig, compiler)) {}
+                snapshot(DefaultBuild(repo, buildConfig, compiler)) {}
             }
         }
-        snapshot(StaticChecks) {
-        }
+        snapshot(StaticChecks(repo)) {}
     }
 })
 
-object StaticChecks : BuildType({
+class StaticChecks(private val repo: GitVcsRoot) : BuildType({
     name = "Static Checks"
+    id("AthenaStaticChecks_${repo.name}")
 
     artifactRules = """
         +:format-fixes.diff
@@ -303,7 +203,7 @@ object StaticChecks : BuildType({
     }
 
     vcs {
-        root(GithubGenericRepo)
+        root(repo)
 
         cleanCheckout = true
     }

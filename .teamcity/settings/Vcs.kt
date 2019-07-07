@@ -28,12 +28,6 @@ object AthenaPublic : GitVcsRoot({
     }
 })
 
-object GithubGenericRepo : GitVcsRoot({
-    name = "Github Generic Repo"
-    url = "https://github.com/%repo%"
-    branch = "refs/heads/develop"
-})
-
 object HttpsGithubComAthenamlAthenamlGithubIoRefsHeadsMaster : GitVcsRoot({
     name = "https://github.com/athenaml/athenaml.github.io#refs/heads/master"
     url = "https://github.com/athenaml/athenaml.github.io"
