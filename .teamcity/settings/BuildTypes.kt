@@ -136,42 +136,48 @@ class MandatoryChecks(private val repo: GitVcsRoot) : BuildType({
     triggers {
         vcs {
             quietPeriodMode = VcsTrigger.QuietPeriodMode.USE_DEFAULT
-            triggerRules = "+:root=${AthenaPublic.id}:**"
+            triggerRules = "+:root=${repo.id}:**"
 
-            branchFilter = """
-                +:pull/*
+            if (repo.name == "athena_public") {
+                branchFilter = """
+                +:refs/pull/(*/merge)
                 +:develop
                 +:master
-            """.trimIndent()
+                """.trimIndent()
+            } else {
+                branchFilter = "+:refs/heads/*"
+            }
             watchChangesInDependencies = true
             enableQueueOptimization = false
         }
     }
 
-    features {
-        pullRequests {
-            vcsRootExtId = "${AthenaPublic.id}"
-            provider = github {
-                authType = vcsRoot()
-                filterAuthorRole = PullRequests.GitHubRoleFilter.MEMBER
-            }
-        }
-        commitStatusPublisher {
-            vcsRootExtId = "${AthenaPublic.id}"
-            publisher = github {
-                githubUrl = "https://api.github.com"
-                authType = personalToken {
-                    token = "zxx1bfacd1e0d69bcbff375fbbc5dfdcebcf0b349a3e1c4d89ea8a537816b12b1fd074ca14f942bc176775d03cbe80d301b"
+    if (repo.name == "athena_public") {
+        features {
+            pullRequests {
+                vcsRootExtId = "${repo.id}"
+                provider = github {
+                    authType = vcsRoot()
+                    filterAuthorRole = PullRequests.GitHubRoleFilter.MEMBER
                 }
             }
-        }
-        commitStatusPublisher {
-            vcsRootExtId = "${AthenaPublic.id}"
-            publisher = upsource {
-                serverUrl = "https://upsource.getathena.ml"
-                projectId = "ATHENA"
-                userName = "admin"
-                password = "zxx771e317223635f9b139d6aec1e0d771ca7964e61aa6cbd40604de29877cb04b50a8d93941b3b5f7ce52d4fa5a8dfbd56ebe49af0469bf9f4626f1248aebc6d0d775d03cbe80d301b"
+            commitStatusPublisher {
+                vcsRootExtId = "${repo.id}"
+                publisher = github {
+                    githubUrl = "https://api.github.com"
+                    authType = personalToken {
+                        token = "zxx1bfacd1e0d69bcbff375fbbc5dfdcebcf0b349a3e1c4d89ea8a537816b12b1fd074ca14f942bc176775d03cbe80d301b"
+                    }
+                }
+            }
+            commitStatusPublisher {
+                vcsRootExtId = "${repo.id}"
+                publisher = upsource {
+                    serverUrl = "https://upsource.getathena.ml"
+                    projectId = "ATHENA"
+                    userName = "admin"
+                    password = "zxx771e317223635f9b139d6aec1e0d771ca7964e61aa6cbd40604de29877cb04b50a8d93941b3b5f7ce52d4fa5a8dfbd56ebe49af0469bf9f4626f1248aebc6d0d775d03cbe80d301b"
+                }
             }
         }
     }
@@ -338,7 +344,7 @@ object UpdateDocs : BuildType({
     triggers {
         vcs {
             branchFilter = """
-                +:/refs/heads/master
+                +:refs/heads/master
                 +:<default>
             """.trimIndent()
         }
