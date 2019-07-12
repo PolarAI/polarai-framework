@@ -20,50 +20,67 @@
 #include <string>
 #include <string_view>
 
-namespace athena::backend {
+#include "llvm/IR/Module.h"
+#include "llvm/IR/IRBuilder.h"
+
+
+namespace athena::backend::llvm {
 class RuntimeDriver {
-    void* mLibraryHandle;
-    void (*mFaddPointer)(void* a, size_t ca, void* b, size_t cb, void* c);
-    void (*mAllocatePointer)(void* a, void* t);
-    void* (*mGetFPPointer)(void* a, void* t);
-    void (*mFfillPointer)(void* allocator, void* tensor, float f);
+private:
+    void *mLibraryHandle;
+    void (*mFaddPointer)(void *a, size_t ca, void *b, size_t cb, void *c);
+    void (*mAllocatePointer)(void *a, void *t);
+    void *(*mGetFPPointer)(void *a, void *t);
+    void (*mFfillPointer)(void *allocator, void *tensor, float f);
 
-    void* getFunction(std::string_view nameFunction);
+    void *getFunction(std::string_view nameFunction);
 
-    public:
+    std::vector<std::unique_ptr<::llvm::Module>> mModules;
+
+    void generateLLLVMIrBindings(
+        ::llvm::LLVMContext &ctx,
+        ::llvm::Module &module,
+        ::llvm::IRBuilder<> &builder
+    );
+
+    void *getFunctionPtr(std::string str) { return nullptr; }
+
+    ::llvm::ArrayRef<::llvm::Value*> getArgs(::llvm::Function *function);
+
+public:
     RuntimeDriver();
-    RuntimeDriver(std::string_view nameLibrary);
-    RuntimeDriver(const RuntimeDriver& rhs) = delete;
-    RuntimeDriver(RuntimeDriver&& rhs) noexcept = default;
+    explicit RuntimeDriver(std::string_view nameLibrary);
+    RuntimeDriver(const RuntimeDriver &rhs) = delete;
+    RuntimeDriver(RuntimeDriver &&rhs) noexcept = default;
     ~RuntimeDriver();
 
-    RuntimeDriver& operator=(const RuntimeDriver& rhs) = delete;
-    RuntimeDriver& operator=(RuntimeDriver&& rhs) noexcept;
+    RuntimeDriver &operator=(const RuntimeDriver &rhs) = delete;
+    RuntimeDriver &operator=(RuntimeDriver &&rhs) noexcept;
 
     void load(std::string_view nameLibrary);
     void unload();
     void reload(std::string_view nameLibrary);
     bool isLoaded() const;
 
-    void athena_fadd(void* a, size_t ca, void* b, size_t cb, void* c) {
+    void athena_fadd(void *a, size_t ca, void *b, size_t cb, void *c) {
         mFaddPointer(a, ca, b, cb, c);
     }
-    void athena_allocate(void* a, void* t) {
+    void athena_allocate(void *a, void *t) {
         mAllocatePointer(a, t);
     }
-    void* athena_get_fast_pointer(void* a, void* t) {
+    void *athena_get_fast_pointer(void *a, void *t) {
         return mGetFPPointer(a, t);
     }
-    void athena_ffill(void* allocator, void* tensor, float f) {}
+    void athena_ffill(void *allocator, void *tensor, float f) {}
 };
 extern RuntimeDriver kRuntimeDriver;
 }  // namespace athena::backend
 
 extern "C" {
-void athena_fadd(void* a, size_t ca, void* b, size_t cb, void* c);
-void athena_allocate(void* a, void* t);
-void* athena_get_fast_pointer(void* a, void* t);
-void athena_ffill(void* allocator, void* tensor, float f);
+void athena_fadd(void *a, size_t ca, void *b, size_t cb, void *c);
+void athena_allocate(void *a, void *t);
+void *athena_get_fast_pointer(void *a, void *t);
+void athena_ffill(void *allocator, void *tensor, float f);
 }
 
 #endif  // ATHENA_RUNTIME_DRIVER_H

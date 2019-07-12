@@ -13,7 +13,7 @@
 
 #include <athena/backend/llvm/runtime-driver/runtime-driver.h>
 
-namespace athena::backend {
+namespace athena::backend::llvm {
 
 RuntimeDriver kRuntimeDriver;
 
@@ -75,19 +75,28 @@ void RuntimeDriver::reload(std::string_view nameLibrary) {
 bool RuntimeDriver::isLoaded() const {
     return mLibraryHandle != nullptr;
 }
+::llvm::ArrayRef<::llvm::Value *> RuntimeDriver::getArgs(::llvm::Function *function) {
+    std::vector<::llvm::Value *> argValues;
+
+    for (auto &arg : function->args()) {
+        argValues.push_back(arg.getValueName()->second);
+    }
+
+    return argValues;
+}
 }  // namespace athena::backend
 
 extern "C" {
-void athena_fadd(void* a, size_t ca, void* b, size_t cb, void* c) {
-    athena::backend::kRuntimeDriver.athena_fadd(a, ca, b, cb, c);
-}
-void athena_allocate(void* a, void* t) {
-    athena::backend::kRuntimeDriver.athena_allocate(a, t);
-}
-void* athena_get_fast_pointer(void* a, void* t) {
-    return athena::backend::kRuntimeDriver.athena_get_fast_pointer(a, t);
-}
-void athena_ffill(void* allocator, void* tensor, float f) {
-    athena::backend::kRuntimeDriver.athena_ffill(allocator, tensor, f);
-}
+//void athena_fadd(void* a, size_t ca, void* b, size_t cb, void* c) {
+//    athena::backend::kRuntimeDriver.athena_fadd(a, ca, b, cb, c);
+//}
+//void athena_allocate(void* a, void* t) {
+//    athena::backend::kRuntimeDriver.athena_allocate(a, t);
+//}
+//void* athena_get_fast_pointer(void* a, void* t) {
+//    return athena::backend::kRuntimeDriver.athena_get_fast_pointer(a, t);
+//}
+//void athena_ffill(void* allocator, void* tensor, float f) {
+//    athena::backend::kRuntimeDriver.athena_ffill(allocator, tensor, f);
+//}
 }
