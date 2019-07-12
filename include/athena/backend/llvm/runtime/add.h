@@ -13,8 +13,14 @@
 #ifndef ATHENA_ADD_H
 #define ATHENA_ADD_H
 
+#include <athena/core/inner/Tensor.h>
+#include <athena/backend/llvm/device/Device.h>
+
+
 #if __cplusplus
 #include <cstddef>
+
+
 extern "C" {
 #else
 #include <stddef.h>
@@ -25,5 +31,26 @@ void athena_fadd(void *a, size_t ca, void *b, size_t cb, void *c);
 #if __cplusplus
 }
 #endif
+
+template<typename T>
+void add(
+    athena::backend::llvm::Device *,
+    athena::core::inner::Tensor *a,
+    athena::core::inner::Tensor *b
+);
+
+template <>
+void add<float>(
+    athena::backend::llvm::Device *,
+    athena::core::inner::Tensor *a,
+    athena::core::inner::Tensor *b
+);
+
+template <>
+void add<double>(
+    athena::backend::llvm::Device *,
+    athena::core::inner::Tensor *a,
+    athena::core::inner::Tensor *b
+);
 
 #endif  // ATHENA_ADD_H

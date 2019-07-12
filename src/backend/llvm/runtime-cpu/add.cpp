@@ -12,8 +12,13 @@
  */
 
 #include <athena/backend/llvm/runtime/add.h>
+#include <athena/backend/llvm/device/Device.h>
+#include <athena/core/inner/Tensor.h>
 
 #include <iostream>
+
+using namespace athena::backend::llvm;
+using namespace athena::core::inner;
 
 void athena_fadd(void *a, size_t ca, void *b, size_t cb, void *c) {
     auto *af = static_cast<float *>(a);
@@ -23,4 +28,9 @@ void athena_fadd(void *a, size_t ca, void *b, size_t cb, void *c) {
     for (size_t i = 0; i < ca; i++) {
         cf[i] = af[i] + bf[i];
     }
+}
+
+template <typename T>
+void add(Device *, Tensor *a, Tensor *b) {
+
 }

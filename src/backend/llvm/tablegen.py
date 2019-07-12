@@ -54,7 +54,7 @@ def generate_llvm(name, signature):
     for template in ["float", "double"]:
         res = ""
         vec_name = get_mangled_name(name, template) + "_args"
-        res += "std::vector<::llvm::Type *> " + vec_name + "(" + str(len(signature)) + ");\n"
+        res += "std::vector<::llvm::Type *> " + vec_name + ";\n"
 
         for arg in signature:
             res += vec_name + ".push_back("
@@ -107,7 +107,14 @@ def main():
     with open(args.outp, "w") as o:
         inp = open(args.inp, "r")
 
-        if args.mode == "driver":
+        if args.mode == "wrapper":
+            o.write("#include <athena/backend/llvm/device/Device.h>\n")
+            o.write("#include <athena/backend/llvm/runtime/builtin.h>\n")
+            o.write("#include <athena/core/inner/Tensor.h>\n")
+            o.write("using namespace athena::backend::llvm;\n")
+            o.write("using namespace athena::core::inner;\n\n")
+            o.write("extern \"C\" {\n")
+        elif args.mode == "driver":
             o.write("#include <athena/backend/llvm/runtime-driver/runtime-driver.h>\n")
             o.write("#include \"llvm/IR/Constants.h\"\n")
             o.write("#include \"llvm/IR/IRBuilder.h\"\n")
@@ -126,6 +133,8 @@ def main():
             elif args.mode == "driver":
                 o.write(generate_llvm(command[0], types))
 
+        if args.mode == "wrapper":
+            o.write("}\n")
         if args.mode == "driver":
             o.write("}\n")
 

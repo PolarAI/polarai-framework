@@ -61,6 +61,8 @@ public:
     void unload();
     void reload(std::string_view nameLibrary);
     bool isLoaded() const;
+    
+    void prepareModules(::llvm::LLVMContext &ctx);
 
     void athena_fadd(void *a, size_t ca, void *b, size_t cb, void *c) {
         mFaddPointer(a, ca, b, cb, c);

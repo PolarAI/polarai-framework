@@ -12,6 +12,8 @@
  */
 
 #include <athena/backend/llvm/runtime-driver/runtime-driver.h>
+#include <llvm/Support/Debug.h>
+
 
 namespace athena::backend::llvm {
 
@@ -79,10 +81,17 @@ bool RuntimeDriver::isLoaded() const {
     std::vector<::llvm::Value *> argValues;
 
     for (auto &arg : function->args()) {
-        argValues.push_back(arg.getValueName()->second);
+        argValues.push_back(&arg);
     }
 
     return argValues;
+}
+void RuntimeDriver::prepareModules(::llvm::LLVMContext &ctx) {
+    auto newModule = std::make_unique<::llvm::Module>("id", ctx);
+    ::llvm::IRBuilder<> builder(ctx);
+    generateLLLVMIrBindings(ctx, *newModule, builder);
+    newModule->print(::llvm::dbgs(), nullptr);
+
 }
 }  // namespace athena::backend
 

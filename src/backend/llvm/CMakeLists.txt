@@ -6,6 +6,9 @@ message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 set(WRAPPER_CPP ${CMAKE_CURRENT_BINARY_DIR}/wrapper.cpp)
 set(GENERATOR_CPP ${CMAKE_CURRENT_BINARY_DIR}/generator.cpp)
 
+file(WRITE ${WRAPPER_CPP} "")
+file(WRITE ${GENERATOR_CPP} "")
+
 add_custom_target(wrapper_cpp
         COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tablegen.py
         ${CMAKE_CURRENT_SOURCE_DIR}/builtins.td ${WRAPPER_CPP} wrapper

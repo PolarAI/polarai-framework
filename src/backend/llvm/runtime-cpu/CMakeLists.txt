@@ -48,7 +48,12 @@ endfunction(getblis)
 option(FORCE_BLIS "Require library to use BLIS" OFF)
 option(FORCE_ULAS "Require library to use uBLAS" OFF)
 
-add_athena_library(runtime-llvm-cpu SHARED add.cpp allocate.cpp fill.cpp)
+add_athena_library(runtime-llvm-cpu SHARED
+        add.cpp
+        allocate.cpp
+        fill.cpp
+        ${WRAPPER_CPP})
+add_dependencies(runtime-llvm-cpu wrapper_cpp)
 
 if (APPLE)
     set_property(TARGET runtime-llvm-cpu APPEND_STRING PROPERTY LINK_FLAGS " -undefined dynamic_lookup")
