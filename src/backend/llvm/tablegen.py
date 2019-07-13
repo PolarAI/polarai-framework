@@ -159,7 +159,7 @@ def main():
             o.write("#include \"llvm/IR/Constants.h\"\n")
             o.write("#include \"llvm/IR/IRBuilder.h\"\n")
             o.write("void athena::backend::llvm::RuntimeDriver"
-                    "::generateLLLVMIrBindings(::llvm::LLVMContext &ctx, ::llvm::Module &module, "
+                    "::generateLLVMIrBindings(::llvm::LLVMContext &ctx, ::llvm::Module &module, "
                     "::llvm::IRBuilder<> &builder) {\n")
 
         for line in inp:

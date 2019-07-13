@@ -33,11 +33,9 @@ private:
 
     std::vector<std::unique_ptr<::llvm::Module>> mModules;
 
-    void generateLLLVMIrBindings(
-        ::llvm::LLVMContext &ctx,
-        ::llvm::Module &module,
-        ::llvm::IRBuilder<> &builder
-    );
+    void generateLLVMIrBindings(::llvm::LLVMContext &ctx,
+                                ::llvm::Module &module,
+                                ::llvm::IRBuilder<> &builder);
 
     static ::llvm::ArrayRef<::llvm::Value*> getArgs(::llvm::Function *function);
 

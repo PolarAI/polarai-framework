@@ -75,7 +75,7 @@ bool RuntimeDriver::isLoaded() const {
 void RuntimeDriver::prepareModules() {
     auto newModule = std::make_unique<::llvm::Module>("runtime", mContext);
     ::llvm::IRBuilder<> builder(mContext);
-    generateLLLVMIrBindings(mContext, *newModule, builder);
+    generateLLVMIrBindings(mContext, *newModule, builder);
 #ifdef DEBUG
     bool brokenDebugInfo = false;
     std::string str;
