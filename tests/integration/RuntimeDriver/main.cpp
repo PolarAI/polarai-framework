@@ -11,61 +11,44 @@
  * the License.
  */
 
-#include "athena/backend/llvm/runtime-driver/runtime-driver.h"
+#include <athena/backend/llvm/runtime-driver/runtime-driver.h>
 
-#include <cassert>
 #include <gtest/gtest.h>
-#include <iostream>
-#include <string>
 #include <llvm/Support/TargetSelect.h>
+#include <string>
 
-
-std::string kPathToRuntimeCPU;
-const std::string kPathToRuntimeCPUName = "PATH_TO_RUNTIME_CPU";
+static const std::string kPathToRuntimeCPUName = "PATH_TO_RUNTIME_CPU";
 
 namespace athena::backend::llvm {
 
 class RuntimeDriverTest : public ::testing::Test {
     protected:
+    std::string mPathToRuntimeCPU;
+    std::unique_ptr<::llvm::LLVMContext> mContext =
+        std::make_unique<::llvm::LLVMContext>();
+    RuntimeDriver mDriver;
+
     void SetUp() override {
         ::llvm::InitializeNativeTarget();
         ::llvm::InitializeNativeTargetAsmParser();
         ::llvm::InitializeNativeTargetAsmPrinter();
-        kPathToRuntimeCPU = ::getenv(kPathToRuntimeCPUName.data());
+        mPathToRuntimeCPU = ::getenv(kPathToRuntimeCPUName.data());
     }
+
+    public:
+    RuntimeDriverTest() : mDriver(*mContext) {}
 };
 
-TEST_F(RuntimeDriverTest, Test1) {
-    static ::llvm::LLVMContext ctx;
-    kRuntimeDriver.prepareModules(ctx);
+TEST_F(RuntimeDriverTest, TestCreation) {
+    mDriver.reload(mPathToRuntimeCPU);
+    ASSERT_TRUE(mDriver.isLoaded());
 }
 
-//TEST_F(RuntimeDriverTest, TestCreation) {
-//    std::string nameLibrary(kPathToRuntimeCPU);
-//    kRuntimeDriver.reload(nameLibrary);
-//    assert(kRuntimeDriver.isLoaded());
-//}
-//
-//TEST_F(RuntimeDriverTest, TestLoads) {
-//    std::string nameLibrary(kPathToRuntimeCPU);
-//    kRuntimeDriver = RuntimeDriver(nameLibrary);
-//    assert(kRuntimeDriver.isLoaded());
-//    kRuntimeDriver.unload();
-//    assert(!kRuntimeDriver.isLoaded());
-//    kRuntimeDriver.load(nameLibrary);
-//    assert(kRuntimeDriver.isLoaded());
-//    kRuntimeDriver.reload(nameLibrary);
-//    assert(kRuntimeDriver.isLoaded());
-//}
-//
-//TEST_F(RuntimeDriverTest, TestFunctionCall) {
-//    std::string nameLibrary(kPathToRuntimeCPU);
-//    constexpr size_t size = 3;
-//    float vector_first[] = {1.0, 2.0, 3.0}, vector_second[] = {4.0, 5.0, 6.0},
-//          vector_res[size];
-//    athena_fadd(vector_first, size, vector_second, size, vector_res);
-//    assert(vector_res[0] == 5.0);
-//    assert(vector_res[1] == 7.0);
-//    assert(vector_res[2] == 9.0);
-//}
-}  // namespace athena::backend
+TEST_F(RuntimeDriverTest, TestFunctionLoad) {
+    mDriver.load(mPathToRuntimeCPU);
+    auto &modules = mDriver.getModules();
+    ASSERT_GT(modules.size(), 0);
+
+    ASSERT_NE(modules[0]->getFunction("athn_add_f"), nullptr);
+}
+}  // namespace athena::backend::llvm
