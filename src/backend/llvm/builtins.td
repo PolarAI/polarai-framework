@@ -1,1 +1,1 @@
-add : Tensor*, Tensor*
+add : Tensor*, Tensor*, Tensor*

@@ -36,15 +36,25 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
     mExecutionSession.getMainJITDylib().setGenerator(cantFail(
         ::llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(DL)));
 }
-::llvm::Expected<std::unique_ptr<AthenaJIT>> AthenaJIT::create() {
+std::unique_ptr<AthenaJIT> AthenaJIT::create() {
+    LLVMInitializeNativeTarget();
+    LLVMInitializeNativeAsmPrinter();
+    LLVMInitializeNativeAsmParser();
+
     auto JTMB = ::llvm::orc::JITTargetMachineBuilder::detectHost();
 
-    if (!JTMB) return JTMB.takeError();
+    if (!JTMB) {
+        ::llvm::consumeError(JTMB.takeError());
+        new core::FatalError(2, "Unable to detect host");
+    }
 
     auto DL = JTMB->getDefaultDataLayoutForTarget();
-    if (!DL) return DL.takeError();
+    if (!DL) {
+        ::llvm::consumeError(DL.takeError());
+        new core::FatalError(2, "Unable to get target data layout");
+    }
 
-    return ::llvm::make_unique<AthenaJIT>(std::move(*JTMB), std::move(*DL));
+    return std::make_unique<AthenaJIT>(std::move(*JTMB), std::move(*DL));
 }
 ::llvm::Error AthenaJIT::addModule(std::unique_ptr<::llvm::Module> &M) {
     return mOptimizeLayer.add(
@@ -71,9 +81,9 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
 
     // Run the optimizations over all functions in the module being added to
     // the JIT.
-    for (auto &F : *TSM.getModule()) {
-        FPM->run(F);
-    }
+//    for (auto &F : *TSM.getModule()) {
+//        FPM->run(F);
+//    }
 
     return TSM;
 }

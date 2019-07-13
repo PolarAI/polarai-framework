@@ -52,7 +52,7 @@ class AthenaJIT {
     AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
               ::llvm::DataLayout &&DL);
 
-    static ::llvm::Expected<std::unique_ptr<AthenaJIT>> create();
+    static std::unique_ptr<AthenaJIT> create();
     const ::llvm::DataLayout &getDataLayout() const {
         return mDataLayout;
     }

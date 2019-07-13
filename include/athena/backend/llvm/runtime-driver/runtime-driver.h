@@ -28,12 +28,8 @@ namespace athena::backend::llvm {
 class RuntimeDriver {
 private:
     void *mLibraryHandle;
-    void (*mFaddPointer)(void *a, size_t ca, void *b, size_t cb, void *c);
-    void (*mAllocatePointer)(void *a, void *t);
-    void *(*mGetFPPointer)(void *a, void *t);
-    void (*mFfillPointer)(void *allocator, void *tensor, float f);
 
-    void *getFunction(std::string_view nameFunction);
+    void *getFunctionPtr(std::string_view funcName);
 
     std::vector<std::unique_ptr<::llvm::Module>> mModules;
 
@@ -43,13 +39,14 @@ private:
         ::llvm::IRBuilder<> &builder
     );
 
-    void *getFunctionPtr(std::string str) { return nullptr; }
+    static ::llvm::ArrayRef<::llvm::Value*> getArgs(::llvm::Function *function);
 
-    ::llvm::ArrayRef<::llvm::Value*> getArgs(::llvm::Function *function);
+    void prepareModules();
+
+    ::llvm::LLVMContext &mContext;
 
 public:
-    RuntimeDriver();
-    explicit RuntimeDriver(std::string_view nameLibrary);
+    explicit RuntimeDriver(::llvm::LLVMContext &ctx);
     RuntimeDriver(const RuntimeDriver &rhs) = delete;
     RuntimeDriver(RuntimeDriver &&rhs) noexcept = default;
     ~RuntimeDriver();
@@ -61,28 +58,13 @@ public:
     void unload();
     void reload(std::string_view nameLibrary);
     bool isLoaded() const;
-    
-    void prepareModules(::llvm::LLVMContext &ctx);
 
-    void athena_fadd(void *a, size_t ca, void *b, size_t cb, void *c) {
-        mFaddPointer(a, ca, b, cb, c);
-    }
-    void athena_allocate(void *a, void *t) {
-        mAllocatePointer(a, t);
-    }
-    void *athena_get_fast_pointer(void *a, void *t) {
-        return mGetFPPointer(a, t);
-    }
-    void athena_ffill(void *allocator, void *tensor, float f) {}
+    std::vector<std::unique_ptr<::llvm::Module>> &getModules() {
+        // todo clone modules
+        return mModules;
+    };
 };
-extern RuntimeDriver kRuntimeDriver;
 }  // namespace athena::backend
 
-extern "C" {
-void athena_fadd(void *a, size_t ca, void *b, size_t cb, void *c);
-void athena_allocate(void *a, void *t);
-void *athena_get_fast_pointer(void *a, void *t);
-void athena_ffill(void *allocator, void *tensor, float f);
-}
 
 #endif  // ATHENA_RUNTIME_DRIVER_H

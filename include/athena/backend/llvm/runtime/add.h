@@ -14,6 +14,7 @@
 #define ATHENA_ADD_H
 
 #include <athena/core/inner/Tensor.h>
+#include <athena/core/Allocator.h>
 #include <athena/backend/llvm/device/Device.h>
 
 
@@ -33,24 +34,12 @@ void athena_fadd(void *a, size_t ca, void *b, size_t cb, void *c);
 #endif
 
 template<typename T>
-void add(
+extern void add(
     athena::backend::llvm::Device *,
+    athena::core::Allocator *,
     athena::core::inner::Tensor *a,
-    athena::core::inner::Tensor *b
-);
-
-template <>
-void add<float>(
-    athena::backend::llvm::Device *,
-    athena::core::inner::Tensor *a,
-    athena::core::inner::Tensor *b
-);
-
-template <>
-void add<double>(
-    athena::backend::llvm::Device *,
-    athena::core::inner::Tensor *a,
-    athena::core::inner::Tensor *b
+    athena::core::inner::Tensor *b,
+    athena::core::inner::Tensor *c
 );
 
 #endif  // ATHENA_ADD_H

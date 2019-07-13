@@ -12,6 +12,6 @@
 #ifndef ATHENA_BUILTIN_H
 #define ATHENA_BUILTIN_H
 
-#include "add.h"
+#include <athena/backend/llvm/runtime/add.h>
 
 #endif //ATHENA_BUILTIN_H

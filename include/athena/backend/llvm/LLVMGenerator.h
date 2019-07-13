@@ -15,6 +15,7 @@
 
 #include "LLVMGeneratorFunctor.h"
 
+#include <athena/backend/llvm/device/Device.h>
 #include <athena/core/AbstractGenerator.h>
 #include <athena/core/AbstractLoader.h>
 #include <athena/core/Allocator.h>
@@ -30,12 +31,15 @@ namespace athena::backend::llvm {
 class LLVMGenerator : public core::AbstractGenerator {
     private:
     std::map<std::string, LLVMGeneratorFunctor<void>> mFunctorsMap;
-    const std::unique_ptr<::llvm::Module> &mModule;
+    const std::unique_ptr<::llvm::Module> &mGeneratedModule;
+    std::vector<std::unique_ptr<::llvm::Module>> &mExistingModules;
     ::llvm::LLVMContext &mContext;
     // todo abatashev: refactor main block
     ::llvm::BasicBlock *mMainBlock;
     ::llvm::BasicBlock *mCurrentBlock;
     ::llvm::IRBuilder<> mBuilder;
+
+    Device mDevice;
 
     core::Allocator &mAllocator;
 
@@ -51,9 +55,11 @@ class LLVMGenerator : public core::AbstractGenerator {
                       core::inner::Tensor &c) override;
 
     public:
-    explicit LLVMGenerator(::llvm::LLVMContext &ctx,
-                           const std::unique_ptr<::llvm::Module> &module,
-                           core::Allocator &allocator);
+    explicit LLVMGenerator(
+        ::llvm::LLVMContext &ctx,
+        const std::unique_ptr<::llvm::Module> &module,
+        core::Allocator &allocator,
+        std::vector<std::unique_ptr<::llvm::Module>> &existing);
     /**
      * Generate code to execute loaders subroutines
      * @param loader Loader to be used
@@ -114,6 +120,23 @@ class LLVMGenerator : public core::AbstractGenerator {
      */
     core::Allocator &getAllocator() {
         return mAllocator;
+    }
+
+    void setExistingModules(
+        std::vector<std::unique_ptr<::llvm::Module>> &&modules) {
+        mExistingModules = std::move(modules);
+    }
+
+    Device *getPreferredDevice(const std::string &) {
+        return &mDevice;
+    }
+
+    ::llvm::Function *findLLVMFunction(const std::string &name) {
+        for (const auto &module : mExistingModules) {
+            auto func = module->getFunction(name);
+            if (func) return func;
+        }
+        return nullptr;
     }
 };
 }  // namespace athena::backend::llvm

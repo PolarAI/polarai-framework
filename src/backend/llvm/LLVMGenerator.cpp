@@ -23,14 +23,16 @@ namespace athena::backend::llvm {
 llvm::LLVMGenerator::LLVMGenerator(
     ::llvm::LLVMContext &ctx,
     const std::unique_ptr<::llvm::Module> &module,
-    core::Allocator &allocator)
-    : mModule(module),
+    core::Allocator &allocator,
+    std::vector<std::unique_ptr<::llvm::Module>> &existing)
+    : mGeneratedModule(module),
       mMainBlock(::llvm::BasicBlock::Create(
           ctx, "entry", module->getFunction("jitmain"))),
       mCurrentBlock(mMainBlock),
       mContext(ctx),
       mBuilder(::llvm::IRBuilder(mMainBlock)),
-      mAllocator(allocator) {
+      mAllocator(allocator),
+      mExistingModules(existing) {
     mBuilder.SetInsertPoint(mMainBlock);
     codegen::registerDefaultFunctors(this);
 }
@@ -41,10 +43,10 @@ llvm::LLVMGenerator::LLVMGenerator(
 
 ::llvm::Value *LLVMGenerator::generateGetFastPointer(core::inner::Tensor &t) {
     ::llvm::Function *calledFunction =
-        mModule->getFunction("athena_get_fast_pointer");
+        mGeneratedModule->getFunction("athena_get_fast_pointer");
 
     if (!calledFunction)
-        calledFunction = impl::create_get_fast_pointer_decl(mContext, *mModule);
+        calledFunction = impl::create_get_fast_pointer_decl(mContext, *mGeneratedModule);
 
     if (!calledFunction) {
         core::FatalError(1, "Unknown function referenced");
@@ -64,7 +66,7 @@ llvm::LLVMGenerator::LLVMGenerator(
 void LLVMGenerator::generateLoad(const core::AbstractLoader &loader,
                                  core::inner::Tensor &tensor) {
     ::llvm::Function *loadFunction =
-        mModule->getFunction(loader.getLoadCName());
+        mGeneratedModule->getFunction(loader.getLoadCName());
 
     if (!loadFunction) {
         std::vector<::llvm::Type *> args(3, ::llvm::Type::getInt64Ty(mContext));
@@ -73,7 +75,7 @@ void LLVMGenerator::generateLoad(const core::AbstractLoader &loader,
 
         loadFunction =
             ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage,
-                                     loader.getLoadCName(), mModule.get());
+                                     loader.getLoadCName(), mGeneratedModule.get());
     }
 
     if (!loadFunction) {
@@ -94,23 +96,23 @@ void LLVMGenerator::generateLoad(const core::AbstractLoader &loader,
     mBuilder.CreateCall(loadFunction, ArgsV);
 }
 void LLVMGenerator::generateImpl(std::string &name, core::inner::Tensor &a) {
-    mFunctorsMap[name](mContext, *mModule, mBuilder, a);
+    mFunctorsMap[name](mContext, *mGeneratedModule, mBuilder, a);
 }
 void LLVMGenerator::generateImpl(std::string &name,
                                  core::inner::Tensor &a,
                                  void *&b) {
-    mFunctorsMap[name](mContext, *mModule, mBuilder, a, b);
+    mFunctorsMap[name](mContext, *mGeneratedModule, mBuilder, a, b);
 }
 void LLVMGenerator::generateImpl(std::string &name,
                                  core::inner::Tensor &a,
                                  core::inner::Tensor &b) {
-    mFunctorsMap[name](mContext, *mModule, mBuilder, a, b);
+    mFunctorsMap[name](mContext, *mGeneratedModule, mBuilder, a, b);
 }
 void LLVMGenerator::generateImpl(std::string &name,
                                  core::inner::Tensor &a,
                                  core::inner::Tensor &b,
                                  core::inner::Tensor &c) {
-    mFunctorsMap[name](mContext, *mModule, mBuilder, a, b, c);
+    mFunctorsMap[name](mContext, *mGeneratedModule, mBuilder, a, b, c);
 }
 void LLVMGenerator::openNode(std::string_view name) {
 #ifdef DEBUG
@@ -120,7 +122,7 @@ void LLVMGenerator::openNode(std::string_view name) {
         ::llvm::FunctionType::get(::llvm::Type::getVoidTy(mContext), false);
     auto nodeFunction =
         ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage,
-                                 "node_" + std::string(name), *mModule);
+                                 "node_" + std::string(name), *mGeneratedModule);
 
     mBuilder.CreateCall(nodeFunction);
 

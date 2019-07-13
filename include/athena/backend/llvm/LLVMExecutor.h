@@ -14,6 +14,7 @@
 #define ATHENA_LLVMEXECUTOR_H
 
 #include <athena/backend/llvm/AthenaJIT.h>
+#include <athena/backend/llvm/runtime-driver/runtime-driver.h>
 #include <athena/core/Allocator.h>
 #include <athena/core/Executor.h>
 
@@ -31,6 +32,9 @@ class LLVMExecutor : public athena::core::Executor {
     std::unique_ptr<::llvm::Module> mMainModule;
     std::unique_ptr<core::Allocator> mAllocator;
     athena::core::Traversal mGraphTraversal;
+    std::unique_ptr<RuntimeDriver> mRuntimeDriver;
+
+    std::vector<std::unique_ptr<::llvm::Module>> mExistingModules;
 
     public:
     LLVMExecutor();
@@ -39,7 +43,7 @@ class LLVMExecutor : public athena::core::Executor {
      * execution
      * @param graph Graph to be executed
      */
-    void prepare(athena::core::Graph& graph) override;
+    void prepare(athena::core::Graph &graph) override;
     /**
      * Do actual computation
      */
@@ -48,14 +52,13 @@ class LLVMExecutor : public athena::core::Executor {
      *
      * @return Associated Allocator
      */
-    std::unique_ptr<core::Allocator>& getAllocator();
+    std::unique_ptr<core::Allocator> &getAllocator();
     /**
      * Set Allocator to be used
      * @param allocator User Allocator
      */
-    void setAllocator(std::unique_ptr<core::Allocator>& allocator);
+    void setAllocator(std::unique_ptr<core::Allocator> &allocator);
 };
-
 }  // namespace athena::backend::llvm
 
 #endif  // ATHENA_LLVMEXECUTOR_H

@@ -14,7 +14,8 @@ def generate_wrapper(name, signature):
         defs += get_mangled_name(name, template)
         defs += "("
 
-        defs += "void *devicePtr"
+        defs += "void *devicePtr, "
+        defs += "void *allocatorPtr"
 
         arg_no = 0
         for arg in signature:
@@ -28,6 +29,7 @@ def generate_wrapper(name, signature):
         defs += ") {\n"
 
         defs += "auto device = reinterpret_cast<Device*>(devicePtr);\n"
+        defs += "auto allocator = reinterpret_cast<Allocator*>(allocatorPtr);\n"
 
         arg_no = 0
         for arg in signature:
@@ -35,15 +37,15 @@ def generate_wrapper(name, signature):
                 defs += "auto arg" + str(arg_no) + " = reinterpret_cast<" + arg + ">(arg" + str(
                     arg_no) + "Ptr);\n"
             arg_no += 1
-        defs += name + "<" + template + ">(device"
+        defs += name + "<" + template + ">(device, allocator"
 
         arg_no = 0
         for arg in signature:
-            defs += ","
+            defs += ", "
             if arg not in plainArgTypes:
-                defs += " arg" + str(arg_no)
+                defs += "arg" + str(arg_no)
             else:
-                defs += " " + arg + " arg" + str(arg_no)
+                defs += "" + arg + " arg" + str(arg_no)
             arg_no += 1
         defs += ");\n"
         defs += "}\n"
@@ -55,6 +57,8 @@ def generate_llvm(name, signature):
         res = ""
         vec_name = get_mangled_name(name, template) + "_args"
         res += "std::vector<::llvm::Type *> " + vec_name + ";\n"
+        res += vec_name + ".push_back(::llvm::Type::getInt64Ty(ctx));\n"
+        res += vec_name + ".push_back(::llvm::Type::getInt64Ty(ctx));\n"
 
         for arg in signature:
             res += vec_name + ".push_back("
@@ -77,20 +81,24 @@ def generate_llvm(name, signature):
         res += get_mangled_name(name, template) + "\", &module);\n"
 
         block_name = get_mangled_name(name, template) + "_block"
-        res += "auto " + block_name + " = ::llvm::BasicBlock::Create(ctx, \"entry\", "
+        res += "auto " + block_name + " = ::llvm::BasicBlock::Create(ctx, \"\", "
         res += get_mangled_name(name, template) + "_F);\n"
 
         res += "builder.SetInsertPoint(" + block_name + ");\n"
-        res += "auto " + get_mangled_name(name, template) + "_ptr = "
-        res += "::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(ctx), " \
-               "reinterpret_cast<uint64_t>(getFunctionPtr(\""
+        res += "auto " + get_mangled_name(name, template) + "_ptr_val = "
+        res += "::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(ctx), "
+        res += "reinterpret_cast<uint64_t>(getFunctionPtr(\""
         res += get_mangled_name(name, template) + "\")));\n"
 
-        res += ""
+        res += "auto " + get_mangled_name(name, template) + "_ptr = "
+        res += "builder.CreateIntToPtr(" + get_mangled_name(name, template) + "_ptr_val, "
+        res += get_mangled_name(name, template) + "_FT->getPointerTo());\n"
 
         res += "builder.CreateCall(" + get_mangled_name(name, template) + "_FT, "
         res += get_mangled_name(name, template) + "_ptr, "
         res += "getArgs(" + get_mangled_name(name, template) + "_F));\n"
+
+        res += "builder.CreateRetVoid();\n"
 
         return res
 
@@ -111,8 +119,10 @@ def main():
             o.write("#include <athena/backend/llvm/device/Device.h>\n")
             o.write("#include <athena/backend/llvm/runtime/builtin.h>\n")
             o.write("#include <athena/core/inner/Tensor.h>\n")
+            o.write("#include <athena/core/Allocator.h>\n")
             o.write("using namespace athena::backend::llvm;\n")
             o.write("using namespace athena::core::inner;\n\n")
+            o.write("using namespace athena::core;\n\n")
             o.write("extern \"C\" {\n")
         elif args.mode == "driver":
             o.write("#include <athena/backend/llvm/runtime-driver/runtime-driver.h>\n")

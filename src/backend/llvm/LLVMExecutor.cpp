@@ -28,6 +28,7 @@
 namespace athena::backend::llvm {
 
 void LLVMExecutor::prepare(athena::core::Graph &graph) {
+
     mMainModule = std::make_unique<::llvm::Module>("AthenaMain",
                                                    mJITCompiler->getContext());
     mMainModule->setDataLayout(mJITCompiler->getDataLayout());
@@ -39,8 +40,10 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
     ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage, "jitmain",
                              *mMainModule);
 
+//    mExistingModules = mRuntimeDriver->getModules();
+
     LLVMGenerator generator(mJITCompiler->getContext(), mMainModule,
-                            *mAllocator);
+                            *mAllocator, mRuntimeDriver->getModules());
 
     mGraphTraversal = graph.traverse();
 
@@ -103,33 +106,36 @@ void LLVMExecutor::execute() {
         core::FatalError(1, "Error adding module to JIT");
     }
 
+    for (auto &module : mRuntimeDriver->getModules()) {
+        module->setDataLayout(mJITCompiler->getDataLayout());
+        auto err = mJITCompiler->addModule(module);
+        if (err) {
+            new core::FatalError(1, "Unable to add module");
+        }
+    }
+
     auto sym = mJITCompiler->lookup("jitmain");
 #ifdef DEBUG
     assert(sym && "Failed to find jitmain function");
 #endif
+
     auto mainFunction = (void (*)())(intptr_t)sym.get().getAddress();
     mainFunction();
 }
 
-LLVMExecutor::LLVMExecutor() {
-    ::llvm::InitializeNativeTarget();
-    LLVMInitializeNativeAsmPrinter();
-    LLVMInitializeNativeAsmParser();
-
-    auto libName = std::getenv("ATHENA_RT_LIBRARY");
-    kRuntimeDriver.load(libName);
-#ifdef DEBUG
-    assert(kRuntimeDriver.isLoaded());
-#endif
-
-    auto compiler = AthenaJIT::create();
-
-    if (!compiler) {
-        ::llvm::consumeError(compiler.takeError());
+LLVMExecutor::LLVMExecutor() : mJITCompiler(AthenaJIT::create()) {
+    if (!mJITCompiler) {
         new core::FatalError(1, "Unable to create JIT compiler");
     }
 
-    mJITCompiler = std::move(compiler.get());
+    mRuntimeDriver =
+        std::make_unique<RuntimeDriver>(mJITCompiler->getContext());
+
+    auto libName = std::getenv("ATHENA_RT_LIBRARY");
+    mRuntimeDriver->load(libName);
+#ifdef DEBUG
+    assert(mRuntimeDriver->isLoaded());
+#endif
 }
 
 std::unique_ptr<core::Allocator> &LLVMExecutor::getAllocator() {
