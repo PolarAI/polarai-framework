@@ -45,11 +45,7 @@ class LLVMJITTestType : public ::testing::Test {
         ::llvm::InitializeNativeTarget();
         LLVMInitializeNativeAsmPrinter();
         LLVMInitializeNativeAsmParser();
-        auto jitCompilerWrapper = AthenaJIT::create();
-        if (!jitCompilerWrapper) {
-            llvm::consumeError(jitCompilerWrapper.takeError());
-        }
-        jitCompiler = std::move(jitCompilerWrapper.get());
+        jitCompiler = AthenaJIT::create();
     }
 };
 

@@ -1,15 +1,16 @@
 import argparse
 
-plainArgTypes = ["int", "int*", "int *"]
+plainArgTypes = ["int", "int*", "int *", "float", "float *", "float*", "double", "double *",
+                 "double*"]
 
 
-def get_mangled_name(name, type):
-    return "athn_" + name + "_" + type[0]
+def get_mangled_name(name, typename):
+    return "athn_" + name + "_" + typename[0]
 
 
-def generate_wrapper(name, signature):
+def generate_wrapper(name, signature, gentypes):
     defs = ""
-    for template in ["float", "double"]:
+    for template in gentypes:
         defs += "void "
         defs += get_mangled_name(name, template)
         defs += "("
@@ -20,10 +21,18 @@ def generate_wrapper(name, signature):
         arg_no = 0
         for arg in signature:
             defs += ","
-            if arg not in plainArgTypes:
+
+            arg_resolved = arg
+
+            if arg == "gentype":
+                arg_resolved = template
+            elif arg == "gentype *":
+                arg_resolved = template + " *"
+
+            if arg_resolved not in plainArgTypes:
                 defs += " void *arg" + str(arg_no) + "Ptr"
             else:
-                defs += " " + arg + " arg" + str(arg_no)
+                defs += " " + arg_resolved + " arg" + str(arg_no)
             arg_no += 1
 
         defs += ") {\n"
@@ -33,8 +42,14 @@ def generate_wrapper(name, signature):
 
         arg_no = 0
         for arg in signature:
-            if arg not in plainArgTypes:
-                defs += "auto arg" + str(arg_no) + " = reinterpret_cast<" + arg + ">(arg" + str(
+            arg_resolved = arg
+            if arg == "gentype":
+                arg_resolved = template
+            elif arg == "gentype *":
+                arg_resolved = template + " *"
+            if arg_resolved not in plainArgTypes:
+                defs += "auto arg" + str(
+                    arg_no) + " = reinterpret_cast<" + arg_resolved + ">(arg" + str(
                     arg_no) + "Ptr);\n"
             arg_no += 1
         defs += name + "<" + template + ">(device, allocator"
@@ -52,8 +67,8 @@ def generate_wrapper(name, signature):
     return defs
 
 
-def generate_llvm(name, signature):
-    for template in ["float", "double"]:
+def generate_llvm(name, signature, gentypes):
+    for template in gentypes:
         res = ""
         vec_name = get_mangled_name(name, template) + "_args"
         res += "std::vector<::llvm::Type *> " + vec_name + ";\n"
@@ -63,10 +78,25 @@ def generate_llvm(name, signature):
         for arg in signature:
             res += vec_name + ".push_back("
 
-            if arg == "int":
+            arg_resolved = arg
+
+            if arg == "gentype":
+                arg_resolved = template
+            elif arg == "gentype *":
+                arg_resolved = template + " *"
+
+            if arg_resolved == "int":
                 res += "::llvm::Type::getInt32Ty(ctx)"
-            elif arg == "int *" or arg == "int *":
+            elif arg_resolved == "int *" or arg == "int*":
                 res += "::llvm::Type::getInt32PtrTy(ctx)"
+            elif arg_resolved == "float":
+                res += "::llvm::Type::getFloatTy(ctx)"
+            elif arg_resolved == "float *" or arg == "float*":
+                res += "::llvm::Type::getFloatPtrTy(ctx)"
+            elif arg_resolved == "double":
+                res += "::llvm::Type::getFloatTy(ctx)"
+            elif arg_resolved == "double *" or arg == "double*":
+                res += "::llvm::Type::getFloatPtrTy(ctx)"
             else:
                 res += "::llvm::Type::getInt64Ty(ctx)"
             res += ");\n"
@@ -138,10 +168,17 @@ def main():
             command[0] = command[0].strip()
             types = list(map(str.strip, types))
 
+            gentypes = ["float", "double"]
+
+            if len(command) == 3:
+                if command[2].strip() != "*":
+                    gentypes = command[2].split(",")
+                    gentypes = list(map(str.strip, gentypes))
+
             if args.mode == "wrapper":
-                o.write(generate_wrapper(command[0], types))
+                o.write(generate_wrapper(command[0], types, gentypes))
             elif args.mode == "driver":
-                o.write(generate_llvm(command[0], types))
+                o.write(generate_llvm(command[0], types, gentypes))
 
         if args.mode == "wrapper":
             o.write("}\n")

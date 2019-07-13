@@ -13,5 +13,7 @@
 #define ATHENA_BUILTIN_H
 
 #include <athena/backend/llvm/runtime/add.h>
+#include <athena/backend/llvm/runtime/fill.h>
+#include <athena/backend/llvm/runtime/allocate.h>
 
-#endif //ATHENA_BUILTIN_H
+#endif  // ATHENA_BUILTIN_H

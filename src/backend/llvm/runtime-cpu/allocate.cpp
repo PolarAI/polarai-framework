@@ -15,18 +15,15 @@
 #include <athena/core/Allocator.h>
 #include <athena/core/inner/Tensor.h>
 
-extern "C" {
-void athena_allocate(void *a, void *t) {
-    auto pAllocator = reinterpret_cast<athena::core::Allocator *>(a);
-    auto pTensor = reinterpret_cast<athena::core::inner::Tensor *>(t);
+using namespace athena::backend::llvm;
+using namespace athena::core::inner;
+using namespace athena::core;
 
-    pAllocator->allocate(*pTensor);
+template <typename T>
+void allocate(Device *, Allocator *allocator, Tensor *a) {
+    allocator->allocate(*a);
 }
 
-size_t athena_get_fast_pointer(void *a, void *t) {
-    auto pAllocator = reinterpret_cast<athena::core::Allocator *>(a);
-    auto pTensor = reinterpret_cast<athena::core::inner::Tensor *>(t);
-
-    return pAllocator->getFastPointer(*pTensor);
-}
-}
+template void allocate<void>(athena::backend::llvm::Device *,
+                         athena::core::Allocator *,
+                         athena::core::inner::Tensor *a);

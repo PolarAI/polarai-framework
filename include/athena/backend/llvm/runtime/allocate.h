@@ -14,18 +14,13 @@
 #ifndef ATHENA_ALLOCATE_H
 #define ATHENA_ALLOCATE_H
 
-#if __cplusplus
-#include <cstddef>
-extern "C" {
-#else
-#include <stddef.h>
-#endif
+#include <athena/backend/llvm/device/Device.h>
+#include <athena/core/Allocator.h>
+#include <athena/core/inner/Tensor.h>
 
-void athena_allocate(void *allocator, void *tensor);
-size_t athena_get_fast_pointer(void *allocator, void *tensor);
-
-#if __cplusplus
-}
-#endif
+template <typename T>
+extern void allocate(athena::backend::llvm::Device *,
+                     athena::core::Allocator *,
+                     athena::core::inner::Tensor *a);
 
 #endif  // ATHENA_ALLOCATE_H

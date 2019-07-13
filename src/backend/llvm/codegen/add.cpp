@@ -17,18 +17,6 @@
 
 namespace athena::backend::llvm::codegen {
 
-::llvm::Function *create_fadd_decl(::llvm::LLVMContext &ctx,
-                                   ::llvm::Module &module) {
-    std::vector<::llvm::Type *> args(5, ::llvm::Type::getInt64Ty(ctx));
-    ::llvm::FunctionType *FT =
-        ::llvm::FunctionType::get(::llvm::Type::getVoidTy(ctx), args, false);
-
-    ::llvm::Function *F = ::llvm::Function::Create(
-        FT, ::llvm::Function::ExternalLinkage, "athena_fadd", &module);
-
-    return F;
-}
-
 void registerAdd(LLVMGenerator *generator) {
     std::function<void(::llvm::LLVMContext &, ::llvm::Module &,
                        ::llvm::IRBuilder<> &, core::inner::Tensor &,
@@ -38,10 +26,7 @@ void registerAdd(LLVMGenerator *generator) {
                         core::inner::Tensor &b, core::inner::Tensor &c) {
             // todo handle different data types
 
-
             ::llvm::Function *calledFunction = generator->findLLVMFunction("athn_add_f");
-
-//            if (!calledFunction) calledFunction = create_fadd_decl(ctx, module);
 
             if (!calledFunction) {
                 core::FatalError(1, "Unknown function referenced");

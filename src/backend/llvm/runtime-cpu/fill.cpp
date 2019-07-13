@@ -11,19 +11,31 @@
  * the License.
  */
 
+#include <athena/backend/llvm/device/Device.h>
+#include <athena/backend/llvm/runtime/add.h>
 #include <athena/backend/llvm/runtime/fill.h>
 #include <athena/core/Allocator.h>
 #include <athena/core/inner/Tensor.h>
 
-extern "C" {
-void athena_ffill(void *allocator, void *tensor, float f) {
-    auto *pAllocator = reinterpret_cast<athena::core::Allocator *>(allocator);
-    auto *pTensor = reinterpret_cast<athena::core::inner::Tensor *>(tensor);
+using namespace athena::backend::llvm;
+using namespace athena::core::inner;
+using namespace athena::core;
 
-    auto *mem = reinterpret_cast<float *>(pAllocator->getRAMPointer(*pTensor));
+template <typename T>
+void fill(Device *, Allocator *allocator, Tensor *a, T value) {
+    auto *memory = reinterpret_cast<T *>(allocator->getRAMPointer(*a));
 
-    for (size_t i = 0; i < pTensor->getShapeView().getTotalSize(); i++) {
-        mem[i] = f;
+    for (size_t i = 0; i < a->getShape().getTotalSize(); i++) {
+        memory[i] = value;
     }
 }
-}
+
+template void fill<float>(athena::backend::llvm::Device *,
+                          athena::core::Allocator *,
+                          athena::core::inner::Tensor *a,
+                          float value);
+
+template void fill<double>(athena::backend::llvm::Device *,
+                           athena::core::Allocator *,
+                           athena::core::inner::Tensor *a,
+                           double value);

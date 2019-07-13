@@ -15,38 +15,23 @@
 
 namespace athena::backend::llvm::codegen {
 
-::llvm::Function *create_allocate_decl(::llvm::LLVMContext &ctx,
-                                       ::llvm::Module &module) {
-    std::vector<::llvm::Type *> args(2, ::llvm::Type::getInt64Ty(ctx));
-    ::llvm::FunctionType *FT =
-        ::llvm::FunctionType::get(::llvm::Type::getVoidTy(ctx), args, false);
-
-    ::llvm::Function *F = ::llvm::Function::Create(
-        FT, ::llvm::Function::ExternalLinkage, "athena_allocate", &module);
-
-    return F;
-}
-
 void registerAllocate(LLVMGenerator *generator) {
     std::function<void(::llvm::LLVMContext &, ::llvm::Module &,
                        ::llvm::IRBuilder<> &, core::inner::Tensor &)>
         f = [generator](::llvm::LLVMContext &ctx, ::llvm::Module &module,
                         ::llvm::IRBuilder<> &builder, core::inner::Tensor &a) {
-            // todo handle different data types
-
             ::llvm::Function *calledFunction =
-                module.getFunction("athena_allocate");
-
-            if (!calledFunction)
-                calledFunction = create_allocate_decl(ctx, module);
+                generator->findLLVMFunction("athn_allocate_v");
 
             if (!calledFunction) {
                 core::FatalError(1, "Unknown function referenced");
             }
 
-            // todo check arg count
-
             std::vector<::llvm::Value *> ArgsV;
+            ::llvm::Constant *device = ::llvm::ConstantInt::get(
+                ::llvm::Type::getInt64Ty(ctx),
+                reinterpret_cast<size_t>(generator->getPreferredDevice("allocate")));
+            ArgsV.push_back(device);
             ::llvm::Constant *allocatorConst =
                 ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(ctx),
                                          (size_t)(&generator->getAllocator()));

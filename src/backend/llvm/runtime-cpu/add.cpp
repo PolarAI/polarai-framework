@@ -11,49 +11,34 @@
  * the License.
  */
 
-#include <athena/backend/llvm/runtime/add.h>
 #include <athena/backend/llvm/device/Device.h>
-#include <athena/core/inner/Tensor.h>
+#include <athena/backend/llvm/runtime/add.h>
 #include <athena/core/Allocator.h>
+#include <athena/core/inner/Tensor.h>
 
 using namespace athena::backend::llvm;
 using namespace athena::core::inner;
 using namespace athena::core;
 
-void athena_fadd(void *a, size_t ca, void *b, size_t cb, void *c) {
-    auto *af = static_cast<float *>(a);
-    auto *bf = static_cast<float *>(b);
-    auto *cf = static_cast<float *>(c);
-
-    for (size_t i = 0; i < ca; i++) {
-        cf[i] = af[i] + bf[i];
-    }
-}
-
 template <typename T>
-void add(Device *, Allocator* allocator, Tensor *a, Tensor *b, Tensor *c) {
-
-    auto *af = reinterpret_cast<T*>(allocator->getRAMPointer(*a));
-    auto *bf = reinterpret_cast<T*>(allocator->getRAMPointer(*b));
-    auto *cf = reinterpret_cast<T*>(allocator->getRAMPointer(*c));
+void add(Device *, Allocator *allocator, Tensor *a, Tensor *b, Tensor *c) {
+    auto *af = reinterpret_cast<T *>(allocator->getRAMPointer(*a));
+    auto *bf = reinterpret_cast<T *>(allocator->getRAMPointer(*b));
+    auto *cf = reinterpret_cast<T *>(allocator->getRAMPointer(*c));
 
     for (size_t i = 0; i < c->getShape().getTotalSize(); i++) {
         cf[i] = af[i] + bf[i];
     }
 }
 
-template void add<float>(
-    athena::backend::llvm::Device *,
-    athena::core::Allocator *,
-    athena::core::inner::Tensor *a,
-    athena::core::inner::Tensor *b,
-    athena::core::inner::Tensor *c
-);
+template void add<float>(athena::backend::llvm::Device *,
+                         athena::core::Allocator *,
+                         athena::core::inner::Tensor *a,
+                         athena::core::inner::Tensor *b,
+                         athena::core::inner::Tensor *c);
 
-template void add<double>(
-    athena::backend::llvm::Device *,
-    athena::core::Allocator *,
-    athena::core::inner::Tensor *a,
-    athena::core::inner::Tensor *b,
-    athena::core::inner::Tensor *c
-);
+template void add<double>(athena::backend::llvm::Device *,
+                          athena::core::Allocator *,
+                          athena::core::inner::Tensor *a,
+                          athena::core::inner::Tensor *b,
+                          athena::core::inner::Tensor *c);

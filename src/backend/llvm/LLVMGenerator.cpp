@@ -41,28 +41,6 @@ llvm::LLVMGenerator::LLVMGenerator(
     return mBuilder;
 }
 
-::llvm::Value *LLVMGenerator::generateGetFastPointer(core::inner::Tensor &t) {
-    ::llvm::Function *calledFunction =
-        mGeneratedModule->getFunction("athena_get_fast_pointer");
-
-    if (!calledFunction)
-        calledFunction = impl::create_get_fast_pointer_decl(mContext, *mGeneratedModule);
-
-    if (!calledFunction) {
-        core::FatalError(1, "Unknown function referenced");
-    }
-
-    std::vector<::llvm::Value *> ArgsV;
-    ::llvm::Constant *allocatorConst = ::llvm::ConstantInt::get(
-        ::llvm::Type::getInt64Ty(mContext), (size_t)(&mAllocator));
-    ArgsV.push_back(allocatorConst);
-    ::llvm::Constant *tensorConst = ::llvm::ConstantInt::get(
-        ::llvm::Type::getInt64Ty(mContext), reinterpret_cast<size_t>(&t));
-    ArgsV.push_back(tensorConst);
-    auto callInst = mBuilder.CreateCall(calledFunction, ArgsV);
-    return callInst;
-}
-
 void LLVMGenerator::generateLoad(const core::AbstractLoader &loader,
                                  core::inner::Tensor &tensor) {
     ::llvm::Function *loadFunction =
