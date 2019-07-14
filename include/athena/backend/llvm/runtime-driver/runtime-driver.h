@@ -37,7 +37,7 @@ private:
                                 ::llvm::Module &module,
                                 ::llvm::IRBuilder<> &builder);
 
-    static ::llvm::ArrayRef<::llvm::Value*> getArgs(::llvm::Function *function);
+    static void setProperAttrs(::llvm::Function *function);
 
     void prepareModules();
 

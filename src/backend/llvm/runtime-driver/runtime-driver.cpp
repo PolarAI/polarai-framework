@@ -20,22 +20,22 @@
 
 namespace athena::backend::llvm {
 
-RuntimeDriver::RuntimeDriver(::llvm::LLVMContext &ctx) : mLibraryHandle(nullptr), mContext(ctx) {}
+RuntimeDriver::RuntimeDriver(::llvm::LLVMContext &ctx)
+    : mLibraryHandle(nullptr), mContext(ctx) {}
 
 RuntimeDriver::~RuntimeDriver() {
     unload();
 }
-RuntimeDriver& RuntimeDriver::operator=(RuntimeDriver&& rhs) noexcept {
+RuntimeDriver &RuntimeDriver::operator=(RuntimeDriver &&rhs) noexcept {
     unload();
     mLibraryHandle = rhs.mLibraryHandle;
     rhs.mLibraryHandle = nullptr;
     return *this;
 }
-void* RuntimeDriver::getFunctionPtr(std::string_view funcName) {
-    if (void* function = dlsym(mLibraryHandle, funcName.data());
-        !function) {
-        new ::athena::core::FatalError(1,
-                                   "RuntimeDriver: " + std::string(dlerror()));
+void *RuntimeDriver::getFunctionPtr(std::string_view funcName) {
+    if (void *function = dlsym(mLibraryHandle, funcName.data()); !function) {
+        new ::athena::core::FatalError(
+            1, "RuntimeDriver: " + std::string(dlerror()));
         return nullptr;
     } else {
         return function;
@@ -44,15 +44,15 @@ void* RuntimeDriver::getFunctionPtr(std::string_view funcName) {
 void RuntimeDriver::load(std::string_view nameLibrary) {
     if (mLibraryHandle = dlopen(nameLibrary.data(), RTLD_LAZY);
         !mLibraryHandle) {
-        new ::athena::core::FatalError(1,
-                                   "RuntimeDriver: " + std::string(dlerror()));
+        new ::athena::core::FatalError(
+            1, "RuntimeDriver: " + std::string(dlerror()));
     }
     prepareModules();
 }
 void RuntimeDriver::unload() {
     if (mLibraryHandle && dlclose(mLibraryHandle)) {
-        ::athena::core::FatalError err(1,
-                                   "RuntimeDriver: " + std::string(dlerror()));
+        ::athena::core::FatalError err(
+            1, "RuntimeDriver: " + std::string(dlerror()));
     }
     mLibraryHandle = nullptr;
 }
@@ -63,17 +63,10 @@ void RuntimeDriver::reload(std::string_view nameLibrary) {
 bool RuntimeDriver::isLoaded() const {
     return mLibraryHandle != nullptr;
 }
-::llvm::ArrayRef<::llvm::Value *> RuntimeDriver::getArgs(::llvm::Function *function) {
-    std::vector<::llvm::Value *> argValues;
 
-    for (auto &arg : function->args()) {
-        argValues.push_back(&arg);
-    }
-
-    return argValues;
-}
 void RuntimeDriver::prepareModules() {
     auto newModule = std::make_unique<::llvm::Module>("runtime", mContext);
+    newModule->setTargetTriple(::llvm::sys::getDefaultTargetTriple());
     ::llvm::IRBuilder<> builder(mContext);
     generateLLVMIrBindings(mContext, *newModule, builder);
 #ifdef DEBUG
@@ -84,9 +77,14 @@ void RuntimeDriver::prepareModules() {
     stream.flush();
     if (isBroken || brokenDebugInfo) {
         err() << str;
+        newModule->print(::llvm::errs(), nullptr);
         new core::FatalError(10, "incorrect ir");
     }
 #endif
     mModules.push_back(std::move(newModule));
 }
-}  // namespace athena::backend
+void RuntimeDriver::setProperAttrs(::llvm::Function *function) {
+    function->addFnAttr(::llvm::Attribute::NoUnwind);
+    function->addFnAttr(::llvm::Attribute::UWTable);
+}
+}  // namespace athena::backend::llvm

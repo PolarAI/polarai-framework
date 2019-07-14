@@ -31,6 +31,7 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
     mMainModule = std::make_unique<::llvm::Module>("AthenaMain",
                                                    mJITCompiler->getContext());
     mMainModule->setDataLayout(mJITCompiler->getDataLayout());
+    mMainModule->setTargetTriple(::llvm::sys::getDefaultTargetTriple());
 
     // todo consider initializing some optimizers
 
@@ -95,13 +96,6 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
     auto builder = generator.getBuilder();
 
     builder.CreateRetVoid();
-}
-
-void LLVMExecutor::execute() {
-    auto err = mJITCompiler->addModule(mMainModule);
-    if (err) {
-        core::FatalError(1, "Error adding module to JIT");
-    }
 
     for (auto &module : mRuntimeDriver->getModules()) {
         module->setDataLayout(mJITCompiler->getDataLayout());
@@ -109,6 +103,13 @@ void LLVMExecutor::execute() {
         if (err) {
             new core::FatalError(1, "Unable to add module");
         }
+    }
+}
+
+void LLVMExecutor::execute() {
+    auto err = mJITCompiler->addModule(mMainModule);
+    if (err) {
+        core::FatalError(1, "Error adding module to JIT");
     }
 
     auto sym = mJITCompiler->lookup("jitmain");
