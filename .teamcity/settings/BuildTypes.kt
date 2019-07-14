@@ -15,6 +15,8 @@ import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.VcsTrigger
 import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.schedule
 import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.vcs
 import jetbrains.buildServer.configs.kotlin.v2018_2.vcs.GitVcsRoot
+import java.util.Date
+import java.text.SimpleDateFormat
 
 class DefaultBuild(private val repo: GitVcsRoot, private val buildConfig: String, private val compiler: String) : BuildType({
     id("AthenaBuild_${repo.name}_${buildConfig}_$compiler".toExtId())
@@ -89,6 +91,9 @@ object Daily : BuildType({
 
     type = Type.COMPOSITE
 
+    val sdf = SimpleDateFormat("dd-mm-yyyy")
+    val buildDate = sdf.format(Date())
+
     vcs {
         root(AthenaPublic)
         checkoutMode = CheckoutMode.ON_SERVER
@@ -111,6 +116,12 @@ object Daily : BuildType({
         investigationsAutoAssigner {
             defaultAssignee = "abatashev"
         }
+        vcsLabeling {
+            vcsRootId = "${AthenaPublic.id}"
+            labelingPattern = "nightly-" + buildDate
+            branchFilter = ""
+        }
+
     }
 
     dependencies {
@@ -142,15 +153,21 @@ class MandatoryChecks(private val repo: GitVcsRoot) : BuildType({
 
             if (repo.name == "athena_public") {
                 branchFilter = """
-                +:refs/pull/(*/merge)
+                +:pull/*
                 +:develop
                 +:master
                 """.trimIndent()
             } else {
-                branchFilter = "+:refs/heads/*"
+                branchFilter = """
+                    +:*
+                    -:develop
+                    -:master
+                """.trimIndent()
             }
             watchChangesInDependencies = true
             enableQueueOptimization = false
+            perCheckinTriggering = true
+            groupCheckinsByCommitter = true
         }
     }
 
@@ -168,7 +185,7 @@ class MandatoryChecks(private val repo: GitVcsRoot) : BuildType({
                 publisher = github {
                     githubUrl = "https://api.github.com"
                     authType = personalToken {
-                        token = "zxx1bfacd1e0d69bcbff375fbbc5dfdcebcf0b349a3e1c4d89ea8a537816b12b1fd074ca14f942bc176775d03cbe80d301b"
+                        token = "zxx24d3eb84f48caad36dc56a3252875b70b7fd09cd46cb8ab54153e54fc1042983f410212252a6a0cf775d03cbe80d301b"
                     }
                 }
             }
