@@ -28,7 +28,6 @@
 namespace athena::backend::llvm {
 
 void LLVMExecutor::prepare(athena::core::Graph &graph) {
-
     mMainModule = std::make_unique<::llvm::Module>("AthenaMain",
                                                    mJITCompiler->getContext());
     mMainModule->setDataLayout(mJITCompiler->getDataLayout());
@@ -39,8 +38,6 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
         ::llvm::Type::getVoidTy(mJITCompiler->getContext()), false);
     ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage, "jitmain",
                              *mMainModule);
-
-//    mExistingModules = mRuntimeDriver->getModules();
 
     LLVMGenerator generator(mJITCompiler->getContext(), mMainModule,
                             *mAllocator, mRuntimeDriver->getModules());

@@ -51,9 +51,9 @@ void LLVMGenerator::generateLoad(const core::AbstractLoader &loader,
         ::llvm::FunctionType *FT = ::llvm::FunctionType::get(
             ::llvm::Type::getVoidTy(mContext), args, false);
 
-        loadFunction =
-            ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage,
-                                     loader.getLoadCName(), mGeneratedModule.get());
+        loadFunction = ::llvm::Function::Create(
+            FT, ::llvm::Function::ExternalLinkage, loader.getLoadCName(),
+            mGeneratedModule.get());
     }
 
     if (!loadFunction) {
@@ -98,9 +98,9 @@ void LLVMGenerator::openNode(std::string_view name) {
 #endif
     ::llvm::FunctionType *FT =
         ::llvm::FunctionType::get(::llvm::Type::getVoidTy(mContext), false);
-    auto nodeFunction =
-        ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage,
-                                 "node_" + std::string(name), *mGeneratedModule);
+    auto nodeFunction = ::llvm::Function::Create(
+        FT, ::llvm::Function::ExternalLinkage, "node_" + std::string(name),
+        *mGeneratedModule);
 
     mBuilder.CreateCall(nodeFunction);
 
