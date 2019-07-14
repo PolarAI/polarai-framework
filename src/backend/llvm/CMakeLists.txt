@@ -1,4 +1,5 @@
 find_package(LLVM CONFIG)
+find_package(PythonInterp REQUIRED)
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
@@ -24,8 +25,6 @@ add_subdirectory(runtime-cpu)
 add_subdirectory(runtime-driver)
 
 file(GLOB codegen_src "codegen/*.cpp")
-
-find_package(PythonInterp REQUIRED)
 
 add_athena_library(backend-llvm STATIC
         LLVMExecutor.cpp
