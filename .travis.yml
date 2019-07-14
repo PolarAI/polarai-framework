@@ -12,25 +12,20 @@ stages:
 before_script:
   - docker pull athenaml/build:latest
 
+env:
+  - ATHENA_BUILD_TYPE=Debug
+  - ATHENA_BUILD_TYPE=Release
+
+script:
+  - mkdir build_$ATHENA_BUILD_TYPE
+  - docker run -v $TRAVIS_BUILD_DIR:/opt/src -e CC=clang-8 -e CXX=clang++-8 athenaml/build /opt/src/scripts/build.py --build-type=$ATHENA_BUILD_TYPE /opt/src/build_$ATHENA_BUILD_TYPE /opt/src
+  - docker run -e ATHENA_TEST_ENVIRONMENT=ci -v $TRAVIS_BUILD_DIR:/opt/src athenaml/build /opt/src/scripts/test.sh /opt/src/build_$ATHENA_BUILD_TYPE
+
 jobs:
   include:
     - stage: static_checks
       name: "Static Checks"
+      env: ATHENA_BUILD_TYPE=Release
       script:
         - git fetch
         - docker run -v $TRAVIS_BUILD_DIR:/opt/src -e CLANG_FORMAT_DIFF_EXEC=/usr/lib/llvm-8/share/clang/clang-format-diff.py athenaml/build bash -c "cd /opt/src && scripts/clang-format.sh"
-    - stage: compile
-      name: "Compile"
-      env:
-        - ATHENA_BUILD_TYPE=Debug
-        - ATHENA_BUILD_TYPE=Release
-      script:
-        - mkdir build_$ATHENA_BUILD_TYPE
-        - docker run -v $TRAVIS_BUILD_DIR:/opt/src -e CC=clang-8 -e CXX=clang++-8 athenaml/build /opt/src/scripts/build.py --build-type=$ATHENA_BUILD_TYPE /opt/src/build_$ATHENA_BUILD_TYPE /opt/src
-    - stage: test
-      name: "Test"
-      env:
-        - ATHENA_BUILD_TYPE=Debug
-        - ATHENA_BUILD_TYPE=Release
-      script:
-        - docker run -e ATHENA_TEST_ENVIRONMENT=ci -v $TRAVIS_BUILD_DIR:/opt/src athenaml/build /opt/src/scripts/test.sh /opt/src/build_$ATHENA_BUILD_TYPE
