@@ -7,4 +7,4 @@ else
     cd $1
 fi
 
-ctest -T Test
+ctest -VV -T Test
