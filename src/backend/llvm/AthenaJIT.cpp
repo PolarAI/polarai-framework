@@ -15,6 +15,7 @@
 #include <athena/backend/llvm/runtime-driver/runtime-driver.h>
 
 #include <cstdlib>
+#include <llvm/Passes/PassBuilder.h>
 #include <llvm/Transforms/InstCombine/InstCombine.h>
 #include <llvm/Transforms/Scalar.h>
 #include <llvm/Transforms/Scalar/GVN.h>
@@ -69,21 +70,45 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
 ::llvm::Expected<::llvm::orc::ThreadSafeModule> AthenaJIT::optimizeModule(
     ::llvm::orc::ThreadSafeModule TSM,
     const ::llvm::orc::MaterializationResponsibility &R) {
-    // Create a function pass manager.
-    auto FPM = ::llvm::make_unique<::llvm::legacy::FunctionPassManager>(
-        TSM.getModule());
+    ::llvm::FunctionPassManager mFunctionPassManager;
+    ::llvm::ModulePassManager mModulePassManager;
+    ::llvm::ModulePassManager mPreLinkThinLTOPassManager;
 
-    // Add some optimizations.
-    FPM->add(::llvm::createReassociatePass());
-    FPM->add(::llvm::createGVNPass());
-    FPM->add(::llvm::createCFGSimplificationPass());
-    FPM->doInitialization();
+    ::llvm::LoopAnalysisManager loopAnalysisManager;
+    ::llvm::FunctionAnalysisManager functionAnalysisManager;
+    ::llvm::CGSCCAnalysisManager cGSCCAnalysisManager;
+    ::llvm::ModuleAnalysisManager moduleAnalysisManager;
 
-    // Run the optimizations over all functions in the module being added to
-    // the JIT.
-    //    for (auto &F : *TSM.getModule()) {
-    //        FPM->run(F);
-    //    }
+    ::llvm::PassBuilder passBuilder;
+    passBuilder.registerModuleAnalyses(moduleAnalysisManager);
+    passBuilder.registerCGSCCAnalyses(cGSCCAnalysisManager);
+    passBuilder.registerFunctionAnalyses(functionAnalysisManager);
+    passBuilder.registerLoopAnalyses(loopAnalysisManager);
+    passBuilder.crossRegisterProxies(
+        loopAnalysisManager, functionAnalysisManager, cGSCCAnalysisManager,
+        moduleAnalysisManager);
+    mModulePassManager = passBuilder.buildModuleOptimizationPipeline(
+        ::llvm::PassBuilder::O2, false);
+    mFunctionPassManager = passBuilder.buildFunctionSimplificationPipeline(
+        ::llvm::PassBuilder::O2, ::llvm::PassBuilder::ThinLTOPhase::PostLink,
+        false);
+    mPreLinkThinLTOPassManager = passBuilder.buildThinLTOPreLinkDefaultPipeline(
+        ::llvm::PassBuilder::O2, false);
+
+    auto lock = TSM.getContextLock();
+
+    ::llvm::Module &module = *TSM.getModule();
+
+    mModulePassManager.run(module, moduleAnalysisManager);
+
+    for (auto &func : module) {
+        if (!func.isDeclaration())
+            mFunctionPassManager.run(func, functionAnalysisManager);
+    }
+
+    mPreLinkThinLTOPassManager.run(module, moduleAnalysisManager);
+
+    TSM.getModule()->print(::llvm::errs(), nullptr);
 
     return TSM;
 }
