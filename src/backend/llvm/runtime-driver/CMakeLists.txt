@@ -10,7 +10,7 @@ llvm_map_components_to_libnames(llvm_libs all)
 target_link_libraries(runtime-driver PRIVATE ${llvm_libs})
 
 if (UNIX AND NOT APPLE)
-    target_link_libraries(runtime-driver dl.so)
+    target_link_libraries(runtime-driver PRIVATE dl.so)
     #else ()
     #    message(FATAL_ERROR "Dynamic link library does not defined for your OS")
 endif ()
