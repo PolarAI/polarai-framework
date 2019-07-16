@@ -72,7 +72,6 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
     const ::llvm::orc::MaterializationResponsibility &R) {
     ::llvm::FunctionPassManager mFunctionPassManager;
     ::llvm::ModulePassManager mModulePassManager;
-    ::llvm::ModulePassManager mPreLinkThinLTOPassManager;
 
     ::llvm::LoopAnalysisManager loopAnalysisManager;
     ::llvm::FunctionAnalysisManager functionAnalysisManager;
@@ -92,8 +91,6 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
     mFunctionPassManager = passBuilder.buildFunctionSimplificationPipeline(
         ::llvm::PassBuilder::O2, ::llvm::PassBuilder::ThinLTOPhase::PostLink,
         false);
-    mPreLinkThinLTOPassManager = passBuilder.buildThinLTOPreLinkDefaultPipeline(
-        ::llvm::PassBuilder::O2, false);
 
     auto lock = TSM.getContextLock();
 
@@ -105,10 +102,6 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
         if (!func.isDeclaration())
             mFunctionPassManager.run(func, functionAnalysisManager);
     }
-
-    mPreLinkThinLTOPassManager.run(module, moduleAnalysisManager);
-
-    TSM.getModule()->print(::llvm::errs(), nullptr);
 
     return TSM;
 }

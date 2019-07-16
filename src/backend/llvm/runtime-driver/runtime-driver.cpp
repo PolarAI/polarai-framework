@@ -86,5 +86,6 @@ void RuntimeDriver::prepareModules() {
 void RuntimeDriver::setProperAttrs(::llvm::Function *function) {
     function->addFnAttr(::llvm::Attribute::NoUnwind);
     function->addFnAttr(::llvm::Attribute::UWTable);
+    function->addFnAttr(::llvm::Attribute::AlwaysInline);
 }
 }  // namespace athena::backend::llvm
