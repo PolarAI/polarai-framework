@@ -32,10 +32,7 @@ class Node : public AbstractNode {
     Node() = delete;
     Node(const Node& rhs) = default;
     Node(Node&& rhs) noexcept;
-    Node(TensorShape shape,
-         DataType dataType,
-         Operation& operation,
-         std::string name = "");
+    Node(Operation& operation, std::string name = "");
     ~Node() override;
 
     Node& operator=(const Node& rhs) = default;

@@ -44,7 +44,7 @@ TEST(JIT, SimpleVectorAdd) {
     graph.addNode(bInp);
 
     AddOperation addOp;
-    Node add(shape, DataType::FLOAT, addOp, "vector_add_1");
+    Node add(addOp, "vector_add_1");
     graph.addNode(add);
     add.after(aInp, 1);
     add.after(bInp, 2);

@@ -14,12 +14,10 @@
 #include <athena/core/LossNode.h>
 
 namespace athena::core {
-LossNode::LossNode(TensorShape shape,
-                   DataType dataType,
-                   Operation& operation,
+LossNode::LossNode(Operation& operation,
                    Criterion criterion,
                    std::string name)
-    : Node(std::move(shape), dataType, operation, std::move(name)),
+    : Node(operation, std::move(name)),
       mCriterion(criterion) {}
 LossNode::LossNode(LossNode&& rhs) noexcept
     : Node(std::move(rhs)), mCriterion(rhs.mCriterion) {

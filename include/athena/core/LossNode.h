@@ -29,9 +29,7 @@ class LossNode : public Node {
     LossNode() = delete;
     LossNode(const LossNode& rhs) = default;
     LossNode(LossNode&& rhs) noexcept;
-    LossNode(TensorShape shape,
-             DataType dataType,
-             Operation& operation,
+    LossNode(Operation& operation,
              Criterion criterion,
              std::string name = "");
     ~LossNode() override;

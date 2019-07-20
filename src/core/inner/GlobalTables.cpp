@@ -12,11 +12,24 @@
  */
 
 #include <athena/core/inner/GlobalTables.h>
+#include <athena/core/inner/Tensor.h>
 
 namespace athena::core::inner {
 Table<AllocationRecord>& getAllocationTable() {
     static Table<AllocationRecord> table;
     return table;
+}
+
+std::vector<std::unique_ptr<Tensor>>& getTensorRegistry() {
+    static std::vector<std::unique_ptr<Tensor>> registry;
+
+    if (registry.empty()) {
+        auto tensor =
+            std::make_unique<Tensor>(DataType::UNDEFINED, TensorShape({}));
+        registry.push_back(std::move(tensor));
+    }
+
+    return registry;
 }
 
 Table<AbstractNode*>& getNodeTable() {

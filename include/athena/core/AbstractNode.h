@@ -32,7 +32,7 @@ using EdgeMark = size_t;
 class AbstractNode {
     private:
     void fullClear();
-    inner::Tensor mTensor;
+    inner::Tensor& mTensor;
     std::string mName;
     size_t mGraphIndex;
     size_t mNodeIndex;
@@ -43,6 +43,7 @@ class AbstractNode {
     AbstractNode(const AbstractNode& rhs);
     AbstractNode(AbstractNode&& rhs) noexcept;
     AbstractNode(TensorShape shape, DataType dataType, std::string name);
+    explicit AbstractNode(std::string name);
     virtual ~AbstractNode();
 
     AbstractNode& operator=(const AbstractNode& rhs);
@@ -69,6 +70,8 @@ class AbstractNode {
     friend void inner::setGraphIndex(AbstractNode& node, size_t graphIndex);
     friend void inner::incrementInputCount(athena::core::AbstractNode& node);
     friend inner::Tensor& inner::getTensorFromNode(AbstractNode& node);
+    friend void inner::setResultTensor(athena::core::AbstractNode& node,
+                                       athena::core::inner::Tensor& tensor);
 };
 }  // namespace athena::core
 

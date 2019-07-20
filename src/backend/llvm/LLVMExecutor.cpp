@@ -78,19 +78,15 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
                 // todo check for frozen nodes
                 auto derivativeTensor = node.getOperation().getDerivativeTensor(
                     preparedTensors, argNo);
-                core::inner::addDerivativeTensor(node, *derivativeTensor);
+                core::inner::addDerivativeTensor(node, derivativeTensor);
                 preparedTensors.pop_back();
-                preparedTensors.push_back(derivativeTensor);
-                generator.generate("allocate", *derivativeTensor);
+                preparedTensors.push_back(&derivativeTensor);
+                generator.generate("allocate", derivativeTensor);
                 node.getOperation().genDerivative(generator, preparedTensors,
                                                   argNo);
             }
 
             generator.closeNode();
-        }
-
-        auto &outputNodes = cluster.get<core::OutputNode>();
-        for (auto &nodeDeps : outputNodes) {
         }
     }
 

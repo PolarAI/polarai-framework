@@ -270,6 +270,7 @@ const Traversal& Graph::traverse() {
                         node->getNodeIndex(),
                         std::move(visits[nodeIndex].input),
                         std::move(visits[nodeIndex].output));
+                    break;
                 case NodeType::LOSS:
                     cluster.get<LossNode>().emplace_back(
                         node->getNodeIndex(),
@@ -287,6 +288,32 @@ const Traversal& Graph::traverse() {
         std::swap(currentQueue, newQueue);
         if (currentQueue.empty()) {
             break;
+        }
+    }
+
+    // Now that we have graph traversal, it is possible to determine tensor
+    // shapes
+    for (auto& cluster : mTraversal.getClusters()) {
+        auto& actionNodes = cluster.get<core::Node>();
+        for (auto& nodeDep : actionNodes) {
+            auto& node = static_cast<core::Node&>(
+                *inner::getNodeTable()[nodeDep.nodeIndex]);
+            std::vector<inner::Tensor*> opArgs;
+            for (auto& inp : nodeDep.input) {
+                opArgs.push_back(&inner::getTensorFromNode(
+                    *inner::getNodeTable()[inp.nodeIndex]));
+            }
+            inner::setResultTensor(node,
+                                   node.getOperation().getResultTensor(opArgs));
+        }
+
+        auto& outputNodes = cluster.get<core::OutputNode>();
+        for (auto& nodeDep : actionNodes) {
+            auto& node = static_cast<core::Node&>(
+                *inner::getNodeTable()[nodeDep.nodeIndex]);
+            auto& parentNode = static_cast<core::AbstractNode&>(
+                *inner::getNodeTable()[nodeDep.input[0].nodeIndex]);
+            inner::setResultTensor(node, inner::getTensorFromNode(parentNode));
         }
     }
     inner::setTraversalValidity(mTraversal, true);

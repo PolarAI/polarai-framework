@@ -20,11 +20,9 @@ Node::Node(Node&& rhs) noexcept
       mDerivativeTensors(std::move(rhs.mDerivativeTensors)) {
     rhs.mOperation = nullptr;
 }
-Node::Node(TensorShape shape,
-           DataType dataType,
-           Operation& operation,
+Node::Node(Operation& operation,
            std::string name)
-    : AbstractNode(std::move(shape), dataType, std::move(name)),
+    : AbstractNode(std::move(name)),
       mOperation(&operation) {}
 Node::~Node() {
     saveInGraph(false);

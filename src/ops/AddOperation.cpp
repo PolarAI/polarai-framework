@@ -11,6 +11,7 @@
  * the License.
  */
 
+#include <athena/core/inner/InnerFunctions.h>
 #include <athena/ops/AddOperation.h>
 
 #include <cassert>
@@ -26,23 +27,21 @@ void AddOperation::gen(
 
     g.generate("add", *a, *b, *c);
 }
-core::inner::Tensor *AddOperation::getResultTensor(
+core::inner::Tensor &AddOperation::getResultTensor(
     std::vector<core::inner::Tensor *> args) const {
     core::ShapeView shapeView(args[0]->getShapeView());
-    core::inner::Tensor *res =
-        new core::inner::Tensor(args[0]->getDataType(), shapeView.toShape());
-    return res;
+    return core::inner::createTensor(args[0]->getDataType(),
+                                     shapeView.toShape());
 }
 
-core::inner::Tensor *AddOperation::getDerivativeTensor(
+core::inner::Tensor &AddOperation::getDerivativeTensor(
     std::vector<core::inner::Tensor *> args, int argNo) const {
 #ifdef DEBUG
     assert(argNo < 2 && "AddOperation takes 2 arguments!");
 #endif
     core::ShapeView shapeView(args[argNo]->getShapeView());
-    core::inner::Tensor *res = new core::inner::Tensor(
-        args[argNo]->getDataType(), shapeView.toShape());
-    return res;
+    return core::inner::createTensor(args[argNo]->getDataType(),
+                                     shapeView.toShape());
 }
 void AddOperation::genDerivative(
     core::AbstractGenerator &g,

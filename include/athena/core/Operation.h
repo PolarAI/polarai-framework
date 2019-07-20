@@ -16,6 +16,7 @@
 
 #include <athena/core/AbstractGenerator.h>
 #include <athena/core/FatalError.h>
+#include <athena/core/inner/GlobalTables.h>
 #include <athena/core/inner/Tensor.h>
 
 #include <string>
@@ -32,9 +33,9 @@ class Operation {
 
     public:
     explicit Operation(std::string&& name) : mName(std::move(name)){};
-    virtual inner::Tensor* getResultTensor(
+    virtual inner::Tensor& getResultTensor(
         std::vector<inner::Tensor*> args) const = 0;
-    virtual inner::Tensor* getDerivativeTensor(std::vector<inner::Tensor*> args,
+    virtual inner::Tensor& getDerivativeTensor(std::vector<inner::Tensor*> args,
                                                int argNo) const = 0;
     /**
      * Generate code for Operation
@@ -59,33 +60,35 @@ class Operation {
      * @return Name of Operation
      */
     std::string getName() const;
+
+    virtual size_t getOperandsCount() const = 0;
 };
 
 class OperationDummy : public Operation {
     public:
     explicit OperationDummy(std::string name) : Operation(std::move(name)){};
 
-    inner::Tensor* getResultTensor(
+    inner::Tensor& getResultTensor(
         std::vector<inner::Tensor*> args) const override {
-        FatalError(1, "NOT IMPL");
-        return nullptr;
+        new FatalError(1, "NOT IMPL");
+        return *inner::getTensorRegistry()[0];
     }
 
-    inner::Tensor* getDerivativeTensor(std::vector<inner::Tensor*> args,
+    inner::Tensor& getDerivativeTensor(std::vector<inner::Tensor*> args,
                                        int argNo) const override {
-        FatalError(1, "NOT IMPL");
-        return nullptr;
+        new FatalError(1, "NOT IMPL");
+        return *inner::getTensorRegistry()[0];
     }
 
     void gen(AbstractGenerator& g,
              std::vector<inner::Tensor*>& operationArguments) const override {
-        FatalError(1, "NOT IMPL");
+        new FatalError(1, "NOT IMPL");
     }
 
     void genDerivative(AbstractGenerator& g,
                        std::vector<inner::Tensor*>& operationArguments,
                        int argNo) const override {
-        FatalError(1, "NOT IMPL");
+        new FatalError(1, "NOT IMPL");
     }
 };
 }  // namespace athena::core

@@ -14,6 +14,7 @@
 #include <athena/core/FatalError.h>
 #include <athena/core/inner/GlobalTables.h>
 #include <athena/core/inner/Tensor.h>
+#include <athena/core/inner/InnerFunctions.h>
 
 #include <string>
 
@@ -84,5 +85,11 @@ void Tensor::clear() {
     mRecordIndex = inner::kKUndefinedIndex;
     mShapeOffset = 0;
     mShapePartialProduct = 1;
+}
+
+Tensor &createTensor(DataType type, TensorShape shape) {
+    auto tensor = std::make_unique<Tensor>(type, shape);
+    getTensorRegistry().push_back(std::move(tensor));
+    return *getTensorRegistry().back();
 }
 }  // namespace athena::core::inner

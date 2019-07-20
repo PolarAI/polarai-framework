@@ -1,3 +1,5 @@
+#include <utility>
+
 /*
  * Copyright (c) 2018 Athena. All rights reserved.
  * https://getathena.ml
@@ -23,7 +25,7 @@ AbstractNode::AbstractNode(const AbstractNode& rhs)
       mNodeIndex(inner::getNodeTable().registerRecord(this)),
       mInputsCount(0) {}
 AbstractNode::AbstractNode(AbstractNode&& rhs) noexcept
-    : mTensor(std::move(rhs.mTensor)),
+    : mTensor(rhs.mTensor),
       mName(std::move(rhs.mName)),
       mGraphIndex(rhs.mGraphIndex),
       mNodeIndex(rhs.mNodeIndex),
@@ -34,7 +36,7 @@ AbstractNode::AbstractNode(AbstractNode&& rhs) noexcept
 AbstractNode::AbstractNode(TensorShape shape,
                            DataType dataType,
                            std::string name)
-    : mTensor(dataType, std::move(shape)),
+    : mTensor(inner::createTensor(dataType, std::move(shape))),
       mName(std::move(name)),
       mGraphIndex(inner::kKUndefinedIndex),
       mNodeIndex(inner::getNodeTable().registerRecord(this)),
@@ -134,5 +136,15 @@ void AbstractNode::saveInGraph(bool isRepairedNode) {
     if (auto* graph = inner::getGraphTable()[mGraphIndex]; graph) {
         graph->saveNode(*this, isRepairedNode);
     }
+}
+AbstractNode::AbstractNode(std::string name)
+    : mTensor(*inner::getTensorRegistry()[0]),
+      mName(std::move(name)),
+      mGraphIndex(inner::kKUndefinedIndex),
+      mNodeIndex(inner::getNodeTable().registerRecord(this)),
+      mInputsCount(0) {}
+void inner::setResultTensor(athena::core::AbstractNode& node,
+                            athena::core::inner::Tensor& tensor) {
+    node.mTensor = tensor;
 }
 }  // namespace athena::core

@@ -26,9 +26,9 @@ class AddOperation : public core::Operation {
     public:
     AddOperation() : Operation("add") {}
 
-    core::inner::Tensor *getResultTensor(
+    core::inner::Tensor &getResultTensor(
         std::vector<core::inner::Tensor *> args) const override;
-    core::inner::Tensor *getDerivativeTensor(
+    core::inner::Tensor &getDerivativeTensor(
         std::vector<core::inner::Tensor *> args, int argNo) const override;
     void gen(
         core::AbstractGenerator &g,
@@ -36,6 +36,9 @@ class AddOperation : public core::Operation {
     void genDerivative(core::AbstractGenerator &g,
                        std::vector<core::inner::Tensor *> &operationArguments,
                        int argNo) const override;
+    size_t getOperandsCount() const override {
+        return 2;
+    }
 };
 }  // namespace athena::ops
 #endif  // ATHENA_ADDOPERATION_H
