@@ -16,6 +16,7 @@
 #include <athena/backend/llvm/runtime-driver/runtime-driver.h>
 #include <athena/core/FatalError.h>
 #include <athena/core/InputNode.h>
+#include <athena/core/LossNode.h>
 #include <athena/core/Node.h>
 #include <athena/core/inner/GlobalTables.h>
 #include <athena/core/inner/InnerFunctions.h>
@@ -87,6 +88,43 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
             }
 
             generator.closeNode();
+        }
+
+        auto &lossNodes = cluster.get<core::LossNode>();
+        if (lossNodes.size() == 1) {
+            auto &nodeDeps = lossNodes[0];
+            std::vector<core::inner::Tensor *> preparedTensors;
+            for (auto &input : nodeDeps.input) {
+                auto *node = core::inner::getNodeTable()[input.nodeIndex];
+                preparedTensors.push_back(
+                    &core::inner::getTensorFromNode(*node));
+            }
+            auto &node = *reinterpret_cast<core::LossNode *>(
+                core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+            generator.openNode(node.getName());
+            generator.generate("allocate",
+                               core::inner::getTensorFromNode(node));
+            preparedTensors.push_back(&core::inner::getTensorFromNode(node));
+            // todo lock tensors in memory
+            node.getOperation().gen(generator, preparedTensors);
+            // todo unlock tensors in memory
+
+            for (size_t argNo = 0; argNo < nodeDeps.input.size(); argNo++) {
+                // todo check for frozen nodes
+                auto &derivativeTensor =
+                    node.getOperation().getDerivativeTensor(preparedTensors,
+                                                            argNo);
+                core::inner::addDerivativeTensor(node, derivativeTensor);
+                preparedTensors.pop_back();
+                preparedTensors.push_back(&derivativeTensor);
+                generator.generate("allocate", derivativeTensor);
+                node.getOperation().genDerivative(generator, preparedTensors,
+                                                  argNo);
+            }
+
+            generator.closeNode();
+        } else if (lossNodes.size() > 1) {
+            new core::FatalError(1, "More than 1 loss node");
         }
     }
 

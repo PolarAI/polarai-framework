@@ -14,6 +14,7 @@
 #ifndef ATHENA_GRAPH_H
 #define ATHENA_GRAPH_H
 
+#include <athena/core/Optimizer.h>
 #include <athena/core/Traversal.h>
 #include <athena/core/inner/Settings.h>
 #include <athena/core/inner/Table.h>
@@ -58,6 +59,8 @@ class Graph {
     Topology mTopology;
     size_t mGraphIndex;
     Traversal mTraversal;
+    std::unique_ptr<Optimizer> mOptimizer;
+
     template <typename TemplateNodeType>
     void saveRealNode(TemplateNodeType& node,
                       bool isRepairedNode,
@@ -124,10 +127,21 @@ class Graph {
     friend Traversal& inner::getTraversal(Graph& graph);
 
     /**
-     * Print graph in dot format. For debug purposes only.
+     * Print Graph in dot format. For debug purposes only.
      * @param stream Output stream
      */
     void printDot(std::basic_ostream<char> &stream);
+
+    /**
+     * Set up Graph optimizer
+     * @tparam Opt Optimizer class
+     * @tparam Args Optimizer arguments type
+     * @param args Optimizer arguments
+     */
+    template <typename Opt, typename... Args>
+    void setUpOptimizer(Args... args) {
+        mOptimizer = std::make_unique<Opt>(args...);
+    }
 };
 }  // namespace athena::core
 
