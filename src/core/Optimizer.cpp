@@ -11,11 +11,4 @@
  * the License.
  */
 
-#ifndef ATHENA_DEVICE_H
-#define ATHENA_DEVICE_H
-
-namespace athena::backend::llvm {
-class Device {};
-}  // namespace athena::backend::llvm
-
-#endif  // ATHENA_DEVICE_H
+#include <athena/core/Optimizer.h>
