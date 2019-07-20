@@ -213,6 +213,14 @@ size_t Graph::getGraphIndex() const {
 bool Graph::isValidTraversal() const {
     return mTraversal.isValidTraversal();
 }
+
+#define TRAVERSE_SWITCH_HELPER(typeName)                              \
+    case typeName:                                                    \
+        cluster.get<NodeTypeId<typeName>::type>().emplace_back(       \
+            node->getNodeIndex(), std::move(visits[nodeIndex].input), \
+            std::move(visits[nodeIndex].output));                     \
+        break;
+
 const Traversal& Graph::traverse() {
     if (mTraversal.isValidTraversal()) {
         return mTraversal;
@@ -253,30 +261,10 @@ const Traversal& Graph::traverse() {
             }
             AbstractNode* node = inner::getNodeTable()[nodeIndex];
             switch (node->getType()) {
-                case NodeType::DEFAULT:
-                    cluster.get<Node>().emplace_back(
-                        node->getNodeIndex(),
-                        std::move(visits[nodeIndex].input),
-                        std::move(visits[nodeIndex].output));
-                    break;
-                case NodeType::INPUT:
-                    cluster.get<InputNode>().emplace_back(
-                        node->getNodeIndex(),
-                        std::move(visits[nodeIndex].input),
-                        std::move(visits[nodeIndex].output));
-                    break;
-                case NodeType::OUTPUT:
-                    cluster.get<OutputNode>().emplace_back(
-                        node->getNodeIndex(),
-                        std::move(visits[nodeIndex].input),
-                        std::move(visits[nodeIndex].output));
-                    break;
-                case NodeType::LOSS:
-                    cluster.get<LossNode>().emplace_back(
-                        node->getNodeIndex(),
-                        std::move(visits[nodeIndex].input),
-                        std::move(visits[nodeIndex].output));
-                    break;
+                TRAVERSE_SWITCH_HELPER(NodeType::DEFAULT)
+                TRAVERSE_SWITCH_HELPER(NodeType::INPUT)
+                TRAVERSE_SWITCH_HELPER(NodeType::LOSS)
+                TRAVERSE_SWITCH_HELPER(NodeType::OUTPUT)
                 default:
                     FatalError(1, "Undefined NodeType in traverse()");
             }
@@ -293,11 +281,20 @@ const Traversal& Graph::traverse() {
 
     // Now that we have graph traversal, it is possible to determine tensor
     // shapes
+    setUpTensors();
+
+    inner::setTraversalValidity(mTraversal, true);
+    return mTraversal;
+}
+
+#undef TRAVERSE_SWITCH_HELPER
+
+void Graph::setUpTensors() const {
     for (auto& cluster : mTraversal.getClusters()) {
-        auto& actionNodes = cluster.get<core::Node>();
+        auto& actionNodes = cluster.get<Node>();
         for (auto& nodeDep : actionNodes) {
-            auto& node = static_cast<core::Node&>(
-                *inner::getNodeTable()[nodeDep.nodeIndex]);
+            auto& node =
+                static_cast<Node&>(*inner::getNodeTable()[nodeDep.nodeIndex]);
             std::vector<inner::Tensor*> opArgs;
             for (auto& inp : nodeDep.input) {
                 opArgs.push_back(&inner::getTensorFromNode(
@@ -307,17 +304,15 @@ const Traversal& Graph::traverse() {
                                    node.getOperation().getResultTensor(opArgs));
         }
 
-        auto& outputNodes = cluster.get<core::OutputNode>();
+        auto& outputNodes = cluster.get<OutputNode>();
         for (auto& nodeDep : outputNodes) {
-            auto& node = static_cast<core::Node&>(
-                *inner::getNodeTable()[nodeDep.nodeIndex]);
+            auto& node =
+                static_cast<Node&>(*inner::getNodeTable()[nodeDep.nodeIndex]);
             auto& parentNode =
                 *inner::getNodeTable()[nodeDep.input[0].nodeIndex];
             inner::setResultTensor(node, inner::getTensorFromNode(parentNode));
         }
     }
-    inner::setTraversalValidity(mTraversal, true);
-    return mTraversal;
 }
 void Graph::printDot(std::basic_ostream<char>& stream) {
     stream << "digraph mygraph {\n";

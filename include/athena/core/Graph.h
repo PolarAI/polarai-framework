@@ -68,6 +68,8 @@ class Graph {
     void saveNode(AbstractNode& node, bool isRepairedNode, bool isErase);
     ATHENA_REINITIALIZE void fullClear();
 
+    void setUpTensors() const;
+
     public:
     Graph();
     Graph(const Graph& rhs) = delete;

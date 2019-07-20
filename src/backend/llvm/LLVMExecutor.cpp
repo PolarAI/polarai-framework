@@ -47,7 +47,7 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
     for (auto &cluster : mGraphTraversal.getClusters()) {
         auto &inputNodes = cluster.get<core::InputNode>();
         for (auto &nodeDeps : inputNodes) {
-            auto &inputNode = static_cast<core::InputNode &>(
+            auto &inputNode = node_cast<core::InputNode &>(
                 *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
             generator.openNode(inputNode.getName());
             generator.generate("allocate",
@@ -65,7 +65,7 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
                 preparedTensors.push_back(
                     &core::inner::getTensorFromNode(*node));
             }
-            auto &node = static_cast<core::Node &>(
+            auto &node = node_cast<core::Node &>(
                 *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
             generator.openNode(node.getName());
             generator.generate("allocate",
