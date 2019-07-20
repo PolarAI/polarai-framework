@@ -90,6 +90,10 @@ class OperationDummy : public Operation {
                        int argNo) const override {
         new FatalError(1, "NOT IMPL");
     }
+
+    size_t getOperandsCount() const override {
+        return 0;
+    }
 };
 }  // namespace athena::core
 
