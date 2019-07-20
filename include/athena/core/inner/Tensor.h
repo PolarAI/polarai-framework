@@ -29,12 +29,12 @@ class Tensor {
            size_t shapePartialProduct);
 
     public:
-    Tensor(const Tensor& rhs);
+    Tensor(const Tensor& rhs) = default;
     Tensor(Tensor&& rhs) noexcept = default;
     Tensor(DataType dataType, TensorShape shape);
     ~Tensor() = default;
 
-    Tensor& operator=(const Tensor& rhs);
+    Tensor& operator=(const Tensor& rhs) = default;
     Tensor& operator=(Tensor&& rhs) noexcept = default;
     Tensor operator[](size_t index) const;
 

@@ -122,6 +122,12 @@ class Graph {
      * @return A reference to last traversal
      */
     friend Traversal& inner::getTraversal(Graph& graph);
+
+    /**
+     * Print graph in dot format. For debug purposes only.
+     * @param stream Output stream
+     */
+    void printDot(std::basic_ostream<char> &stream);
 };
 }  // namespace athena::core
 

@@ -38,8 +38,8 @@ TEST(JIT, SimpleVectorAdd) {
     MemoryLoader bLoader(bData, 3 * sizeof(float));
 
     Graph graph;
-    InputNode aInp(shape, DataType::FLOAT, aLoader);
-    InputNode bInp(shape, DataType::FLOAT, bLoader);
+    InputNode aInp(shape, DataType::FLOAT, aLoader, "a");
+    InputNode bInp(shape, DataType::FLOAT, bLoader, "b");
     graph.addNode(aInp);
     graph.addNode(bInp);
 
@@ -49,7 +49,7 @@ TEST(JIT, SimpleVectorAdd) {
     add.after(aInp, 1);
     add.after(bInp, 2);
 
-    OutputNode outputNode(DataType::FLOAT);
+    OutputNode outputNode(DataType::FLOAT, "out");
     graph.addNode(outputNode);
     outputNode.after(add, 1);
 
@@ -63,7 +63,6 @@ TEST(JIT, SimpleVectorAdd) {
     executor.execute();
 
     // Assert
-
     auto accessor = outputNode.getAccessor<float>(*executor.getAllocator());
 
     EXPECT_FLOAT_EQ(*accessor[0], 5.0);

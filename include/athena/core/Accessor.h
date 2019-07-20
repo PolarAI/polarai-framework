@@ -36,7 +36,6 @@ class Accessor {
           mAccessIdx(std::move(idx)) {}
 
     Accessor<T> operator[](size_t idx) {
-        std::cout << mAccessTensor.getShapeView().dimensions();
         if (mAccessIdx.size() == mAccessTensor.getShapeView().dimensions() /*||
             idx >= mAccessTensor.getShapeView().dim(mAccessIdx.size())*/) {
             new FatalError(1, "Index is out of range");

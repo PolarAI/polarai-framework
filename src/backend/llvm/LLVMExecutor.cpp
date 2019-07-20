@@ -76,8 +76,8 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
 
             for (size_t argNo = 0; argNo < nodeDeps.input.size(); argNo++) {
                 // todo check for frozen nodes
-                auto derivativeTensor = node.getOperation().getDerivativeTensor(
-                    preparedTensors, argNo);
+                auto &derivativeTensor =
+                    node.getOperation().getDerivativeTensor(preparedTensors, argNo);
                 core::inner::addDerivativeTensor(node, derivativeTensor);
                 preparedTensors.pop_back();
                 preparedTensors.push_back(&derivativeTensor);

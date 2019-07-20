@@ -19,11 +19,6 @@
 #include <string>
 
 namespace athena::core::inner {
-Tensor::Tensor(const Tensor& rhs) : mShapeOffset(0), mShapePartialProduct(1) {
-    mVirtualAddress = getAllocationTable().registerRecord(
-        rhs.getDataType(), rhs.getShapeView().toShape());
-    mRecordIndex = getAllocationTable().size() - 1;
-}
 Tensor::Tensor(DataType dataType, TensorShape shape)
     : mVirtualAddress(
           getAllocationTable().registerRecord(dataType, std::move(shape))),
@@ -38,14 +33,6 @@ Tensor::Tensor(size_t id,
       mRecordIndex(recordIndex),
       mShapeOffset(shapeOffset),
       mShapePartialProduct(shapePartialProduct) {}
-Tensor& Tensor::operator=(const Tensor& rhs) {
-    mShapeOffset = 0;
-    mVirtualAddress = getAllocationTable().registerRecord(
-        rhs.getDataType(), rhs.getShapeView().toShape());
-    mRecordIndex = inner::getAllocationTable().size() - 1;
-    mShapePartialProduct = 1;
-    return *this;
-}
 Tensor Tensor::operator[](size_t index) const {
     auto shapeView = getAllocationTable()[mRecordIndex].getShapeView();
     size_t subShapePartialProduct =

@@ -308,15 +308,71 @@ const Traversal& Graph::traverse() {
         }
 
         auto& outputNodes = cluster.get<core::OutputNode>();
-        for (auto& nodeDep : actionNodes) {
+        for (auto& nodeDep : outputNodes) {
             auto& node = static_cast<core::Node&>(
                 *inner::getNodeTable()[nodeDep.nodeIndex]);
-            auto& parentNode = static_cast<core::AbstractNode&>(
-                *inner::getNodeTable()[nodeDep.input[0].nodeIndex]);
+            auto& parentNode =
+                *inner::getNodeTable()[nodeDep.input[0].nodeIndex];
             inner::setResultTensor(node, inner::getTensorFromNode(parentNode));
         }
     }
     inner::setTraversalValidity(mTraversal, true);
     return mTraversal;
+}
+void Graph::printDot(std::basic_ostream<char>& stream) {
+    stream << "digraph mygraph {\n";
+    traverse();
+    for (auto& cluster : mTraversal.getClusters()) {
+        auto& inputNodes = cluster.get<core::InputNode>();
+        for (auto& nodeDeps : inputNodes) {
+            auto& inputNode = static_cast<core::InputNode&>(
+                *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+            stream << inputNode.getName() << " [label=\"INP "
+                   << inputNode.getName();
+            auto& tensor = inner::getTensorFromNode(inputNode);
+            stream << "\\nTensor addr: " << tensor.getVirtualAddress();
+            stream << "\\nTensor total size: "
+                   << tensor.getShapeView().getTotalSize();
+            stream << "\"]\n";
+        }
+
+        auto& actionNodes = cluster.get<core::Node>();
+        for (auto& nodeDeps : actionNodes) {
+            auto& actionNode = static_cast<core::Node&>(
+                *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+            stream << actionNode.getName() << " [label=\"ACT "
+                   << actionNode.getName();
+            auto& tensor = inner::getTensorFromNode(actionNode);
+            stream << "\\nTensor addr: " << tensor.getVirtualAddress();
+            stream << "\\nTensor total size: "
+                   << tensor.getShapeView().getTotalSize();
+            stream << "\"]\n";
+
+            for (auto& parent : nodeDeps.input) {
+                auto* pNode = core::inner::getNodeTable()[parent.nodeIndex];
+                stream << pNode->getName() << " -> " << actionNode.getName();
+                stream << ";\n";
+            }
+        }
+
+        auto& outputNodes = cluster.get<core::OutputNode>();
+        for (auto& nodeDeps : outputNodes) {
+            auto& outputNode = static_cast<core::OutputNode&>(
+                *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+            stream << outputNode.getName() << " [label=\"OUTP "
+                   << outputNode.getName();
+            auto& tensor = inner::getTensorFromNode(outputNode);
+            stream << "\\nTensor addr: " << tensor.getVirtualAddress();
+            stream << "\\nTensor total size: "
+                   << tensor.getShapeView().getTotalSize();
+            stream << "\"]\n";
+
+            auto* pNode =
+                core::inner::getNodeTable()[nodeDeps.input[0].nodeIndex];
+            stream << pNode->getName() << " -> " << outputNode.getName();
+            stream << ";\n";
+        }
+    }
+    stream << "}\n";
 }
 }  // namespace athena::core
