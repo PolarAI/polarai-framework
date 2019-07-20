@@ -294,7 +294,7 @@ void Graph::setUpTensors() const {
         auto& actionNodes = cluster.get<Node>();
         for (auto& nodeDep : actionNodes) {
             auto& node =
-                static_cast<Node&>(*inner::getNodeTable()[nodeDep.nodeIndex]);
+                node_cast<Node&>(*inner::getNodeTable()[nodeDep.nodeIndex]);
             std::vector<inner::Tensor*> opArgs;
             for (auto& inp : nodeDep.input) {
                 opArgs.push_back(&inner::getTensorFromNode(
@@ -306,8 +306,8 @@ void Graph::setUpTensors() const {
 
         auto& outputNodes = cluster.get<OutputNode>();
         for (auto& nodeDep : outputNodes) {
-            auto& node =
-                static_cast<Node&>(*inner::getNodeTable()[nodeDep.nodeIndex]);
+            auto& node = node_cast<OutputNode&>(
+                *inner::getNodeTable()[nodeDep.nodeIndex]);
             auto& parentNode =
                 *inner::getNodeTable()[nodeDep.input[0].nodeIndex];
             inner::setResultTensor(node, inner::getTensorFromNode(parentNode));
