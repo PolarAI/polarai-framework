@@ -33,8 +33,6 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
     mMainModule->setDataLayout(mJITCompiler->getDataLayout());
     mMainModule->setTargetTriple(::llvm::sys::getDefaultTargetTriple());
 
-    // todo consider initializing some optimizers
-
     ::llvm::FunctionType *FT = ::llvm::FunctionType::get(
         ::llvm::Type::getVoidTy(mJITCompiler->getContext()), false);
     ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage, "jitmain",
@@ -53,7 +51,6 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
             generator.openNode(inputNode.getName());
             generator.generate("allocate",
                                core::inner::getTensorFromNode(inputNode));
-            // todo generate code for loader
             generator.generateLoad(inputNode.getLoader(),
                                    core::inner::getTensorFromNode(inputNode));
             generator.closeNode();
@@ -90,6 +87,10 @@ void LLVMExecutor::prepare(athena::core::Graph &graph) {
             }
 
             generator.closeNode();
+        }
+
+        auto &outputNodes = cluster.get<core::OutputNode>();
+        for (auto &nodeDeps : outputNodes) {
         }
     }
 

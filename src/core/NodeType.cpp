@@ -18,7 +18,7 @@
 namespace athena::core {
 template <typename TemplateNodeType>
 NodeType getNodeType() {
-    FatalError(1, "NodeType is not defined for given type");
+    new FatalError(1, "NodeType is not defined for given type");
     return NodeType::UNDEFINED;
 }
 template <>

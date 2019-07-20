@@ -14,6 +14,8 @@
 #ifndef ATHENA_OUTPUTNODE_H
 #define ATHENA_OUTPUTNODE_H
 
+#include "Accessor.h"
+
 #include <athena/core/AbstractNode.h>
 
 namespace athena::core {
@@ -32,6 +34,11 @@ class OutputNode : public AbstractNode {
     OutputNode& operator=(OutputNode&& rhs) noexcept = default;
 
     NodeType getType() const override;
+
+    template <typename T>
+    Accessor<T> getAccessor(Allocator& allocator) {
+        return Accessor<T>(allocator, inner::getTensorFromNode(*this), {});
+    }
 };
 }  // namespace athena::core
 

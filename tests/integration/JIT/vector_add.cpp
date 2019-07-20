@@ -49,6 +49,10 @@ TEST(JIT, SimpleVectorAdd) {
     add.after(aInp, 1);
     add.after(bInp, 2);
 
+    OutputNode outputNode(DataType::FLOAT);
+    graph.addNode(outputNode);
+    outputNode.after(add, 1);
+
     LLVMExecutor executor;
     std::unique_ptr<Allocator> trivialAllocator =
         std::make_unique<LLVMTrivialAllocator>();
@@ -60,10 +64,9 @@ TEST(JIT, SimpleVectorAdd) {
 
     // Assert
 
-    auto pRes = (float*)executor.getAllocator()->getFastPointer(
-        inner::getTensorFromNode(add));
+    auto accessor = outputNode.getAccessor<float>(*executor.getAllocator());
 
-    EXPECT_FLOAT_EQ(pRes[0], 5.0);
-    EXPECT_FLOAT_EQ(pRes[1], 7.0);
-    EXPECT_FLOAT_EQ(pRes[2], 9.0);
+    EXPECT_FLOAT_EQ(*accessor[0], 5.0);
+    EXPECT_FLOAT_EQ(*accessor[1], 7.0);
+    EXPECT_FLOAT_EQ(*accessor[2], 9.0);
 }
