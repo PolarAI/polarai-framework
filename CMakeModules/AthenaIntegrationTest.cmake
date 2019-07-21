@@ -16,6 +16,10 @@ function(add_athena_integration_test)
     endif ()
     if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${INTEG_CONFIG_INNER_NAME})
         configure_file(${INTEG_CONFIG_INNER_NAME} ${INTEG_CONFIG_OUTER_NAME})
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${INTEG_CONFIG_OUTER_NAME} DESTINATION test)
     endif ()
     add_test(NAME "${PARSED_ARGS_TARGET_NAME}IntegrationTest" COMMAND ${PARSED_ARGS_TARGET_NAME})
+
+    install(TARGETS ${PARSED_ARGS_TARGET_NAME}
+            RUNTIME DESTINATION test)
 endfunction(add_athena_integration_test)

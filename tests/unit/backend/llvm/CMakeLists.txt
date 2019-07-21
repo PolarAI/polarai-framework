@@ -12,3 +12,6 @@ target_include_directories(runUnitLLVMBackend PRIVATE ${LLVM_INCLUDE_DIRS})
 target_compile_definitions(runUnitLLVMBackend PRIVATE ${LLVM_DEFINITIONS})
 
 add_test(NAME UnitLLVMBackendTests COMMAND runUnitLLVMBackend)
+
+install(TARGETS runUnitLLVMBackend
+        RUNTIME DESTINATION test)

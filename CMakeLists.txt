@@ -44,7 +44,7 @@ if (NOT DOCS_ONLY)
     enable_sanitizers()
 
     include_directories(${CMAKE_SOURCE_DIR}/include)
-    install(DIRECTORY include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/athena DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
     add_definitions(-DATHENA_MAJOR_VERSION="${ATHENA_MAJOR_VERSION}")
     add_definitions(-DATHENA_MINOR_VERSION="${ATHENA_MINOR_VERSION}")
