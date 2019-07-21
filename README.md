@@ -17,7 +17,7 @@ Prerequisites:
 - CMake 3.13+
 - A C++17 capable compiler
 - LLVM 8
-- Python 3 (optional)
+- Python 3
 
 Building from source
 

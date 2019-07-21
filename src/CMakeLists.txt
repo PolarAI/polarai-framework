@@ -1,5 +1,13 @@
+option(ATHENA_BUILD_STATIC "OFF")
+
+set(LIB_TYPE SHARED)
+if (ATHENA_BUILD_STATIC)
+    set(LIB_TYPE STATIC)
+endif ()
+
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/null.cpp "")
-add_athena_library(athena SHARED ${CMAKE_CURRENT_BINARY_DIR}/null.cpp)
+
+add_athena_library(athena ${LIB_TYPE} ${CMAKE_CURRENT_BINARY_DIR}/null.cpp)
 
 add_subdirectory(backend)
 add_subdirectory(core)

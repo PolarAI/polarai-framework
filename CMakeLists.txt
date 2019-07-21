@@ -7,10 +7,9 @@ set(ATHENA_MAJOR_VERSION "0")
 set(ATHENA_MINOR_VERSION "1")
 set(ATHENA_PATCH_VERSION "0")
 
-option(DISABLE_TESTS "OFF")
-option(ENABLE_CODE_COVERAGE "OFF")
-option(DOCS_ONLY "OFF")
-set(USE_SANITIZERS "OFF" CACHE STRING "Specify Google Sanitizers")
+option(ATHENA_DISABLE_TESTS "OFF")
+option(ATHENA_DOCS_ONLY "OFF")
+set(ATHENA_USE_SANITIZERS "OFF" CACHE STRING "Specify Google Sanitizers")
 
 # choose new behaviour for CMP0042
 # see http://www.cmake.org/cmake/help/v3.0/policy/CMP0042.html for more details
@@ -21,7 +20,7 @@ endif (POLICY CMP0042)
 include(AthenaDocs)
 enable_docs()
 
-if (NOT DOCS_ONLY)
+if (NOT ATHENA_DOCS_ONLY)
 
     enable_language(C)
     enable_language(CXX)
@@ -61,7 +60,7 @@ if (NOT DOCS_ONLY)
 
     add_subdirectory(src)
 
-    if (NOT DISABLE_TESTS)
+    if (NOT ATHENA_DISABLE_TESTS)
         add_subdirectory(tests)
         coverage_evaluate()
     endif ()
