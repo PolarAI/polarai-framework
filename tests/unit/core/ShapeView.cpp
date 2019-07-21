@@ -28,7 +28,7 @@ TEST(TensorViewTest, CreationEmpty) {
 TEST(TensorViewTest, CreationFromShape) {
     std::vector<size_t> expected{3, 2, 3, 20};
     size_t product = std::accumulate<std::vector<size_t>::iterator, size_t>(
-        expected.begin(), expected.end(), 1, std::multiplies<size_t>());
+        expected.begin(), expected.end(), 1, std::multiplies<>());
     TensorShape shape(expected);
     ShapeView view = shape.getShapeView();
     ASSERT_EQ(view.dimensions(), expected.size());
@@ -37,7 +37,7 @@ TEST(TensorViewTest, CreationFromShape) {
 TEST(TensorViewTest, CheckFieldsAndFunctions) {
     std::vector<size_t> expected{12, 12, 3, 2, 3, 20};
     size_t product = std::accumulate<std::vector<size_t>::iterator, size_t>(
-        expected.begin(), expected.end(), 1, std::multiplies<size_t>());
+        expected.begin(), expected.end(), 1, std::multiplies<>());
     TensorShape shape(expected);
     ShapeView view = shape.getShapeView();
     ASSERT_EQ(view.dimensions(), expected.size());

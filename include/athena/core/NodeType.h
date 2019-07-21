@@ -47,14 +47,31 @@ struct NodeTypeId<NodeType::OUTPUT> : std::decay<OutputNode> {};
 
 namespace athena {
 template <typename NodeTypeName, typename ParentNodeType>
-typename std::remove_reference<NodeTypeName>::type &node_cast(
-    ParentNodeType &node) {
+typename std::enable_if<std::is_reference<NodeTypeName>::value,
+                        NodeTypeName>::type
+node_cast(ParentNodeType &node) {
     using PureType = typename std::remove_reference<NodeTypeName>::type;
+#ifdef DEBUG
     if (node.getType() != core::getNodeType<PureType>()) {
         new core::FatalError(127, "Attempt to cast incompatible types");
     }
+#endif
 
     return *reinterpret_cast<PureType *>(&node);
+}
+
+template <typename NodeTypeName, typename ParentNodeType>
+typename std::enable_if<std::is_pointer<NodeTypeName>::value,
+                        NodeTypeName>::type
+node_dyncast(ParentNodeType node) {
+    using PureType = typename std::remove_pointer<NodeTypeName>::type;
+#ifdef DEBUG
+    if (node->getType() != core::getNodeType<PureType>()) {
+        new core::FatalError(127, "Attempt to cast incompatible types");
+    }
+#endif
+
+    return reinterpret_cast<PureType *>(node);
 }
 }  // namespace athena
 

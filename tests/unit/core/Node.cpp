@@ -23,7 +23,9 @@ TEST(Node, Create) {
     DataType dataType = DataType::DOUBLE;
     std::string operationName = "Dummy";
     OperationDummy op(operationName);
-    Node n(shape, dataType, op);
+    Node n(op);
+    auto tensor1 = inner::createTensor(dataType, shape);
+    inner::setResultTensor(n, tensor1);
     ASSERT_EQ(n.getDataType(), dataType);
     ASSERT_EQ(n.getShapeView(), shape);
     ASSERT_EQ(n.getType(), NodeType::DEFAULT);
@@ -36,7 +38,9 @@ TEST(Node, CopyConstructor) {
     DataType dataType = DataType::DOUBLE;
     std::string operationName = "Dummy";
     OperationDummy op(operationName);
-    Node n(shape, dataType, op);
+    Node n(op);
+    auto tensor1 = inner::createTensor(dataType, shape);
+    inner::setResultTensor(n, tensor1);
     Node nSecond(n);
     ASSERT_EQ(inner::getNodeTable().size(), 3);
     ASSERT_EQ(n.getShapeView(), nSecond.getShapeView());
@@ -51,11 +55,15 @@ TEST(Node, CopyOperator) {
     DataType dataType = DataType::DOUBLE;
     std::string operationName = "Dummy";
     OperationDummy op(operationName);
-    Node n(shape, dataType, op);
+    Node n(op);
+    auto tensor1 = inner::createTensor(dataType, shape);
+    inner::setResultTensor(n, tensor1);
     TensorShape shapeSecond{2, 3, 4};
     DataType dataTypeSecond = DataType::HALF;
     std::string operationNameSecond = "DummySecond";
-    Node nSecond(shapeSecond, dataTypeSecond, op, operationNameSecond);
+    Node nSecond(op, operationNameSecond);
+    auto tensor2 = inner::createTensor(dataTypeSecond, shapeSecond);
+    inner::setResultTensor(nSecond, tensor2);
     nSecond = n;
     ASSERT_EQ(inner::getNodeTable().size(), 3);
     ASSERT_EQ(n.getShapeView(), nSecond.getShapeView());
@@ -67,7 +75,7 @@ TEST(Node, CopyOperator) {
 TEST(Node, NodeSavesOperation) {
     inner::getNodeTable().clear();
     OperationDummy op("DummyOp");
-    Node node({1}, DataType::DOUBLE, op);
+    Node node(op);
 
     EXPECT_EQ(node.getOperation().getName(), "DummyOp");
 }

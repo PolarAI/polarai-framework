@@ -70,13 +70,11 @@ class OperationDummy : public Operation {
 
     inner::Tensor& getResultTensor(
         std::vector<inner::Tensor*> args) const override {
-        new FatalError(1, "NOT IMPL");
         return *inner::getTensorRegistry()[0];
     }
 
     inner::Tensor& getDerivativeTensor(std::vector<inner::Tensor*> args,
                                        int argNo) const override {
-        new FatalError(1, "NOT IMPL");
         return *inner::getTensorRegistry()[0];
     }
 
