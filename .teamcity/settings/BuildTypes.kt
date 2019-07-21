@@ -206,6 +206,8 @@ class MandatoryChecks(private val repo: GitVcsRoot) : BuildType({
                     +:*
                     -:develop
                     -:master
+                    -:pull/*
+                    -:pull/*/merge
                 """.trimIndent()
             }
             watchChangesInDependencies = true
