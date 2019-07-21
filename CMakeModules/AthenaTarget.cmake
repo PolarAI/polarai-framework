@@ -12,6 +12,9 @@ function(add_athena_library target_name modifier)
     if (UNIX)
         target_compile_options(${target_name} PRIVATE "-fPIC")
     endif ()
+
+    find_package(codecov)
+    add_coverage(${target_name})
 endfunction(add_athena_library)
 
 function(add_athena_executable target_name)

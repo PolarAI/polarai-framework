@@ -1,2 +1,2 @@
 add_athena_library(MemoryLoader STATIC MemoryLoader.cpp)
-target_link_libraries(MemoryLoader athena-core)
+target_link_libraries(MemoryLoader PRIVATE athena-core)

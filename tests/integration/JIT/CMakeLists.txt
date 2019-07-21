@@ -1,5 +1,11 @@
+find_package(LLVM CONFIG)
+llvm_map_components_to_libnames(llvm_libs core irreader support transformutils passes codegen orcjit x86asmparser x86codegen lto)
+
 add_athena_integration_test(
         TARGET_NAME JIT
         SRCS vector_add.cpp
-        LIBS athena
+        LIBS athena ${llvm_libs}
 )
+
+target_include_directories(JIT PUBLIC ${LLVM_INCLUDE_DIRS})
+target_compile_definitions(JIT PUBLIC ${LLVM_DEFINITIONS})
