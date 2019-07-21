@@ -13,16 +13,19 @@ def build(args):
         options.append("Ninja")
 
     if args.docs_only:
-        options.append("-DDOCS_ONLY=ON")
+        options.append("-DATHENA_DOCS_ONLY=ON")
 
     if args.disable_tests:
-        options.append("-DDISABLE_TESTS=ON")
+        options.append("-DATENA_DISABLE_TESTS=ON")
 
     if args.enable_coverage:
-        options.append("-DENABLE_CODE_COVERAGE=ON")
+        options.append("-DENABLE_COVERAGE=ON")
 
     if args.compile_commands:
         options.append("-DCMAKE_EXPORT_COMPILE_COMMANDS=ON")
+
+    if "" != args.install_dir:
+        options.append("-DCMAKE_INSTALL_PREFIX=" + args.install_dir)
 
     if not os.path.exists(args.destination):
         os.mkdir(args.destination)
@@ -55,6 +58,7 @@ def main():
     parser.add_argument("--compile-commands", action='store_true', help="Export compile commands")
     parser.add_argument("--use-ldd", action='store_true', help="Use LLVM ldd linker")
     parser.add_argument("--no-build", action='store_true', help="Do not perform actual build")
+    parser.add_argument("--install-dir", type=str, default="", help="Installation path")
 
     args = parser.parse_args()
 

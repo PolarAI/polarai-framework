@@ -22,15 +22,8 @@ class DefaultBuild(private val repo: GitVcsRoot, private val buildConfig: String
     id("AthenaBuild_${repo.name}_${buildConfig}_$compiler".toExtId())
     name = "[$buildConfig][$compiler] Build"
 
-    var buildOptions = "--ninja"
-
-    if (compiler == "Clang") {
-        buildOptions += " --use-ldd"
-    }
-
-    if (buildConfig == "Debug") {
-        buildOptions += " --enable-coverage"
-    }
+    var needsCoverage = buildConfig == "Debug"
+    var binaryDest = if (buildConfig == "Debug") "build" else "install"
 
     params {
         param("cc", (if (compiler == "Clang") "clang-8" else "gcc-8"))
@@ -39,32 +32,83 @@ class DefaultBuild(private val repo: GitVcsRoot, private val buildConfig: String
         param("env.BUILD_TYPE", "%build_type%")
         param("repo", "athenaml/athena")
         param("env.SRC_DIR", "%system.teamcity.build.checkoutDir%")
-        param("env.ATHENA_BINARY_DIR", "%teamcity.build.checkoutDir%/build_${buildConfig}_$compiler")
+        param("env.ATHENA_BINARY_DIR", "%teamcity.build.checkoutDir%/${binaryDest}_${buildConfig}_$compiler")
+        param("env.BUILD_PATH", "%teamcity.build.checkoutDir%/build_${buildConfig}_$compiler")
         param("build_type", "")
         param("build_options", "--ninja")
     }
 
+    var buildOptions = "--ninja"
+    buildOptions += " --build-type " + buildConfig
+
+
+    if (compiler == "Clang") {
+        buildOptions += " --use-ldd"
+    }
+
+    if (needsCoverage) {
+        buildOptions += " --enable-coverage"
+        artifactRules = """
+            +:build_${buildConfig}_$compiler/lcov/html/all_targets => coverage.zip
+        """.trimIndent()
+    }
+
+    if (buildConfig == "Release") {
+        artifactRules = """
+            +:build_${buildConfig}_$compiler/athena*.tar.gz
+        """.trimIndent()
+    }
+
     steps {
+        if (needsCoverage) {
+            script {
+                name = "Cleanup before Build"
+                scriptContent = "find . -name \"*.gcda\" -print0 | xargs -0 rm"
+                dockerImage = "registry.gitlab.com/athenaml/ubuntu_docker_images/%image_name%:latest"
+                dockerPull = true
+            }
+        }
         exec {
             name = "Build"
             path = "scripts/build.py"
-            arguments = "$buildOptions --build-type $buildConfig %env.ATHENA_BINARY_DIR% %env.SRC_DIR%"
+            arguments = "$buildOptions --build-type $buildConfig %env.BUILD_PATH% %env.SRC_DIR%"
             dockerImage = "registry.gitlab.com/athenaml/ubuntu_docker_images/%image_name%:latest"
             dockerPull = true
             dockerRunParameters = "-e CC=%cc% -e CXX=%cxx% -e ATHENA_BINARY_DIR=%env.ATHENA_BINARY_DIR% -e ATHENA_TEST_ENVIRONMENT=ci"
         }
+        if (buildConfig == "Release") {
+            script {
+                name = "Install"
+                scriptContent = "cd %env.BUILD_PATH% && cmake --build . --target install;"
+                dockerImage = "registry.gitlab.com/athenaml/ubuntu_docker_images/%image_name%:latest"
+                dockerPull = true
+            }
+            script {
+                name = "Pack"
+                scriptContent = "cd %env.BUILD_PATH% && cpack -G \"TGZ\";"
+                dockerImage = "registry.gitlab.com/athenaml/ubuntu_docker_images/%image_name%:latest"
+                dockerPull = true
+            }
+        }
         exec {
             name = "Test"
             path = "scripts/test.sh"
-            arguments = "%env.ATHENA_BINARY_DIR%"
+            arguments = "%env.BUILD_PATH%"
             dockerImage = "registry.gitlab.com/athenaml/ubuntu_docker_images/%image_name%:latest"
             dockerPull = true
+        }
+        if (needsCoverage) {
+            script {
+                name = "Coverage"
+                scriptContent = "cd %env.BUILD_PATH% && cmake --build . --target lcov;"
+                dockerImage = "registry.gitlab.com/athenaml/ubuntu_docker_images/%image_name%:latest"
+                dockerPull = true
+            }
         }
     }
 
     vcs {
         root(repo)
-        checkoutMode = CheckoutMode.ON_SERVER
     }
 
     features {
