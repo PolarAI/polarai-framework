@@ -214,7 +214,7 @@ bool Graph::isValidTraversal() const {
     return mTraversal.isValidTraversal();
 }
 
-#define TRAVERSE_SWITCH_HELPER(typeName)                              \
+#define TRAVERSE_ADD_NODES_TO_CLUSTER(typeName)                       \
     case typeName:                                                    \
         cluster.get<NodeTypeId<typeName>::type>().emplace_back(       \
             node->getNodeIndex(), std::move(visits[nodeIndex].input), \
@@ -261,10 +261,10 @@ const Traversal& Graph::traverse() {
             }
             AbstractNode* node = inner::getNodeTable()[nodeIndex];
             switch (node->getType()) {
-                TRAVERSE_SWITCH_HELPER(NodeType::DEFAULT)
-                TRAVERSE_SWITCH_HELPER(NodeType::INPUT)
-                TRAVERSE_SWITCH_HELPER(NodeType::LOSS)
-                TRAVERSE_SWITCH_HELPER(NodeType::OUTPUT)
+                TRAVERSE_ADD_NODES_TO_CLUSTER(NodeType::DEFAULT)
+                TRAVERSE_ADD_NODES_TO_CLUSTER(NodeType::INPUT)
+                TRAVERSE_ADD_NODES_TO_CLUSTER(NodeType::LOSS)
+                TRAVERSE_ADD_NODES_TO_CLUSTER(NodeType::OUTPUT)
                 default:
                     FatalError(1, "Undefined NodeType in traverse()");
             }
@@ -287,7 +287,7 @@ const Traversal& Graph::traverse() {
     return mTraversal;
 }
 
-#undef TRAVERSE_SWITCH_HELPER
+#undef TRAVERSE_ADD_NODES_TO_CLUSTER
 
 void Graph::setUpTensors() const {
     for (auto& cluster : mTraversal.getClusters()) {
@@ -320,7 +320,7 @@ void Graph::printDot(std::basic_ostream<char>& stream) {
     for (auto& cluster : mTraversal.getClusters()) {
         auto& inputNodes = cluster.get<core::InputNode>();
         for (auto& nodeDeps : inputNodes) {
-            auto& inputNode = static_cast<core::InputNode&>(
+            auto& inputNode = node_cast<core::InputNode&>(
                 *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
             stream << inputNode.getName() << " [label=\"INP "
                    << inputNode.getName();
@@ -333,7 +333,7 @@ void Graph::printDot(std::basic_ostream<char>& stream) {
 
         auto& actionNodes = cluster.get<core::Node>();
         for (auto& nodeDeps : actionNodes) {
-            auto& actionNode = static_cast<core::Node&>(
+            auto& actionNode = node_cast<core::Node&>(
                 *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
             stream << actionNode.getName() << " [label=\"ACT "
                    << actionNode.getName();
@@ -352,7 +352,7 @@ void Graph::printDot(std::basic_ostream<char>& stream) {
 
         auto& outputNodes = cluster.get<core::OutputNode>();
         for (auto& nodeDeps : outputNodes) {
-            auto& outputNode = static_cast<core::OutputNode&>(
+            auto& outputNode = node_cast<core::OutputNode&>(
                 *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
             stream << outputNode.getName() << " [label=\"OUTP "
                    << outputNode.getName();
