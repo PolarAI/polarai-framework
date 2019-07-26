@@ -186,7 +186,6 @@ class MandatoryChecks(private val repo: GitVcsRoot) : BuildType({
 
     vcs {
         root(repo)
-        checkoutMode = CheckoutMode.ON_SERVER
         showDependenciesChanges = true
     }
 
@@ -275,8 +274,6 @@ class StaticChecks(private val repo: GitVcsRoot) : BuildType({
 
     vcs {
         root(repo)
-
-        cleanCheckout = true
     }
 
     steps {
