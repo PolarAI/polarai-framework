@@ -45,7 +45,7 @@ if (NOT ATHENA_DOCS_ONLY)
     enable_sanitizers()
 
     include_directories(${CMAKE_SOURCE_DIR}/include)
-    install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/athena DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/athena DESTINATION include)
 
     add_definitions(-DATHENA_MAJOR_VERSION="${ATHENA_MAJOR_VERSION}")
     add_definitions(-DATHENA_MINOR_VERSION="${ATHENA_MINOR_VERSION}")
@@ -66,7 +66,6 @@ if (NOT ATHENA_DOCS_ONLY)
         add_subdirectory(tests)
         coverage_evaluate()
     endif ()
-
 
     set(CPACK_PACKAGE_VENDOR "Athena")
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "High performance deep learning library")

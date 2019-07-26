@@ -55,9 +55,7 @@ target_compile_features(athena
         cxx_defaulted_move_initializers)
 
 install(TARGETS athena EXPORT AthenaConfig
-        ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # This is for Windows
+        LIBRARY DESTINATION lib)
 
 install(EXPORT AthenaConfig
         NAMESPACE Athena::
