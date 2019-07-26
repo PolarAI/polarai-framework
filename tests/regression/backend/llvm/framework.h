@@ -42,7 +42,7 @@ struct Registrar {
     class TestCaseName##Test : public BaseTest {                 \
         public:                                                  \
         static Registrar<TestCaseName##Test> registrar;          \
-        void test() override final;                              \
+        void test() final;                                       \
     };                                                           \
     Registrar<TestCaseName##Test> TestCaseName##Test::registrar( \
         XSTR(__FILE__));                                         \
