@@ -38,6 +38,8 @@ if (NOT ATHENA_DOCS_ONLY)
 
     include(AthenaTarget)
     include(AthenaEnableSanitizers)
+    include(AthenaDependency)
+    include(dependencies.cmake)
 
     enable_testing()
     enable_sanitizers()
