@@ -7,5 +7,5 @@ add_athena_integration_test(
         LIBS athena ${llvm_libs}
 )
 
-target_include_directories(JIT PUBLIC ${LLVM_INCLUDE_DIRS})
-target_compile_definitions(JIT PUBLIC ${LLVM_DEFINITIONS})
+target_include_directories(TestIntegrationJITRunnable PUBLIC ${LLVM_INCLUDE_DIRS})
+target_compile_definitions(TestIntegrationJITRunnable PUBLIC ${LLVM_DEFINITIONS})
