@@ -34,13 +34,12 @@ class DefaultBuild(private val repo: GitVcsRoot, private val buildConfig: String
         param("env.SRC_DIR", "%system.teamcity.build.checkoutDir%")
         param("env.ATHENA_BINARY_DIR", "%teamcity.build.checkoutDir%/${binaryDest}_${buildConfig}_$compiler")
         param("env.BUILD_PATH", "%teamcity.build.checkoutDir%/build_${buildConfig}_$compiler")
-        param("build_type", "")
-        param("build_options", "--ninja")
     }
 
     var buildOptions = "--ninja"
     buildOptions += " --build-type " + buildConfig
 
+    buildOptions += ""--install-dir=%env.ATHENA_BINARY_DIR% "
 
     if (compiler == "Clang") {
         buildOptions += " --use-ldd"
