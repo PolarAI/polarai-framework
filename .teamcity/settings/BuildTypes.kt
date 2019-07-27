@@ -23,7 +23,7 @@ class DefaultBuild(private val repo: GitVcsRoot, private val buildConfig: String
     name = "[$buildConfig][$compiler] Build"
 
     var needsCoverage = buildConfig == "Debug"
-    var binaryDest = if (buildConfig == "Debug") "build" else "install"
+    var binaryDest = install
 
     params {
         param("cc", (if (compiler == "Clang") "clang-8" else "gcc-8"))
@@ -76,13 +76,13 @@ class DefaultBuild(private val repo: GitVcsRoot, private val buildConfig: String
             dockerPull = true
             dockerRunParameters = "-e CC=%cc% -e CXX=%cxx% -e ATHENA_BINARY_DIR=%env.ATHENA_BINARY_DIR% -e ATHENA_TEST_ENVIRONMENT=ci"
         }
+        script {
+            name = "Install"
+            scriptContent = "cd %env.BUILD_PATH% && cmake --build . --target install;"
+            dockerImage = "registry.gitlab.com/athenaml/ubuntu_docker_images/%image_name%:latest"
+            dockerPull = true
+        }
         if (buildConfig == "Release") {
-            script {
-                name = "Install"
-                scriptContent = "cd %env.BUILD_PATH% && cmake --build . --target install;"
-                dockerImage = "registry.gitlab.com/athenaml/ubuntu_docker_images/%image_name%:latest"
-                dockerPull = true
-            }
             script {
                 name = "Pack"
                 scriptContent = "cd %env.BUILD_PATH% && cpack -G \"TGZ\";"
