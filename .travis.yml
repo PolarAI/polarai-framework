@@ -12,7 +12,7 @@ before_script:
 
 env:
   global:
-    - COMMAND_WRAPPER=docker run -v $TRAVIS_BUILD_DIR:$TRAVIS_BUILD_DIR -e ATHENA_TEST_ENVIRONMENT=ci -e ATHENA_BINARY_DIR=$TRAVIS_BUILD_DIR/install_$ATHENA_BUILD_TYPE -e CC=clang-8 -e CXX=clang++-8 athenaml/build
+    - COMMAND_WRAPPER="docker run -v $TRAVIS_BUILD_DIR:$TRAVIS_BUILD_DIR -e ATHENA_TEST_ENVIRONMENT=ci -e ATHENA_BINARY_DIR=$TRAVIS_BUILD_DIR/install_$ATHENA_BUILD_TYPE -e CC=clang-8 -e CXX=clang++-8 athenaml/build"
   matrix:
     - ATHENA_BUILD_TYPE=Debug
     - ATHENA_BUILD_TYPE=Release
