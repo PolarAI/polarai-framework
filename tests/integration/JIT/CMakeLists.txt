@@ -4,7 +4,7 @@ llvm_map_components_to_libnames(llvm_libs core irreader support transformutils p
 add_athena_integration_test(
         TARGET_NAME JIT
         SRCS vector_add.cpp
-        LIBS athena ${llvm_libs}
+        LIBS athena ${llvm_libs} MemoryLoader
 )
 
 target_include_directories(TestIntegrationJITRunnable PUBLIC ${LLVM_INCLUDE_DIRS})

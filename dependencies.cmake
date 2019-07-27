@@ -1,6 +1,9 @@
 # This file contains mandatory dependencies
 
 # yaml-cpp is used to parse integration test config files
+set(YAML_CPP_BUILD_TESTS OFF)
+set(YAML_CPP_BUILD_CONTRIB OFF)
+set(YAML_CPP_BUILD_TOOLS OFF)
 AthenaAddDependency(
         TARGET_NAME yaml-cpp
         GIT_URL https://github.com/jbeder/yaml-cpp.git
