@@ -22,7 +22,7 @@ class DefaultBuild(private val repo: GitVcsRoot, private val buildConfig: String
     id("AthenaBuild_${repo.name}_${buildConfig}_$compiler".toExtId())
     name = "[$buildConfig][$compiler] Build"
 
-    var needsCoverage = buildConfig == "Debug"
+    var needsCoverage = false && buildConfig == "Debug"
     var binaryDest = install
 
     params {
@@ -135,7 +135,7 @@ object Daily : BuildType({
 
     type = Type.COMPOSITE
 
-    val sdf = SimpleDateFormat("dd-mm-yyyy")
+    val sdf = SimpleDateFormat("dd-MM-yyyy")
     val buildDate = sdf.format(Date())
 
     vcs {
