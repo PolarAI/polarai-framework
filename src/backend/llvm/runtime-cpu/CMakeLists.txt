@@ -14,6 +14,4 @@ elseif (UNIX)
 endif ()
 
 install(TARGETS runtime-llvm-cpu EXPORT AthenaConfig
-        ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}/runtime
-        LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}/runtime
-        RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR}/runtime)  # This is for Windows
+        LIBRARY DESTINATION lib/runtime)
