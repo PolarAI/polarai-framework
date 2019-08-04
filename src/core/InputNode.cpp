@@ -21,8 +21,10 @@ InputNode::InputNode(InputNode&& rhs) noexcept
 InputNode::InputNode(TensorShape shape,
                      DataType dataType,
                      AbstractLoader& loader,
+                     bool isFrozen,
                      std::string name)
     : AbstractNode(std::move(shape), dataType, std::move(name)),
+      mIsFrozen(isFrozen),
       mLoader(&loader) {}
 InputNode::~InputNode() {
     saveInGraph(false);
@@ -54,5 +56,8 @@ void InputNode::setLoader(AbstractLoader& loader) {
 void InputNode::clear() {
     mLoader = nullptr;
     AbstractNode::clear();
+}
+bool InputNode::isFrozen() {
+    return mIsFrozen;
 }
 }  // namespace athena::core

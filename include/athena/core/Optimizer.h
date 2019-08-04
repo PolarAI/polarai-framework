@@ -18,9 +18,15 @@
 namespace athena::core {
 class Optimizer {
     public:
+    [[nodiscard]] constexpr virtual size_t getRequiredOrder() const = 0;
     virtual void genFix(AbstractGenerator &generator,
                         inner::Tensor &target,
-                        inner::Tensor &error) = 0;
+                        std::vector<inner::Tensor *> errors) = 0;
+    virtual void genErrors(
+        AbstractGenerator &generator,
+        std::vector<inner::Tensor *> derivativeTensors,
+        std::vector<inner::Tensor *> nodeErrorTensors,
+        std::vector<inner::Tensor *> outcomingErrorTensors) = 0;
 };
 }  // namespace athena::core
 

@@ -33,8 +33,11 @@ class AddOperation : public core::Operation {
     void gen(
         core::AbstractGenerator &g,
         std::vector<core::inner::Tensor *> &operationArguments) const override;
-    void genDerivative(core::AbstractGenerator &g,
+    void genDerivative(const int order,
+                       core::AbstractGenerator &g,
+                       core::inner::Tensor &operationResult,
                        std::vector<core::inner::Tensor *> &operationArguments,
+                       core::inner::Tensor &derivativeTensor,
                        int argNo) const override;
     size_t getOperandsCount() const override {
         return 2;

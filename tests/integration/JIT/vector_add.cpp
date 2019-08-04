@@ -57,7 +57,7 @@ TEST(JIT, SimpleVectorAdd) {
     std::unique_ptr<Allocator> trivialAllocator =
         std::make_unique<LLVMTrivialAllocator>();
     executor.setAllocator(trivialAllocator);
-    executor.prepare(graph);
+    executor.setGraph(graph);
 
     // Act
     executor.execute();

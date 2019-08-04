@@ -44,20 +44,20 @@ core::inner::Tensor &AddOperation::getDerivativeTensor(
                                      shapeView.toShape());
 }
 void AddOperation::genDerivative(
+    const int order,
     core::AbstractGenerator &g,
+    core::inner::Tensor &operationResult,
     std::vector<core::inner::Tensor *> &operationArguments,
+    core::inner::Tensor &derivativeTensor,
     int argNo) const {
     float f_unit = 1;
     void *unit = reinterpret_cast<void *>(&f_unit);
-    // We need to make sure the 4th (3rd in terms of vector)
-    // tensor persist and is a derivative tensor
 #ifdef DEBUG
-    assert(operationArguments.size() >= 3 &&
-           "operationArguments[2] must be derivative tensor");
-    assert(operationArguments[2]->getDataType() != core::DataType::UNDEFINED &&
-           "operationArguments[2] is broken");
+    // We need to make sure the derivative tensor exists
+    assert(derivativeTensor.getDataType() != core::DataType::UNDEFINED &&
+           "derivativeTensor is broken");
 #endif
-    g.generate("fill", *operationArguments[2], unit);
+    g.generate("fill", derivativeTensor, unit);
 }
 
 }  // namespace athena::ops

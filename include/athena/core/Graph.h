@@ -61,6 +61,8 @@ class Graph {
     Traversal mTraversal;
     std::unique_ptr<Optimizer> mOptimizer;
 
+    const std::string mGraphName;
+
     template <typename TemplateNodeType>
     void saveRealNode(TemplateNodeType& node,
                       bool isRepairedNode,
@@ -132,7 +134,7 @@ class Graph {
      * Print Graph in dot format. For debug purposes only.
      * @param stream Output stream
      */
-    void printDot(std::basic_ostream<char> &stream);
+    void printDot(std::basic_ostream<char>& stream);
 
     /**
      * Set up Graph optimizer
@@ -144,6 +146,18 @@ class Graph {
     void setUpOptimizer(Args... args) {
         mOptimizer = std::make_unique<Opt>(args...);
     }
+
+    std::unique_ptr<Optimizer>& getOptimizer() {
+        return mOptimizer;
+    }
+
+    /**
+     *
+     * @return Current graph name
+     */
+    std::string getGraphName() {
+        return mGraphName;
+    };
 };
 }  // namespace athena::core
 

@@ -14,9 +14,11 @@
 #define ATHENA_LLVMEXECUTOR_H
 
 #include <athena/backend/llvm/AthenaJIT.h>
+#include <athena/backend/llvm/LLVMGenerator.h>
 #include <athena/backend/llvm/runtime-driver/runtime-driver.h>
 #include <athena/core/Allocator.h>
 #include <athena/core/Executor.h>
+#include <athena/core/Traversal.h>
 
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
@@ -29,21 +31,63 @@ namespace athena::backend::llvm {
 class LLVMExecutor : public athena::core::Executor {
     private:
     std::unique_ptr<AthenaJIT> mJITCompiler;
-    std::unique_ptr<::llvm::Module> mMainModule;
+    //    std::unique_ptr<::llvm::Module> mMainModule;
     std::unique_ptr<core::Allocator> mAllocator;
-    athena::core::Traversal mGraphTraversal;
+    //    athena::core::Traversal mGraphTraversal;
     std::unique_ptr<RuntimeDriver> mRuntimeDriver;
 
     std::vector<std::unique_ptr<::llvm::Module>> mExistingModules;
 
+    template <typename T>
+    using ClusterContainer = std::vector<core::inner::NodeDependencies<T>>;
+
+    /**
+     * Generate LLVM IR for Graph
+     * @param graph Execution graph
+     * @return LLVM IR module with generated graph
+     */
+    std::vector<std::unique_ptr<::llvm::Module>> compileGraph(
+        athena::core::Graph &graph);
+
+    /**
+     * Generate LLVM IR for input nodes
+     * @param generator Generator associated with corresponding graph
+     * @param inputNodes InputNodes that need to be compiled
+     */
+    static void compileInputNodes(
+        LLVMGenerator &generator,
+        const ClusterContainer<core::InputNode> &inputNodes);
+
+    /**
+     * Generate LLVM IR for nodes
+     * @param generator Generator associated with corresponding graph
+     * @param inputNodes Nodes that need to be compiled
+     */
+    static void compileActionNodes(
+        LLVMGenerator &generator,
+        const ClusterContainer<core::Node> &actionNodes);
+
+    /**
+     * Generate LLVM IR for loss nodes
+     * @param generator Generator associated with corresponding graph
+     * @param inputNodes LossNodes that need to be compiled
+     */
+    static void compileLossNodes(
+        LLVMGenerator &generator,
+        const ClusterContainer<core::LossNode> &lossNodes);
+
+    void compileDerivatives(LLVMGenerator &generator,
+                            const core::Traversal &traversal,
+                            core::Optimizer &graphOptimizer);
+
     public:
     LLVMExecutor();
     /**
-     * Prepare Graph for execution. This method must always be called before
+     * Set Graph for execution. This method must always be called before
      * execution
      * @param graph Graph to be executed
      */
-    void prepare(athena::core::Graph &graph) override;
+    void setGraph(athena::core::Graph &graph) override;
     /**
      * Do actual computation
      */

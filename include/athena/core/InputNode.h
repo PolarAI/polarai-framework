@@ -24,6 +24,7 @@ namespace athena::core {
 class InputNode : public AbstractNode {
     protected:
     AbstractLoader* mLoader;
+    bool mIsFrozen;
 
     public:
     InputNode() = delete;
@@ -32,6 +33,7 @@ class InputNode : public AbstractNode {
     InputNode(TensorShape shape,
               DataType dataType,
               AbstractLoader& loader,
+              bool isFrozen = true,
               std::string name = "");
     ~InputNode() override;
 
@@ -45,6 +47,7 @@ class InputNode : public AbstractNode {
     const AbstractLoader& loader() const;
     void setLoader(AbstractLoader& loader);
     void clear() override;
+    bool isFrozen();
 };
 }  // namespace athena::core
 

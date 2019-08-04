@@ -17,13 +17,12 @@ namespace athena::core {
 Node::Node(Node&& rhs) noexcept
     : AbstractNode(std::move(rhs)),
       mOperation(rhs.mOperation),
-      mDerivativeTensors(std::move(rhs.mDerivativeTensors)) {
+      mDerivativeTensors(std::move(rhs.mDerivativeTensors)),
+      mErrorTensors(std::move(rhs.mErrorTensors)) {
     rhs.mOperation = nullptr;
 }
-Node::Node(Operation& operation,
-           std::string name)
-    : AbstractNode(std::move(name)),
-      mOperation(&operation) {}
+Node::Node(Operation& operation, std::string name)
+    : AbstractNode(std::move(name)), mOperation(&operation) {}
 Node::~Node() {
     saveInGraph(false);
 }
@@ -57,6 +56,15 @@ void Node::clear() {
     AbstractNode::clear();
 }
 void inner::addDerivativeTensor(Node& node, inner::Tensor& tensor) {
-    node.mDerivativeTensors.push_back(tensor);
+    node.mDerivativeTensors.push_back(&tensor);
+}
+inner::Tensor& inner::getDerivativeTensor(Node& node, size_t index) {
+    return *node.mDerivativeTensors[index];
+}
+void inner::addErrorTensor(Node& node, inner::Tensor& tensor) {
+    node.mDerivativeTensors.push_back(&tensor);
+}
+inner::Tensor& inner::getErrorTensor(Node& node, size_t index) {
+    return *node.mDerivativeTensors[index];
 }
 }  // namespace athena::core

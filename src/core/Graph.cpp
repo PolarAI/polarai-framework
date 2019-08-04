@@ -58,7 +58,9 @@ void initQueue(std::queue<size_t>& queue,
         }
     }
 }
-Graph::Graph() : mGraphIndex(inner::getGraphTable().registerRecord(this)) {}
+Graph::Graph()
+    : mGraphIndex(inner::getGraphTable().registerRecord(this)),
+      mGraphName("MainGraph") {}
 Graph::Graph(Graph&& rhs) noexcept
     : mSyncStorage(std::move(rhs.mSyncStorage)),
       mOwningStorage(std::move(rhs.mOwningStorage)),
@@ -133,18 +135,16 @@ void Graph::saveNode(AbstractNode& node, bool isRepairedNode, bool isErase) {
     }
     switch (node.getType()) {
         case NodeType::DEFAULT:
-            saveRealNode(static_cast<Node&>(node), isRepairedNode, isErase);
+            saveRealNode(node_cast<Node&>(node), isRepairedNode, isErase);
             break;
         case NodeType::INPUT:
-            saveRealNode(static_cast<InputNode&>(node), isRepairedNode,
-                         isErase);
+            saveRealNode(node_cast<InputNode&>(node), isRepairedNode, isErase);
             break;
         case NodeType::OUTPUT:
-            saveRealNode(static_cast<OutputNode&>(node), isRepairedNode,
-                         isErase);
+            saveRealNode(node_cast<OutputNode&>(node), isRepairedNode, isErase);
             break;
         case NodeType::LOSS:
-            saveRealNode(static_cast<LossNode&>(node), isRepairedNode, isErase);
+            saveRealNode(node_cast<LossNode&>(node), isRepairedNode, isErase);
         default:
             FatalError(1, "saveNode() in Graph : ", this,
                        ". GraphIndex : ", mGraphIndex, ". Undefined node type");
@@ -293,15 +293,50 @@ void Graph::setUpTensors() const {
     for (auto& cluster : mTraversal.getClusters()) {
         auto& actionNodes = cluster.get<Node>();
         for (auto& nodeDep : actionNodes) {
+            std::vector<inner::Tensor*> opArgs;
+
             auto& node =
                 node_cast<Node&>(*inner::getNodeTable()[nodeDep.nodeIndex]);
-            std::vector<inner::Tensor*> opArgs;
             for (auto& inp : nodeDep.input) {
                 opArgs.push_back(&inner::getTensorFromNode(
                     *inner::getNodeTable()[inp.nodeIndex]));
             }
             inner::setResultTensor(node,
                                    node.getOperation().getResultTensor(opArgs));
+
+            for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
+                 idx++) {
+                auto& derivativeTensor =
+                    node.getOperation().getDerivativeTensor(opArgs, idx);
+                inner::addDerivativeTensor(node, derivativeTensor);
+
+                auto& errorTensor =
+                    node.getOperation().getDerivativeTensor(opArgs, idx);
+                inner::addErrorTensor(node, errorTensor);
+            }
+        }
+
+        auto& lossNodes = cluster.get<LossNode>();
+        for (auto& nodeDep : lossNodes) {
+            std::vector<inner::Tensor*> opArgs;
+
+            auto& node =
+                node_cast<Node&>(*inner::getNodeTable()[nodeDep.nodeIndex]);
+            for (auto& inp : nodeDep.input) {
+                opArgs.push_back(&inner::getTensorFromNode(
+                    *inner::getNodeTable()[inp.nodeIndex]));
+            }
+            inner::setResultTensor(node,
+                                   node.getOperation().getResultTensor(opArgs));
+
+            for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
+                 idx++) {
+                auto& derivativeTensor =
+                    node.getOperation().getDerivativeTensor(opArgs, idx);
+                // For loss node error and derivative means the same
+                inner::addDerivativeTensor(node, derivativeTensor);
+                inner::addErrorTensor(node, derivativeTensor);
+            }
         }
 
         auto& outputNodes = cluster.get<OutputNode>();

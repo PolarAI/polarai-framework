@@ -20,7 +20,7 @@ namespace athena::core {
 
 class Executor {
     public:
-    virtual void prepare(Graph &graph) = 0;
+    virtual void setGraph(Graph &graph) = 0;
     virtual void execute() = 0;
 };
 

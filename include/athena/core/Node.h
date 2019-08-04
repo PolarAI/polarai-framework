@@ -24,15 +24,19 @@ namespace athena::core {
 class Node : public AbstractNode {
     protected:
     Operation* mOperation;
-    std::vector<inner::Tensor> mDerivativeTensors;
+    std::vector<inner::Tensor*> mDerivativeTensors;
+    std::vector<inner::Tensor*> mErrorTensors;
 
     friend void inner::addDerivativeTensor(Node& node, inner::Tensor& tensor);
+    friend inner::Tensor& inner::getDerivativeTensor(Node& node, size_t index);
+    friend void inner::addErrorTensor(Node& node, inner::Tensor& tensor);
+    friend inner::Tensor& inner::getErrorTensor(Node& node, size_t index);
 
     public:
     Node() = delete;
     Node(const Node& rhs) = default;
     Node(Node&& rhs) noexcept;
-    Node(Operation& operation, std::string name = "");
+    explicit Node(Operation& operation, std::string name = "");
     ~Node() override;
 
     Node& operator=(const Node& rhs) = default;
