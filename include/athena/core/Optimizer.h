@@ -14,19 +14,26 @@
 #ifndef ATHENA_OPTIMIZER_H
 #define ATHENA_OPTIMIZER_H
 
-#include "AbstractGenerator.h"
+#include <athena/core/AbstractGenerator.h>
+
 namespace athena::core {
 class Optimizer {
     public:
-    [[nodiscard]] constexpr virtual size_t getRequiredOrder() const = 0;
+    Optimizer() = default;
+    Optimizer(const Optimizer &) = default;
+    Optimizer(Optimizer &&) = default;
+    virtual ~Optimizer() = default;
+    [[nodiscard]] virtual size_t getRequiredOrder() const {
+        return 0;
+    };
     virtual void genFix(AbstractGenerator &generator,
                         inner::Tensor &target,
-                        std::vector<inner::Tensor *> errors) = 0;
+                        std::vector<inner::Tensor *> &errors){};
     virtual void genErrors(
         AbstractGenerator &generator,
-        std::vector<inner::Tensor *> derivativeTensors,
-        std::vector<inner::Tensor *> nodeErrorTensors,
-        std::vector<inner::Tensor *> outcomingErrorTensors) = 0;
+        std::vector<inner::Tensor *> &derivativeTensors,
+        std::vector<inner::Tensor *> &nodeErrorTensors,
+        std::vector<inner::Tensor *> &outcomingErrorTensors){};
 };
 }  // namespace athena::core
 

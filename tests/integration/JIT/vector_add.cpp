@@ -13,6 +13,7 @@
 
 #include <athena/backend/llvm/LLVMExecutor.h>
 #include <athena/backend/llvm/LLVMTrivialAllocator.h>
+#include <athena/core/GradientDescent.h>
 #include <athena/core/Graph.h>
 #include <athena/core/InputNode.h>
 #include <athena/core/Node.h>
@@ -38,6 +39,8 @@ TEST(JIT, SimpleVectorAdd) {
     MemoryLoader bLoader(bData, 3 * sizeof(float));
 
     Graph graph;
+    graph.setUpOptimizer<Optimizer>(/*learningRate0.01*/);
+    graph.setUpOptimizer<GradientDescent>(/*learningRate*/ 0.01);
     InputNode aInp(shape, DataType::FLOAT, aLoader, "a");
     InputNode bInp(shape, DataType::FLOAT, bLoader, "b");
     graph.addNode(aInp);
