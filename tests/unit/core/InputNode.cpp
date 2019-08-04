@@ -23,7 +23,7 @@ TEST(InputNode, Create) {
     DataType dataType = DataType::DOUBLE;
     std::string name = "Dummy";
     DummyLoader loader;
-    InputNode n(shape, dataType, loader, name);
+    InputNode n(shape, dataType, loader, false, name);
     ASSERT_EQ(n.getDataType(), dataType);
     ASSERT_EQ(n.getShapeView(), shape);
     ASSERT_EQ(n.getType(), NodeType::INPUT);
@@ -36,7 +36,7 @@ TEST(InputNode, CopyConstructor) {
     DataType dataType = DataType::DOUBLE;
     std::string name = "Dummy";
     DummyLoader loader;
-    InputNode n(shape, dataType, loader, name);
+    InputNode n(shape, dataType, loader, false, name);
     InputNode nSecond(n);
     ASSERT_EQ(inner::getNodeTable().size(), 3);
     ASSERT_EQ(n.getShapeView(), nSecond.getShapeView());
@@ -56,7 +56,8 @@ TEST(InputNode, CopyOperator) {
     TensorShape shapeSecond{2, 3, 4};
     DataType dataTypeSecond = DataType::HALF;
     std::string operationNameSecond = "DummySecond";
-    InputNode nSecond(shapeSecond, dataTypeSecond, loader, operationNameSecond);
+    InputNode nSecond(shapeSecond, dataTypeSecond, loader, false,
+                      operationNameSecond);
     nSecond = n;
     ASSERT_EQ(inner::getNodeTable().size(), 3);
     ASSERT_EQ(n.getShapeView(), nSecond.getShapeView());
