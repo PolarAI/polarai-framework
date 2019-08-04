@@ -23,6 +23,9 @@ class GraphTest : public ::testing::Test {
     protected:
     Graph graph;
     DummyLoader loader;
+    OperationDummy operation;
+
+    GraphTest() : operation("DummyOperation"){};
 
     void SetUp() override {
         clearAll();
@@ -34,7 +37,6 @@ TEST(GraphSimpleTest, Creation) {
     Graph graph;
 }
 TEST_F(GraphTest, Using) {
-    OperationDummy operation("DummyOperation");
     InputNode inputNodeFirst({1}, DataType::HALF, loader, false, "Input1");
     ASSERT_EQ(inputNodeFirst.getNodeIndex(), 1);
     graph.addNode(inputNodeFirst);
@@ -72,11 +74,10 @@ TEST_F(GraphTest, Using) {
     ASSERT_EQ(required_topology, graph.getTopology());
 }
 TEST_F(GraphTest, RemoveNode) {
-    OperationDummy operation("DummyOperation");
-    InputNode inputNodeFirst({1}, DataType::HALF, loader, false, "Input1");
+    InputNode inputNodeFirst({1}, DataType::FLOAT, loader, false, "Input1");
     ASSERT_EQ(inputNodeFirst.getNodeIndex(), 1);
     graph.addNode(inputNodeFirst);
-    InputNode inputNodeSecond({1}, DataType::HALF, loader, false, "Input2");
+    InputNode inputNodeSecond({1}, DataType::FLOAT, loader, false, "Input2");
     ASSERT_EQ(inputNodeSecond.getNodeIndex(), 2);
     graph.addNode(inputNodeSecond);
     Node node(operation, "Node1");
@@ -99,11 +100,10 @@ TEST_F(GraphTest, RemoveNode) {
     ASSERT_EQ(graph.getTopology().size(), 0);
 }
 TEST_F(GraphTest, DeepTestTraverse) {
-    OperationDummy operation("DummyOperation");
-    InputNode inputNodeFirst({1}, DataType::HALF, loader, false, "Input1");
+    InputNode inputNodeFirst({1}, DataType::DOUBLE, loader, false, "Input1");
     ASSERT_EQ(inputNodeFirst.getNodeIndex(), 1);
     graph.addNode(inputNodeFirst);
-    InputNode inputNodeSecond({1}, DataType::HALF, loader, false, "Input2");
+    InputNode inputNodeSecond({1}, DataType::DOUBLE, loader, false, "Input2");
     ASSERT_EQ(inputNodeSecond.getNodeIndex(), 2);
     graph.addNode(inputNodeSecond);
     Node node(operation, "Node1");
@@ -192,7 +192,6 @@ TEST_F(GraphTest, DeepTestTraverse) {
     }
 }
 TEST_F(GraphTest, TraverseOnOtherGraph) {
-    OperationDummy operation("DummyOperation");
     InputNode inputNodeFirst({1}, DataType::HALF, loader, false, "Input1");
     InputNode inputNodeSecond({1}, DataType::HALF, loader, false, "Input2");
     Node nodeFirst(operation, "Node1");

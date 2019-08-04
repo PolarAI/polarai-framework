@@ -321,7 +321,7 @@ void Graph::setUpTensors() const {
             std::vector<inner::Tensor*> opArgs;
 
             auto& node =
-                node_cast<Node&>(*inner::getNodeTable()[nodeDep.nodeIndex]);
+                node_cast<LossNode&>(*inner::getNodeTable()[nodeDep.nodeIndex]);
             for (auto& inp : nodeDep.input) {
                 opArgs.push_back(&inner::getTensorFromNode(
                     *inner::getNodeTable()[inp.nodeIndex]));
