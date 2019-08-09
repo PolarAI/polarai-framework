@@ -98,7 +98,7 @@ void registerFmaImpl(LLVMGenerator *generator,
     ::llvm::Constant *bTensor = ::llvm::ConstantInt::get(
         ::llvm::Type::getInt64Ty(ctx), reinterpret_cast<size_t>(&b));
     ArgsV.push_back(bTensor);
-    ::llvm::Constant *scaleBConst = getFPConstant(ctx, realScaleA);
+    ::llvm::Constant *scaleBConst = getFPConstant(ctx, realScaleB);
     ArgsV.push_back(scaleBConst);
     ::llvm::Constant *cTensor = ::llvm::ConstantInt::get(
         ::llvm::Type::getInt64Ty(ctx), reinterpret_cast<size_t>(&c));

@@ -64,8 +64,6 @@ void athena::core::GradientDescent::genErrors(
             break;
         case DataType::FLOAT: {
             unit = *reinterpret_cast<uint64_t *>(&fltUnit);
-            auto fltLR = static_cast<float>(mLearningRate);
-            unit = *reinterpret_cast<uint64_t *>(&fltLR);
             break;
         }
         default:

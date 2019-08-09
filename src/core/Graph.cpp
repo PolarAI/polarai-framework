@@ -297,10 +297,12 @@ void Graph::setUpTensors() const {
 
             auto& node =
                 node_cast<Node&>(*inner::getNodeTable()[nodeDep.nodeIndex]);
-            for (auto& inp : nodeDep.input) {
-                opArgs.push_back(&inner::getTensorFromNode(
-                    *inner::getNodeTable()[inp.nodeIndex]));
-            }
+            std::for_each(nodeDep.input.begin(), nodeDep.input.end(),
+                          [&](const auto& inp) {
+                              opArgs.push_back(&inner::getTensorFromNode(
+                                  *inner::getNodeTable()[inp.nodeIndex]));
+                          });
+
             inner::setResultTensor(node,
                                    node.getOperation().getResultTensor(opArgs));
 
@@ -322,10 +324,12 @@ void Graph::setUpTensors() const {
 
             auto& node =
                 node_cast<LossNode&>(*inner::getNodeTable()[nodeDep.nodeIndex]);
-            for (auto& inp : nodeDep.input) {
-                opArgs.push_back(&inner::getTensorFromNode(
-                    *inner::getNodeTable()[inp.nodeIndex]));
-            }
+            std::for_each(nodeDep.input.begin(), nodeDep.input.end(),
+                          [&](const auto& inp) {
+                              opArgs.push_back(&inner::getTensorFromNode(
+                                  *inner::getNodeTable()[inp.nodeIndex]));
+                          });
+
             inner::setResultTensor(node,
                                    node.getOperation().getResultTensor(opArgs));
 
