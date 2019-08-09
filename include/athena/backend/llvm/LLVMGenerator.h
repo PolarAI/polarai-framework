@@ -53,6 +53,12 @@ class LLVMGenerator : public core::AbstractGenerator {
                       core::inner::Tensor &a,
                       core::inner::Tensor &b,
                       core::inner::Tensor &c) override;
+    void generateImpl(std::string &,
+                      core::inner::Tensor &a,
+                      uint64_t scaleA,
+                      core::inner::Tensor &b,
+                      uint64_t scaleB,
+                      core::inner::Tensor &c) override;
 
     public:
     explicit LLVMGenerator(

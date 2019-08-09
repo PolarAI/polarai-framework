@@ -11,8 +11,6 @@
  * the License.
  */
 
-#include "common.h"
-
 #include <athena/backend/llvm/LLVMGenerator.h>
 
 namespace athena::backend::llvm::codegen {

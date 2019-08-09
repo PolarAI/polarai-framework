@@ -32,6 +32,12 @@ class AbstractGenerator {
                               inner::Tensor &a,
                               inner::Tensor &b,
                               inner::Tensor &c) = 0;
+    virtual void generateImpl(std::string &,
+                              inner::Tensor &a,
+                              uint64_t scaleA,
+                              inner::Tensor &b,
+                              uint64_t scaleB,
+                              inner::Tensor &c) = 0;
 
     public:
     virtual void openNode(std::string_view name) = 0;

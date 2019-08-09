@@ -12,7 +12,6 @@
  */
 
 #include <athena/backend/llvm/device/Device.h>
-#include <athena/backend/llvm/runtime/add.h>
 #include <athena/core/Allocator.h>
 #include <athena/core/inner/Tensor.h>
 

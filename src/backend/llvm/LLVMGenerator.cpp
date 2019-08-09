@@ -92,6 +92,15 @@ void LLVMGenerator::generateImpl(std::string &name,
                                  core::inner::Tensor &c) {
     mFunctorsMap[name](mContext, *mGeneratedModule, mBuilder, a, b, c);
 }
+void LLVMGenerator::generateImpl(std::string &name,
+                                 core::inner::Tensor &a,
+                                 uint64_t scaleA,
+                                 core::inner::Tensor &b,
+                                 uint64_t scaleB,
+                                 core::inner::Tensor &c) {
+    mFunctorsMap[name](mContext, *mGeneratedModule, mBuilder, a, scaleA, b,
+                       scaleB, c);
+}
 void LLVMGenerator::openNode(std::string_view name) {
 #ifdef DEBUG
     assert(mCurrentBlock == mMainBlock && "There is an opened node");
