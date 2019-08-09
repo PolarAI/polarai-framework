@@ -29,12 +29,12 @@
  * @param c Result Tensor
  */
 template <typename T>
-void hadamard(athena::backend::llvm::Device *,
-              athena::core::Allocator *allocator,
-              athena::core::inner::Tensor *a,
-              T scaleA,
-              athena::core::inner::Tensor *b,
-              T scaleB,
-              athena::core::inner::Tensor *c);
+extern void hadamard(athena::backend::llvm::Device *,
+                     athena::core::Allocator *allocator,
+                     athena::core::inner::Tensor *a,
+                     T scaleA,
+                     athena::core::inner::Tensor *b,
+                     T scaleB,
+                     athena::core::inner::Tensor *c);
 
 #endif  // ATHENA_MATRIX_H

@@ -22,6 +22,25 @@ namespace athena::backend::llvm::codegen {
 void registerAdd(LLVMGenerator *generator);
 void registerAllocate(LLVMGenerator *generator);
 void registerFill(LLVMGenerator *generator);
+void registerHadamard(LLVMGenerator *generator);
+void registerFma(LLVMGenerator *generator);
+
+template <typename T>
+::llvm::Constant *getFPConstant(::llvm::LLVMContext &ctx, T value) {
+    static_assert(false, "Not implemented");
+}
+
+template <>
+::llvm::Constant *getFPConstant<float>(::llvm::LLVMContext &ctx, float value) {
+    return ::llvm::ConstantFP::get(::llvm::Type::getFloatTy(ctx), value);
+}
+
+template <>
+::llvm::Constant *getFPConstant<double>(::llvm::LLVMContext &ctx,
+                                        double value) {
+    return ::llvm::ConstantFP::get(::llvm::Type::getDoubleTy(ctx), value);
+}
+
 }  // namespace athena::backend::llvm::codegen
 
 #endif  // ATHENA_COMMON_H

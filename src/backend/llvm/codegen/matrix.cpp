@@ -12,26 +12,11 @@
  */
 
 #include "Mangler.h"
+#include "common.h"
 
 #include <athena/backend/llvm/LLVMGenerator.h>
 
 namespace athena::backend::llvm::codegen {
-
-template <typename T>
-::llvm::Constant *getFPConstant(::llvm::LLVMContext &ctx, T value) {
-    static_assert(false, "Not implemented");
-}
-
-template <>
-::llvm::Constant *getFPConstant<float>(::llvm::LLVMContext &ctx, float value) {
-    return ::llvm::ConstantFP::get(::llvm::Type::getFloatTy(ctx), value);
-}
-
-template <>
-::llvm::Constant *getFPConstant<double>(::llvm::LLVMContext &ctx,
-                                        double value) {
-    return ::llvm::ConstantFP::get(::llvm::Type::getDoubleTy(ctx), value);
-}
 
 template <typename T>
 void registerHadamardImpl(LLVMGenerator *generator,

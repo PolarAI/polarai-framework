@@ -24,4 +24,24 @@ extern void add(athena::backend::llvm::Device *,
                 athena::core::inner::Tensor *b,
                 athena::core::inner::Tensor *c);
 
+/**
+ * Fused multiplication and addition
+ * c = scaleA * a + scaleB * b
+ * @tparam T
+ * @param allocator
+ * @param a
+ * @param scaleA
+ * @param b
+ * @param scaleB
+ * @param c
+ */
+template <typename T>
+extern void fma(athena::backend::llvm::Device *,
+                athena::core::Allocator *allocator,
+                athena::core::inner::Tensor *a,
+                T scaleA,
+                athena::core::inner::Tensor *b,
+                T scaleB,
+                athena::core::inner::Tensor *c);
+
 #endif  // ATHENA_ADD_H

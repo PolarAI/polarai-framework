@@ -41,3 +41,20 @@ template void add<double>(athena::backend::llvm::Device *,
                           athena::core::inner::Tensor *a,
                           athena::core::inner::Tensor *b,
                           athena::core::inner::Tensor *c);
+
+template <typename T>
+void fma(athena::backend::llvm::Device *,
+         athena::core::Allocator *allocator,
+         athena::core::inner::Tensor *a,
+         T scaleA,
+         athena::core::inner::Tensor *b,
+         T scaleB,
+         athena::core::inner::Tensor *c) {
+    auto *af = reinterpret_cast<T *>(allocator->getRAMPointer(*a));
+    auto *bf = reinterpret_cast<T *>(allocator->getRAMPointer(*b));
+    auto *cf = reinterpret_cast<T *>(allocator->getRAMPointer(*c));
+
+    for (size_t i = 0; i < c->getShape().getTotalSize(); i++) {
+        cf[i] = scaleA * af[i] + scaleB * bf[i];
+    }
+}

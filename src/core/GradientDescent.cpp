@@ -13,6 +13,7 @@
 
 #include <athena/core/AbstractGenerator.h>
 #include <athena/core/GradientDescent.h>
+#include <athena/core/inner/InnerFunctions.h>
 #include <athena/core/inner/Tensor.h>
 
 namespace athena::core {
@@ -22,10 +23,59 @@ size_t GradientDescent::getRequiredOrder() const {
 void athena::core::GradientDescent::genFix(
     AbstractGenerator &generator,
     inner::Tensor &target,
-    std::vector<inner::Tensor *> &errors) {}
+    std::vector<inner::Tensor *> &errors) {
+    float fltUnit = 1.0;
+    double dblUnit = 1.0;
+    uint64_t unit = 0;
+    uint64_t learningRate;
+
+    switch (target.getDataType()) {
+        case DataType::DOUBLE:
+            unit = *reinterpret_cast<uint64_t *>(&dblUnit);
+            learningRate = *reinterpret_cast<uint64_t *>(&mLearningRate);
+            break;
+        case DataType::FLOAT: {
+            unit = *reinterpret_cast<uint64_t *>(&fltUnit);
+            auto fltLR = static_cast<float>(mLearningRate);
+            learningRate = *reinterpret_cast<uint64_t *>(&fltLR);
+            break;
+        }
+        default:
+            new FatalError(1, "Unsupported type");
+    }
+
+    for (auto *errTensor : errors) {
+        generator.generate("fma", *errTensor, learningRate, target, unit,
+                           target);
+    }
+}
 void athena::core::GradientDescent::genErrors(
     AbstractGenerator &generator,
     std::vector<inner::Tensor *> &derivativeTensors,
     std::vector<inner::Tensor *> &nodeErrorTensors,
-    std::vector<inner::Tensor *> &outcomingErrorTensors) {}
+    std::vector<inner::Tensor *> &outcomingErrorTensors) {
+    float fltUnit = 1.0;
+    double dblUnit = 1.0;
+    uint64_t unit = 0;
+
+    switch (derivativeTensors.front()->getDataType()) {
+        case DataType::DOUBLE:
+            unit = *reinterpret_cast<uint64_t *>(&dblUnit);
+            break;
+        case DataType::FLOAT: {
+            unit = *reinterpret_cast<uint64_t *>(&fltUnit);
+            auto fltLR = static_cast<float>(mLearningRate);
+            unit = *reinterpret_cast<uint64_t *>(&fltLR);
+            break;
+        }
+        default:
+            new FatalError(1, "Unsupported type");
+    }
+
+    for (size_t idx = 0; idx < derivativeTensors.size(); idx++) {
+        generator.generate("hadamard", *derivativeTensors[idx], unit,
+                           nodeErrorTensors[idx], unit,
+                           outcomingErrorTensors[idx]);
+    }
+}
 }  // namespace athena::core

@@ -11,8 +11,10 @@
  * the License.
  */
 
-#include <athena/backend/llvm/LLVMGenerator.h>
+#include "Mangler.h"
+#include "common.h"
 
+#include <athena/backend/llvm/LLVMGenerator.h>
 namespace athena::backend::llvm::codegen {
 
 void registerAdd(LLVMGenerator *generator) {
@@ -56,5 +58,68 @@ void registerAdd(LLVMGenerator *generator) {
         };
 
     generator->registerFunctor("add", f);
+}
+
+template <typename T>
+void registerFmaImpl(LLVMGenerator *generator,
+                     ::llvm::LLVMContext &ctx,
+                     ::llvm::Module &module,
+                     ::llvm::IRBuilder<> &builder,
+                     core::inner::Tensor &a,
+                     uint64_t scaleA,
+                     core::inner::Tensor &b,
+                     uint64_t scaleB,
+                     core::inner::Tensor &c) {
+    auto realScaleA = *reinterpret_cast<T *>(&scaleA);
+    auto realScaleB = *reinterpret_cast<T *>(&scaleB);
+
+    ::llvm::Function *calledFunction =
+        generator->findLLVMFunction(Mangler::getMangledName<T>("hadamard"));
+
+    if (!calledFunction) {
+        core::FatalError(1, "Unknown function referenced");
+    }
+
+    std::vector<::llvm::Value *> ArgsV;
+
+    ::llvm::Constant *device = ::llvm::ConstantInt::get(
+        ::llvm::Type::getInt64Ty(ctx),
+        reinterpret_cast<size_t>(generator->getPreferredDevice("hadamard")));
+    ArgsV.push_back(device);
+    ::llvm::Constant *allocator = ::llvm::ConstantInt::get(
+        ::llvm::Type::getInt64Ty(ctx),
+        reinterpret_cast<size_t>(&generator->getAllocator()));
+    ArgsV.push_back(allocator);
+    ::llvm::Constant *aTensor = ::llvm::ConstantInt::get(
+        ::llvm::Type::getInt64Ty(ctx), reinterpret_cast<size_t>(&a));
+    ArgsV.push_back(aTensor);
+    ::llvm::Constant *scaleAConst = getFPConstant(ctx, realScaleA);
+    ArgsV.push_back(scaleAConst);
+    ::llvm::Constant *bTensor = ::llvm::ConstantInt::get(
+        ::llvm::Type::getInt64Ty(ctx), reinterpret_cast<size_t>(&b));
+    ArgsV.push_back(bTensor);
+    ::llvm::Constant *scaleBConst = getFPConstant(ctx, realScaleA);
+    ArgsV.push_back(scaleBConst);
+    ::llvm::Constant *cTensor = ::llvm::ConstantInt::get(
+        ::llvm::Type::getInt64Ty(ctx), reinterpret_cast<size_t>(&c));
+    ArgsV.push_back(cTensor);
+    builder.CreateCall(calledFunction, ArgsV);
+}
+
+void registerFma(LLVMGenerator *generator) {
+    std::function<void(::llvm::LLVMContext &, ::llvm::Module &,
+                       ::llvm::IRBuilder<> &, core::inner::Tensor &, uint64_t,
+                       core::inner::Tensor &, uint64_t, core::inner::Tensor &)>
+        f = [generator](::llvm::LLVMContext &ctx, ::llvm::Module &module,
+                        ::llvm::IRBuilder<> &builder, core::inner::Tensor &a,
+                        uint64_t scaleA, core::inner::Tensor &b,
+                        uint64_t scaleB, core::inner::Tensor &c) {
+            registerFmaImpl<float>(generator, ctx, module, builder, a, scaleA,
+                                   b, scaleB, c);
+            registerFmaImpl<double>(generator, ctx, module, builder, a, scaleA,
+                                    b, scaleB, c);
+        };
+
+    generator->registerFunctor("fma", f);
 }
 }  // namespace athena::backend::llvm::codegen
