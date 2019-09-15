@@ -36,7 +36,7 @@ AbstractNode::AbstractNode(AbstractNode&& rhs) noexcept
 AbstractNode::AbstractNode(TensorShape shape,
                            DataType dataType,
                            std::string name)
-    : mTensor(inner::createTensor(dataType, std::move(shape))),
+    : mTensor(new inner::Tensor(dataType, std::move(shape))),
       mName(std::move(name)),
       mGraphIndex(inner::kKUndefinedIndex),
       mNodeIndex(inner::getNodeTable().registerRecord(this)),
@@ -86,16 +86,16 @@ void AbstractNode::before(const AbstractNode& node, EdgeMark mark) const {
     }
 }
 ShapeView AbstractNode::getShapeView() const {
-    return mTensor.getShapeView();
+    return mTensor->getShapeView();
 }
 ShapeView AbstractNode::getSubShapeView(size_t offset) const {
-    return mTensor.getSubShapeView(offset);
+    return mTensor->getSubShapeView(offset);
 }
 const TensorShape& AbstractNode::getShape() const {
-    return mTensor.getShape();
+    return mTensor->getShape();
 }
 DataType AbstractNode::getDataType() const {
-    return mTensor.getDataType();
+    return mTensor->getDataType();
 }
 size_t AbstractNode::getNodeIndex() const {
     return mNodeIndex;
@@ -121,10 +121,10 @@ void AbstractNode::setShape(const TensorShape& shape) {
             1,
             "It is forbidden to change shapes of nodes which belongs to graph");
     }
-    mTensor.setShape(shape);
+    mTensor->setShape(shape);
 }
 void AbstractNode::clear() {
-    mTensor.clear();
+    mTensor->clear();
     mName.clear();
 }
 void AbstractNode::removeFromGraph() {
@@ -138,13 +138,13 @@ void AbstractNode::saveInGraph(bool isRepairedNode) {
     }
 }
 AbstractNode::AbstractNode(std::string name)
-    : mTensor(*inner::getTensorRegistry()[0]),
+    : mTensor(inner::getNullTensor()),
       mName(std::move(name)),
       mGraphIndex(inner::kKUndefinedIndex),
       mNodeIndex(inner::getNodeTable().registerRecord(this)),
       mInputsCount(0) {}
 void inner::setResultTensor(athena::core::AbstractNode& node,
-                            athena::core::inner::Tensor& tensor) {
+                            athena::core::inner::Tensor* tensor) {
     node.mTensor = tensor;
 }
 }  // namespace athena::core

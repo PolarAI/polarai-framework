@@ -62,7 +62,7 @@ inner::Tensor& inner::getDerivativeTensor(Node& node, size_t index) {
     return *node.mDerivativeTensors[index];
 }
 void inner::addErrorTensor(Node& node, inner::Tensor& tensor) {
-    node.mDerivativeTensors.push_back(&tensor);
+    node.mErrorTensors.push_back(&tensor);
 }
 inner::Tensor& inner::getErrorTensor(Node& node, size_t index) {
     return *node.mDerivativeTensors[index];

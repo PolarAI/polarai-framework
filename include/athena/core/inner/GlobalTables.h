@@ -21,7 +21,6 @@ namespace athena::core::inner {
 Table<AllocationRecord>& getAllocationTable();
 Table<AbstractNode*>& getNodeTable();
 Table<Graph*>& getGraphTable();
-std::vector<std::unique_ptr<Tensor>>& getTensorRegistry();
 }  // namespace athena::core::inner
 
 #endif  // ATHENA_GLOBALTABLES_H

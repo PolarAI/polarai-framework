@@ -16,10 +16,13 @@
 #include <athena/core/GradientDescent.h>
 #include <athena/core/Graph.h>
 #include <athena/core/InputNode.h>
+#include <athena/core/LossNode.h>
 #include <athena/core/Node.h>
+#include <athena/core/inner/InnerFunctions.h>
 #include <athena/core/inner/Tensor.h>
 #include <athena/loaders/MemoryLoader/MemoryLoader.h>
 #include <athena/ops/AddOperation.h>
+#include <athena/ops/MSELossFunction.h>
 
 #include <gtest/gtest.h>
 
@@ -34,15 +37,17 @@ TEST(JIT, SimpleVectorAdd) {
 
     float aData[] = {1, 2, 3};
     float bData[] = {4, 5, 6};
+    float cData[] = {0, 0, 0};
 
     MemoryLoader aLoader(aData, 3 * sizeof(float));
     MemoryLoader bLoader(bData, 3 * sizeof(float));
+    MemoryLoader cLoader(cData, 3 * sizeof(float));
 
     Graph graph;
     graph.setUpOptimizer<Optimizer>(/*learningRate0.01*/);
     graph.setUpOptimizer<GradientDescent>(/*learningRate*/ 0.01);
-    InputNode aInp(shape, DataType::FLOAT, aLoader, "a");
-    InputNode bInp(shape, DataType::FLOAT, bLoader, "b");
+    InputNode aInp(shape, DataType::FLOAT, aLoader, false, "a");
+    InputNode bInp(shape, DataType::FLOAT, bLoader, false, "b");
     graph.addNode(aInp);
     graph.addNode(bInp);
 
@@ -55,6 +60,14 @@ TEST(JIT, SimpleVectorAdd) {
     OutputNode outputNode(DataType::FLOAT, "out");
     graph.addNode(outputNode);
     outputNode.after(add, 1);
+
+    MSELossFunction lossFunction;
+    InputNode cInp(shape, DataType::FLOAT, cLoader, true, "c");
+    graph.addNode(cInp);
+    LossNode lossNode(lossFunction, Criterion::MIN, "mse_loss");
+    graph.addNode(lossNode);
+    lossNode.after(add, 1);
+    lossNode.after(cInp, 2);
 
     LLVMExecutor executor;
     std::unique_ptr<Allocator> trivialAllocator =

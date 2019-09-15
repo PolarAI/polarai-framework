@@ -16,7 +16,7 @@
 
 #include <athena/core/AbstractGenerator.h>
 #include <athena/core/FatalError.h>
-#include <athena/core/inner/GlobalTables.h>
+#include <athena/core/inner/InnerFunctions.h>
 #include <athena/core/inner/Tensor.h>
 
 #include <string>
@@ -33,9 +33,9 @@ class Operation {
 
     public:
     explicit Operation(std::string&& name) : mName(std::move(name)){};
-    virtual inner::Tensor& getResultTensor(
+    virtual inner::Tensor* getResultTensor(
         std::vector<inner::Tensor*> args) const = 0;
-    virtual inner::Tensor& getDerivativeTensor(std::vector<inner::Tensor*> args,
+    virtual inner::Tensor* getDerivativeTensor(std::vector<inner::Tensor*> args,
                                                int argNo) const = 0;
 
     /**
@@ -74,14 +74,14 @@ class OperationDummy : public Operation {
     public:
     explicit OperationDummy(std::string name) : Operation(std::move(name)){};
 
-    inner::Tensor& getResultTensor(
+    inner::Tensor* getResultTensor(
         std::vector<inner::Tensor*> args) const override {
-        return *inner::getTensorRegistry()[0];
+        return inner::getNullTensor();
     }
 
-    inner::Tensor& getDerivativeTensor(std::vector<inner::Tensor*> args,
+    inner::Tensor* getDerivativeTensor(std::vector<inner::Tensor*> args,
                                        int argNo) const override {
-        return *inner::getTensorRegistry()[0];
+        return inner::getNullTensor();
     }
 
     void gen(AbstractGenerator& g,

@@ -145,6 +145,7 @@ void Graph::saveNode(AbstractNode& node, bool isRepairedNode, bool isErase) {
             break;
         case NodeType::LOSS:
             saveRealNode(node_cast<LossNode&>(node), isRepairedNode, isErase);
+            break;
         default:
             FatalError(1, "saveNode() in Graph : ", this,
                        ". GraphIndex : ", mGraphIndex, ". Undefined node type");
@@ -309,11 +310,11 @@ void Graph::setUpTensors() const {
             for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
                  idx++) {
                 auto& derivativeTensor =
-                    node.getOperation().getDerivativeTensor(opArgs, idx);
+                    *node.getOperation().getDerivativeTensor(opArgs, idx);
                 inner::addDerivativeTensor(node, derivativeTensor);
 
                 auto& errorTensor =
-                    node.getOperation().getDerivativeTensor(opArgs, idx);
+                    *node.getOperation().getDerivativeTensor(opArgs, idx);
                 inner::addErrorTensor(node, errorTensor);
             }
         }
@@ -349,7 +350,7 @@ void Graph::setUpTensors() const {
                 *inner::getNodeTable()[nodeDep.nodeIndex]);
             auto& parentNode =
                 *inner::getNodeTable()[nodeDep.input[0].nodeIndex];
-            inner::setResultTensor(node, inner::getTensorFromNode(parentNode));
+            inner::setResultTensor(node, &inner::getTensorFromNode(parentNode));
         }
     }
 }
@@ -367,7 +368,16 @@ void Graph::printDot(std::basic_ostream<char>& stream) {
             stream << "\\nTensor addr: " << tensor.getVirtualAddress();
             stream << "\\nTensor total size: "
                    << tensor.getShapeView().getTotalSize();
-            stream << "\"]\n";
+            stream << "\"";
+
+            stream << ";style=filled;";
+            if (inputNode.isFrozen()) {
+                stream << "color=\"#91D2FF\"";
+            } else {
+                stream << "color=\"#FFDF9E\"";
+            }
+
+            stream << "]\n";
         }
 
         auto& actionNodes = cluster.get<core::Node>();

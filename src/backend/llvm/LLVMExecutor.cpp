@@ -311,4 +311,98 @@ void LLVMExecutor::compileDerivatives(LLVMGenerator &generator,
     }
 }
 
+void LLVMExecutor::compileNodeDerivatives(
+    LLVMGenerator &generator,
+    const LLVMExecutor::ClusterContainer<core::Node> &nodes,
+    core::Optimizer &graphOptimizer) {
+    for (auto &nodeDeps : nodes) {
+        std::vector<core::inner::Tensor *> inputs;
+        for (auto &inp : nodeDeps.input) {
+            auto &tensor = core::inner::getTensorFromNode(
+                *core::inner::getNodeTable()[inp.nodeIndex]);
+
+            inputs.push_back(&tensor);
+        }
+
+        auto &node = node_cast<core::Node &>(
+            *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+
+        auto &outputTensor = core::inner::getTensorFromNode(node);
+
+        std::vector<core::inner::Tensor *> derivativeTensors;
+
+        for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
+             idx++) {
+            auto &derivativeTensor =
+                core::inner::getDerivativeTensor(node, idx);
+
+            derivativeTensors.push_back(&derivativeTensor);
+
+            generator.generate("allocate", derivativeTensor);
+            // todo lock tensors in memory
+            node.getOperation().genDerivative(graphOptimizer.getRequiredOrder(),
+                                              generator, outputTensor, inputs,
+                                              derivativeTensor, idx);
+            // TODO memory clean up
+        }
+
+        std::vector<core::inner::Tensor *> incomingErrors;
+        for (auto &outp : nodeDeps.output) {
+            auto &abstractNode = *core::inner::getNodeTable()[outp.nodeIndex];
+            if (abstractNode.getType() == core::NodeType::LOSS ||
+                abstractNode.getType() == core::NodeType::DEFAULT) {
+                auto &outpNode = *reinterpret_cast<core::Node *>(&abstractNode);
+                auto &tensor =
+                    core::inner::getErrorTensor(outpNode, outp.mark - 1);
+                incomingErrors.push_back(&tensor);
+            }
+        }
+
+        std::vector<core::inner::Tensor *> internalErrors;
+
+        for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
+             idx++) {
+            auto &errorTensor = core::inner::getErrorTensor(node, idx);
+
+            internalErrors.push_back(&errorTensor);
+
+            generator.generate("allocate", errorTensor);
+        }
+
+        graphOptimizer.genErrors(generator, derivativeTensors, internalErrors,
+                                 incomingErrors);
+    }
+}
+
+void LLVMExecutor::adjustWeights(
+    LLVMGenerator &generator,
+    const LLVMExecutor::ClusterContainer<core::InputNode> &inputNodes,
+    core::Optimizer &graphOptimizer) {
+    for (auto &nodeDeps : inputNodes) {
+        auto &inputNode = node_cast<core::InputNode &>(
+            *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+
+        // Frozen nodes are usually user data thus not updated
+        if (inputNode.isFrozen()) continue;
+
+        // todo lock in memory
+        auto &tensor = core::inner::getTensorFromNode(inputNode);
+
+        std::vector<core::inner::Tensor *> incomingErrors;
+        for (auto &outp : nodeDeps.output) {
+            auto &abstractNode = *core::inner::getNodeTable()[outp.nodeIndex];
+            if (abstractNode.getType() == core::NodeType::LOSS ||
+                abstractNode.getType() == core::NodeType::DEFAULT) {
+                auto &outpNode = *reinterpret_cast<core::Node *>(&abstractNode);
+                auto &errTensor =
+                    core::inner::getErrorTensor(outpNode, outp.mark - 1);
+                incomingErrors.push_back(&errTensor);
+            }
+        }
+
+        // Apply error correction
+        graphOptimizer.genFix(generator, tensor, incomingErrors);
+    }
+}
+
 }  // namespace athena::backend::llvm

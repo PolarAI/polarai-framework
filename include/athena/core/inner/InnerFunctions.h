@@ -35,8 +35,8 @@ void addDerivativeTensor(Node &node, inner::Tensor &tensor);
 Tensor &getDerivativeTensor(Node &node, size_t index);
 void addErrorTensor(Node &node, inner::Tensor &tensor);
 Tensor &getErrorTensor(Node &node, size_t index);
-void setResultTensor(AbstractNode &node, inner::Tensor &tensor);
-Tensor &createTensor(DataType type, TensorShape shape);
+void setResultTensor(AbstractNode &node, inner::Tensor *tensor);
+Tensor *getNullTensor();
 }  // namespace athena::core::inner
 
 #endif  // ATHENA_INNERFUNCTIONS_H

@@ -55,19 +55,33 @@ void athena::core::GradientDescent::genErrors(
     std::vector<inner::Tensor *> &nodeErrorTensors,
     std::vector<inner::Tensor *> &outcomingErrorTensors) {
     float fltUnit = 1.0;
+    float fltZero = 0.0;
     double dblUnit = 1.0;
+    double dblZero = 0.0;
     uint64_t unit = 0;
+    uint64_t zero;
 
     switch (derivativeTensors.front()->getDataType()) {
         case DataType::DOUBLE:
             unit = *reinterpret_cast<uint64_t *>(&dblUnit);
+            zero = *reinterpret_cast<uint64_t *>(&dblZero);
             break;
         case DataType::FLOAT: {
             unit = *reinterpret_cast<uint64_t *>(&fltUnit);
+            zero = *reinterpret_cast<uint64_t *>(&fltZero);
             break;
         }
         default:
             new FatalError(1, "Unsupported type");
+    }
+
+    auto *accum = new inner::Tensor(derivativeTensors.front()->getDataType(),
+                                    outcomingErrorTensors.front()->getShape());
+    generator.generate("allocate", *accum);
+    void *pzero = static_cast<void *>(&zero);
+    generator.generate("fill", *accum, pzero);
+    for (auto &outcomingErrorTensor : outcomingErrorTensors) {
+        generator.generate("add", *accum, *outcomingErrorTensor, *accum);
     }
 
     for (size_t idx = 0; idx < derivativeTensors.size(); idx++) {
@@ -75,5 +89,7 @@ void athena::core::GradientDescent::genErrors(
                            nodeErrorTensors[idx], unit,
                            outcomingErrorTensors[idx]);
     }
+
+    // todo deallocate
 }
 }  // namespace athena::core

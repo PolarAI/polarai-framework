@@ -41,6 +41,11 @@ template <>
     return ::llvm::ConstantFP::get(::llvm::Type::getDoubleTy(ctx), value);
 }
 
+template <>
+::llvm::Constant *getFPConstant<float>(::llvm::LLVMContext &ctx, float value);
+template <>
+::llvm::Constant *getFPConstant<double>(::llvm::LLVMContext &ctx, double value);
+
 }  // namespace athena::backend::llvm::codegen
 
 #endif  // ATHENA_COMMON_H

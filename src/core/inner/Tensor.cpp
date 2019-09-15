@@ -74,9 +74,9 @@ void Tensor::clear() {
     mShapePartialProduct = 1;
 }
 
-Tensor &createTensor(DataType type, TensorShape shape) {
-    auto tensor = std::make_unique<Tensor>(type, shape);
-    getTensorRegistry().push_back(std::move(tensor));
-    return *getTensorRegistry().back();
+Tensor* getNullTensor() {
+    static auto* null = new Tensor(DataType::UNDEFINED, {0});
+    return null;
 }
+
 }  // namespace athena::core::inner

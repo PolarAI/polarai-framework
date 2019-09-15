@@ -15,15 +15,15 @@
 #include <athena/ops/MSELossFunction.h>
 
 namespace athena::ops {
-core::inner::Tensor &ops::MSELossFunction::getResultTensor(
+core::inner::Tensor *ops::MSELossFunction::getResultTensor(
     std::vector<core::inner::Tensor *> args) const {
     core::TensorShape newShape{1};
-    return core::inner::createTensor(args[0]->getDataType(), newShape);
+    return new core::inner::Tensor(args[0]->getDataType(), newShape);
 }
-core::inner::Tensor &MSELossFunction::getDerivativeTensor(
+core::inner::Tensor *MSELossFunction::getDerivativeTensor(
     std::vector<core::inner::Tensor *> args, int argNo) const {
     core::TensorShape newShape{1};
-    return core::inner::createTensor(args[0]->getDataType(), newShape);
+    return new core::inner::Tensor(args[0]->getDataType(), newShape);
 }
 void MSELossFunction::gen(
     core::AbstractGenerator &g,

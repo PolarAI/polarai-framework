@@ -22,7 +22,7 @@ void incrementInputCount(AbstractNode &node) {
     ++node.mInputsCount;
 }
 Tensor &getTensorFromNode(AbstractNode &node) {
-    return node.mTensor;
+    return *node.mTensor;
 }
 Traversal &getTraversal(Graph &graph) {
     return graph.mTraversal;
