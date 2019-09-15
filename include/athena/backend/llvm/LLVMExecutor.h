@@ -76,9 +76,24 @@ class LLVMExecutor : public athena::core::Executor {
         LLVMGenerator &generator,
         const ClusterContainer<core::LossNode> &lossNodes);
 
-    void compileDerivatives(LLVMGenerator &generator,
-                            const core::Traversal &traversal,
+    static void compileDerivatives(LLVMGenerator &generator,
+                                   const core::Traversal &traversal,
                             core::Optimizer &graphOptimizer);
+
+    static void compileLossDerivatives(
+        LLVMGenerator &generator,
+        const ClusterContainer<core::LossNode> &lossNodes,
+        core::Optimizer &graphOptimizer);
+
+    static void compileNodeDerivatives(
+        LLVMGenerator &generator,
+        const ClusterContainer<core::Node> &nodes,
+        core::Optimizer &graphOptimizer);
+
+    static void adjustWeights(
+        LLVMGenerator &generator,
+        const ClusterContainer<core::InputNode> &inputNodes,
+        core::Optimizer &graphOptimizer);
 
     public:
     LLVMExecutor();

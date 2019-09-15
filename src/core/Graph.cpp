@@ -337,7 +337,7 @@ void Graph::setUpTensors() const {
             for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
                  idx++) {
                 auto& derivativeTensor =
-                    node.getOperation().getDerivativeTensor(opArgs, idx);
+                    *node.getOperation().getDerivativeTensor(opArgs, idx);
                 // For loss node error and derivative means the same
                 inner::addDerivativeTensor(node, derivativeTensor);
                 inner::addErrorTensor(node, derivativeTensor);
@@ -385,6 +385,25 @@ void Graph::printDot(std::basic_ostream<char>& stream) {
             auto& actionNode = node_cast<core::Node&>(
                 *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
             stream << actionNode.getName() << " [label=\"ACT "
+                   << actionNode.getName();
+            auto& tensor = inner::getTensorFromNode(actionNode);
+            stream << "\\nTensor addr: " << tensor.getVirtualAddress();
+            stream << "\\nTensor total size: "
+                   << tensor.getShapeView().getTotalSize();
+            stream << "\"]\n";
+
+            for (auto& parent : nodeDeps.input) {
+                auto* pNode = core::inner::getNodeTable()[parent.nodeIndex];
+                stream << pNode->getName() << " -> " << actionNode.getName();
+                stream << ";\n";
+            }
+        }
+
+        auto& lossNodes = cluster.get<core::LossNode>();
+        for (auto& nodeDeps : lossNodes) {
+            auto& actionNode = node_cast<core::LossNode&>(
+                *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+            stream << actionNode.getName() << " [label=\"LOSS "
                    << actionNode.getName();
             auto& tensor = inner::getTensorFromNode(actionNode);
             stream << "\\nTensor addr: " << tensor.getVirtualAddress();

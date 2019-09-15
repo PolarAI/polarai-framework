@@ -53,7 +53,7 @@ AbstractNode& AbstractNode::operator=(AbstractNode&& rhs) noexcept {
     if (mGraphIndex != inner::kKUndefinedIndex) {
         FatalError(1, "Move into node, which belongs to graph");
     }
-    mTensor = std::move(rhs.mTensor);
+    mTensor = rhs.mTensor;
     mName = std::move(rhs.mName);
     mGraphIndex = rhs.mGraphIndex;
     mNodeIndex = rhs.mNodeIndex;
@@ -61,9 +61,6 @@ AbstractNode& AbstractNode::operator=(AbstractNode&& rhs) noexcept {
     inner::getNodeTable()[mNodeIndex] = this;
     rhs.fullClear();
     return *this;
-}
-size_t AbstractNode::getTensorAddress() const {
-    return mTensor.getVirtualAddress();
 }
 void AbstractNode::fullClear() {
     AbstractNode::clear();

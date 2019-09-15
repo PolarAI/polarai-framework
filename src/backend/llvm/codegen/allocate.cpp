@@ -40,7 +40,18 @@ void registerAllocate(LLVMGenerator *generator) {
             ::llvm::Constant *tensorConst = ::llvm::ConstantInt::get(
                 ::llvm::Type::getInt64Ty(ctx), (size_t)(&a));
             ArgsV.push_back(tensorConst);
-            builder.CreateCall(calledFunction, ArgsV);
+            auto callInst = builder.CreateCall(calledFunction, ArgsV);
+            if (!callInst) {
+                new core::FatalError(
+                    -1, "Call instruction for allocate is not created");
+            }
+//            auto tensorMetaNode = ::llvm::MDNode::get(
+//                ctx,
+//                ::llvm::MDTuple::get(
+//                    ctx, ::llvm::MDString::get(
+//                             ctx, "Virtual address " +
+//                                      std::to_string(a.getVirtualAddress()))));
+//            callInst->setMetadata("athn.tensor", tensorMetaNode);
         };
 
     generator->registerFunctor("allocate", f);

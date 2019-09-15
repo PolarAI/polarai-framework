@@ -108,16 +108,22 @@ void registerFmaImpl(LLVMGenerator *generator,
 
 void registerFma(LLVMGenerator *generator) {
     std::function<void(::llvm::LLVMContext &, ::llvm::Module &,
-                       ::llvm::IRBuilder<> &, core::inner::Tensor &, uint64_t,
-                       core::inner::Tensor &, uint64_t, core::inner::Tensor &)>
+                       ::llvm::IRBuilder<> &, core::inner::Tensor &, uint64_t &,
+                       core::inner::Tensor &, uint64_t &,
+                       core::inner::Tensor &)>
         f = [generator](::llvm::LLVMContext &ctx, ::llvm::Module &module,
                         ::llvm::IRBuilder<> &builder, core::inner::Tensor &a,
                         uint64_t scaleA, core::inner::Tensor &b,
                         uint64_t scaleB, core::inner::Tensor &c) {
-            registerFmaImpl<float>(generator, ctx, module, builder, a, scaleA,
-                                   b, scaleB, c);
-            registerFmaImpl<double>(generator, ctx, module, builder, a, scaleA,
-                                    b, scaleB, c);
+            if (a.getDataType() == core::DataType::FLOAT) {
+                registerFmaImpl<float>(generator, ctx, module, builder, a,
+                                       scaleA, b, scaleB, c);
+            } else if (a.getDataType() == core::DataType::DOUBLE) {
+                registerFmaImpl<double>(generator, ctx, module, builder, a,
+                                        scaleA, b, scaleB, c);
+            } else {
+                new core::FatalError(1, "Unsupported type");
+            }
         };
 
     generator->registerFunctor("fma", f);

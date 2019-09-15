@@ -24,17 +24,10 @@ class Mangler {
 
     public:
     template <typename T>
-    static std::string getMangledName(const std::string &name);
+    static std::string getMangledName(const std::string &name) {
+        return "athn_" + name + getTypePostfix<T>();
+    }
 };
-
-template <>
-std::string Mangler::getMangledName<float>(const std::string &name);
-template <>
-std::string Mangler::getMangledName<double>(const std::string &name);
-template <>
-std::string Mangler::getTypePostfix<float>();
-template <>
-std::string Mangler::getTypePostfix<double>();
 }  // namespace athena::backend::llvm
 
 #endif  // ATHENA_MANGLER_H

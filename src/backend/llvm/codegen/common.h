@@ -27,18 +27,8 @@ void registerFma(LLVMGenerator *generator);
 
 template <typename T>
 ::llvm::Constant *getFPConstant(::llvm::LLVMContext &ctx, T value) {
-    static_assert(false, "Not implemented");
-}
-
-template <>
-::llvm::Constant *getFPConstant<float>(::llvm::LLVMContext &ctx, float value) {
-    return ::llvm::ConstantFP::get(::llvm::Type::getFloatTy(ctx), value);
-}
-
-template <>
-::llvm::Constant *getFPConstant<double>(::llvm::LLVMContext &ctx,
-                                        double value) {
-    return ::llvm::ConstantFP::get(::llvm::Type::getDoubleTy(ctx), value);
+    new core::FatalError(1, "Unable to create FP constant");
+    return nullptr;  // unreachable
 }
 
 template <>

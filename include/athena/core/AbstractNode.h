@@ -54,7 +54,6 @@ class AbstractNode {
     ShapeView getShapeView() const;
     ShapeView getSubShapeView(size_t offset = 1) const;
     const TensorShape& getShape() const;
-    size_t getTensorAddress() const;
     DataType getDataType() const;
     virtual NodeType getType() const = 0;
     size_t getNodeIndex() const;

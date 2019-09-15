@@ -14,6 +14,8 @@
 #include <athena/core/inner/InnerFunctions.h>
 #include <athena/ops/MSELossFunction.h>
 
+#include <cassert>
+
 namespace athena::ops {
 core::inner::Tensor *ops::MSELossFunction::getResultTensor(
     std::vector<core::inner::Tensor *> args) const {
@@ -28,7 +30,7 @@ core::inner::Tensor *MSELossFunction::getDerivativeTensor(
 void MSELossFunction::gen(
     core::AbstractGenerator &g,
     std::vector<core::inner::Tensor *> &operationArguments) const {
-    g.generate("mse", *operationArguments[0], *operationArguments[1]);
+    //    g.generate("mse", *operationArguments[0], *operationArguments[1]);
 }
 void MSELossFunction::genDerivative(
     int order,
@@ -37,6 +39,10 @@ void MSELossFunction::genDerivative(
     std::vector<core::inner::Tensor *> &operationArguments,
     core::inner::Tensor &derivativeTensor,
     int argNo) const {
+#ifdef DEBUG
+    assert(operationArguments.size() == 2 && "Operation args != 2");
+#endif
+
     double scaleDouble = 2.0 / operationResult.getShapeView().getTotalSize();
 
     uint64_t scale = 0;
@@ -59,7 +65,7 @@ void MSELossFunction::genDerivative(
             new core::FatalError(1, "Data type not supported");
     }
 
-    g.generate("fma", *operationArguments[0], scale, &operationArguments[1],
+    g.generate("fma", *operationArguments[0], scale, *operationArguments[1],
                negScale, derivativeTensor);
 }
 }  // namespace athena::ops

@@ -25,6 +25,7 @@
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/Support/TargetSelect.h"
 
+#include <algorithm>
 #include <cassert>
 
 namespace athena::backend::llvm {
@@ -188,125 +189,48 @@ void LLVMExecutor::compileDerivatives(LLVMGenerator &generator,
                                       core::Optimizer &graphOptimizer) {
     auto clusters = traversal.getClusters();
 
-    std::unordered_map<core::AbstractNode *, std::vector<core::inner::Tensor *>>
-        nodeErrors;
-
     for (auto clusterIt = clusters.rbegin(); clusterIt != clusters.rend();
          ++clusterIt) {
-        // Generate dericatives for loss nodes. There is no need to calculate
-        // error, as loss node output is error.
         auto &lossNodes = clusterIt->get<core::LossNode>();
-        for (auto &nodeDeps : lossNodes) {
-            // Collect inputs
-            std::vector<core::inner::Tensor *> inputs;
-            for (auto &inp : nodeDeps.input) {
-                auto &tensor = core::inner::getTensorFromNode(
-                    *core::inner::getNodeTable()[inp.nodeIndex]);
+        compileLossDerivatives(generator, lossNodes, graphOptimizer);
 
-                inputs.push_back(&tensor);
-            }
-
-            auto &lossNode = node_cast<core::LossNode &>(
-                *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
-
-            auto &outputTensor = core::inner::getTensorFromNode(lossNode);
-
-            // Calculate derivatives with respect to inputs
-            // TODO consider moving this computation to forward feed since it
-            // seems to have all the necessary info.
-            for (size_t idx = 0;
-                 idx < lossNode.getOperation().getOperandsCount(); idx++) {
-                auto derivativeTensor =
-                    core::inner::getDerivativeTensor(lossNode, idx);
-
-                generator.generate("allocate", derivativeTensor);
-                // todo lock tensors in memory
-                lossNode.getOperation().genDerivative(
-                    graphOptimizer.getRequiredOrder(), generator, outputTensor,
-                    inputs, derivativeTensor, idx);
-
-                // TODO memory clean up
-
-                // As the final derivative will be just sum of partial
-                // derivatives, we don't really care about order here
-                auto *errNode =
-                    core::inner::getNodeTable()[nodeDeps.input[idx].nodeIndex];
-                nodeErrors.insert(std::make_pair(
-                    errNode, std::vector<core::inner::Tensor *>()));
-                nodeErrors[errNode].push_back(
-                    &core::inner::getErrorTensor(lossNode, idx));
-            }
-        }
-
-        // Generate dericatives and errors for action nodes.
         auto &actionNodes = clusterIt->get<core::Node>();
-        for (auto &nodeDeps : actionNodes) {
-            // Collect inputs
-            std::vector<core::inner::Tensor *> inputs;
-            for (auto &inp : nodeDeps.input) {
-                auto &tensor = core::inner::getTensorFromNode(
-                    *core::inner::getNodeTable()[inp.nodeIndex]);
-
-                inputs.push_back(&tensor);
-            }
-
-            auto &node = node_cast<core::Node &>(
-                *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
-
-            auto &outputTensor = core::inner::getTensorFromNode(node);
-            // TODO this looks dumb to me. Maybe just use node's vectors?
-            std::vector<core::inner::Tensor *> derivativeTensors;
-            std::vector<core::inner::Tensor *> errorTensors;
-
-            for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
-                 idx++) {
-                auto &derivativeTensor =
-                    core::inner::getDerivativeTensor(node, idx);
-
-                generator.generate("allocate", derivativeTensor);
-                // todo lock tensors in memory
-                node.getOperation().genDerivative(
-                    graphOptimizer.getRequiredOrder(), generator, outputTensor,
-                    inputs, derivativeTensor, idx);
-
-                // As the final derivative will be just sum of partial
-                // derivatives, we don't really care about order here
-                auto *errNode =
-                    core::inner::getNodeTable()[nodeDeps.input[idx].nodeIndex];
-                nodeErrors.insert(std::make_pair(
-                    errNode, std::vector<core::inner::Tensor *>()));
-                nodeErrors[errNode].push_back(
-                    &core::inner::getErrorTensor(node, idx));
-
-                derivativeTensors.push_back(
-                    &core::inner::getDerivativeTensor(node, idx));
-                errorTensors.push_back(&core::inner::getErrorTensor(node, idx));
-            }
-
-            for (auto *errorTensor : nodeErrors[&node]) {
-                generator.generate("allocate", *errorTensor);
-                // todo lock in memory
-            }
-
-            // Actually generate errors
-            graphOptimizer.genErrors(generator, derivativeTensors, errorTensors,
-                                     nodeErrors[&node]);
-            // TODO cleanup wasted tensors
-        }
+        compileNodeDerivatives(generator, actionNodes, graphOptimizer);
 
         auto &inputNodes = clusterIt->get<core::InputNode>();
-        for (auto &nodeDeps : inputNodes) {
-            auto &inputNode = node_cast<core::InputNode &>(
-                *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+        adjustWeights(generator, inputNodes, graphOptimizer);
+    }
+}
+void LLVMExecutor::compileLossDerivatives(
+    LLVMGenerator &generator,
+    const LLVMExecutor::ClusterContainer<core::LossNode> &lossNodes,
+    core::Optimizer &graphOptimizer) {
+    for (auto &nodeDeps : lossNodes) {
+        // Collect inputs
+        std::vector<core::inner::Tensor *> inputs;
+        for (auto &inp : nodeDeps.input) {
+            auto &tensor = core::inner::getTensorFromNode(
+                *core::inner::getNodeTable()[inp.nodeIndex]);
 
-            // Frozen nodes are usually user data thus not updated
-            if (inputNode.isFrozen()) continue;
+            inputs.push_back(&tensor);
+        }
 
-            // todo lock in memory
-            auto &tensor = core::inner::getTensorFromNode(inputNode);
+        auto &lossNode = node_cast<core::LossNode &>(
+            *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
 
-            // Apply error correction
-            graphOptimizer.genFix(generator, tensor, nodeErrors[&inputNode]);
+        auto &outputTensor = core::inner::getTensorFromNode(lossNode);
+
+        for (size_t idx = 0;
+             idx < lossNode.getOperation().getOperandsCount() - 1; idx++) {
+            auto &derivativeTensor =
+                core::inner::getDerivativeTensor(lossNode, idx);
+
+            generator.generate("allocate", derivativeTensor);
+            // todo lock tensors in memory
+            lossNode.getOperation().genDerivative(
+                graphOptimizer.getRequiredOrder(), generator, outputTensor,
+                inputs, derivativeTensor, idx);
+            // TODO memory clean up
         }
     }
 }

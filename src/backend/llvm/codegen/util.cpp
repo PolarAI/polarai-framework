@@ -11,16 +11,17 @@
  * the License.
  */
 
-#include "Mangler.h"
+#include "common.h"
 
-namespace athena::backend::llvm {
+namespace athena::backend::llvm::codegen {
 template <>
-std::string Mangler::getTypePostfix<float>() {
-    return "_f";
-}
-template <>
-std::string Mangler::getTypePostfix<double>() {
-    return "_d";
+::llvm::Constant *getFPConstant<float>(::llvm::LLVMContext &ctx, float value) {
+    return ::llvm::ConstantFP::get(::llvm::Type::getFloatTy(ctx), value);
 }
 
-}  // namespace athena::backend::llvm
+template <>
+::llvm::Constant *getFPConstant<double>(::llvm::LLVMContext &ctx,
+                                        double value) {
+    return ::llvm::ConstantFP::get(::llvm::Type::getDoubleTy(ctx), value);
+}
+}

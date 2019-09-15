@@ -13,7 +13,6 @@
 
 #include <athena/core/AbstractGenerator.h>
 #include <athena/core/GradientDescent.h>
-#include <athena/core/inner/InnerFunctions.h>
 #include <athena/core/inner/Tensor.h>
 
 namespace athena::core {
@@ -86,8 +85,7 @@ void athena::core::GradientDescent::genErrors(
 
     for (size_t idx = 0; idx < derivativeTensors.size(); idx++) {
         generator.generate("hadamard", *derivativeTensors[idx], unit,
-                           nodeErrorTensors[idx], unit,
-                           outcomingErrorTensors[idx]);
+                           *nodeErrorTensors[idx], unit, *accum);
     }
 
     // todo deallocate

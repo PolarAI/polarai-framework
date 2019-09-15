@@ -16,6 +16,8 @@
 
 #include <athena/backend/llvm/LLVMGenerator.h>
 
+#include <string>
+
 namespace athena::backend::llvm::codegen {
 
 template <typename T>
@@ -66,16 +68,22 @@ void registerHadamardImpl(LLVMGenerator *generator,
 
 void registerHadamard(LLVMGenerator *generator) {
     std::function<void(::llvm::LLVMContext &, ::llvm::Module &,
-                       ::llvm::IRBuilder<> &, core::inner::Tensor &, uint64_t,
-                       core::inner::Tensor &, uint64_t, core::inner::Tensor &)>
+                       ::llvm::IRBuilder<> &, core::inner::Tensor &, uint64_t &,
+                       core::inner::Tensor &, uint64_t &,
+                       core::inner::Tensor &)>
         f = [generator](::llvm::LLVMContext &ctx, ::llvm::Module &module,
                         ::llvm::IRBuilder<> &builder, core::inner::Tensor &a,
                         uint64_t scaleA, core::inner::Tensor &b,
                         uint64_t scaleB, core::inner::Tensor &c) {
-            registerHadamardImpl<float>(generator, ctx, module, builder, a,
-                                        scaleA, b, scaleB, c);
-            registerHadamardImpl<double>(generator, ctx, module, builder, a,
-                                         scaleA, b, scaleB, c);
+            if (a.getDataType() == core::DataType::FLOAT) {
+                registerHadamardImpl<float>(generator, ctx, module, builder, a,
+                                            scaleA, b, scaleB, c);
+            } else if (a.getDataType() == core::DataType::DOUBLE) {
+                registerHadamardImpl<double>(generator, ctx, module, builder, a,
+                                             scaleA, b, scaleB, c);
+            } else {
+                new core::FatalError(1, "Unsupported type");
+            }
         };
 
     generator->registerFunctor("hadamard", f);
