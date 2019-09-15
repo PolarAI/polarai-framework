@@ -24,7 +24,7 @@ TEST(Node, Create) {
     std::string operationName = "Dummy";
     OperationDummy op(operationName);
     Node n(op);
-    auto tensor1 = inner::createTensor(dataType, shape);
+    auto *tensor1 = new inner::Tensor(dataType, shape);
     inner::setResultTensor(n, tensor1);
     ASSERT_EQ(n.getDataType(), dataType);
     ASSERT_EQ(n.getShapeView(), shape);
@@ -39,7 +39,7 @@ TEST(Node, CopyConstructor) {
     std::string operationName = "Dummy";
     OperationDummy op(operationName);
     Node n(op);
-    auto tensor1 = inner::createTensor(dataType, shape);
+    auto *tensor1 = new inner::Tensor(dataType, shape);
     inner::setResultTensor(n, tensor1);
     Node nSecond(n);
     ASSERT_EQ(inner::getNodeTable().size(), 3);
@@ -56,13 +56,13 @@ TEST(Node, CopyOperator) {
     std::string operationName = "Dummy";
     OperationDummy op(operationName);
     Node n(op);
-    auto tensor1 = inner::createTensor(dataType, shape);
+    auto *tensor1 = new inner::Tensor(dataType, shape);
     inner::setResultTensor(n, tensor1);
     TensorShape shapeSecond{2, 3, 4};
     DataType dataTypeSecond = DataType::HALF;
     std::string operationNameSecond = "DummySecond";
     Node nSecond(op, operationNameSecond);
-    auto tensor2 = inner::createTensor(dataTypeSecond, shapeSecond);
+    auto *tensor2 = new inner::Tensor(dataTypeSecond, shapeSecond);
     inner::setResultTensor(nSecond, tensor2);
     nSecond = n;
     ASSERT_EQ(inner::getNodeTable().size(), 3);
