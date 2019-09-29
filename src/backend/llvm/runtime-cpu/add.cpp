@@ -12,6 +12,7 @@
  */
 
 #include <athena/backend/llvm/device/Device.h>
+#include <athena/backend/llvm/runtime/add.h>
 #include <athena/core/Allocator.h>
 #include <athena/core/inner/Tensor.h>
 
@@ -30,18 +31,6 @@ void add(Device *, Allocator *allocator, Tensor *a, Tensor *b, Tensor *c) {
     }
 }
 
-template void add<float>(athena::backend::llvm::Device *,
-                         athena::core::Allocator *,
-                         athena::core::inner::Tensor *a,
-                         athena::core::inner::Tensor *b,
-                         athena::core::inner::Tensor *c);
-
-template void add<double>(athena::backend::llvm::Device *,
-                          athena::core::Allocator *,
-                          athena::core::inner::Tensor *a,
-                          athena::core::inner::Tensor *b,
-                          athena::core::inner::Tensor *c);
-
 template <typename T>
 void fma(athena::backend::llvm::Device *,
          athena::core::Allocator *allocator,
@@ -58,3 +47,31 @@ void fma(athena::backend::llvm::Device *,
         cf[i] = scaleA * af[i] + scaleB * bf[i];
     }
 }
+
+template void add<float>(athena::backend::llvm::Device *,
+                         athena::core::Allocator *,
+                         athena::core::inner::Tensor *a,
+                         athena::core::inner::Tensor *b,
+                         athena::core::inner::Tensor *c);
+
+template void add<double>(athena::backend::llvm::Device *,
+                          athena::core::Allocator *,
+                          athena::core::inner::Tensor *a,
+                          athena::core::inner::Tensor *b,
+                          athena::core::inner::Tensor *c);
+
+template void fma<float>(athena::backend::llvm::Device *,
+                         athena::core::Allocator *allocator,
+                         athena::core::inner::Tensor *a,
+                         float scaleA,
+                         athena::core::inner::Tensor *b,
+                         float scaleB,
+                         athena::core::inner::Tensor *c);
+
+template void fma<double>(athena::backend::llvm::Device *,
+                          athena::core::Allocator *allocator,
+                          athena::core::inner::Tensor *a,
+                          double scaleA,
+                          athena::core::inner::Tensor *b,
+                          double scaleB,
+                          athena::core::inner::Tensor *c);

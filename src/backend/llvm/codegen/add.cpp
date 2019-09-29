@@ -74,7 +74,7 @@ void registerFmaImpl(LLVMGenerator *generator,
     auto realScaleB = *reinterpret_cast<T *>(&scaleB);
 
     ::llvm::Function *calledFunction =
-        generator->findLLVMFunction(Mangler::getMangledName<T>("hadamard"));
+        generator->findLLVMFunction(Mangler::getMangledName<T>("fma"));
 
     if (!calledFunction) {
         core::FatalError(1, "Unknown function referenced");
@@ -84,7 +84,7 @@ void registerFmaImpl(LLVMGenerator *generator,
 
     ::llvm::Constant *device = ::llvm::ConstantInt::get(
         ::llvm::Type::getInt64Ty(ctx),
-        reinterpret_cast<size_t>(generator->getPreferredDevice("hadamard")));
+        reinterpret_cast<size_t>(generator->getPreferredDevice("fma")));
     ArgsV.push_back(device);
     ::llvm::Constant *allocator = ::llvm::ConstantInt::get(
         ::llvm::Type::getInt64Ty(ctx),

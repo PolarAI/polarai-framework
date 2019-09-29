@@ -65,6 +65,6 @@ void inner::addErrorTensor(Node& node, inner::Tensor& tensor) {
     node.mErrorTensors.push_back(&tensor);
 }
 inner::Tensor& inner::getErrorTensor(Node& node, size_t index) {
-    return *node.mDerivativeTensors[index];
+    return *node.mErrorTensors[index];
 }
 }  // namespace athena::core

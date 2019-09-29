@@ -24,6 +24,7 @@ void registerAllocate(LLVMGenerator *generator);
 void registerFill(LLVMGenerator *generator);
 void registerHadamard(LLVMGenerator *generator);
 void registerFma(LLVMGenerator *generator);
+void registerMse(LLVMGenerator *generator);
 
 template <typename T>
 ::llvm::Constant *getFPConstant(::llvm::LLVMContext &ctx, T value) {

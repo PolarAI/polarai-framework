@@ -24,13 +24,13 @@ core::inner::Tensor *ops::MSELossFunction::getResultTensor(
 }
 core::inner::Tensor *MSELossFunction::getDerivativeTensor(
     std::vector<core::inner::Tensor *> args, int argNo) const {
-    core::TensorShape newShape{1};
-    return new core::inner::Tensor(args[0]->getDataType(), newShape);
+    return new core::inner::Tensor(args[0]->getDataType(), args[0]->getShape());
 }
 void MSELossFunction::gen(
     core::AbstractGenerator &g,
     std::vector<core::inner::Tensor *> &operationArguments) const {
-    //    g.generate("mse", *operationArguments[0], *operationArguments[1]);
+    g.generate("mse", *operationArguments[0], *operationArguments[1],
+               *operationArguments[2]);
 }
 void MSELossFunction::genDerivative(
     int order,
@@ -44,6 +44,7 @@ void MSELossFunction::genDerivative(
 #endif
 
     double scaleDouble = 2.0 / operationResult.getShapeView().getTotalSize();
+    float scaleFloat = 2.0f / operationResult.getShapeView().getTotalSize();
 
     uint64_t scale = 0;
     uint64_t negScale = 0;
@@ -56,9 +57,9 @@ void MSELossFunction::genDerivative(
             break;
         }
         case core::DataType::FLOAT: {
-            double negScaleDouble = -scaleDouble;
-            scale = *reinterpret_cast<uint64_t *>(&scaleDouble);
-            negScale = *reinterpret_cast<uint64_t *>(&negScaleDouble);
+            float negScaleFloat = -scaleFloat;
+            scale = *reinterpret_cast<uint64_t *>(&scaleFloat);
+            negScale = *reinterpret_cast<uint64_t *>(&negScaleFloat);
             break;
         }
         default:

@@ -18,5 +18,6 @@
 #include <athena/backend/llvm/runtime/allocate.h>
 #include <athena/backend/llvm/runtime/fill.h>
 #include <athena/backend/llvm/runtime/matrix.h>
+#include <athena/backend/llvm/runtime/mse.h>
 
 #endif  // ATHENA_BUILTIN_H

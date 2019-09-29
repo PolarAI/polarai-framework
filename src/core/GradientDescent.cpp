@@ -84,8 +84,8 @@ void athena::core::GradientDescent::genErrors(
     }
 
     for (size_t idx = 0; idx < derivativeTensors.size(); idx++) {
-        generator.generate("hadamard", *derivativeTensors[idx], unit,
-                           *nodeErrorTensors[idx], unit, *accum);
+        generator.generate("hadamard", *derivativeTensors[idx], unit, *accum,
+                           unit, *nodeErrorTensors[idx]);
     }
 
     // todo deallocate
