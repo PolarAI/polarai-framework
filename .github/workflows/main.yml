@@ -9,6 +9,8 @@ on:
     branches:
       - master
       - develop
+  schedule:
+    - cron: "0 3 * * *"
 
 jobs:
   build:
@@ -20,11 +22,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
+      - name: Prepare Env
+        run: docker pull athenaml/build:latest
       - name: Test
-        run: |
-          mkdir -p build_${{ matrix.build_type }}
-          docker pull athenaml/build:latest
-          export COMMAND_WRAPPER="docker run -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE -e ATHENA_TEST_ENVIRONMENT=ci -e ATHENA_BINARY_DIR=$GITHUB_WORKSPACE/install_${{ matrix.build_type }} -e CC=clang-8 -e CXX=clang++-8 athenaml/build"
-          $COMMAND_WRAPPER $GITHUB_WORKSPACE/scripts/build.py --install-dir=$GITHUB_WORKSPACE/install_${{ matrix.build_type }} --build-type=${{ matrix.build_type }} $GITHUB_WORKSPACE/build_${{ matrix.build_type }} $GITHUB_WORKSPACE
-          $COMMAND_WRAPPER cmake --build $GITHUB_WORKSPACE/build_${{ matrix.build_type }} --target install
-          $COMMAND_WRAPPER $GITHUB_WORKSPACE/scripts/test.sh $GITHUB_WORKSPACE/build_${{ matrix.build_type }}
+        env:
+          BUILD_TYPE: ${{ matrix.build_type }}
+        run: $GITHUB_WORKSPACE/scripts/gh_ci_linux.sh
