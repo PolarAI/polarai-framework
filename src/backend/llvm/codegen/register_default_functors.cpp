@@ -17,11 +17,11 @@
 
 namespace athena::backend::llvm::codegen {
 void registerDefaultFunctors(LLVMGenerator *generator) {
-    registerAdd(generator);
+    registerStandardBuiltin<BuiltinThreeTensorArgs>("add", generator);
     registerAllocate(generator);
     registerFill(generator);
-    registerHadamard(generator);
-    registerFma(generator);
-    registerMse(generator);
+    registerStandardBuiltin<BuiltinTATATArgs>("hadamard", generator);
+    registerStandardBuiltin<BuiltinTATATArgs>("fma", generator);
+    registerStandardBuiltin<BuiltinThreeTensorArgs>("mse", generator);
 }
 }  // namespace athena::backend::llvm::codegen

@@ -19,12 +19,8 @@
 #include <functional>
 
 namespace athena::backend::llvm::codegen {
-void registerAdd(LLVMGenerator *generator);
 void registerAllocate(LLVMGenerator *generator);
 void registerFill(LLVMGenerator *generator);
-void registerHadamard(LLVMGenerator *generator);
-void registerFma(LLVMGenerator *generator);
-void registerMse(LLVMGenerator *generator);
 
 template <typename T>
 ::llvm::Constant *getFPConstant(::llvm::LLVMContext &ctx, T value) {
@@ -37,6 +33,24 @@ template <>
 template <>
 ::llvm::Constant *getFPConstant<double>(::llvm::LLVMContext &ctx, double value);
 
+using BuiltinThreeTensorArgs = std::function<void(::llvm::LLVMContext &,
+                                                  ::llvm::Module &,
+                                                  ::llvm::IRBuilder<> &,
+                                                  core::inner::Tensor &,
+                                                  core::inner::Tensor &,
+                                                  core::inner::Tensor &)>;
+
+using BuiltinTATATArgs = std::function<void(::llvm::LLVMContext &,
+                                            ::llvm::Module &,
+                                            ::llvm::IRBuilder<> &,
+                                            core::inner::Tensor &,
+                                            uint64_t,
+                                            core::inner::Tensor &,
+                                            uint64_t,
+                                            core::inner::Tensor &)>;
+
+template <typename T>
+void registerStandardBuiltin(const std::string &name, LLVMGenerator *generator);
 }  // namespace athena::backend::llvm::codegen
 
 #endif  // ATHENA_COMMON_H
