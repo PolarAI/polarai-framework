@@ -23,7 +23,6 @@
 #include <athena/core/inner/InnerFunctions.h>
 
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
-#include "llvm/Support/TargetSelect.h"
 
 #include <algorithm>
 #include <cassert>
@@ -52,14 +51,28 @@ void LLVMExecutor::setGraph(athena::core::Graph &graph) {
     }
 }
 
-void LLVMExecutor::execute() {
-    auto sym = mJITCompiler->lookup("jitmain");
+void LLVMExecutor::evaluate() {
+    auto sym = mJITCompiler->lookup("evaluateGraph");
 #ifdef DEBUG
-    assert(sym && "Failed to find jitmain function");
+    assert(
+        sym &&
+        "Failed to find evaluateGraph function. Did you forget to set Graph?");
 #endif
 
-    auto mainFunction = (void (*)())(intptr_t)sym.get().getAddress();
-    mainFunction();
+    auto evaluateFunction = (void (*)())(intptr_t)sym.get().getAddress();
+    evaluateFunction();
+}
+
+void LLVMExecutor::optimizeGraph() {
+    auto sym = mJITCompiler->lookup("optimizeGraph");
+#ifdef DEBUG
+    assert(
+        sym &&
+        "Failed to find optimizeGraph function. Did you forget to set Graph?");
+#endif
+
+    auto optimizeFunction = (void (*)())(intptr_t)sym.get().getAddress();
+    optimizeFunction();
 }
 
 LLVMExecutor::LLVMExecutor() : mJITCompiler(AthenaJIT::create()) {
@@ -70,6 +83,7 @@ LLVMExecutor::LLVMExecutor() : mJITCompiler(AthenaJIT::create()) {
     mRuntimeDriver =
         std::make_unique<RuntimeDriver>(mJITCompiler->getContext());
 
+    // TODO better RT lib handling
     auto libName = std::getenv("ATHENA_RT_LIBRARY");
     mRuntimeDriver->load(libName);
 #ifdef DEBUG
@@ -93,13 +107,10 @@ std::vector<std::unique_ptr<::llvm::Module>> LLVMExecutor::compileGraph(
     // TODO get real target triple
     llvmModule->setTargetTriple(::llvm::sys::getDefaultTargetTriple());
 
-    ::llvm::FunctionType *FT = ::llvm::FunctionType::get(
-        ::llvm::Type::getVoidTy(mJITCompiler->getContext()), false);
-    ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage, "jitmain",
-                             *llvmModule);
-
     LLVMGenerator generator(mJITCompiler->getContext(), llvmModule, *mAllocator,
                             mRuntimeDriver->getModules());
+
+    generator.generateFunctionHeader("evaluateGraph");
 
     auto graphTraversal = graph.traverse();
 
@@ -114,11 +125,11 @@ std::vector<std::unique_ptr<::llvm::Module>> LLVMExecutor::compileGraph(
         compileLossNodes(generator, lossNodes);
     }
 
+    generator.generateFunctionFooter();
+
+    generator.generateFunctionHeader("optimizeGraph");
     compileDerivatives(generator, graphTraversal, *graph.getOptimizer());
-
-    auto builder = generator.getBuilder();
-
-    builder.CreateRetVoid();
+    generator.generateFunctionFooter();
 
     std::vector<std::unique_ptr<::llvm::Module>> resultModules;
     resultModules.push_back(std::move(llvmModule));

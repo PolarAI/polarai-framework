@@ -26,14 +26,13 @@ llvm::LLVMGenerator::LLVMGenerator(
     core::Allocator &allocator,
     std::vector<std::unique_ptr<::llvm::Module>> &existing)
     : mGeneratedModule(module),
-      mMainBlock(::llvm::BasicBlock::Create(
-          ctx, "entry", module->getFunction("jitmain"))),
-      mCurrentBlock(mMainBlock),
+      mCurrentMainBlock(nullptr),
+      mCurrentBlock(mCurrentMainBlock),
       mContext(ctx),
-      mBuilder(::llvm::IRBuilder(mMainBlock)),
+      mBuilder(::llvm::IRBuilder(ctx)),
       mAllocator(allocator),
       mExistingModules(existing) {
-    mBuilder.SetInsertPoint(mMainBlock);
+    mBuilder.SetInsertPoint(mCurrentMainBlock);
     codegen::registerDefaultFunctors(this);
 }
 
@@ -103,7 +102,7 @@ void LLVMGenerator::generateImpl(std::string &name,
 }
 void LLVMGenerator::openNode(std::string_view name) {
 #ifdef DEBUG
-    assert(mCurrentBlock == mMainBlock && "There is an opened node");
+    assert(mCurrentBlock == mCurrentMainBlock && "There is an opened node");
 #endif
     ::llvm::FunctionType *FT =
         ::llvm::FunctionType::get(::llvm::Type::getVoidTy(mContext), false);
@@ -119,7 +118,22 @@ void LLVMGenerator::openNode(std::string_view name) {
 }
 void LLVMGenerator::closeNode() {
     mBuilder.CreateRetVoid();
-    mCurrentBlock = mMainBlock;
+    mCurrentBlock = mCurrentMainBlock;
     mBuilder.SetInsertPoint(mCurrentBlock);
+}
+void LLVMGenerator::generateFunctionHeader(const std::string &name) {
+    ::llvm::FunctionType *FT =
+        ::llvm::FunctionType::get(::llvm::Type::getVoidTy(mContext), false);
+    ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage, name,
+                             *mGeneratedModule);
+    mCurrentMainBlock = ::llvm::BasicBlock::Create(
+        mContext, "entry", mGeneratedModule->getFunction(name));
+    mCurrentBlock = mCurrentMainBlock;
+    mBuilder.SetInsertPoint(mCurrentBlock);
+}
+void LLVMGenerator::generateFunctionFooter() {
+    mBuilder.CreateRetVoid();
+    mCurrentBlock = nullptr;
+    mCurrentMainBlock = nullptr;
 }
 }  // namespace athena::backend::llvm

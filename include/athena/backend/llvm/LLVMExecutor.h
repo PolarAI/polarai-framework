@@ -106,7 +106,13 @@ class LLVMExecutor : public athena::core::Executor {
     /**
      * Do actual computation
      */
-    void execute() override;
+    void evaluate() override;
+
+    /**
+     * Apply weight correction technique
+     */
+    void optimizeGraph() override;
+
     /**
      *
      * @return Associated Allocator

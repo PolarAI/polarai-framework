@@ -35,7 +35,7 @@ class LLVMGenerator : public core::AbstractGenerator {
     std::vector<std::unique_ptr<::llvm::Module>> &mExistingModules;
     ::llvm::LLVMContext &mContext;
     // todo abatashev: refactor main block
-    ::llvm::BasicBlock *mMainBlock;
+    ::llvm::BasicBlock *mCurrentMainBlock;
     ::llvm::BasicBlock *mCurrentBlock;
     ::llvm::IRBuilder<> mBuilder;
 
@@ -94,6 +94,19 @@ class LLVMGenerator : public core::AbstractGenerator {
      * Notifies generator that Node code generation ends
      */
     void closeNode() override;
+
+    /**
+     * Creates empty function without arguments and sets it as current main
+     * block
+     * @param name Function name
+     */
+    void generateFunctionHeader(const std::string &name);
+
+    /**
+     * Generates return command for current function and removes it from current
+     * main block
+     */
+    void generateFunctionFooter();
 
     /**
      * Register new functor

@@ -76,7 +76,7 @@ TEST(JIT, SimpleVectorAdd) {
     executor.setGraph(graph);
 
     // Act
-    executor.execute();
+    executor.evaluate();
 
     // Assert
     auto accessor = outputNode.getAccessor<float>(*executor.getAllocator());
