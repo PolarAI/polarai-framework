@@ -82,7 +82,7 @@ function(AthenaAddDependency)
         FetchContent_GetProperties("${PARSED_ARGS_TARGET_NAME}")
         if (NOT ${PARSED_ARGS_TARGET_NAME}_POPULATED)
             FetchContent_Populate("${PARSED_ARGS_TARGET_NAME}")
-            add_subdirectory(${${PARSED_ARGS_TARGET_NAME}_SOURCE_DIR} ${${PARSED_ARGS_TARGET_NAME}_BINARY_DIR})
+            add_subdirectory(${${PARSED_ARGS_TARGET_NAME}_SOURCE_DIR} ${${PARSED_ARGS_TARGET_NAME}_BINARY_DIR} EXCLUDE_FROM_ALL)
             add_library(AthenaDep::${PARSED_ARGS_TARGET_NAME} INTERFACE IMPORTED)
 
             set(INCLUDE_DIRS)
