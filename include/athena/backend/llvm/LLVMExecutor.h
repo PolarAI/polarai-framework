@@ -56,7 +56,8 @@ class LLVMExecutor : public athena::core::Executor {
      */
     static void compileInputNodes(
         LLVMGenerator &generator,
-        const ClusterContainer<core::InputNode> &inputNodes);
+        const ClusterContainer<core::InputNode> &inputNodes,
+        athena::core::Graph& graph);
 
     /**
      * Generate LLVM IR for nodes
@@ -65,7 +66,8 @@ class LLVMExecutor : public athena::core::Executor {
      */
     static void compileActionNodes(
         LLVMGenerator &generator,
-        const ClusterContainer<core::Node> &actionNodes);
+        const ClusterContainer<core::Node> &actionNodes,
+        athena::core::Graph& graph);
 
     /**
      * Generate LLVM IR for loss nodes
@@ -74,26 +76,31 @@ class LLVMExecutor : public athena::core::Executor {
      */
     static void compileLossNodes(
         LLVMGenerator &generator,
-        const ClusterContainer<core::LossNode> &lossNodes);
+        const ClusterContainer<core::LossNode> &lossNodes,
+        athena::core::Graph& graph);
 
     static void compileDerivatives(LLVMGenerator &generator,
                                    const core::Traversal &traversal,
-                            core::Optimizer &graphOptimizer);
+                                   core::Optimizer &graphOptimizer,
+                                   core::Graph& graph);
 
     static void compileLossDerivatives(
         LLVMGenerator &generator,
         const ClusterContainer<core::LossNode> &lossNodes,
-        core::Optimizer &graphOptimizer);
+        core::Optimizer &graphOptimizer,
+        core::Graph& graph);
 
     static void compileNodeDerivatives(
         LLVMGenerator &generator,
         const ClusterContainer<core::Node> &nodes,
-        core::Optimizer &graphOptimizer);
+        core::Optimizer &graphOptimizer,
+        core::Graph& graph);
 
     static void adjustWeights(
         LLVMGenerator &generator,
         const ClusterContainer<core::InputNode> &inputNodes,
-        core::Optimizer &graphOptimizer);
+        core::Optimizer &graphOptimizer,
+        core::Graph& graph);
 
     public:
     LLVMExecutor();

@@ -31,11 +31,12 @@ class LossNode : public Node {
     LossNode(LossNode&& rhs) noexcept;
     LossNode(Operation& operation,
              Criterion criterion,
+             Context& context,
              std::string name = "");
     ~LossNode() override;
 
-    LossNode& operator=(const LossNode& rhs) = default;
-    LossNode& operator=(LossNode&& rhs) noexcept;
+    LossNode& operator=(const LossNode& rhs) = delete;
+    LossNode& operator=(LossNode&& rhs) = delete;
 
     NodeType getType() const override;
     Criterion getCriterion() const;

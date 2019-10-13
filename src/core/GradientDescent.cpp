@@ -71,7 +71,6 @@ void athena::core::GradientDescent::genError(
         default:
             new FatalError(-1, "Unsupported type");
     }
-
     void *pzero = static_cast<void *>(&zero);
     generator.generate("fill", totalError, pzero);
 

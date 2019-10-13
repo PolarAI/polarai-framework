@@ -16,8 +16,9 @@
 namespace athena::core {
 LossNode::LossNode(Operation& operation,
                    Criterion criterion,
+                   Context& context,
                    std::string name)
-    : Node(operation, std::move(name)),
+    : Node(operation, context, std::move(name)),
       mCriterion(criterion) {}
 LossNode::LossNode(LossNode&& rhs) noexcept
     : Node(std::move(rhs)), mCriterion(rhs.mCriterion) {
@@ -25,12 +26,6 @@ LossNode::LossNode(LossNode&& rhs) noexcept
 }
 LossNode::~LossNode() {
     saveInGraph(false);
-}
-LossNode& LossNode::operator=(LossNode&& rhs) noexcept {
-    mCriterion = rhs.mCriterion;
-    rhs.mCriterion = Criterion::UNDEFINED;
-    Node::operator=(std::move(rhs));
-    return *this;
 }
 NodeType LossNode::getType() const {
     return NodeType::LOSS;

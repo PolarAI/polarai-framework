@@ -21,17 +21,10 @@ Node::Node(Node&& rhs) noexcept
       mErrorTensor(std::move(rhs.mErrorTensor)) {
     rhs.mOperation = nullptr;
 }
-Node::Node(Operation& operation, std::string name)
-    : AbstractNode(std::move(name)), mOperation(&operation) {}
+Node::Node(Operation& operation, Context& context, std::string name)
+    : AbstractNode(context, std::move(name)), mOperation(&operation) {}
 Node::~Node() {
     saveInGraph(false);
-}
-Node& Node::operator=(Node&& rhs) noexcept {
-    mOperation = rhs.mOperation;
-    rhs.mOperation = nullptr;
-    mDerivativeTensors = std::move(rhs.mDerivativeTensors);
-    AbstractNode::operator=(std::move(rhs));
-    return *this;
 }
 NodeType Node::getType() const {
     return NodeType::DEFAULT;

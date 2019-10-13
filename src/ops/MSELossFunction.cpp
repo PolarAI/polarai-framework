@@ -18,13 +18,13 @@
 
 namespace athena::ops {
 core::inner::Tensor *ops::MSELossFunction::getResultTensor(
-    std::vector<core::inner::Tensor *> args) const {
+    core::Context& context, std::vector<core::inner::Tensor *> args) const {
     core::TensorShape newShape{1};
-    return new core::inner::Tensor(args[0]->getDataType(), newShape);
+    return new core::inner::Tensor(args[0]->getDataType(), newShape, context);
 }
 core::inner::Tensor *MSELossFunction::getDerivativeTensor(
-    std::vector<core::inner::Tensor *> args, int argNo) const {
-    return new core::inner::Tensor(args[0]->getDataType(), args[0]->getShape());
+    core::Context& context, std::vector<core::inner::Tensor *> args, int argNo) const {
+    return new core::inner::Tensor(args[0]->getDataType(), args[0]->getShape(), context);
 }
 void MSELossFunction::gen(
     core::AbstractGenerator &g,
@@ -70,8 +70,8 @@ void MSELossFunction::genDerivative(
     g.generate("fma", *operationArguments[0], scale, *operationArguments[1],
                negScale, derivativeTensor);
 }
-core::inner::Tensor *MSELossFunction::getErrorTensor(
-    std::vector<core::inner::Tensor *> args, int derivativeOrder) const {
+core::inner::Tensor *MSELossFunction::getErrorTensor(core::Context& context,
+                                                     std::vector<core::inner::Tensor *> args, int derivativeOrder) const {
     // Loss node is always the last node (except for output)
     // No need for actual implementation
     // todo refactor me

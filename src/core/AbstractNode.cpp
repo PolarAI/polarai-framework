@@ -15,52 +15,37 @@
 
 #include <athena/core/AbstractNode.h>
 #include <athena/core/Graph.h>
-#include <athena/core/inner/GlobalTables.h>
 
 namespace athena::core {
 AbstractNode::AbstractNode(const AbstractNode& rhs)
     : mTensor(rhs.mTensor),
+      mContext(rhs.mContext),
       mName(rhs.mName),
       mGraphIndex(inner::kKUndefinedIndex),
-      mNodeIndex(inner::getNodeTable().registerRecord(this)),
+      mNodeIndex(inner::getNodeTable(*mContext).registerRecord(this)),
       mInputsCount(0) {}
 AbstractNode::AbstractNode(AbstractNode&& rhs) noexcept
     : mTensor(rhs.mTensor),
+      mContext(rhs.mContext),
       mName(std::move(rhs.mName)),
       mGraphIndex(rhs.mGraphIndex),
       mNodeIndex(rhs.mNodeIndex),
       mInputsCount(rhs.mInputsCount) {
-    inner::getNodeTable()[mNodeIndex] = this;
+    inner::getNodeTable(*mContext)[mNodeIndex] = this;
     rhs.fullClear();
 }
 AbstractNode::AbstractNode(TensorShape shape,
                            DataType dataType,
+                           Context& context,
                            std::string name)
-    : mTensor(new inner::Tensor(dataType, std::move(shape))),
+    : mTensor(new inner::Tensor(dataType, std::move(shape), context)),
+      mContext(&context),
       mName(std::move(name)),
       mGraphIndex(inner::kKUndefinedIndex),
-      mNodeIndex(inner::getNodeTable().registerRecord(this)),
+      mNodeIndex(inner::getNodeTable(*mContext).registerRecord(this)),
       mInputsCount(0) {}
 AbstractNode::~AbstractNode() {
-    inner::getNodeTable()[mNodeIndex] = nullptr;
-}
-AbstractNode& AbstractNode::operator=(const AbstractNode& rhs) {
-    mTensor = rhs.mTensor;
-    mName = rhs.mName;
-    return *this;
-}
-AbstractNode& AbstractNode::operator=(AbstractNode&& rhs) noexcept {
-    if (mGraphIndex != inner::kKUndefinedIndex) {
-        FatalError(1, "Move into node, which belongs to graph");
-    }
-    mTensor = rhs.mTensor;
-    mName = std::move(rhs.mName);
-    mGraphIndex = rhs.mGraphIndex;
-    mNodeIndex = rhs.mNodeIndex;
-    mInputsCount = rhs.mInputsCount;
-    inner::getNodeTable()[mNodeIndex] = this;
-    rhs.fullClear();
-    return *this;
+    inner::getNodeTable(*mContext)[mNodeIndex] = nullptr;
 }
 void AbstractNode::fullClear() {
     AbstractNode::clear();
@@ -69,14 +54,14 @@ void AbstractNode::fullClear() {
     mInputsCount = 0;
 }
 void AbstractNode::after(const AbstractNode& node, EdgeMark mark) const {
-    if (auto* graph = inner::getGraphTable()[mGraphIndex]; graph) {
+    if (auto* graph = inner::getGraphTable(*mContext)[mGraphIndex]; graph) {
         graph->link(node, *this, mark);
     } else {
         FatalError(1, "Graph which contains node ", this, " does not exists");
     }
 }
 void AbstractNode::before(const AbstractNode& node, EdgeMark mark) const {
-    if (auto* graph = inner::getGraphTable()[mGraphIndex]; graph) {
+    if (auto* graph = inner::getGraphTable(*mContext)[mGraphIndex]; graph) {
         graph->link(*this, node, mark);
     } else {
         FatalError(1, "Graph which contains node ", this, " does not exists");
@@ -125,20 +110,21 @@ void AbstractNode::clear() {
     mName.clear();
 }
 void AbstractNode::removeFromGraph() {
-    if (auto* graph = inner::getGraphTable()[mGraphIndex]; graph) {
+    if (auto* graph = inner::getGraphTable(*mContext)[mGraphIndex]; graph) {
         graph->removeNode(*this);
     }
 }
 void AbstractNode::saveInGraph(bool isRepairedNode) {
-    if (auto* graph = inner::getGraphTable()[mGraphIndex]; graph) {
+    if (auto* graph = inner::getGraphTable(*mContext)[mGraphIndex]; graph) {
         graph->saveNode(*this, isRepairedNode);
     }
 }
-AbstractNode::AbstractNode(std::string name)
-    : mTensor(inner::getNullTensor()),
+AbstractNode::AbstractNode(Context& context, std::string name)
+    : mTensor(inner::getNullTensor(context)),
+      mContext(&context),
       mName(std::move(name)),
       mGraphIndex(inner::kKUndefinedIndex),
-      mNodeIndex(inner::getNodeTable().registerRecord(this)),
+      mNodeIndex(inner::getNodeTable(*mContext).registerRecord(this)),
       mInputsCount(0) {}
 void inner::setResultTensor(athena::core::AbstractNode& node,
                             athena::core::inner::Tensor* tensor) {

@@ -19,10 +19,6 @@
 
 #include <cstddef>
 
-namespace athena::core {
-class AbstractNode;
-}
-
 namespace athena::core::inner {
 void setGraphIndex(AbstractNode &node, size_t graphIndex);
 void incrementInputCount(AbstractNode &node);
@@ -36,7 +32,11 @@ Tensor &getDerivativeTensor(Node &node, size_t index);
 void setErrorTensor(Node &node, Tensor *tensor);
 inner::Tensor &getErrorTensor(Node &node);
 void setResultTensor(AbstractNode &node, inner::Tensor *tensor);
-Tensor *getNullTensor();
+Tensor *getNullTensor(Context& context);
+inner::Table<AllocationRecord>& getAllocationTable(athena::core::Context& context);
+inner::Table<Graph*>& getGraphTable(athena::core::Context& context);
+inner::Table<AbstractNode*>& getNodeTable(athena::core::Context& context);
+Context& getContext(athena::core::Graph& graph);
 }  // namespace athena::core::inner
 
 #endif  // ATHENA_INNERFUNCTIONS_H

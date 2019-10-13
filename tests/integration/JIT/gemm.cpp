@@ -43,28 +43,29 @@ TEST(JIT, GEMM) {
     MemoryLoader bLoader(bData, 9 * sizeof(float));
     MemoryLoader cLoader(cData, 9 * sizeof(float));
 
-    Graph graph;
+    Context context;
+    Graph graph(context);
     graph.setUpOptimizer<Optimizer>(/*learningRate0.01*/);
     graph.setUpOptimizer<GradientDescent>(/*learningRate*/ 0.01);
-    InputNode aInp(shape, DataType::FLOAT, aLoader, false, "a");
-    InputNode bInp(shape, DataType::FLOAT, bLoader, false, "b");
+    InputNode aInp(shape, DataType::FLOAT, aLoader, context, false, "a");
+    InputNode bInp(shape, DataType::FLOAT, bLoader, context, false, "b");
     graph.addNode(aInp);
     graph.addNode(bInp);
 
     GEMMOperation gemmOp(false, false);
-    Node gemm(gemmOp, "gemm_1");
+    Node gemm(gemmOp, context, "gemm_1");
     graph.addNode(gemm);
     gemm.after(aInp, 1);
     gemm.after(bInp, 2);
 
-    OutputNode outputNode(DataType::FLOAT, "out");
+    OutputNode outputNode(DataType::FLOAT, context, "out");
     graph.addNode(outputNode);
     outputNode.after(gemm, 1);
 
     MSELossFunction lossFunction;
-    InputNode cInp(shape, DataType::FLOAT, cLoader, true, "c");
+    InputNode cInp(shape, DataType::FLOAT, cLoader, context, true, "c");
     graph.addNode(cInp);
-    LossNode lossNode(lossFunction, Criterion::MIN, "mse_loss");
+    LossNode lossNode(lossFunction, Criterion::MIN, context, "mse_loss");
     graph.addNode(lossNode);
     lossNode.after(gemm, 1);
     lossNode.after(cInp, 2);

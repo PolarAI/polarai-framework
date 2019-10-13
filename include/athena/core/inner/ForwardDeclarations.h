@@ -24,9 +24,13 @@ class OutputNode;
 class LossNode;
 class Graph;
 class Traversal;
+class Context;
 namespace inner {
 struct Cluster;
 using Clusters = std::vector<Cluster>;
+template <typename Content>
+class Table;
+class AllocationRecord;
 }  // namespace inner
 }  // namespace athena::core
 

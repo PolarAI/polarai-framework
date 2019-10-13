@@ -37,11 +37,11 @@ class Node : public AbstractNode {
     Node() = delete;
     Node(const Node& rhs) = default;
     Node(Node&& rhs) noexcept;
-    explicit Node(Operation& operation, std::string name = "");
+    explicit Node(Operation& operation, Context& context, std::string name = "");
     ~Node() override;
 
-    Node& operator=(const Node& rhs) = default;
-    Node& operator=(Node&& rhs) noexcept;
+    Node& operator=(const Node& rhs) = delete;
+    Node& operator=(Node&& rhs) = delete;
 
     NodeType getType() const override;
     const Operation& getOperation() const;

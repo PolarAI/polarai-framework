@@ -13,7 +13,6 @@
 
 #include <athena/core/GradientDescent.h>
 #include <athena/core/Graph.h>
-#include <athena/core/inner/GlobalTables.h>
 
 #include <gtest/gtest.h>
 #include <set>
@@ -22,37 +21,38 @@ namespace athena::core {
 
 class GraphTest : public ::testing::Test {
     protected:
+    Context context;
     Graph graph;
     DummyLoader loader;
     OperationDummy operation;
 
-    GraphTest() : operation("DummyOperation"){};
+    GraphTest() : context(Context()), graph(context), operation("DummyOperation"){};
 
     void SetUp() override {
-        clearAll();
         graph.clear();
         graph.setUpOptimizer<Optimizer>();
     }
 };
 
 TEST(GraphSimpleTest, Creation) {
-    Graph graph;
+    Context context;
+    Graph graph(context);
 }
 TEST_F(GraphTest, Using) {
-    InputNode inputNodeFirst({1}, DataType::HALF, loader, false, "Input1");
+    InputNode inputNodeFirst({1}, DataType::HALF, loader, context, false, "Input1");
     ASSERT_EQ(inputNodeFirst.getNodeIndex(), 1);
     graph.addNode(inputNodeFirst);
-    InputNode inputNodeSecond({1}, DataType::HALF, loader, false, "Input2");
+    InputNode inputNodeSecond({1}, DataType::HALF, loader, context, false, "Input2");
     ASSERT_EQ(inputNodeSecond.getNodeIndex(), 2);
     graph.addNode(inputNodeSecond);
-    Node node(operation, "Node1");
+    Node node(operation, context, "Node1");
     ASSERT_EQ(node.getNodeIndex(), 3);
     graph.addNode(node);
     inputNodeFirst.before(node, 1);
     inputNodeSecond.before(node, 1);
-    Node nodeSecondLayerFirst(operation, "Node2.1");
+    Node nodeSecondLayerFirst(operation, context, "Node2.1");
     ASSERT_EQ(nodeSecondLayerFirst.getNodeIndex(), 4);
-    Node nodeSecondLayerSecond(operation, "Node2.2");
+    Node nodeSecondLayerSecond(operation, context, "Node2.2");
     ASSERT_EQ(nodeSecondLayerSecond.getNodeIndex(), 5);
     graph.addNode(nodeSecondLayerFirst);
     graph.addNode(nodeSecondLayerSecond);
@@ -70,26 +70,25 @@ TEST_F(GraphTest, Using) {
     std::sort(topology.begin(), topology.end());
     ASSERT_EQ(required_topology, topology);
     node.saveInGraph();
-    ASSERT_EQ(node.getNodeIndex(), 6);
     ASSERT_EQ(graph.countOwningNodes(), 1);
     ASSERT_EQ(graph.countSyncNodes(), 4);
     ASSERT_EQ(required_topology, graph.getTopology());
 }
 TEST_F(GraphTest, RemoveNode) {
-    InputNode inputNodeFirst({1}, DataType::FLOAT, loader, false, "Input1");
+    InputNode inputNodeFirst({1}, DataType::FLOAT, loader, context, false, "Input1");
     ASSERT_EQ(inputNodeFirst.getNodeIndex(), 1);
     graph.addNode(inputNodeFirst);
-    InputNode inputNodeSecond({1}, DataType::FLOAT, loader, false, "Input2");
+    InputNode inputNodeSecond({1}, DataType::FLOAT, loader, context, false, "Input2");
     ASSERT_EQ(inputNodeSecond.getNodeIndex(), 2);
     graph.addNode(inputNodeSecond);
-    Node node(operation, "Node1");
+    Node node(operation, context, "Node1");
     ASSERT_EQ(node.getNodeIndex(), 3);
     graph.addNode(node);
     inputNodeFirst.before(node, 1);
     inputNodeSecond.before(node, 1);
-    Node nodeSecondLayerFirst(operation, "Node2.1");
+    Node nodeSecondLayerFirst(operation, context, "Node2.1");
     ASSERT_EQ(nodeSecondLayerFirst.getNodeIndex(), 4);
-    Node nodeSecondLayerSecond(operation, "Node2.2");
+    Node nodeSecondLayerSecond(operation, context, "Node2.2");
     ASSERT_EQ(nodeSecondLayerSecond.getNodeIndex(), 5);
     graph.addNode(nodeSecondLayerFirst);
     graph.addNode(nodeSecondLayerSecond);
@@ -102,20 +101,20 @@ TEST_F(GraphTest, RemoveNode) {
     ASSERT_EQ(graph.getTopology().size(), 0);
 }
 TEST_F(GraphTest, DeepTestTraverse) {
-    InputNode inputNodeFirst({1}, DataType::DOUBLE, loader, false, "Input1");
+    InputNode inputNodeFirst({1}, DataType::DOUBLE, loader, context, false, "Input1");
     ASSERT_EQ(inputNodeFirst.getNodeIndex(), 1);
     graph.addNode(inputNodeFirst);
-    InputNode inputNodeSecond({1}, DataType::DOUBLE, loader, false, "Input2");
+    InputNode inputNodeSecond({1}, DataType::DOUBLE, loader, context, false, "Input2");
     ASSERT_EQ(inputNodeSecond.getNodeIndex(), 2);
     graph.addNode(inputNodeSecond);
-    Node node(operation, "Node1");
+    Node node(operation, context, "Node1");
     ASSERT_EQ(node.getNodeIndex(), 3);
     graph.addNode(node);
     inputNodeFirst.before(node, 1);
     inputNodeSecond.before(node, 1);
-    Node nodeSecondLayerFirst(operation, "Node2.1");
+    Node nodeSecondLayerFirst(operation, context, "Node2.1");
     ASSERT_EQ(nodeSecondLayerFirst.getNodeIndex(), 4);
-    Node nodeSecondLayerSecond(operation, "Node2.2");
+    Node nodeSecondLayerSecond(operation, context, "Node2.2");
     ASSERT_EQ(nodeSecondLayerSecond.getNodeIndex(), 5);
     graph.addNode(nodeSecondLayerFirst);
     graph.addNode(nodeSecondLayerSecond);
@@ -128,11 +127,11 @@ TEST_F(GraphTest, DeepTestTraverse) {
         ASSERT_EQ(0, traversal.getClusters()[0].get<Node>().size());
         std::set<std::string> setNames, targetSetNames;
         setNames.insert(
-            inner::getNodeTable()
+            inner::getNodeTable(context)
                 [traversal.getClusters()[0].get<InputNode>()[0].nodeIndex]
                     ->name());
         setNames.insert(
-            inner::getNodeTable()
+            inner::getNodeTable(context)
                 [traversal.getClusters()[0].get<InputNode>()[1].nodeIndex]
                     ->name());
         targetSetNames.insert("Input1");
@@ -151,11 +150,11 @@ TEST_F(GraphTest, DeepTestTraverse) {
         ASSERT_EQ(0, traversal.getClusters()[1].get<InputNode>().size());
         ASSERT_EQ(1, traversal.getClusters()[1].get<Node>().size());
         ASSERT_EQ(std::string("Node1"),
-                  inner::getNodeTable()
+                  inner::getNodeTable(context)
                       [traversal.getClusters()[1].get<Node>()[0].nodeIndex]
                           ->name());
         ASSERT_EQ(node_dyncast<Node*>(
-                      inner::getNodeTable()
+                      inner::getNodeTable(context)
                           [traversal.getClusters()[1].get<Node>()[0].nodeIndex])
                       ->getOperationPtr(),
                   &operation);
@@ -167,11 +166,11 @@ TEST_F(GraphTest, DeepTestTraverse) {
         ASSERT_EQ(2, traversal.getClusters()[2].get<Node>().size());
         std::set<std::string> setNames, targetSetNames;
         setNames.insert(
-            inner::getNodeTable()
+            inner::getNodeTable(context)
                 [traversal.getClusters()[2].get<Node>()[0].nodeIndex]
                     ->name());
         setNames.insert(
-            inner::getNodeTable()
+            inner::getNodeTable(context)
                 [traversal.getClusters()[2].get<Node>()[1].nodeIndex]
                     ->name());
         targetSetNames.insert("Node2.1");
@@ -182,23 +181,23 @@ TEST_F(GraphTest, DeepTestTraverse) {
         ASSERT_EQ(1, traversal.getClusters()[2].get<Node>()[0].input.size());
         ASSERT_EQ(1, traversal.getClusters()[2].get<Node>()[1].input.size());
         ASSERT_EQ(node_dyncast<Node*>(
-                      inner::getNodeTable()
+                      inner::getNodeTable(context)
                           [traversal.getClusters()[2].get<Node>()[0].nodeIndex])
                       ->getOperationPtr(),
                   &operation);
         ASSERT_EQ(node_dyncast<Node*>(
-                      inner::getNodeTable()
+                      inner::getNodeTable(context)
                           [traversal.getClusters()[2].get<Node>()[1].nodeIndex])
                       ->getOperationPtr(),
                   &operation);
     }
 }
 TEST_F(GraphTest, TraverseOnOtherGraph) {
-    InputNode inputNodeFirst({1}, DataType::HALF, loader, false, "Input1");
-    InputNode inputNodeSecond({1}, DataType::HALF, loader, false, "Input2");
-    Node nodeFirst(operation, "Node1");
-    Node nodeSecond(operation, "Node2");
-    Node nodeOut(operation, "NodeOut");
+    InputNode inputNodeFirst({1}, DataType::HALF, loader, context, false, "Input1");
+    InputNode inputNodeSecond({1}, DataType::HALF, loader, context, false, "Input2");
+    Node nodeFirst(operation, context, "Node1");
+    Node nodeSecond(operation, context, "Node2");
+    Node nodeOut(operation, context, "NodeOut");
     graph.addNode(inputNodeFirst);
     graph.addNode(inputNodeSecond);
     graph.addNode(nodeFirst);
@@ -216,11 +215,11 @@ TEST_F(GraphTest, TraverseOnOtherGraph) {
         ASSERT_EQ(0, traversal.getClusters()[0].get<Node>().size());
         std::set<std::string> setNames, targetSetNames;
         setNames.insert(
-            inner::getNodeTable()
+            inner::getNodeTable(context)
                 [traversal.getClusters()[0].get<InputNode>()[0].nodeIndex]
                     ->name());
         setNames.insert(
-            inner::getNodeTable()
+            inner::getNodeTable(context)
                 [traversal.getClusters()[0].get<InputNode>()[1].nodeIndex]
                     ->name());
         targetSetNames.insert("Input1");
@@ -240,11 +239,11 @@ TEST_F(GraphTest, TraverseOnOtherGraph) {
         ASSERT_EQ(2, traversal.getClusters()[1].get<Node>().size());
         std::set<std::string> setNames, targetSetNames;
         setNames.insert(
-            inner::getNodeTable()
+            inner::getNodeTable(context)
                 [traversal.getClusters()[1].get<Node>()[0].nodeIndex]
                     ->name());
         setNames.insert(
-            inner::getNodeTable()
+            inner::getNodeTable(context)
                 [traversal.getClusters()[1].get<Node>()[1].nodeIndex]
                     ->name());
         targetSetNames.insert("Node1");
@@ -259,7 +258,7 @@ TEST_F(GraphTest, TraverseOnOtherGraph) {
         ASSERT_EQ(0, traversal.getClusters()[2].get<InputNode>().size());
         ASSERT_EQ(1, traversal.getClusters()[2].get<Node>().size());
         ASSERT_EQ(std::string("NodeOut"),
-                  inner::getNodeTable()
+                  inner::getNodeTable(context)
                       [traversal.getClusters()[2].get<Node>()[0].nodeIndex]
                           ->name());
         ASSERT_EQ(0, traversal.getClusters()[2].get<Node>()[0].output.size());

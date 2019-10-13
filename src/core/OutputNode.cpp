@@ -14,8 +14,8 @@
 #include <athena/core/OutputNode.h>
 
 namespace athena::core {
-OutputNode::OutputNode(DataType dataType, std::string name)
-    : AbstractNode({}, dataType, std::move(name)) {}
+OutputNode::OutputNode(DataType dataType, Context& context, std::string name)
+    : AbstractNode({}, dataType, context, std::move(name)) {}
 OutputNode::~OutputNode() {
     saveInGraph(false);
 }

@@ -12,19 +12,19 @@
  */
 
 #include <athena/core/Node.h>
-#include <athena/core/inner/GlobalTables.h>
 
 #include <gtest/gtest.h>
 #include <string>
 
 namespace athena::core {
 TEST(Node, Create) {
+    Context context;
     TensorShape shape{2, 3, 4};
     DataType dataType = DataType::DOUBLE;
     std::string operationName = "Dummy";
     OperationDummy op(operationName);
-    Node n(op);
-    auto *tensor1 = new inner::Tensor(dataType, shape);
+    Node n(op, context);
+    auto *tensor1 = new inner::Tensor(dataType, shape, context);
     inner::setResultTensor(n, tensor1);
     ASSERT_EQ(n.getDataType(), dataType);
     ASSERT_EQ(n.getShapeView(), shape);
@@ -33,50 +33,21 @@ TEST(Node, Create) {
     ASSERT_EQ(&n.getOperation(), &op);
 }
 TEST(Node, CopyConstructor) {
-    inner::getNodeTable().clear();
+    Context context;
+    inner::getNodeTable(context).clear();
     TensorShape shape{2, 3, 4};
     DataType dataType = DataType::DOUBLE;
     std::string operationName = "Dummy";
     OperationDummy op(operationName);
-    Node n(op);
-    auto *tensor1 = new inner::Tensor(dataType, shape);
+    Node n(op, context);
+    auto *tensor1 = new inner::Tensor(dataType, shape, context);
     inner::setResultTensor(n, tensor1);
     Node nSecond(n);
-    ASSERT_EQ(inner::getNodeTable().size(), 3);
+    ASSERT_EQ(inner::getNodeTable(context).size(), 3);
     ASSERT_EQ(n.getShapeView(), nSecond.getShapeView());
     ASSERT_EQ(n.getType(), nSecond.getType());
     ASSERT_EQ(n.getDataType(), nSecond.getDataType());
     ASSERT_EQ(n.getName(), nSecond.getName());
     ASSERT_EQ(n.name(), nSecond.name());
-}
-TEST(Node, CopyOperator) {
-    inner::getNodeTable().clear();
-    TensorShape shape{2, 3, 4};
-    DataType dataType = DataType::DOUBLE;
-    std::string operationName = "Dummy";
-    OperationDummy op(operationName);
-    Node n(op);
-    auto *tensor1 = new inner::Tensor(dataType, shape);
-    inner::setResultTensor(n, tensor1);
-    TensorShape shapeSecond{2, 3, 4};
-    DataType dataTypeSecond = DataType::HALF;
-    std::string operationNameSecond = "DummySecond";
-    Node nSecond(op, operationNameSecond);
-    auto *tensor2 = new inner::Tensor(dataTypeSecond, shapeSecond);
-    inner::setResultTensor(nSecond, tensor2);
-    nSecond = n;
-    ASSERT_EQ(inner::getNodeTable().size(), 3);
-    ASSERT_EQ(n.getShapeView(), nSecond.getShapeView());
-    ASSERT_EQ(n.getType(), nSecond.getType());
-    ASSERT_EQ(n.getDataType(), nSecond.getDataType());
-    ASSERT_EQ(n.getName(), nSecond.getName());
-    ASSERT_EQ(n.name(), nSecond.name());
-}
-TEST(Node, NodeSavesOperation) {
-    inner::getNodeTable().clear();
-    OperationDummy op("DummyOp");
-    Node node(op);
-
-    EXPECT_EQ(node.getOperation().getName(), "DummyOp");
 }
 }  // namespace athena::core

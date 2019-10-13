@@ -21,19 +21,14 @@ InputNode::InputNode(InputNode&& rhs) noexcept
 InputNode::InputNode(TensorShape shape,
                      DataType dataType,
                      AbstractLoader& loader,
+                     Context& context,
                      bool isFrozen,
                      std::string name)
-    : AbstractNode(std::move(shape), dataType, std::move(name)),
+    : AbstractNode(std::move(shape), dataType, context, std::move(name)),
       mIsFrozen(isFrozen),
       mLoader(&loader) {}
 InputNode::~InputNode() {
     saveInGraph(false);
-}
-InputNode& InputNode::operator=(InputNode&& rhs) noexcept {
-    mLoader = rhs.mLoader;
-    rhs.mLoader = nullptr;
-    AbstractNode::operator=(std::move(rhs));
-    return *this;
 }
 NodeType InputNode::getType() const {
     return NodeType::INPUT;

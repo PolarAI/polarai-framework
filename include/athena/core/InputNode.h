@@ -33,12 +33,13 @@ class InputNode : public AbstractNode {
     InputNode(TensorShape shape,
               DataType dataType,
               AbstractLoader& loader,
+              Context& context,
               bool isFrozen = true,
               std::string name = "");
     ~InputNode() override;
 
-    InputNode& operator=(const InputNode& rhs) = default;
-    InputNode& operator=(InputNode&& rhs) noexcept;
+    InputNode& operator=(const InputNode& rhs) = delete;
+    InputNode& operator=(InputNode&& rhs) = delete;
 
     NodeType getType() const override;
     const AbstractLoader& getLoader() const;

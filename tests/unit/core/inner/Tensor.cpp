@@ -11,8 +11,8 @@
  * the License.
  */
 
-#include <athena/core/Clear.h>
 #include <athena/core/inner/Tensor.h>
+#include <athena/core/Context.h>
 
 #include <gtest/gtest.h>
 #include <numeric>
@@ -20,8 +20,9 @@
 namespace athena::core::inner {
 
 void testTensorCreation(const std::vector<size_t> &data, DataType dataType) {
+    Context context;
     auto shape = TensorShape(data);
-    auto tensor = Tensor(dataType, shape);
+    auto tensor = Tensor(dataType, shape, context);
     ASSERT_EQ(dataType, tensor.getDataType());
     ASSERT_EQ(shape, tensor.getShapeView());
     std::vector<size_t> resultShapeViewData(shape.getShapeView().begin(),
@@ -40,7 +41,6 @@ void testTensorCreation(const std::vector<size_t> &data, DataType dataType) {
 }
 
 TEST(TensorTest, Creation) {
-    clearAll();
     {
         auto dataType = DataType::DOUBLE;
         std::vector<size_t> data{2, 5, 8, 12};
@@ -78,10 +78,11 @@ TEST(TensorTest, CreationSeveralTensors) {
 }
 
 TEST(TensorTest, GetSubTensor) {
+    Context context;
     auto dataType = DataType::DOUBLE;
     std::vector<size_t> data{50, 65, 8, 12};
     auto shape = TensorShape(data);
-    auto tensor = Tensor(dataType, shape);
+    auto tensor = Tensor(dataType, shape, context);
     for (size_t indexSubTensor = 0; indexSubTensor < data[0];
          ++indexSubTensor) {
         auto subTensor = tensor[indexSubTensor];
@@ -95,10 +96,11 @@ TEST(TensorTest, GetSubTensor) {
 }
 
 TEST(TensorTest, GetSubSubTensor) {
+    Context context;
     auto dataType = DataType::DOUBLE;
     std::vector<size_t> data{10, 10, 10};
     auto shape = TensorShape(data);
-    auto tensor = Tensor(dataType, shape);
+    auto tensor = Tensor(dataType, shape, context);
     size_t subSize =
         std::accumulate<std::vector<size_t>::const_iterator, size_t>(
             data.begin() + 1, data.end(), 1, std::multiplies<size_t>());
@@ -118,10 +120,11 @@ TEST(TensorTest, GetSubSubTensor) {
 }
 
 TEST(TensorTest, CopyConstructor) {
+    Context context;
     auto dataType = DataType::HALF;
     std::vector<size_t> data{10, 12, 10};
     auto shape = TensorShape(data);
-    auto tensor = Tensor(dataType, shape);
+    auto tensor = Tensor(dataType, shape, context);
     size_t subSize =
         std::accumulate<std::vector<size_t>::const_iterator, size_t>(
             data.begin() + 1, data.end(), 1, std::multiplies<size_t>());
@@ -140,15 +143,16 @@ TEST(TensorTest, CopyConstructor) {
 }
 
 TEST(TensorTest, CopyOperator) {
+    Context context;
     auto dataType = DataType::HALF;
     std::vector<size_t> data{10, 12, 10};
     auto shape = TensorShape(data);
-    auto tensor = Tensor(dataType, shape);
+    auto tensor = Tensor(dataType, shape, context);
     {
         auto dataTypeSecond = DataType::HALF;
         std::vector<size_t> dataSecond{10, 12, 10};
         auto shapeSecond = TensorShape(data);
-        auto tensorSecond = Tensor(dataTypeSecond, shapeSecond);
+        auto tensorSecond = Tensor(dataTypeSecond, shapeSecond, context);
         tensor = tensorSecond;
         ASSERT_EQ(tensor.getDataType(), dataTypeSecond);
         ASSERT_EQ(tensor.getShapeView(), shapeSecond);
@@ -157,7 +161,7 @@ TEST(TensorTest, CopyOperator) {
         for (size_t index = 0; index < shape[0]; ++index) {
             auto subTensor = tensor[index];
             auto tensorSecond = subTensor;
-            Tensor tensorThird(dataType, shape);
+            Tensor tensorThird(dataType, shape, context);
             tensorThird = subTensor;
             ASSERT_EQ(tensorSecond.getDataType(), dataType);
             ASSERT_EQ(tensorSecond.getShapeView(), subTensor.getShapeView());
@@ -167,7 +171,8 @@ TEST(TensorTest, CopyOperator) {
     }
 }
 TEST(TensorTest, SetShape) {
-    auto tensor = Tensor(DataType::DOUBLE, {10, 12, 10});
+    Context context;
+    auto tensor = Tensor(DataType::DOUBLE, {10, 12, 10}, context);
     ASSERT_EQ(tensor.getSize(), 10 * 12 * 10);
     ASSERT_EQ(tensor.getShapeView().toShape(), TensorShape({10, 12, 10}));
     tensor.setShape(TensorShape{5, 2, 3});

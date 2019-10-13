@@ -14,11 +14,11 @@
 #ifndef ATHENA_ABSTRACTNODE_H
 #define ATHENA_ABSTRACTNODE_H
 
-#include <athena/core/Clear.h>
 #include <athena/core/DataType.h>
 #include <athena/core/NodeType.h>
 #include <athena/core/inner/InnerFunctions.h>
 #include <athena/core/inner/Tensor.h>
+#include <athena/core/Context.h>
 
 #include <string>
 #include <string_view>
@@ -33,6 +33,7 @@ class AbstractNode {
     private:
     void fullClear();
     inner::Tensor* mTensor;
+    Context* mContext;
     std::string mName;
     size_t mGraphIndex;
     size_t mNodeIndex;
@@ -42,12 +43,12 @@ class AbstractNode {
     AbstractNode() = delete;
     AbstractNode(const AbstractNode& rhs);
     AbstractNode(AbstractNode&& rhs) noexcept;
-    AbstractNode(TensorShape shape, DataType dataType, std::string name);
-    explicit AbstractNode(std::string name);
+    AbstractNode(TensorShape shape, DataType dataType, Context& context, std::string name);
+    AbstractNode(Context& context, std::string name);
     virtual ~AbstractNode();
 
-    AbstractNode& operator=(const AbstractNode& rhs);
-    AbstractNode& operator=(AbstractNode&& rhs) noexcept;
+    AbstractNode& operator=(const AbstractNode& rhs) = delete;
+    AbstractNode& operator=(AbstractNode&& rhs) = delete;
 
     void after(const AbstractNode& node, EdgeMark mark) const;
     void before(const AbstractNode& node, EdgeMark mark) const;

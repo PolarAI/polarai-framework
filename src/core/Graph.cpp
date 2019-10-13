@@ -17,7 +17,6 @@
 #include <athena/core/Node.h>
 #include <athena/core/OutputNode.h>
 #include <athena/core/Traversal.h>
-#include <athena/core/inner/GlobalTables.h>
 #include <athena/core/inner/InnerFunctions.h>
 
 #include <algorithm>
@@ -48,45 +47,38 @@ void initVisits(std::unordered_map<size_t, inner::NodeState>& visits,
 }
 void initQueue(std::queue<size_t>& queue,
                const OwningStorage& owningStorage,
-               const SyncStorage& syncStorage) {
+               const SyncStorage& syncStorage,
+               Context& context) {
     for (auto& inputNode : std::get<std::vector<InputNode>>(owningStorage)) {
         queue.push(inputNode.getNodeIndex());
     }
     for (auto& nodeIndex : syncStorage) {
-        if (inner::getNodeTable()[nodeIndex]->getType() == NodeType::INPUT) {
+        if (inner::getNodeTable(context)[nodeIndex]->getType() == NodeType::INPUT) {
             queue.push(nodeIndex);
         }
     }
 }
-Graph::Graph()
-    : mGraphIndex(inner::getGraphTable().registerRecord(this)),
+Graph::Graph(Context& context)
+    : mContext(&context),
+      mGraphIndex(inner::getGraphTable(*mContext).registerRecord(this)),
       mGraphName("MainGraph") {}
 Graph::Graph(Graph&& rhs) noexcept
     : mSyncStorage(std::move(rhs.mSyncStorage)),
       mOwningStorage(std::move(rhs.mOwningStorage)),
       mTopology(std::move(rhs.mTopology)),
+      mContext(rhs.mContext),
       mGraphIndex(rhs.mGraphIndex),
       mTraversal(std::move(rhs.mTraversal)) {
-    inner::getGraphTable()[mGraphIndex] = this;
+    inner::getGraphTable(*mContext)[mGraphIndex] = this;
     rhs.fullClear();
 }
 Graph::~Graph() {
-    inner::getGraphTable()[mGraphIndex] = nullptr;
+    inner::getGraphTable(*mContext)[mGraphIndex] = nullptr;
     for (auto indexNode : mSyncStorage) {
-        if (auto* node = inner::getNodeTable()[indexNode]; node) {
+        if (auto* node = inner::getNodeTable(*mContext)[indexNode]; node) {
             inner::setGraphIndex(*(node), inner::kKUndefinedIndex);
         }
     }
-}
-Graph& Graph::operator=(Graph&& rhs) noexcept {
-    mSyncStorage = std::move(rhs.mSyncStorage);
-    mOwningStorage = std::move(rhs.mOwningStorage);
-    mTopology = std::move(rhs.mTopology);
-    mGraphIndex = rhs.mGraphIndex;
-    mTraversal = std::move(rhs.mTraversal);
-    inner::getGraphTable()[mGraphIndex] = this;
-    rhs.fullClear();
-    return *this;
 }
 template <typename TemplateNodeType>
 void Graph::saveRealNode(TemplateNodeType& node,
@@ -97,11 +89,11 @@ void Graph::saveRealNode(TemplateNodeType& node,
     }
     std::get<std::vector<TemplateNodeType>>(mOwningStorage)
         .emplace_back(std::move(node));
-    if (isRepairedNode) {
-        TemplateNodeType newNode(
-            std::get<std::vector<TemplateNodeType>>(mOwningStorage).back());
-        node = std::move(newNode);
-    }
+//    if (isRepairedNode) {
+//        TemplateNodeType newNode(
+//            std::get<std::vector<TemplateNodeType>>(mOwningStorage).back());
+//        node = std::move(newNode);
+//    }
 }
 void Graph::fullClear() {
     clear();
@@ -117,7 +109,7 @@ const Topology& Graph::getTopology() const {
     return mTopology;
 }
 void Graph::addNode(AbstractNode& node) {
-    if (Graph* graphPointer = inner::getGraphTable()[node.getGraphIndex()];
+    if (Graph* graphPointer = inner::getGraphTable(*mContext)[node.getGraphIndex()];
         graphPointer) {
         FatalError(1, "addNode() in Graph : ", this,
                    ". GraphIndex : ", mGraphIndex,
@@ -156,7 +148,7 @@ void Graph::saveNode(AbstractNode& node, bool isRepairedNode) {
 }
 void Graph::saveAllSyncNodes(bool isRepairedNode) {
     for (auto syncNode : mSyncStorage) {
-        saveNode(*inner::getNodeTable()[syncNode], isRepairedNode, false);
+        saveNode(*inner::getNodeTable(*mContext)[syncNode], isRepairedNode, false);
     }
     mSyncStorage.clear();
 }
@@ -185,7 +177,7 @@ void Graph::link(const AbstractNode& startNode,
         mTopology.emplace_back(startNode.getNodeIndex(), endNode.getNodeIndex(),
                                mark);
         inner::incrementInputCount(
-            *inner::getNodeTable()[endNode.getNodeIndex()]);
+            *inner::getNodeTable(*mContext)[endNode.getNodeIndex()]);
         inner::setTraversalValidity(mTraversal, false);
     } else {
         FatalError(1, "link() in Graph : ", this,
@@ -231,7 +223,7 @@ const Traversal& Graph::traverse() {
     std::queue<size_t> currentQueue, newQueue;
     std::unordered_map<size_t, inner::NodeState> visits;
     initVisits(visits, mOwningStorage, mSyncStorage);
-    initQueue(currentQueue, mOwningStorage, mSyncStorage);
+    initQueue(currentQueue, mOwningStorage, mSyncStorage, *mContext);
     while (true) {
         inner::Cluster cluster{0};
         while (!currentQueue.empty()) {
@@ -246,7 +238,7 @@ const Traversal& Graph::traverse() {
                     visits[edgeIterator->endNodeIndex].inputCount;
                 ++inputCount;
                 auto targetInputCount =
-                    inner::getNodeTable()[edgeIterator->endNodeIndex]
+                    inner::getNodeTable(*mContext)[edgeIterator->endNodeIndex]
                         ->getInputsCount();
                 if (inputCount == targetInputCount) {
                     newQueue.push(edgeIterator->endNodeIndex);
@@ -260,7 +252,7 @@ const Traversal& Graph::traverse() {
                     edgeIterator->endNodeIndex, edgeIterator->mark);
                 ++edgeIterator;
             }
-            AbstractNode* node = inner::getNodeTable()[nodeIndex];
+            AbstractNode* node = inner::getNodeTable(*mContext)[nodeIndex];
             switch (node->getType()) {
                 TRAVERSE_ADD_NODES_TO_CLUSTER(NodeType::DEFAULT)
                 TRAVERSE_ADD_NODES_TO_CLUSTER(NodeType::INPUT)
@@ -297,23 +289,23 @@ void Graph::setUpTensors() const {
             std::vector<inner::Tensor*> opArgs;
 
             auto& node =
-                node_cast<Node&>(*inner::getNodeTable()[nodeDep.nodeIndex]);
+                node_cast<Node&>(*inner::getNodeTable(*mContext)[nodeDep.nodeIndex]);
             std::for_each(nodeDep.input.begin(), nodeDep.input.end(),
                           [&](const auto& inp) {
                               opArgs.push_back(&inner::getTensorFromNode(
-                                  *inner::getNodeTable()[inp.nodeIndex]));
+                                  *inner::getNodeTable(*mContext)[inp.nodeIndex]));
                           });
 
             inner::setResultTensor(node,
-                                   node.getOperation().getResultTensor(opArgs));
+                                   node.getOperation().getResultTensor(*mContext, opArgs));
             inner::setErrorTensor(node,
                                   node.getOperation().getErrorTensor(
-                                      opArgs, mOptimizer->getRequiredOrder()));
+                                      *mContext, opArgs, mOptimizer->getRequiredOrder()));
 
             for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
                  idx++) {
                 auto& derivativeTensor =
-                    *node.getOperation().getDerivativeTensor(opArgs, idx);
+                    *node.getOperation().getDerivativeTensor(*mContext, opArgs, idx);
                 inner::addDerivativeTensor(node, derivativeTensor);
             }
         }
@@ -323,20 +315,21 @@ void Graph::setUpTensors() const {
             std::vector<inner::Tensor*> opArgs;
 
             auto& node =
-                node_cast<LossNode&>(*inner::getNodeTable()[nodeDep.nodeIndex]);
+                node_cast<LossNode&>(*inner::getNodeTable(*mContext)[nodeDep.nodeIndex]);
             std::for_each(nodeDep.input.begin(), nodeDep.input.end(),
                           [&](const auto& inp) {
                               opArgs.push_back(&inner::getTensorFromNode(
-                                  *inner::getNodeTable()[inp.nodeIndex]));
+                                  *inner::getNodeTable(*mContext)[inp.nodeIndex]));
                           });
 
             inner::setResultTensor(node,
-                                   node.getOperation().getResultTensor(opArgs));
+                                   node.getOperation().getResultTensor(*mContext, opArgs));
 
             for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
                  idx++) {
                 auto& derivativeTensor =
-                    *node.getOperation().getDerivativeTensor(opArgs, idx);
+                    *node.getOperation().getDerivativeTensor(*mContext, opArgs, idx);
+                // For loss node error and derivative means the same
                 inner::addDerivativeTensor(node, derivativeTensor);
             }
         }
@@ -344,9 +337,9 @@ void Graph::setUpTensors() const {
         auto& outputNodes = cluster.get<OutputNode>();
         for (auto& nodeDep : outputNodes) {
             auto& node = node_cast<OutputNode&>(
-                *inner::getNodeTable()[nodeDep.nodeIndex]);
+                *inner::getNodeTable(*mContext)[nodeDep.nodeIndex]);
             auto& parentNode =
-                *inner::getNodeTable()[nodeDep.input[0].nodeIndex];
+                *inner::getNodeTable(*mContext)[nodeDep.input[0].nodeIndex];
             inner::setResultTensor(node, &inner::getTensorFromNode(parentNode));
         }
     }
@@ -358,7 +351,7 @@ void Graph::printDot(std::basic_ostream<char>& stream) {
         auto& inputNodes = cluster.get<core::InputNode>();
         for (auto& nodeDeps : inputNodes) {
             auto& inputNode = node_cast<core::InputNode&>(
-                *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+                *core::inner::getNodeTable(*mContext)[nodeDeps.nodeIndex]);
             stream << inputNode.getName() << " [label=\"INP "
                    << inputNode.getName();
             auto& tensor = inner::getTensorFromNode(inputNode);
@@ -380,7 +373,7 @@ void Graph::printDot(std::basic_ostream<char>& stream) {
         auto& actionNodes = cluster.get<core::Node>();
         for (auto& nodeDeps : actionNodes) {
             auto& actionNode = node_cast<core::Node&>(
-                *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+                *core::inner::getNodeTable(*mContext)[nodeDeps.nodeIndex]);
             stream << actionNode.getName() << " [label=\"ACT "
                    << actionNode.getName();
             auto& tensor = inner::getTensorFromNode(actionNode);
@@ -390,7 +383,7 @@ void Graph::printDot(std::basic_ostream<char>& stream) {
             stream << "\"]\n";
 
             for (auto& parent : nodeDeps.input) {
-                auto* pNode = core::inner::getNodeTable()[parent.nodeIndex];
+                auto* pNode = core::inner::getNodeTable(*mContext)[parent.nodeIndex];
                 stream << pNode->getName() << " -> " << actionNode.getName();
                 stream << ";\n";
             }
@@ -399,7 +392,7 @@ void Graph::printDot(std::basic_ostream<char>& stream) {
         auto& lossNodes = cluster.get<core::LossNode>();
         for (auto& nodeDeps : lossNodes) {
             auto& actionNode = node_cast<core::LossNode&>(
-                *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+                *core::inner::getNodeTable(*mContext)[nodeDeps.nodeIndex]);
             stream << actionNode.getName() << " [label=\"LOSS "
                    << actionNode.getName();
             auto& tensor = inner::getTensorFromNode(actionNode);
@@ -409,7 +402,7 @@ void Graph::printDot(std::basic_ostream<char>& stream) {
             stream << "\"]\n";
 
             for (auto& parent : nodeDeps.input) {
-                auto* pNode = core::inner::getNodeTable()[parent.nodeIndex];
+                auto* pNode = core::inner::getNodeTable(*mContext)[parent.nodeIndex];
                 stream << pNode->getName() << " -> " << actionNode.getName();
                 stream << ";\n";
             }
@@ -418,7 +411,7 @@ void Graph::printDot(std::basic_ostream<char>& stream) {
         auto& outputNodes = cluster.get<core::OutputNode>();
         for (auto& nodeDeps : outputNodes) {
             auto& outputNode = node_cast<core::OutputNode&>(
-                *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
+                *core::inner::getNodeTable(*mContext)[nodeDeps.nodeIndex]);
             stream << outputNode.getName() << " [label=\"OUTP "
                    << outputNode.getName();
             auto& tensor = inner::getTensorFromNode(outputNode);
@@ -428,7 +421,7 @@ void Graph::printDot(std::basic_ostream<char>& stream) {
             stream << "\"]\n";
 
             auto* pNode =
-                core::inner::getNodeTable()[nodeDeps.input[0].nodeIndex];
+                core::inner::getNodeTable(*mContext)[nodeDeps.input[0].nodeIndex];
             stream << pNode->getName() << " -> " << outputNode.getName();
             stream << ";\n";
         }
@@ -436,3 +429,9 @@ void Graph::printDot(std::basic_ostream<char>& stream) {
     stream << "}\n";
 }
 }  // namespace athena::core
+
+namespace athena::core::inner {
+Context& getContext(athena::core::Graph& graph) {
+    return *(graph.mContext);
+}
+}

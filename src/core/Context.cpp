@@ -10,13 +10,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#include <athena/core/Clear.h>
-#include <athena/core/inner/GlobalTables.h>
 
-namespace athena::core {
-void clearAll() {
-    inner::getGraphTable().clear();
-    inner::getNodeTable().clear();
-    inner::getAllocationTable().clear();
+#include <athena/core/Context.h>
+
+namespace athena::core::inner {
+inner::Table<AllocationRecord>& getAllocationTable(athena::core::Context& context) {
+    return context.allocationTable;
 }
-}  // namespace athena::core
+inner::Table<Graph*>& getGraphTable(athena::core::Context& context) {
+    return context.graphTable;
+}
+inner::Table<AbstractNode*>& getNodeTable(athena::core::Context& context) {
+    return context.nodeTable;
+}
+}

@@ -57,6 +57,7 @@ class Graph {
     SyncStorage mSyncStorage;
     OwningStorage mOwningStorage;
     Topology mTopology;
+    Context* mContext;
     size_t mGraphIndex;
     Traversal mTraversal;
     std::unique_ptr<Optimizer> mOptimizer;
@@ -73,13 +74,13 @@ class Graph {
     void setUpTensors() const;
 
     public:
-    Graph();
+    explicit Graph(Context& context);
     Graph(const Graph& rhs) = delete;
     Graph(Graph&& rhs) noexcept;
     ~Graph();
 
     Graph& operator=(const Graph& rhs) = delete;
-    Graph& operator=(Graph&& rhs) noexcept;
+    Graph& operator=(Graph&& rhs) = delete;
 
     const SyncStorage& getSyncStorage() const;
     const OwningStorage& getOwningStorage() const;
@@ -129,6 +130,8 @@ class Graph {
      * @return A reference to last traversal
      */
     friend Traversal& inner::getTraversal(Graph& graph);
+
+    friend Context& inner::getContext(athena::core::Graph& graph);
 
     /**
      * Print Graph in dot format. For debug purposes only.

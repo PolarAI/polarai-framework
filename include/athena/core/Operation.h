@@ -32,13 +32,15 @@ class Operation {
     std::string mName;
 
     public:
-    explicit Operation(std::string&& name) : mName(std::move(name)){};
+    explicit Operation(std::string name)
+        :
+          mName(std::move(name)){};
     virtual inner::Tensor* getResultTensor(
-        std::vector<inner::Tensor*> args) const = 0;
-    virtual inner::Tensor* getErrorTensor(std::vector<inner::Tensor*> args,
+        core::Context& context, std::vector<inner::Tensor*> args) const = 0;
+    virtual inner::Tensor* getErrorTensor(core::Context& context, std::vector<inner::Tensor*> args,
                                           int derivativeOrder) const = 0;
-    virtual inner::Tensor* getDerivativeTensor(std::vector<inner::Tensor*> args,
-                                               int argNo) const = 0;
+    virtual inner::Tensor* getDerivativeTensor(core::Context& context,
+        std::vector<inner::Tensor*> args, int argNo) const = 0;
 
     /**
      * Generate code for Operation
@@ -78,18 +80,18 @@ class OperationDummy : public Operation {
     explicit OperationDummy(std::string name) : Operation(std::move(name)){};
 
     inner::Tensor* getResultTensor(
-        std::vector<inner::Tensor*> args) const override {
-        return inner::getNullTensor();
+        core::Context& context, std::vector<inner::Tensor*> args) const override {
+        return inner::getNullTensor(context);
     }
 
-    inner::Tensor* getErrorTensor(std::vector<inner::Tensor*>,
+    inner::Tensor* getErrorTensor(core::Context& context, std::vector<inner::Tensor*>,
                                   int) const override {
-        return inner::getNullTensor();
+        return inner::getNullTensor(context);
     }
 
-    inner::Tensor* getDerivativeTensor(std::vector<inner::Tensor*> args,
+    inner::Tensor* getDerivativeTensor(core::Context& context, std::vector<inner::Tensor*> args,
                                        int argNo) const override {
-        return inner::getNullTensor();
+        return inner::getNullTensor(context);
     }
 
     void gen(AbstractGenerator& g,

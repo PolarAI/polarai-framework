@@ -15,15 +15,18 @@
 #define ATHENA_TENSOR_H
 
 #include <athena/core/inner/AllocationRecord.h>
+#include <athena/core/inner/ForwardDeclarations.h>
 
 namespace athena::core::inner {
 class Tensor {
     private:
+    Context* mContext;
     size_t mVirtualAddress;
     size_t mRecordIndex;
     size_t mShapeOffset;
     size_t mShapePartialProduct;
-    Tensor(size_t id,
+    Tensor(Context& context,
+           size_t id,
            size_t recordIndex,
            size_t shapeOffset,
            size_t shapePartialProduct);
@@ -31,7 +34,7 @@ class Tensor {
     public:
     Tensor(const Tensor& rhs) = default;
     Tensor(Tensor&& rhs) noexcept = default;
-    Tensor(DataType dataType, TensorShape shape);
+    Tensor(DataType dataType, TensorShape shape, Context& context);
     ~Tensor() = default;
 
     Tensor& operator=(const Tensor& rhs) = default;

@@ -19,16 +19,18 @@ using namespace athena::backend;
 
 namespace athena::ops {
 inner::Tensor *GEMMOperation::getResultTensor(
+    core::Context& context,
     std::vector<core::inner::Tensor *> args) const {
     TensorShape shape{args[0]->getShape().dim(0), args[1]->getShape().dim(1)};
 
-    return new core::inner::Tensor(args[0]->getDataType(), shape);
+    return new core::inner::Tensor(args[0]->getDataType(), shape, context);
 }
 core::inner::Tensor *GEMMOperation::getDerivativeTensor(
+    core::Context& context,
     std::vector<core::inner::Tensor *> args, int argNo) const {
     core::ShapeView shapeView(args[argNo]->getShapeView());
     return new core::inner::Tensor(args[argNo]->getDataType(),
-                                   shapeView.toShape());
+                                   shapeView.toShape(), context);
 }
 void GEMMOperation::gen(
     core::AbstractGenerator &g,
@@ -82,9 +84,9 @@ void GEMMOperation::genDerivative(
 
     g.generate("gemm", opts, *tensorA, *tensorB, derivativeTensor);
 }
-core::inner::Tensor *GEMMOperation::getErrorTensor(
+core::inner::Tensor *GEMMOperation::getErrorTensor(core::Context& context,
     std::vector<core::inner::Tensor *> args, int) const {
     // todo higher orders not supported
-    return getResultTensor(args);
+    return getResultTensor(context, args);
 }
 }

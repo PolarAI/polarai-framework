@@ -26,10 +26,10 @@ class GEMMOperation : public core::Operation {
         : Operation("gemm"),
           mTransposeA(transposeA), mTransposeB(transposeB) {}
     core::inner::Tensor *getResultTensor(
-        std::vector<core::inner::Tensor *> args) const override;
-    core::inner::Tensor *getErrorTensor(std::vector<core::inner::Tensor *> args,
-                                        int derivativeOrder) const override;
-    core::inner::Tensor *getDerivativeTensor(
+        core::Context& context, std::vector<core::inner::Tensor *> args) const override;
+    core::inner::Tensor *getErrorTensor(core::Context& context,
+        std::vector<core::inner::Tensor *> args, int derivativeOrder) const override;
+    core::inner::Tensor *getDerivativeTensor(core::Context& context,
         std::vector<core::inner::Tensor *> args, int argNo) const override;
     void gen(
         core::AbstractGenerator &g,

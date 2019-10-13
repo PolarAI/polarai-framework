@@ -27,11 +27,11 @@ class OutputNode : public AbstractNode {
     OutputNode() = delete;
     OutputNode(const OutputNode& rhs) = default;
     OutputNode(OutputNode&& rhs) = default;
-    explicit OutputNode(DataType dataType, std::string name = "");
+    explicit OutputNode(DataType dataType, Context& context, std::string name = "");
     ~OutputNode() override;
 
-    OutputNode& operator=(const OutputNode& rhs) = default;
-    OutputNode& operator=(OutputNode&& rhs) noexcept = default;
+    OutputNode& operator=(const OutputNode& rhs) = delete;
+    OutputNode& operator=(OutputNode&& rhs) = delete;
 
     NodeType getType() const override;
 

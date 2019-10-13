@@ -26,12 +26,12 @@ class AddOperation : public core::Operation {
     public:
     AddOperation() : Operation("add") {}
 
-    core::inner::Tensor *getResultTensor(
-        std::vector<core::inner::Tensor *> args) const override;
-    core::inner::Tensor *getErrorTensor(std::vector<core::inner::Tensor *> args,
+    core::inner::Tensor *getResultTensor(core::Context& context,
+                                         std::vector<core::inner::Tensor *> args) const override;
+    core::inner::Tensor *getErrorTensor(core::Context& context, std::vector<core::inner::Tensor *> args,
                                         int derivativeOrder) const override;
     core::inner::Tensor *getDerivativeTensor(
-        std::vector<core::inner::Tensor *> args, int argNo) const override;
+        core::Context& context, std::vector<core::inner::Tensor *> args, int argNo) const override;
     void gen(
         core::AbstractGenerator &g,
         std::vector<core::inner::Tensor *> &operationArguments) const override;
