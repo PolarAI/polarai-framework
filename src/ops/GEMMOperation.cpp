@@ -50,6 +50,7 @@ void GEMMOperation::genDerivative(
     int order,
     core::AbstractGenerator &g,
     core::inner::Tensor &operationResult,
+    core::inner::Tensor &internalError,
     std::vector<core::inner::Tensor *> &operationArguments,
     core::inner::Tensor &derivativeTensor,
     int argNo) const {
@@ -72,13 +73,18 @@ void GEMMOperation::genDerivative(
     inner::Tensor *tensorA, *tensorB;
 
     if (argNo == 0) {
-        tensorA = &operationResult;
+        tensorA = &internalError;
         tensorB = operationArguments[1];
     } else {
         tensorA = operationArguments[0];
-        tensorB = &operationResult;
+        tensorB = &internalError;
     }
 
     g.generate("gemm", opts, *tensorA, *tensorB, derivativeTensor);
+}
+core::inner::Tensor *GEMMOperation::getErrorTensor(
+    std::vector<core::inner::Tensor *> args, int) const {
+    // todo higher orders not supported
+    return getResultTensor(args);
 }
 }

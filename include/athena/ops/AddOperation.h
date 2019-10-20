@@ -28,6 +28,8 @@ class AddOperation : public core::Operation {
 
     core::inner::Tensor *getResultTensor(
         std::vector<core::inner::Tensor *> args) const override;
+    core::inner::Tensor *getErrorTensor(std::vector<core::inner::Tensor *> args,
+                                        int derivativeOrder) const override;
     core::inner::Tensor *getDerivativeTensor(
         std::vector<core::inner::Tensor *> args, int argNo) const override;
     void gen(
@@ -36,6 +38,7 @@ class AddOperation : public core::Operation {
     void genDerivative(int order,
                        core::AbstractGenerator &g,
                        core::inner::Tensor &operationResult,
+                       core::inner::Tensor &internalError,
                        std::vector<core::inner::Tensor *> &operationArguments,
                        core::inner::Tensor &derivativeTensor,
                        int argNo) const override;

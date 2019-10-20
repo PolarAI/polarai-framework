@@ -35,6 +35,8 @@ class Operation {
     explicit Operation(std::string&& name) : mName(std::move(name)){};
     virtual inner::Tensor* getResultTensor(
         std::vector<inner::Tensor*> args) const = 0;
+    virtual inner::Tensor* getErrorTensor(std::vector<inner::Tensor*> args,
+                                          int derivativeOrder) const = 0;
     virtual inner::Tensor* getDerivativeTensor(std::vector<inner::Tensor*> args,
                                                int argNo) const = 0;
 
@@ -54,9 +56,10 @@ class Operation {
      * to Generator implementation
      * @param argNo Index of argument that derivative will be computed to
      */
-    virtual void genDerivative(const int order,
+    virtual void genDerivative(int order,
                                AbstractGenerator& g,
                                inner::Tensor& operationResult,
+                               inner::Tensor& internalError,
                                std::vector<inner::Tensor*>& operationArguments,
                                inner::Tensor& derivativeTensor,
                                int argNo) const = 0;
@@ -79,6 +82,11 @@ class OperationDummy : public Operation {
         return inner::getNullTensor();
     }
 
+    inner::Tensor* getErrorTensor(std::vector<inner::Tensor*>,
+                                  int) const override {
+        return inner::getNullTensor();
+    }
+
     inner::Tensor* getDerivativeTensor(std::vector<inner::Tensor*> args,
                                        int argNo) const override {
         return inner::getNullTensor();
@@ -92,6 +100,7 @@ class OperationDummy : public Operation {
     void genDerivative(const int order,
                        AbstractGenerator& g,
                        inner::Tensor& operationResult,
+                       inner::Tensor& internalError,
                        std::vector<inner::Tensor*>& operationArguments,
                        inner::Tensor& derivativeTensor,
                        int argNo) const override {

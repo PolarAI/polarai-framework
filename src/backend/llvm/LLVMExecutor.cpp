@@ -240,6 +240,7 @@ void LLVMExecutor::compileLossDerivatives(
             // todo lock tensors in memory
             lossNode.getOperation().genDerivative(
                 graphOptimizer.getRequiredOrder(), generator, outputTensor,
+                *core::inner::getNullTensor(),  // todo re-think this
                 inputs, derivativeTensor, idx);
             // TODO memory clean up
         }
@@ -262,6 +263,23 @@ void LLVMExecutor::compileNodeDerivatives(
         auto &node = node_cast<core::Node &>(
             *core::inner::getNodeTable()[nodeDeps.nodeIndex]);
 
+        // Calculate total error before this node
+        std::vector<core::inner::Tensor *> incomingErrors;
+        for (auto &outp : nodeDeps.output) {
+            auto &abstractNode = *core::inner::getNodeTable()[outp.nodeIndex];
+            if (abstractNode.getType() == core::NodeType::LOSS ||
+                abstractNode.getType() == core::NodeType::DEFAULT) {
+                auto &outpNode = *reinterpret_cast<core::Node *>(&abstractNode);
+                auto &tensor =
+                    core::inner::getDerivativeTensor(outpNode, outp.mark - 1);
+                incomingErrors.push_back(&tensor);
+            }
+        }
+
+        auto &errorTensor = core::inner::getErrorTensor(node);
+        generator.generate("allocate", errorTensor);
+        graphOptimizer.genError(generator, incomingErrors, errorTensor);
+
         auto &outputTensor = core::inner::getTensorFromNode(node);
 
         std::vector<core::inner::Tensor *> derivativeTensors;
@@ -275,37 +293,21 @@ void LLVMExecutor::compileNodeDerivatives(
 
             generator.generate("allocate", derivativeTensor);
             // todo lock tensors in memory
-            node.getOperation().genDerivative(graphOptimizer.getRequiredOrder(),
-                                              generator, outputTensor, inputs,
-                                              derivativeTensor, idx);
+            node.getOperation().genDerivative(graphOptimizer.getRequiredOrder(), generator, outputTensor,
+                errorTensor, inputs, derivativeTensor, idx);
             // TODO memory clean up
-        }
-
-        std::vector<core::inner::Tensor *> incomingErrors;
-        for (auto &outp : nodeDeps.output) {
-            auto &abstractNode = *core::inner::getNodeTable()[outp.nodeIndex];
-            if (abstractNode.getType() == core::NodeType::LOSS ||
-                abstractNode.getType() == core::NodeType::DEFAULT) {
-                auto &outpNode = *reinterpret_cast<core::Node *>(&abstractNode);
-                auto &tensor =
-                    core::inner::getErrorTensor(outpNode, outp.mark - 1);
-                incomingErrors.push_back(&tensor);
-            }
         }
 
         std::vector<core::inner::Tensor *> internalErrors;
 
         for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
              idx++) {
-            auto &errorTensor = core::inner::getErrorTensor(node, idx);
+            auto &errorTensor = core::inner::getErrorTensor(node);
 
             internalErrors.push_back(&errorTensor);
 
             generator.generate("allocate", errorTensor);
         }
-
-        graphOptimizer.genErrors(generator, derivativeTensors, internalErrors,
-                                 incomingErrors);
     }
 }
 
@@ -329,9 +331,9 @@ void LLVMExecutor::adjustWeights(
             if (abstractNode.getType() == core::NodeType::LOSS ||
                 abstractNode.getType() == core::NodeType::DEFAULT) {
                 auto &outpNode = *reinterpret_cast<core::Node *>(&abstractNode);
-                auto &errTensor =
-                    core::inner::getErrorTensor(outpNode, outp.mark - 1);
-                incomingErrors.push_back(&errTensor);
+                auto &derivativeTensor =
+                    core::inner::getDerivativeTensor(outpNode, outp.mark - 1);
+                incomingErrors.push_back(&derivativeTensor);
             }
         }
 

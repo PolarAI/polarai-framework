@@ -25,12 +25,13 @@ class Node : public AbstractNode {
     protected:
     Operation* mOperation;
     std::vector<inner::Tensor*> mDerivativeTensors;
-    std::vector<inner::Tensor*> mErrorTensors;
+    /// Total incoming error
+    inner::Tensor* mErrorTensor;
 
     friend void inner::addDerivativeTensor(Node& node, inner::Tensor& tensor);
     friend inner::Tensor& inner::getDerivativeTensor(Node& node, size_t index);
-    friend void inner::addErrorTensor(Node& node, inner::Tensor& tensor);
-    friend inner::Tensor& inner::getErrorTensor(Node& node, size_t index);
+    friend void inner::setErrorTensor(Node& node, inner::Tensor* tensor);
+    friend inner::Tensor& inner::getErrorTensor(Node& node);
 
     public:
     Node() = delete;

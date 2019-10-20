@@ -29,11 +29,9 @@ class Optimizer {
     virtual void genFix(AbstractGenerator &generator,
                         inner::Tensor &target,
                         std::vector<inner::Tensor *> &errors){};
-    virtual void genErrors(
-        AbstractGenerator &generator,
-        std::vector<inner::Tensor *> &derivativeTensors,
-        std::vector<inner::Tensor *> &nodeErrorTensors,
-        std::vector<inner::Tensor *> &outcomingErrorTensors){};
+    virtual void genError(AbstractGenerator &generator,
+                          std::vector<inner::Tensor *> &incomingDerivatives,
+                          inner::Tensor &totalError){};
 };
 }  // namespace athena::core
 

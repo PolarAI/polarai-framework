@@ -306,16 +306,15 @@ void Graph::setUpTensors() const {
 
             inner::setResultTensor(node,
                                    node.getOperation().getResultTensor(opArgs));
+            inner::setErrorTensor(node,
+                                  node.getOperation().getErrorTensor(
+                                      opArgs, mOptimizer->getRequiredOrder()));
 
             for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
                  idx++) {
                 auto& derivativeTensor =
                     *node.getOperation().getDerivativeTensor(opArgs, idx);
                 inner::addDerivativeTensor(node, derivativeTensor);
-
-                auto& errorTensor =
-                    *node.getOperation().getDerivativeTensor(opArgs, idx);
-                inner::addErrorTensor(node, errorTensor);
             }
         }
 
@@ -338,9 +337,7 @@ void Graph::setUpTensors() const {
                  idx++) {
                 auto& derivativeTensor =
                     *node.getOperation().getDerivativeTensor(opArgs, idx);
-                // For loss node error and derivative means the same
                 inner::addDerivativeTensor(node, derivativeTensor);
-                inner::addErrorTensor(node, derivativeTensor);
             }
         }
 

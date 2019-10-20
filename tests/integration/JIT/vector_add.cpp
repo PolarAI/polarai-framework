@@ -18,7 +18,6 @@
 #include <athena/core/InputNode.h>
 #include <athena/core/LossNode.h>
 #include <athena/core/Node.h>
-#include <athena/core/inner/InnerFunctions.h>
 #include <athena/core/inner/Tensor.h>
 #include <athena/loaders/MemoryLoader/MemoryLoader.h>
 #include <athena/ops/AddOperation.h>
@@ -44,7 +43,6 @@ TEST(JIT, SimpleVectorAdd) {
     MemoryLoader cLoader(cData, 3 * sizeof(float));
 
     Graph graph;
-    graph.setUpOptimizer<Optimizer>(/*learningRate0.01*/);
     graph.setUpOptimizer<GradientDescent>(/*learningRate*/ 0.01);
     InputNode aInp(shape, DataType::FLOAT, aLoader, false, "a");
     InputNode bInp(shape, DataType::FLOAT, bLoader, false, "b");

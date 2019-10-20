@@ -30,11 +30,9 @@ class GradientDescent : public Optimizer {
     void genFix(AbstractGenerator &generator,
                 inner::Tensor &target,
                 std::vector<inner::Tensor *> &errors) override;
-    void genErrors(
-        AbstractGenerator &generator,
-        std::vector<inner::Tensor *> &derivativeTensors,
-        std::vector<inner::Tensor *> &nodeErrorTensors,
-        std::vector<inner::Tensor *> &outcomingErrorTensors) override;
+    void genError(AbstractGenerator &generator,
+                  std::vector<inner::Tensor *> &incomingDerivatives,
+                  inner::Tensor &totalError) override;
 };
 }  // namespace athena::core
 

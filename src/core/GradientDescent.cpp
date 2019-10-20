@@ -11,9 +11,12 @@
  * the License.
  */
 
+#include <athena/backend/llvm/runtime/structs.h>
 #include <athena/core/AbstractGenerator.h>
 #include <athena/core/GradientDescent.h>
 #include <athena/core/inner/Tensor.h>
+
+using namespace athena::backend;
 
 namespace athena::core {
 size_t GradientDescent::getRequiredOrder() const {
@@ -48,46 +51,32 @@ void athena::core::GradientDescent::genFix(
                            target);
     }
 }
-void athena::core::GradientDescent::genErrors(
+void athena::core::GradientDescent::genError(
     AbstractGenerator &generator,
-    std::vector<inner::Tensor *> &derivativeTensors,
-    std::vector<inner::Tensor *> &nodeErrorTensors,
-    std::vector<inner::Tensor *> &outcomingErrorTensors) {
-    float fltUnit = 1.0;
-    float fltZero = 0.0;
-    double dblUnit = 1.0;
+    std::vector<inner::Tensor *> &incomingDerivatives,
+    inner::Tensor &totalError) {
     double dblZero = 0.0;
-    uint64_t unit = 0;
+    float fltZero = 0.0;
     uint64_t zero;
 
-    switch (derivativeTensors.front()->getDataType()) {
-        case DataType::DOUBLE:
-            unit = *reinterpret_cast<uint64_t *>(&dblUnit);
+    switch (totalError.getDataType()) {
+        case DataType::DOUBLE: {
             zero = *reinterpret_cast<uint64_t *>(&dblZero);
             break;
+        }
         case DataType::FLOAT: {
-            unit = *reinterpret_cast<uint64_t *>(&fltUnit);
             zero = *reinterpret_cast<uint64_t *>(&fltZero);
             break;
         }
         default:
-            new FatalError(1, "Unsupported type");
+            new FatalError(-1, "Unsupported type");
     }
 
-    auto *accum = new inner::Tensor(derivativeTensors.front()->getDataType(),
-                                    outcomingErrorTensors.front()->getShape());
-    generator.generate("allocate", *accum);
     void *pzero = static_cast<void *>(&zero);
-    generator.generate("fill", *accum, pzero);
-    for (auto &outcomingErrorTensor : outcomingErrorTensors) {
-        generator.generate("add", *accum, *outcomingErrorTensor, *accum);
-    }
+    generator.generate("fill", totalError, pzero);
 
-    for (size_t idx = 0; idx < derivativeTensors.size(); idx++) {
-        generator.generate("hadamard", *derivativeTensors[idx], unit, *accum,
-                           unit, *nodeErrorTensors[idx]);
+    for (auto &incomingDerivative : incomingDerivatives) {
+        generator.generate("add", totalError, *incomingDerivative, totalError);
     }
-
-    // todo deallocate
 }
 }  // namespace athena::core

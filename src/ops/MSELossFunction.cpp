@@ -36,6 +36,7 @@ void MSELossFunction::genDerivative(
     int order,
     core::AbstractGenerator &g,
     core::inner::Tensor &operationResult,
+    core::inner::Tensor &internalError,
     std::vector<core::inner::Tensor *> &operationArguments,
     core::inner::Tensor &derivativeTensor,
     int argNo) const {
@@ -68,5 +69,12 @@ void MSELossFunction::genDerivative(
 
     g.generate("fma", *operationArguments[0], scale, *operationArguments[1],
                negScale, derivativeTensor);
+}
+core::inner::Tensor *MSELossFunction::getErrorTensor(
+    std::vector<core::inner::Tensor *> args, int derivativeOrder) const {
+    // Loss node is always the last node (except for output)
+    // No need for actual implementation
+    // todo refactor me
+    return nullptr;
 }
 }  // namespace athena::ops

@@ -11,10 +11,13 @@
  * the License.
  */
 
+#include <athena/backend/llvm/runtime/structs.h>
 #include <athena/core/inner/InnerFunctions.h>
 #include <athena/ops/AddOperation.h>
 
 #include <cassert>
+
+using namespace athena::backend;
 
 namespace athena::ops {
 
@@ -46,6 +49,7 @@ void AddOperation::genDerivative(
     const int order,
     core::AbstractGenerator &g,
     core::inner::Tensor &operationResult,
+    core::inner::Tensor &internalError,
     std::vector<core::inner::Tensor *> &operationArguments,
     core::inner::Tensor &derivativeTensor,
     int argNo) const {
@@ -56,7 +60,16 @@ void AddOperation::genDerivative(
     assert(derivativeTensor.getDataType() != core::DataType::UNDEFINED &&
            "derivativeTensor is broken");
 #endif
+    // todo this is a workaround because I'm too lazy to implement proper copy
+    auto *options = new HadamardOptions<float>{1.f, 0.0f};
+    void *opts = static_cast<void *>(options);
     g.generate("fill", derivativeTensor, unit);
+    g.generate("hadamard", opts, derivativeTensor, internalError,
+               derivativeTensor);
+}
+core::inner::Tensor *AddOperation::getErrorTensor(
+    std::vector<core::inner::Tensor *> args, int) const {
+    return getResultTensor(args);
 }
 
 }  // namespace athena::ops

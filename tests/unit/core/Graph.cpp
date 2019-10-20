@@ -11,6 +11,7 @@
  * the License.
  */
 
+#include <athena/core/GradientDescent.h>
 #include <athena/core/Graph.h>
 #include <athena/core/inner/GlobalTables.h>
 
@@ -30,6 +31,7 @@ class GraphTest : public ::testing::Test {
     void SetUp() override {
         clearAll();
         graph.clear();
+        graph.setUpOptimizer<Optimizer>();
     }
 };
 

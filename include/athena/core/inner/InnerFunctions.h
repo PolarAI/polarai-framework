@@ -33,8 +33,8 @@ Clusters &getClusters(Traversal &traversal);
 void setTraversalValidity(Traversal &traversal, bool flag);
 void addDerivativeTensor(Node &node, inner::Tensor &tensor);
 Tensor &getDerivativeTensor(Node &node, size_t index);
-void addErrorTensor(Node &node, inner::Tensor &tensor);
-Tensor &getErrorTensor(Node &node, size_t index);
+void setErrorTensor(Node &node, Tensor *tensor);
+inner::Tensor &getErrorTensor(Node &node);
 void setResultTensor(AbstractNode &node, inner::Tensor *tensor);
 Tensor *getNullTensor();
 }  // namespace athena::core::inner
