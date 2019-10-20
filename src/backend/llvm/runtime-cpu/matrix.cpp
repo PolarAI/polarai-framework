@@ -12,7 +12,7 @@
  */
 
 #include <athena/backend/llvm/device/Device.h>
-#include <athena/backend/llvm/runtime/matrix.h>
+#include <athena/backend/llvm/runtime/structs.h>
 #include <athena/core/Allocator.h>
 #include <athena/core/inner/Tensor.h>
 
@@ -23,6 +23,7 @@
 #endif
 
 using namespace athena::backend::llvm;
+using namespace athena::backend;
 using namespace athena::core::inner;
 using namespace athena::core;
 
@@ -39,34 +40,31 @@ using namespace athena::core;
 template <typename T>
 void hadamard(Device *,
               Allocator *allocator,
+              HadamardOptions<T> *options,
               Tensor *a,
-              T scaleA,
               Tensor *b,
-              T scaleB,
               Tensor *c) {
     auto *ap = reinterpret_cast<T *>(allocator->getRAMPointer(*a));
     auto *bp = reinterpret_cast<T *>(allocator->getRAMPointer(*b));
     auto *cp = reinterpret_cast<T *>(allocator->getRAMPointer(*c));
 
     for (size_t i = 0; i < c->getShapeView().getTotalSize(); i++) {
-        cp[i] = scaleA * ap[i] * scaleB * bp[i];
+        cp[i] = options->alpha * ap[i] * bp[i] + options->beta * cp[i];
     }
 }
 
 template void hadamard<float>(Device *,
                               Allocator *allocator,
+                              HadamardOptions<float> *options,
                               Tensor *a,
-                              float scaleA,
                               Tensor *b,
-                              float scaleB,
                               Tensor *c);
 
 template void hadamard<double>(Device *,
                                Allocator *allocator,
+                               HadamardOptions<double> *options,
                                Tensor *a,
-                               double scaleA,
                                Tensor *b,
-                               double scaleB,
                                Tensor *c);
 
 template <typename T>

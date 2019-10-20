@@ -11,16 +11,11 @@
  * the License.
  */
 
+#include <athena/backend/llvm/runtime/structs.h>
 #include <athena/ops/GEMMOperation.h>
-using namespace athena::core;
 
-template <typename T>
-struct GEMMOptions {
-    bool transposeA;
-    bool transposeB;
-    T alpha;
-    T beta;
-};
+using namespace athena::core;
+using namespace athena::backend;
 
 namespace athena::ops {
 inner::Tensor *GEMMOperation::getResultTensor(

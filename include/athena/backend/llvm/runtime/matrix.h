@@ -15,42 +15,46 @@
 #define ATHENA_MATRIX_H
 
 #include <athena/backend/llvm/device/Device.h>
+#include <athena/backend/llvm/runtime/structs.h>
 #include <athena/core/Allocator.h>
 #include <athena/core/inner/Tensor.h>
 
 /**
  * Hadamard (element-wise) product
+ *
+ * c = options.alpha * a * b + options.beta * c
+ *
  * @tparam T Tensor content type
  * @param allocator Allocator
+ * @param options Multiplication options
  * @param a First Tensor
- * @param scaleA First Tensor multiplier
  * @param b Second Tensor
- * @param scaleB Second Tensor multiplier
  * @param c Result Tensor
  */
 template <typename T>
 extern void hadamard(athena::backend::llvm::Device *,
                      athena::core::Allocator *allocator,
+                     athena::backend::HadamardOptions<T> *options,
                      athena::core::inner::Tensor *a,
-                     T scaleA,
                      athena::core::inner::Tensor *b,
-                     T scaleB,
                      athena::core::inner::Tensor *c);
 
-namespace athena::backend::llvm {
-template <typename T>
-struct GEMMOptions {
-    bool transposeA;
-    bool transposeB;
-    T alpha;
-    T beta;
-};
-}  // namespace athena::backend::llvm
-
+/**
+ * General matrix-matrix multiplication
+ *
+ * c = options.alpha * a.b + options.beta * c
+ *
+ * @tparam T Tensor content type
+ * @param allocator Allocator
+ * @param options Multiplication options
+ * @param a First Tensor
+ * @param b Second Tensor
+ * @param c Result Tensor
+ */
 template <typename T>
 extern void gemm(athena::backend::llvm::Device *,
                  athena::core::Allocator *allocator,
-                 athena::backend::llvm::GEMMOptions<T> *options,
+                 athena::backend::GEMMOptions<T> *options,
                  athena::core::inner::Tensor *a,
                  athena::core::inner::Tensor *b,
                  athena::core::inner::Tensor *c);

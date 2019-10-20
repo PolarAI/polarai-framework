@@ -176,6 +176,7 @@ def main():
             o.write("#include <athena/core/inner/Tensor.h>\n")
             o.write("#include <athena/core/Allocator.h>\n")
             o.write("using namespace athena::backend::llvm;\n")
+            o.write("using namespace athena::backend;\n")
             o.write("using namespace athena::core::inner;\n\n")
             o.write("using namespace athena::core;\n\n")
             o.write("extern \"C\" {\n")

@@ -20,9 +20,10 @@ void registerDefaultFunctors(LLVMGenerator *generator) {
     registerStandardBuiltin<BuiltinThreeTensorArgs>("add", generator);
     registerAllocate(generator);
     registerFill(generator);
-    registerStandardBuiltin<BuiltinTATATArgs>("hadamard", generator);
     registerStandardBuiltin<BuiltinTATATArgs>("fma", generator);
     registerStandardBuiltin<BuiltinThreeTensorArgs>("mse", generator);
     registerStandardBuiltin<BuiltinThreeTensorWithOptsArgs>("gemm", generator);
+    registerStandardBuiltin<BuiltinThreeTensorWithOptsArgs>("hadamard",
+                                                            generator);
 }
 }  // namespace athena::backend::llvm::codegen
