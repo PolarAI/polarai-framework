@@ -3,7 +3,7 @@ llvm_map_components_to_libnames(llvm_libs core irreader support transformutils p
 
 add_athena_integration_test(
         TARGET_NAME JIT
-        SRCS vector_add.cpp
+        SRCS vector_add.cpp gemm.cpp
         LIBS athena ${llvm_libs} MemoryLoader
 )
 

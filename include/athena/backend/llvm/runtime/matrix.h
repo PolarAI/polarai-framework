@@ -37,4 +37,22 @@ extern void hadamard(athena::backend::llvm::Device *,
                      T scaleB,
                      athena::core::inner::Tensor *c);
 
+namespace athena::backend::llvm {
+template <typename T>
+struct GEMMOptions {
+    bool transposeA;
+    bool transposeB;
+    T alpha;
+    T beta;
+};
+}  // namespace athena::backend::llvm
+
+template <typename T>
+extern void gemm(athena::backend::llvm::Device *,
+                 athena::core::Allocator *allocator,
+                 athena::backend::llvm::GEMMOptions<T> *options,
+                 athena::core::inner::Tensor *a,
+                 athena::core::inner::Tensor *b,
+                 athena::core::inner::Tensor *c);
+
 #endif  // ATHENA_MATRIX_H

@@ -28,6 +28,8 @@ def generate_wrapper(name, signature, gentypes):
                 arg_resolved = template
             elif arg == "gentype *":
                 arg_resolved = template + " *"
+            else:
+                arg_resolved = arg_resolved.replace("<gentype>", "<" + template + ">")
 
             if arg_resolved not in plainArgTypes:
                 defs += " void *arg" + str(arg_no) + "Ptr"
@@ -47,6 +49,8 @@ def generate_wrapper(name, signature, gentypes):
                 arg_resolved = template
             elif arg == "gentype *":
                 arg_resolved = template + " *"
+            else:
+                arg_resolved = arg_resolved.replace("<gentype>", "<" + template + ">")
             if arg_resolved not in plainArgTypes:
                 defs += "auto arg" + str(
                     arg_no) + " = reinterpret_cast<" + arg_resolved + ">(arg" + str(
@@ -84,6 +88,8 @@ def generate_llvm(name, signature, gentypes):
                 arg_resolved = template
             elif arg == "gentype *":
                 arg_resolved = template + " *"
+            else:
+                arg_resolved = arg_resolved.replace("<gentype>", "<" + template + ">")
 
             if arg_resolved == "int":
                 res += "::llvm::Type::getInt32Ty(ctx)"

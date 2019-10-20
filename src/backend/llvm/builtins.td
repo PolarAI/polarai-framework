@@ -4,3 +4,4 @@ mse : Tensor*, Tensor*, Tensor*
 fill : Tensor*, gentype
 allocate : Tensor* : void
 hadamard : Tensor*, gentype, Tensor*, gentype, Tensor*
+gemm : GEMMOptions<gentype>*, Tensor*, Tensor*, Tensor*

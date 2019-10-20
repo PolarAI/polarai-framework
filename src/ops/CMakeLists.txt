@@ -1,1 +1,1 @@
-add_athena_library(athena-ops STATIC AddOperation.cpp MSELossFunction.cpp)
+add_athena_library(athena-ops STATIC AddOperation.cpp MSELossFunction.cpp GEMMOperation.cpp)

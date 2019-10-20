@@ -16,6 +16,12 @@
 #include <athena/core/Allocator.h>
 #include <athena/core/inner/Tensor.h>
 
+#ifdef ATHENA_APPLE_ACCELERATE
+#include <Accelerate/Accelerate.h>
+#else
+#include <cblas.h>
+#endif
+
 using namespace athena::backend::llvm;
 using namespace athena::core::inner;
 using namespace athena::core;
@@ -62,3 +68,59 @@ template void hadamard<double>(Device *,
                                Tensor *b,
                                double scaleB,
                                Tensor *c);
+
+template <typename T>
+void gemm(Device *,
+          Allocator *allocator,
+          GEMMOptions<T> *options,
+          Tensor *a,
+          Tensor *b,
+          Tensor *c) {
+    new FatalError(-1, "Not implemented");
+};
+
+template <>
+void gemm<float>(Device *,
+                 Allocator *allocator,
+                 GEMMOptions<float> *options,
+                 Tensor *a,
+                 Tensor *b,
+                 Tensor *c) {
+    CBLAS_TRANSPOSE transposeA =
+        options->transposeA ? CblasTrans : CblasNoTrans;
+    CBLAS_TRANSPOSE transposeB =
+        options->transposeB ? CblasTrans : CblasNoTrans;
+
+    auto aData = reinterpret_cast<float *>(allocator->getRAMPointer(*a));
+    auto bData = reinterpret_cast<float *>(allocator->getRAMPointer(*b));
+    auto cData = reinterpret_cast<float *>(allocator->getRAMPointer(*c));
+
+    cblas_sgemm(CBLAS_ORDER::CblasColMajor, transposeA, transposeB,
+                a->getShape().dim(0), b->getShape().dim(1),
+                a->getShape().dim(1), options->alpha, aData,
+                a->getShape().dim(0), bData, b->getShape().dim(0),
+                options->beta, cData, c->getShape().dim(0));
+}
+
+template <>
+void gemm<double>(Device *,
+                  Allocator *allocator,
+                  GEMMOptions<double> *options,
+                  Tensor *a,
+                  Tensor *b,
+                  Tensor *c) {
+    CBLAS_TRANSPOSE transposeA =
+        options->transposeA ? CblasTrans : CblasNoTrans;
+    CBLAS_TRANSPOSE transposeB =
+        options->transposeB ? CblasTrans : CblasNoTrans;
+
+    auto aData = reinterpret_cast<double *>(allocator->getRAMPointer(*a));
+    auto bData = reinterpret_cast<double *>(allocator->getRAMPointer(*b));
+    auto cData = reinterpret_cast<double *>(allocator->getRAMPointer(*c));
+
+    cblas_dgemm(CBLAS_ORDER::CblasColMajor, transposeA, transposeB,
+                a->getShape().dim(0), b->getShape().dim(1),
+                a->getShape().dim(1), options->alpha, aData,
+                a->getShape().dim(0), bData, b->getShape().dim(0),
+                options->beta, cData, c->getShape().dim(0));
+}

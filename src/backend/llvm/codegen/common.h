@@ -40,6 +40,15 @@ using BuiltinThreeTensorArgs = std::function<void(::llvm::LLVMContext &,
                                                   core::inner::Tensor &,
                                                   core::inner::Tensor &)>;
 
+using BuiltinThreeTensorWithOptsArgs =
+    std::function<void(::llvm::LLVMContext &,
+                       ::llvm::Module &,
+                       ::llvm::IRBuilder<> &,
+                       void *,
+                       core::inner::Tensor &,
+                       core::inner::Tensor &,
+                       core::inner::Tensor &)>;
+
 using BuiltinTATATArgs = std::function<void(::llvm::LLVMContext &,
                                             ::llvm::Module &,
                                             ::llvm::IRBuilder<> &,
