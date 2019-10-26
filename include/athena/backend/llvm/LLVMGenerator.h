@@ -77,13 +77,7 @@ class LLVMGenerator : public core::AbstractGenerator {
      * @param tensor Destination Tensor
      */
     void generateLoad(const core::AbstractLoader &loader,
-                      core::inner::Tensor &tensor);
-    /**
-     * Generates glue code to get fast memory pointer from Allocator
-     * @param t Destination Tensor
-     * @return Fast memory pointer of Tensor t
-     */
-    ::llvm::Value *generateGetFastPointer(core::inner::Tensor &t);
+                      core::inner::Tensor &tensor) override;
     /**
      *
      * @return LLVM IR Builder
@@ -105,13 +99,13 @@ class LLVMGenerator : public core::AbstractGenerator {
      * block
      * @param name Function name
      */
-    void generateFunctionHeader(const std::string &name);
+    void generateFunctionHeader(const std::string &name) override;
 
     /**
      * Generates return command for current function and removes it from current
      * main block
      */
-    void generateFunctionFooter();
+    void generateFunctionFooter() override;
 
     /**
      * Register new functor

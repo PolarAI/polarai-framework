@@ -13,6 +13,7 @@
 #ifndef ATHENA_ABSTRACTGENERATOR_H
 #define ATHENA_ABSTRACTGENERATOR_H
 
+#include <athena/core/AbstractLoader.h>
 #include <athena/core/inner/Tensor.h>
 
 namespace athena::core {
@@ -47,6 +48,28 @@ class AbstractGenerator {
     public:
     virtual void openNode(std::string_view name) = 0;
     virtual void closeNode() = 0;
+
+    /**
+     * Creates empty function without arguments and sets it as current main
+     * block
+     * @param name Function name
+     */
+    virtual void generateFunctionHeader(const std::string &name) = 0;
+
+    /**
+     * Generates return command for current function and removes it from current
+     * main block
+     */
+    virtual void generateFunctionFooter() = 0;
+
+    /**
+     * Generate code to execute loaders subroutines
+     * @param loader Loader to be used
+     * @param tensor Destination Tensor
+     */
+    virtual void generateLoad(const core::AbstractLoader &loader,
+                              core::inner::Tensor &tensor) = 0;
+
     /**
      * Generate code that corresponds to given parameters
      * @tparam Args Arbitrary parameter pack defined by actual generator
