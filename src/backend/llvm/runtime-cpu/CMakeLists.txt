@@ -41,11 +41,19 @@ else ()
     add_dependencies(runtime-llvm-cpu OpenBlasDownload)
 endif ()
 
+set(WEAK_FLAG)
 if (APPLE)
-    set_property(TARGET runtime-llvm-cpu APPEND_STRING PROPERTY LINK_FLAGS " -undefined dynamic_lookup")
-elseif (UNIX)
-    target_link_options(runtime-llvm-cpu PUBLIC "-Wl,--allow-shlib-undefined")
+    set(WEAK_FLAG -Wl,-weak_library)
 endif ()
 
+target_link_libraries(runtime-llvm-cpu PRIVATE ${WEAK_FLAG} athena-core)
+
 install(TARGETS runtime-llvm-cpu EXPORT AthenaConfig
-        LIBRARY DESTINATION lib/runtime)
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT Athena_Runtime
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT Athena_Runtime
+        NAMELINK_COMPONENT Athena_Development
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT Athena_Development
+        )
