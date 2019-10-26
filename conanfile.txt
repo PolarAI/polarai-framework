@@ -2,6 +2,8 @@
 zlib/1.2.11@conan/stable
 boost/1.67.0@conan/stable
 yaml-cpp/0.6.2@bincrafters/stable
+openblas/0.2.20@conan/stable
 
 [generators]
 cmake
+cmake_find_package
