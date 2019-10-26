@@ -11,25 +11,25 @@ file(WRITE ${WRAPPER_CPP} "")
 file(WRITE ${GENERATOR_CPP} "")
 
 add_custom_target(wrapper_cpp
-        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tablegen.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/builtins.td ${WRAPPER_CPP} wrapper
+        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/runtime/tablegen.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/runtime/builtins.td ${WRAPPER_CPP} wrapper
         )
 
 add_custom_target(generator_cpp
         COMMAND ${PYTHON_EXECUTABLE}
-        ${CMAKE_CURRENT_SOURCE_DIR}/tablegen.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/builtins.td ${GENERATOR_CPP} driver
+        ${CMAKE_CURRENT_SOURCE_DIR}/runtime/tablegen.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/runtime/builtins.td ${GENERATOR_CPP} driver
         )
 
-add_subdirectory(runtime-cpu)
-add_subdirectory(runtime-driver)
+add_subdirectory(runtime/cpu)
+add_subdirectory(runtime/driver)
 
 file(GLOB codegen_src "codegen/*.cpp")
 
 add_athena_library(backend-llvm STATIC
         LLVMExecutor.cpp
         LLVMGenerator.cpp
-        AthenaJIT.cpp
+        jit/AthenaJIT.cpp
         LLVMTrivialAllocator.cpp
         utils.cpp
         ${codegen_src})

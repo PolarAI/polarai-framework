@@ -4,10 +4,10 @@ commands:
         name: ATHENA_RT_LIBRARY
         value:
           ci: "$ENV{ATHENA_BINARY_DIR}/lib/libruntime-llvm-cpu.dylib"
-          dev: "@CMAKE_BINARY_DIR@/src/backend/llvm/runtime-cpu/libruntime-llvm-cpu.dylib"
+          dev: "@CMAKE_BINARY_DIR@/src/backend/llvm/runtime/cpu/libruntime-llvm-cpu.dylib"
   linux:
     - set:
         name: ATHENA_RT_LIBRARY
         value:
           ci: "$ENV{ATHENA_BINARY_DIR}/lib/libruntime-llvm-cpu.so"
-          dev: "@CMAKE_BINARY_DIR@/src/backend/llvm/runtime-cpu/libruntime-llvm-cpu.so"
+          dev: "@CMAKE_BINARY_DIR@/src/backend/llvm/runtime/cpu/libruntime-llvm-cpu.so"
