@@ -1,5 +1,3 @@
-find_package(BLAS)
-
 add_athena_library(runtime-llvm-cpu SHARED
         add.cpp
         allocate.cpp

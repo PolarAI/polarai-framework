@@ -93,11 +93,12 @@ void gemm<float>(Device *,
     auto bData = reinterpret_cast<float *>(allocator->getRAMPointer(*b));
     auto cData = reinterpret_cast<float *>(allocator->getRAMPointer(*c));
 
-    cblas_sgemm(CBLAS_ORDER::CblasColMajor, transposeA, transposeB,
-                a->getShape().dim(0), b->getShape().dim(1),
-                a->getShape().dim(1), options->alpha, aData,
-                a->getShape().dim(0), bData, b->getShape().dim(0),
-                options->beta, cData, c->getShape().dim(0));
+    const int M = static_cast<const int>(a->getShape().dim(1));
+    const int K = static_cast<const int>(a->getShape().dim(0));
+    const int N = static_cast<const int>(b->getShape().dim(0));
+
+    cblas_sgemm(CBLAS_ORDER::CblasRowMajor, transposeA, transposeB, M, N, K,
+                options->alpha, aData, K, bData, N, options->beta, cData, N);
 }
 
 template <>
@@ -116,9 +117,10 @@ void gemm<double>(Device *,
     auto bData = reinterpret_cast<double *>(allocator->getRAMPointer(*b));
     auto cData = reinterpret_cast<double *>(allocator->getRAMPointer(*c));
 
-    cblas_dgemm(CBLAS_ORDER::CblasColMajor, transposeA, transposeB,
-                a->getShape().dim(0), b->getShape().dim(1),
-                a->getShape().dim(1), options->alpha, aData,
-                a->getShape().dim(0), bData, b->getShape().dim(0),
-                options->beta, cData, c->getShape().dim(0));
+    const int M = static_cast<const int>(a->getShape().dim(1));
+    const int K = static_cast<const int>(a->getShape().dim(0));
+    const int N = static_cast<const int>(b->getShape().dim(0));
+
+    cblas_dgemm(CBLAS_ORDER::CblasRowMajor, transposeA, transposeB, M, N, K,
+                options->alpha, aData, K, bData, N, options->beta, cData, N);
 }

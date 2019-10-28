@@ -46,8 +46,6 @@ TYPED_TEST(RuntimeTest, GEMMSimple) {
     TypeParam matrix1[] = {1, 1, 2, 2, 3, 3, 4, 4};
     TypeParam matrix2[] = {1, 2, 3, 4, 1, 2, 3, 4};
 
-    TypeParam matrix3[16];
-
     Context ctx;
 
     Tensor a(data_type_cast<TypeParam>(), {2, 4}, ctx);
