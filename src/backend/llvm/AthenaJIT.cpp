@@ -20,6 +20,11 @@
 #include <llvm/Transforms/Scalar.h>
 #include <llvm/Transforms/Scalar/GVN.h>
 
+static size_t getNextFileId() {
+    static size_t count = 0;
+    return ++count;
+}
+
 namespace athena::backend::llvm {
 AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
                      ::llvm::DataLayout &&DL)
@@ -70,6 +75,18 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
 ::llvm::Expected<::llvm::orc::ThreadSafeModule> AthenaJIT::optimizeModule(
     ::llvm::orc::ThreadSafeModule TSM,
     const ::llvm::orc::MaterializationResponsibility &R) {
+#ifdef DEBUG
+    size_t fileId = getNextFileId();
+    std::error_code errorCode;
+    const std::string fileNamePrefix = "program" + std::to_string(fileId);
+    if (getenv("ATHENA_DUMP_LLVM")) {
+        ::llvm::raw_fd_ostream preOptStream(fileNamePrefix + "_pre_opt.ll",
+                                            errorCode);
+        TSM.getModule()->print(preOptStream, nullptr);
+        preOptStream.close();
+    }
+#endif
+
     ::llvm::FunctionPassManager mFunctionPassManager;
     ::llvm::ModulePassManager mModulePassManager;
 
@@ -102,6 +119,14 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
         if (!func.isDeclaration())
             mFunctionPassManager.run(func, functionAnalysisManager);
     }
+
+#ifdef DEBUG
+    if (getenv("ATHENA_DUMP_LLVM")) {
+        ::llvm::raw_fd_ostream postOptStream(fileNamePrefix + "_post_opt.ll",
+                                             errorCode);
+        TSM.getModule()->print(postOptStream, nullptr);
+    }
+#endif
 
     return TSM;
 }
