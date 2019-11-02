@@ -22,10 +22,6 @@ include(AthenaDocs)
 enable_docs()
 set(CMAKE_CXX_STANDARD 17)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
-# todo remove hacks http://lists.llvm.org/pipermail/llvm-dev/2016-May/099874.html
-if (UNIX AND NOT APPLE)
-set(CMAKE_CXX_FLAGS  "-Wl,--export-dynamic")
-endif()
 
 if (NOT ATHENA_DOCS_ONLY)
 
