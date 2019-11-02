@@ -11,8 +11,9 @@
  * the License.
  */
 
-#include <athena/backend/llvm/AthenaJIT.h>
-#include <athena/backend/llvm/runtime-driver/runtime-driver.h>
+#include "AthenaJIT.h"
+
+#include <athena/core/FatalError.h>
 
 #include <cstdlib>
 #include <llvm/Passes/PassBuilder.h>

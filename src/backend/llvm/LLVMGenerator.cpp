@@ -11,10 +11,11 @@
  * the License.
  */
 
+#include "LLVMGenerator.h"
+
 #include "codegen/register_default_functors.h"
 #include "utils.h"
 
-#include <athena/backend/llvm/LLVMGenerator.h>
 #include <athena/core/FatalError.h>
 #include <athena/loaders/MemoryLoader/MemoryLoader.h>
 

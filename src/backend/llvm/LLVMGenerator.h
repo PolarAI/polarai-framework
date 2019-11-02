@@ -13,8 +13,7 @@
 #ifndef ATHENA_LLVMGENERATOR_H
 #define ATHENA_LLVMGENERATOR_H
 
-#include "LLVMGeneratorFunctor.h"
-
+#include <athena/backend/llvm/LLVMGeneratorFunctor.h>
 #include <athena/backend/llvm/device/Device.h>
 #include <athena/core/AbstractGenerator.h>
 #include <athena/core/AbstractLoader.h>

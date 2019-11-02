@@ -13,30 +13,28 @@
 #ifndef ATHENA_LLVMEXECUTOR_H
 #define ATHENA_LLVMEXECUTOR_H
 
-#include <athena/backend/llvm/AthenaJIT.h>
-#include <athena/backend/llvm/LLVMGenerator.h>
-#include <athena/backend/llvm/runtime-driver/runtime-driver.h>
 #include <athena/core/Allocator.h>
 #include <athena/core/Executor.h>
 #include <athena/core/Traversal.h>
 
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
+namespace llvm {
+class Module;
+}
 
 namespace athena::backend::llvm {
+
+// Forward declarations
+class AthenaJIT;
+class RuntimeDriver;
 
 /**
  * Execute Graph with LLVM-based backend
  */
 class LLVMExecutor : public athena::core::Executor {
     private:
-    std::unique_ptr<AthenaJIT> mJITCompiler;
-    //    std::unique_ptr<::llvm::Module> mMainModule;
+    std::shared_ptr<AthenaJIT> mJITCompiler{nullptr};
     std::unique_ptr<core::Allocator> mAllocator;
-    //    athena::core::Traversal mGraphTraversal;
-    std::unique_ptr<RuntimeDriver> mRuntimeDriver;
-
-    std::vector<std::unique_ptr<::llvm::Module>> mExistingModules;
+    std::shared_ptr<RuntimeDriver> mRuntimeDriver;
 
     template <typename T>
     using ClusterContainer = std::vector<core::inner::NodeDependencies<T>>;
@@ -48,59 +46,6 @@ class LLVMExecutor : public athena::core::Executor {
      */
     std::vector<std::unique_ptr<::llvm::Module>> compileGraph(
         athena::core::Graph &graph);
-
-    /**
-     * Generate LLVM IR for input nodes
-     * @param generator Generator associated with corresponding graph
-     * @param inputNodes InputNodes that need to be compiled
-     */
-    static void compileInputNodes(
-        LLVMGenerator &generator,
-        const ClusterContainer<core::InputNode> &inputNodes,
-        athena::core::Graph& graph);
-
-    /**
-     * Generate LLVM IR for nodes
-     * @param generator Generator associated with corresponding graph
-     * @param inputNodes Nodes that need to be compiled
-     */
-    static void compileActionNodes(
-        LLVMGenerator &generator,
-        const ClusterContainer<core::Node> &actionNodes,
-        athena::core::Graph& graph);
-
-    /**
-     * Generate LLVM IR for loss nodes
-     * @param generator Generator associated with corresponding graph
-     * @param inputNodes LossNodes that need to be compiled
-     */
-    static void compileLossNodes(
-        LLVMGenerator &generator,
-        const ClusterContainer<core::LossNode> &lossNodes,
-        athena::core::Graph& graph);
-
-    static void compileDerivatives(LLVMGenerator &generator,
-                                   const core::Traversal &traversal,
-                                   core::Optimizer &graphOptimizer,
-                                   core::Graph& graph);
-
-    static void compileLossDerivatives(
-        LLVMGenerator &generator,
-        const ClusterContainer<core::LossNode> &lossNodes,
-        core::Optimizer &graphOptimizer,
-        core::Graph& graph);
-
-    static void compileNodeDerivatives(
-        LLVMGenerator &generator,
-        const ClusterContainer<core::Node> &nodes,
-        core::Optimizer &graphOptimizer,
-        core::Graph& graph);
-
-    static void adjustWeights(
-        LLVMGenerator &generator,
-        const ClusterContainer<core::InputNode> &inputNodes,
-        core::Optimizer &graphOptimizer,
-        core::Graph& graph);
 
     public:
     LLVMExecutor();

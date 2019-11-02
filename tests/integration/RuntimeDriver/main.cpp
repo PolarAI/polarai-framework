@@ -11,7 +11,7 @@
  * the License.
  */
 
-#include <athena/backend/llvm/runtime-driver/runtime-driver.h>
+#include "../../../src/backend/llvm/runtime/driver/runtime-driver.h"
 
 #include <gtest/gtest.h>
 #include <llvm/Support/TargetSelect.h>

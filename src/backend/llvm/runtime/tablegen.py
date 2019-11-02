@@ -181,7 +181,7 @@ def main():
             o.write("using namespace athena::core;\n\n")
             o.write("extern \"C\" {\n")
         elif args.mode == "driver":
-            o.write("#include <athena/backend/llvm/runtime-driver/runtime-driver.h>\n")
+            o.write("#include <runtime-driver.h>\n")
             o.write("#include \"llvm/IR/Constants.h\"\n")
             o.write("#include \"llvm/IR/IRBuilder.h\"\n")
             o.write("void athena::backend::llvm::RuntimeDriver"

@@ -54,6 +54,9 @@ class AthenaJIT {
     public:
     AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
               ::llvm::DataLayout &&DL);
+    AthenaJIT(const AthenaJIT &) = delete;
+    AthenaJIT &operator=(const AthenaJIT &) = delete;
+    ~AthenaJIT() = default;
 
     static std::unique_ptr<AthenaJIT> create();
     const ::llvm::DataLayout &getDataLayout() const {

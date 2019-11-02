@@ -11,7 +11,7 @@
  * the License.
  */
 
-#include <athena/backend/llvm/runtime-driver/runtime-driver.h>
+#include "runtime-driver.h"
 
 #include "llvm/IR/Verifier.h"
 

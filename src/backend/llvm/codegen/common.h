@@ -14,7 +14,7 @@
 #ifndef ATHENA_COMMON_H
 #define ATHENA_COMMON_H
 
-#include <athena/backend/llvm/LLVMGenerator.h>
+#include "../LLVMGenerator.h"
 
 #include <functional>
 

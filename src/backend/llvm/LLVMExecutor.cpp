@@ -11,9 +11,11 @@
  * the License.
  */
 
+#include "LLVMGenerator.h"
+#include "jit/AthenaJIT.h"
+#include "runtime/driver/runtime-driver.h"
+
 #include <athena/backend/llvm/LLVMExecutor.h>
-#include <athena/backend/llvm/LLVMGenerator.h>
-#include <athena/backend/llvm/runtime-driver/runtime-driver.h>
 #include <athena/core/FatalError.h>
 #include <athena/core/GraphCompiler.h>
 #include <athena/core/LossNode.h>
