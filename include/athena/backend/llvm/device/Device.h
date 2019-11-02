@@ -14,8 +14,10 @@
 #ifndef ATHENA_DEVICE_H
 #define ATHENA_DEVICE_H
 
+#include <athena/backend/llvm/llvm_export.h>
+
 namespace athena::backend::llvm {
-class Device {};
+class ATH_BACKEND_LLVM_EXPORT Device {};
 }  // namespace athena::backend::llvm
 
 #endif  // ATHENA_DEVICE_H

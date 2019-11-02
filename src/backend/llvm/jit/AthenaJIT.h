@@ -14,6 +14,8 @@
 #ifndef ATHENA_ATHENAJIT_H
 #define ATHENA_ATHENAJIT_H
 
+#include <athena/backend/llvm/llvm_export.h>
+
 #include <llvm/ADT/StringRef.h>
 #include <llvm/Analysis/CGSCCPassManager.h>
 #include <llvm/Analysis/LoopAnalysisManager.h>
@@ -36,7 +38,7 @@ namespace athena::backend::llvm {
 /**
  * Execute LLVM IR
  */
-class AthenaJIT {
+class ATH_BACKEND_LLVM_EXPORT AthenaJIT {
     private:
     ::llvm::orc::ExecutionSession mExecutionSession;
     ::llvm::orc::RTDyldObjectLinkingLayer mObjectLayer;

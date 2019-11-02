@@ -14,6 +14,7 @@
 #ifndef ATHENA_LLVMGENERATORFUNCTOR_H
 #define ATHENA_LLVMGENERATORFUNCTOR_H
 
+#include <athena/backend/llvm/llvm_export.h>
 #include <athena/core/FatalError.h>
 #include <athena/core/inner/Tensor.h>
 
@@ -22,7 +23,7 @@
 
 namespace athena::backend::llvm {
 template <typename Ret>
-struct LLVMGeneratorFunctor {
+struct ATH_BACKEND_LLVM_EXPORT LLVMGeneratorFunctor {
     LLVMGeneratorFunctor() = default;
     template <typename F>
     LLVMGeneratorFunctor(F&& fun) : LLVMGeneratorFunctor(std::function(fun)){};
@@ -41,7 +42,7 @@ struct LLVMGeneratorFunctor {
 };
 
 template <>
-struct LLVMGeneratorFunctor<void> {
+struct ATH_BACKEND_LLVM_EXPORT LLVMGeneratorFunctor<void> {
     LLVMGeneratorFunctor() = default;
     template <typename F>
     explicit LLVMGeneratorFunctor(F&& fun)

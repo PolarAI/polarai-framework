@@ -17,11 +17,12 @@
 #include <athena/core/InputNode.h>
 #include <athena/core/Node.h>
 #include <athena/core/OutputNode.h>
+#include <athena/core/core_export.h>
 #include <athena/core/inner/TupleContainers.h>
 
 namespace athena::core {
 namespace inner {
-struct Dependency {
+struct ATH_CORE_EXPORT Dependency {
     size_t nodeIndex;
     size_t mark;
     Dependency(size_t nodeIndex, size_t mark)
@@ -29,7 +30,7 @@ struct Dependency {
 };
 
 template <typename TemplateNodeType>
-struct NodeDependencies {
+struct ATH_CORE_EXPORT NodeDependencies {
     size_t nodeIndex;
     std::vector<Dependency> input;
     std::vector<Dependency> output;
@@ -41,13 +42,13 @@ struct NodeDependencies {
           output(std::move(output)) {}
 };
 
-struct NodeState {
+struct ATH_CORE_EXPORT NodeState {
     size_t inputCount;
     std::vector<Dependency> input;
     std::vector<Dependency> output;
 };
 
-struct Cluster {
+struct ATH_CORE_EXPORT Cluster {
     using Content = inner::TupleContainersWithWrappers<std::vector,
                                                        inner::NodeDependencies,
                                                        Node,
@@ -72,7 +73,7 @@ struct Cluster {
 /**
  * Graph traversal
  */
-class Traversal {
+class ATH_CORE_EXPORT Traversal {
     private:
     inner::Clusters clusters;
     bool mIsValidTraversal;

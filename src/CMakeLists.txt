@@ -1,6 +1,9 @@
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+
 # --- Global Options ---
 option(ATHENA_BUILD_STATIC "OFF")
 
@@ -17,7 +20,10 @@ endif ()
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/null.cpp "")
 
 # --- Library targets ---
-add_athena_library(athena ${LIB_TYPE} ${CMAKE_CURRENT_BINARY_DIR}/null.cpp)
+add_athena_library(athena ${LIB_TYPE}
+        ATHENA # export name
+        athena_export.h
+        ${CMAKE_CURRENT_BINARY_DIR}/null.cpp)
 
 add_subdirectory(backend)
 add_subdirectory(core)

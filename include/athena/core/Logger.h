@@ -14,11 +14,12 @@
 #define ATHENA_LOGGER_H
 
 #include <athena/core/AbstractLogger.h>
+#include <athena/core/core_export.h>
 
 #include <ostream>
 
 namespace athena::core {
-class Logger : public AbstractLogger {
+class ATH_CORE_EXPORT Logger : public AbstractLogger {
     private:
     std::ostream &mOutStream;
 

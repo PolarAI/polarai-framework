@@ -11,16 +11,18 @@
  * the License.
  */
 
+#include <athena/core/core_export.h>
+
 #include <string>
 
 #ifndef ATHENA_LIBINFO_H
 #define ATHENA_LIBINFO_H
 
 extern "C" {
-const char* getMajorVersion();
-const char* getMinorVersion();
-const char* getPatchVersion();
-const char* getBuildVersion();
+ATH_CORE_EXPORT const char* getMajorVersion();
+ATH_CORE_EXPORT const char* getMinorVersion();
+ATH_CORE_EXPORT const char* getPatchVersion();
+ATH_CORE_EXPORT const char* getBuildVersion();
 }
 
 #endif  // ATHENA_LIBINFO_H

@@ -16,6 +16,7 @@
 
 #include <athena/core/AbstractGenerator.h>
 #include <athena/core/FatalError.h>
+#include <athena/core/core_export.h>
 #include <athena/core/inner/InnerFunctions.h>
 #include <athena/core/inner/Tensor.h>
 
@@ -27,7 +28,7 @@ namespace athena::core {
 /**
  * Operation is an abstract computation, like addition or multiplication
  */
-class Operation {
+class ATH_CORE_EXPORT Operation {
     protected:
     std::string mName;
 
@@ -81,7 +82,7 @@ class Operation {
     };
 };
 
-class OperationDummy : public Operation {
+class ATH_CORE_EXPORT OperationDummy : public Operation {
     public:
     explicit OperationDummy(std::string name) : Operation(std::move(name)){};
 

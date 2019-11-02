@@ -15,8 +15,10 @@
 #define ATHENA_GEMMOPERATION_H
 
 #include <athena/core/Operation.h>
+#include <athena/ops/ops_export.h>
+
 namespace athena::ops {
-class GEMMOperation : public core::Operation {
+class ATH_OPS_EXPORT GEMMOperation : public core::Operation {
     private:
     bool mTransposeA;
     bool mTransposeB;

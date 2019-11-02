@@ -17,9 +17,10 @@
 #include <athena/core/AbstractGenerator.h>
 #include <athena/core/Operation.h>
 #include <athena/core/inner/Tensor.h>
+#include <athena/ops/ops_export.h>
 
 namespace athena::ops {
-class MSELossFunction : public core::Operation {
+class ATH_OPS_EXPORT MSELossFunction : public core::Operation {
     public:
     MSELossFunction() : Operation("mse") {}
 

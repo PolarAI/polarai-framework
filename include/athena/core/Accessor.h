@@ -15,13 +15,15 @@
 #define ATHENA_ACCESSOR_H
 
 #include <athena/core/Allocator.h>
+#include <athena/core/core_export.h>
 #include <athena/core/inner/Tensor.h>
 
 #include <utility>
+
 namespace athena::core {
 
 template <typename T>
-class Accessor {
+class ATH_CORE_EXPORT Accessor {
     private:
     Allocator &mAllocator;
     inner::Tensor &mAccessTensor;

@@ -29,6 +29,8 @@ add_subdirectory(runtime/driver)
 file(GLOB codegen_src "codegen/*.cpp")
 
 add_athena_library(${ATH_BACKEND_LLVM} STATIC
+        ATH_BACKEND_LLVM # export name
+        backend/llvm/llvm_export.h
         LLVMExecutor.cpp
         LLVMGenerator.cpp
         jit/AthenaJIT.cpp

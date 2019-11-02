@@ -14,8 +14,10 @@
 #ifndef ATHENA_CRITERION_H
 #define ATHENA_CRITERION_H
 
+#include <athena/core/core_export.h>
+
 namespace athena::core {
-enum class Criterion { UNDEFINED = 0, MAX = 1, MIN = 2 };
+enum class ATH_CORE_EXPORT Criterion { UNDEFINED = 0, MAX = 1, MIN = 2 };
 }
 
 #endif  // ATHENA_CRITERION_H

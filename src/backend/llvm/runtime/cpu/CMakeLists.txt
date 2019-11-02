@@ -1,6 +1,8 @@
 set(ATH_RT_LLVM_CPU "AthenaLLVMCpuRuntime" CACHE STRING "" FORCE)
 
 add_athena_library(${ATH_RT_LLVM_CPU} SHARED
+        ATH_RT_LLVM # export name
+        backend/llvm/runtime/runtime_export.h # export file name
         add.cpp
         allocate.cpp
         fill.cpp
@@ -8,6 +10,7 @@ add_athena_library(${ATH_RT_LLVM_CPU} SHARED
         mse.cpp
         ${WRAPPER_CPP})
 add_dependencies(${ATH_RT_LLVM_CPU} wrapper_cpp)
+target_compile_options(${ATH_RT_LLVM_CPU} PRIVATE -fvisibility=default)
 
 find_package(BLAS)
 
@@ -44,11 +47,16 @@ else ()
 endif ()
 
 set(WEAK_FLAG)
+set(NOWEAK_FLAG)
 if (APPLE)
     set(WEAK_FLAG -Wl,-weak_library)
+elseif (UNIX)
+    set(WEAK_FLAG -Wl,--as-needed)
+    set(NOWEAK_FLAG -Wl,--no-as-needed)
 endif ()
 
-target_link_libraries(${ATH_RT_LLVM_CPU} PRIVATE ${WEAK_FLAG} ${ATH_CORE})
+target_link_libraries(${ATH_RT_LLVM_CPU} PRIVATE ${WEAK_FLAG} ${ATH_CORE} ${NOWEAK_FLAG})
+target_compile_definitions(${ATH_RT_LLVM_CPU} PRIVATE -D${ATH_CORE}_WEAK)
 
 install(TARGETS ${ATH_RT_LLVM_CPU} EXPORT AthenaConfig
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

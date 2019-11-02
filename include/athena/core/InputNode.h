@@ -16,12 +16,13 @@
 
 #include <athena/core/AbstractLoader.h>
 #include <athena/core/AbstractNode.h>
+#include <athena/core/core_export.h>
 
 namespace athena::core {
 /**
  * Special type of Node that can not have predecessors
  */
-class InputNode : public AbstractNode {
+class ATH_CORE_EXPORT InputNode : public AbstractNode {
     protected:
     AbstractLoader* mLoader;
     bool mIsFrozen;

@@ -15,10 +15,11 @@
 #define ATHENA_EXECUTOR_H
 
 #include <athena/core/Graph.h>
+#include <athena/core/core_export.h>
 
 namespace athena::core {
 
-class Executor {
+class ATH_CORE_EXPORT Executor {
     public:
     virtual void setGraph(Graph &graph) = 0;
     virtual void evaluate() = 0;

@@ -13,28 +13,29 @@
 
 #include <athena/core/FatalError.h>
 #include <athena/core/NodeType.h>
+#include <athena/core/core_export.h>
 #include <athena/core/inner/ForwardDeclarations.h>
 
 namespace athena::core {
 template <typename TemplateNodeType>
-NodeType getNodeType() {
+NodeType ATH_CORE_EXPORT getNodeType() {
     new FatalError(1, "NodeType is not defined for given type");
     return NodeType::UNDEFINED;
 }
 template <>
-NodeType getNodeType<Node>() {
+NodeType ATH_CORE_EXPORT getNodeType<Node>() {
     return NodeType::DEFAULT;
 }
 template <>
-NodeType getNodeType<InputNode>() {
+NodeType ATH_CORE_EXPORT getNodeType<InputNode>() {
     return NodeType::INPUT;
 }
 template <>
-NodeType getNodeType<OutputNode>() {
+NodeType ATH_CORE_EXPORT getNodeType<OutputNode>() {
     return NodeType::OUTPUT;
 }
 template <>
-NodeType getNodeType<LossNode>() {
+NodeType ATH_CORE_EXPORT getNodeType<LossNode>() {
     return NodeType::LOSS;
 }
 }  // namespace athena::core

@@ -53,6 +53,7 @@ if (NOT ATHENA_DOCS_ONLY)
 
     include_directories(${CMAKE_SOURCE_DIR}/include)
     install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/athena DESTINATION include)
+    install(DIRECTORY ${CMAKE_BINARY_DIR}/export/athena DESTINATION include)
 
     add_definitions(-DATHENA_MAJOR_VERSION="${ATHENA_MAJOR_VERSION}")
     add_definitions(-DATHENA_MINOR_VERSION="${ATHENA_MINOR_VERSION}")

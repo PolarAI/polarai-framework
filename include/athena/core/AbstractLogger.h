@@ -14,6 +14,7 @@
 #define ATHENA_ABSTRACTLOGER_H
 
 #include <athena/core/Error.h>
+#include <athena/core/core_export.h>
 
 #include <string>
 #include <string_view>
@@ -25,7 +26,7 @@ class Error;
 /**
  * Abstract Athena logger interface
  */
-class AbstractLogger {
+class ATH_CORE_EXPORT AbstractLogger {
     public:
     AbstractLogger() = default;
     AbstractLogger(const AbstractLogger &) = default;

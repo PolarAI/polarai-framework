@@ -14,6 +14,7 @@
 #define ATHENA_ABSTRACTGENERATOR_H
 
 #include <athena/core/AbstractLoader.h>
+#include <athena/core/core_export.h>
 #include <athena/core/inner/Tensor.h>
 
 namespace athena::core {
@@ -22,7 +23,7 @@ namespace athena::core {
  * A helper interface to connect operations with actual runtime implementations
  * through backend
  */
-class AbstractGenerator {
+class ATH_CORE_EXPORT AbstractGenerator {
     protected:
     virtual void generateImpl(std::string &, inner::Tensor &a) = 0;
     virtual void generateImpl(std::string &, inner::Tensor &a, void *&b) = 0;

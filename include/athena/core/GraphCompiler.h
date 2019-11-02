@@ -16,9 +16,10 @@
 
 #include <athena/core/AbstractGenerator.h>
 #include <athena/core/Graph.h>
+#include <athena/core/core_export.h>
 
 namespace athena::core {
-class GraphCompiler {
+class ATH_CORE_EXPORT GraphCompiler {
     public:
     static void compileForward(Graph &graph, AbstractGenerator &generator);
     static void compileBackward(Graph &graph, AbstractGenerator &generator);

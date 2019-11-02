@@ -16,9 +16,10 @@
 
 #include <athena/core/DataType.h>
 #include <athena/core/TensorShape.h>
+#include <athena/core/core_export.h>
 
 namespace athena::core::inner {
-struct AllocationRecord {
+struct ATH_CORE_EXPORT AllocationRecord {
     private:
     DataType mDataType;
     TensorShape mShape;

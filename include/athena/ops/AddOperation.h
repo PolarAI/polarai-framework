@@ -17,12 +17,13 @@
 #include <athena/core/AbstractGenerator.h>
 #include <athena/core/Operation.h>
 #include <athena/core/inner/Tensor.h>
+#include <athena/ops/ops_export.h>
 
 namespace athena::ops {
 /**
  * Add two Tensors
  */
-class AddOperation : public core::Operation {
+class ATH_OPS_EXPORT AddOperation : public core::Operation {
     public:
     AddOperation() : Operation("add") {}
 

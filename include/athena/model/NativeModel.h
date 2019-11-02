@@ -15,12 +15,13 @@
 #define ATHENA_NATIVEMODEL_H
 
 #include <athena/core/Graph.h>
+#include <athena/model/model_export.h>
 
 #include <istream>
 #include <ostream>
 
 namespace athena::model {
-class NativeModel {
+class ATH_MODEL_EXPORT NativeModel {
     public:
     static void serializeGraph(core::Graph &graph, std::ostream &stream);
     static void deserializeGraph(core::Graph &graph, std::istream &stream);

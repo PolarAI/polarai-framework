@@ -14,6 +14,8 @@
 #ifndef ATHENA_TUPLECONTAINERS_H
 #define ATHENA_TUPLECONTAINERS_H
 
+#include <athena/core/core_export.h>
+
 #include <tuple>
 
 namespace athena::core::inner {
@@ -21,11 +23,11 @@ template <template <typename, typename...> typename Container,
           template <typename>
           typename Wrapper,
           typename... Args>
-struct TupleContainersWithWrappers {
+struct ATH_CORE_EXPORT TupleContainersWithWrappers {
     using Holder = std::tuple<Container<Wrapper<Args>>...>;
 };
 template <template <typename, typename...> typename Container, typename... Args>
-struct TupleContainers {
+struct ATH_CORE_EXPORT TupleContainers {
     using Holder = std::tuple<Container<Args>...>;
 };
 }  // namespace athena::core::inner

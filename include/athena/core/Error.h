@@ -13,6 +13,8 @@
 #ifndef ATHENA_ERROR_H
 #define ATHENA_ERROR_H
 
+#include <athena/core/core_export.h>
+
 #include <ostream>
 #include <sstream>
 #include <string_view>
@@ -22,7 +24,7 @@ namespace athena::core {
 /**
  * A non-fatal error
  */
-class Error {
+class ATH_CORE_EXPORT Error {
     protected:
     int32_t mErrorCode;
     std::string mErrorMessage;
@@ -41,7 +43,8 @@ class Error {
     friend std::ostream &operator<<(std::ostream &stream, const Error &err);
 };
 template <typename... Args>
-Error::Error(int32_t errorCode, Args &&... messages) : mErrorCode(errorCode) {
+ATH_CORE_EXPORT Error::Error(int32_t errorCode, Args &&... messages)
+    : mErrorCode(errorCode) {
     std::stringstream ss;
     (ss << ... << std::forward<Args>(messages));
     mErrorMessage = ss.str();

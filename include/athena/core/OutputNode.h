@@ -14,20 +14,22 @@
 #ifndef ATHENA_OUTPUTNODE_H
 #define ATHENA_OUTPUTNODE_H
 
-#include "Accessor.h"
-
 #include <athena/core/AbstractNode.h>
+#include <athena/core/Accessor.h>
+#include <athena/core/core_export.h>
 
 namespace athena::core {
 /**
  * Special type of Node that use for output of data
  */
-class OutputNode : public AbstractNode {
+class ATH_CORE_EXPORT OutputNode : public AbstractNode {
     public:
     OutputNode() = delete;
     OutputNode(const OutputNode& rhs) = default;
     OutputNode(OutputNode&& rhs) = default;
-    explicit OutputNode(DataType dataType, Context& context, std::string name = "");
+    explicit OutputNode(DataType dataType,
+                        Context& context,
+                        std::string name = "");
     ~OutputNode() override;
 
     OutputNode& operator=(const OutputNode& rhs) = delete;

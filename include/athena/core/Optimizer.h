@@ -15,9 +15,10 @@
 #define ATHENA_OPTIMIZER_H
 
 #include <athena/core/AbstractGenerator.h>
+#include <athena/core/core_export.h>
 
 namespace athena::core {
-class Optimizer {
+class ATH_CORE_EXPORT Optimizer {
     public:
     Optimizer() = default;
     Optimizer(const Optimizer &) = default;

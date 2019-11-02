@@ -16,12 +16,13 @@
 
 #include <athena/core/Criterion.h>
 #include <athena/core/Node.h>
+#include <athena/core/core_export.h>
 
 namespace athena::core {
 /**
  * Special type of node that use for backward propagation on graph
  */
-class LossNode : public Node {
+class ATH_CORE_EXPORT LossNode : public Node {
     private:
     Criterion mCriterion;
 

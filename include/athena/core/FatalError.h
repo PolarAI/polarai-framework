@@ -12,9 +12,11 @@
  */
 #ifndef ATHENA_FATALERROR_H
 #define ATHENA_FATALERROR_H
+
 #include "Logger.h"
 
 #include <athena/core/Error.h>
+#include <athena/core/core_export.h>
 #include <athena/core/log.h>
 
 #include <csignal>
@@ -26,7 +28,7 @@ namespace athena::core {
 /**
  * A fatal error. Creating instances of this class forces program to stop.
  */
-class FatalError : public Error {
+class ATH_CORE_EXPORT FatalError : public Error {
     public:
     template <typename... Args>
     explicit FatalError(int32_t errorCode, Args... messages);

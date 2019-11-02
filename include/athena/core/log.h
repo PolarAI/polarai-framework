@@ -16,12 +16,13 @@
 
 #include <athena/core/AbstractLogger.h>
 #include <athena/core/Logger.h>
+#include <athena/core/core_export.h>
 
 #include <iostream>
 #include <memory>
 
 namespace athena {
-class LogHolder {
+class ATH_CORE_EXPORT LogHolder {
     std::unique_ptr<core::AbstractLogger> mLog;
     std::unique_ptr<core::AbstractLogger> mErr;
 
@@ -50,20 +51,20 @@ class LogHolder {
     friend core::AbstractLogger& err();
 };
 
-extern const std::unique_ptr<LogHolder> logHolder;
+extern const ATH_CORE_EXPORT std::unique_ptr<LogHolder> logHolder;
 
 template <typename LoggerType, typename... Args>
-void setLogStream(Args&&... args) {
+ATH_CORE_EXPORT void setLogStream(Args&&... args) {
     logHolder->setStream<LoggerType>(logHolder->mLog,
                                      std::forward<Args>(args)...);
 }
 template <typename LoggerType, typename... Args>
-void setErrStream(Args&&... args) {
+ATH_CORE_EXPORT void setErrStream(Args&&... args) {
     logHolder->setStream<LoggerType>(logHolder->mErr,
                                      std::forward<Args>(args)...);
 }
-core::AbstractLogger& log();
-core::AbstractLogger& err();
+ATH_CORE_EXPORT core::AbstractLogger& log();
+ATH_CORE_EXPORT core::AbstractLogger& err();
 }  // namespace athena
 
 #endif  // ATHENA_LOG_H

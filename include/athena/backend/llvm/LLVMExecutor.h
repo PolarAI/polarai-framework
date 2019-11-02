@@ -13,6 +13,7 @@
 #ifndef ATHENA_LLVMEXECUTOR_H
 #define ATHENA_LLVMEXECUTOR_H
 
+#include <athena/backend/llvm/llvm_export.h>
 #include <athena/core/Allocator.h>
 #include <athena/core/Executor.h>
 #include <athena/core/Traversal.h>
@@ -30,7 +31,7 @@ class RuntimeDriver;
 /**
  * Execute Graph with LLVM-based backend
  */
-class LLVMExecutor : public athena::core::Executor {
+class ATH_BACKEND_LLVM_EXPORT LLVMExecutor : public athena::core::Executor {
     private:
     std::shared_ptr<AthenaJIT> mJITCompiler{nullptr};
     std::unique_ptr<core::Allocator> mAllocator;

@@ -16,12 +16,13 @@
 
 #include <athena/core/AbstractNode.h>
 #include <athena/core/Operation.h>
+#include <athena/core/core_export.h>
 
 namespace athena::core {
 /**
  * Node holds Operation and Tensors to perform computation
  */
-class Node : public AbstractNode {
+class ATH_CORE_EXPORT Node : public AbstractNode {
     protected:
     Operation* mOperation;
     std::vector<inner::Tensor*> mDerivativeTensors;

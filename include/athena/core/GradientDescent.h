@@ -15,9 +15,10 @@
 #define ATHENA_GRADIENTDESCENT_H
 
 #include <athena/core/Optimizer.h>
+#include <athena/core/core_export.h>
 
 namespace athena::core {
-class GradientDescent : public Optimizer {
+class ATH_CORE_EXPORT GradientDescent : public Optimizer {
     protected:
     double mLearningRate;
 

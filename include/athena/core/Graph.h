@@ -16,6 +16,7 @@
 
 #include <athena/core/Optimizer.h>
 #include <athena/core/Traversal.h>
+#include <athena/core/core_export.h>
 #include <athena/core/inner/Settings.h>
 #include <athena/core/inner/Table.h>
 
@@ -26,7 +27,7 @@
 
 namespace athena::core {
 namespace inner {
-struct Edge {
+struct ATH_CORE_EXPORT Edge {
     size_t startNodeIndex;
     size_t endNodeIndex;
     EdgeMark mark;
@@ -53,7 +54,7 @@ using Topology = std::vector<inner::Edge>;
  * A computation graph is an abstraction to represent an arbitrary function
  * in a way that is suitable for computation.
  */
-class Graph {
+class ATH_CORE_EXPORT Graph {
     private:
     SyncStorage mSyncStorage;
     OwningStorage mOwningStorage;

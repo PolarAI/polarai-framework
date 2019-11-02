@@ -14,11 +14,12 @@
 #ifndef ATHENA_TENSOR_H
 #define ATHENA_TENSOR_H
 
+#include <athena/core/core_export.h>
 #include <athena/core/inner/AllocationRecord.h>
 #include <athena/core/inner/ForwardDeclarations.h>
 
 namespace athena::core::inner {
-class Tensor {
+class ATH_CORE_EXPORT Tensor {
     private:
     Context* mContext;
     size_t mVirtualAddress;

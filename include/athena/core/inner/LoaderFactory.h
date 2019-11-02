@@ -15,13 +15,14 @@
 #define ATHENA_LOADERFACTORY_H
 
 #include <athena/core/AbstractLoader.h>
+#include <athena/core/core_export.h>
 #include <athena/loaders/MemoryLoader/MemoryLoader.h>
 
 #include <unordered_map>
 
 namespace athena::core::inner {
 
-class LoaderFactory {
+class ATH_CORE_EXPORT LoaderFactory {
     private:
     std::unordered_map<std::string, AbstractLoader *(*)(const std::string &)>
         loadersMap;

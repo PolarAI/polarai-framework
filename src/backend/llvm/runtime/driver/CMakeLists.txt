@@ -1,6 +1,10 @@
 set(ATH_RT_LLVM_DRIVER "AthenaLLVMRuntimeDriver" CACHE STRING "" FORCE)
 
-add_athena_library(${ATH_RT_LLVM_DRIVER} STATIC runtime-driver.cpp ${GENERATOR_CPP})
+add_athena_library(${ATH_RT_LLVM_DRIVER} STATIC
+        ATH_RT_LLVM_DRIVER # export name
+        backend/llvm/driver/driver_export.h # export file name
+        runtime-driver.cpp
+        ${GENERATOR_CPP})
 target_link_libraries(${ATH_RT_LLVM_DRIVER} PRIVATE ${ATH_CORE})
 add_dependencies(${ATH_RT_LLVM_DRIVER} generator_cpp)
 

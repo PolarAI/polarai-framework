@@ -14,12 +14,19 @@
 #ifndef ATHENA_DATATYPE_H
 #define ATHENA_DATATYPE_H
 
+#include <athena/core/core_export.h>
+
 #include <cstddef>
 
 namespace athena::core {
-enum class DataType : int { UNDEFINED = 0, DOUBLE = 1, FLOAT = 2, HALF = 3 };
+enum class ATH_CORE_EXPORT DataType : int {
+    UNDEFINED = 0,
+    DOUBLE = 1,
+    FLOAT = 2,
+    HALF = 3
+};
 
-size_t sizeOfDataType(const DataType& dataType);
+ATH_CORE_EXPORT size_t sizeOfDataType(const DataType& dataType);
 }  // namespace athena::core
 
 #endif  // ATHENA_DATATYPE_H

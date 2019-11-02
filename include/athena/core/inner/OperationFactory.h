@@ -15,6 +15,7 @@
 #define ATHENA_OPERATIONFACTORY_H
 
 #include <athena/core/Operation.h>
+#include <athena/core/core_export.h>
 #include <athena/ops/AddOperation.h>
 #include <athena/ops/GEMMOperation.h>
 #include <athena/ops/MSELossFunction.h>
@@ -23,7 +24,7 @@
 
 namespace athena::core::inner {
 
-class OperationFactory {
+class ATH_CORE_EXPORT OperationFactory {
     private:
     std::unordered_map<std::string, Operation *(*)(const std::string &)> opsMap;
 

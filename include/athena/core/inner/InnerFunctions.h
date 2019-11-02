@@ -14,29 +14,33 @@
 #ifndef ATHENA_INNERFUNCTIONS_H
 #define ATHENA_INNERFUNCTIONS_H
 
+#include <athena/core/core_export.h>
 #include <athena/core/inner/ForwardDeclarations.h>
 #include <athena/core/inner/Tensor.h>
 
 #include <cstddef>
 
 namespace athena::core::inner {
-void setGraphIndex(AbstractNode &node, size_t graphIndex);
-void incrementInputCount(AbstractNode &node);
-Tensor &getTensorFromNode(AbstractNode &node);
-Traversal &getTraversal(Graph &graph);
-Clusters &getClusters(Graph &graph);
-Clusters &getClusters(Traversal &traversal);
-void setTraversalValidity(Traversal &traversal, bool flag);
-void addDerivativeTensor(Node &node, inner::Tensor &tensor);
-Tensor &getDerivativeTensor(Node &node, size_t index);
-void setErrorTensor(Node &node, Tensor *tensor);
-inner::Tensor &getErrorTensor(Node &node);
-void setResultTensor(AbstractNode &node, inner::Tensor *tensor);
-Tensor *getNullTensor(Context& context);
-inner::Table<AllocationRecord>& getAllocationTable(athena::core::Context& context);
-inner::Table<Graph*>& getGraphTable(athena::core::Context& context);
-inner::Table<AbstractNode*>& getNodeTable(athena::core::Context& context);
-Context& getContext(athena::core::Graph& graph);
+ATH_CORE_EXPORT void setGraphIndex(AbstractNode &node, size_t graphIndex);
+ATH_CORE_EXPORT void incrementInputCount(AbstractNode &node);
+ATH_CORE_EXPORT Tensor &getTensorFromNode(AbstractNode &node);
+ATH_CORE_EXPORT Traversal &getTraversal(Graph &graph);
+ATH_CORE_EXPORT Clusters &getClusters(Graph &graph);
+ATH_CORE_EXPORT Clusters &getClusters(Traversal &traversal);
+ATH_CORE_EXPORT void setTraversalValidity(Traversal &traversal, bool flag);
+ATH_CORE_EXPORT void addDerivativeTensor(Node &node, inner::Tensor &tensor);
+ATH_CORE_EXPORT Tensor &getDerivativeTensor(Node &node, size_t index);
+ATH_CORE_EXPORT void setErrorTensor(Node &node, Tensor *tensor);
+ATH_CORE_EXPORT inner::Tensor &getErrorTensor(Node &node);
+ATH_CORE_EXPORT void setResultTensor(AbstractNode &node, inner::Tensor *tensor);
+ATH_CORE_EXPORT Tensor *getNullTensor(Context &context);
+ATH_CORE_EXPORT inner::Table<AllocationRecord> &getAllocationTable(
+    athena::core::Context &context);
+ATH_CORE_EXPORT inner::Table<Graph *> &getGraphTable(
+    athena::core::Context &context);
+ATH_CORE_EXPORT inner::Table<AbstractNode *> &getNodeTable(
+    athena::core::Context &context);
+ATH_CORE_EXPORT Context &getContext(athena::core::Graph &graph);
 }  // namespace athena::core::inner
 
 #endif  // ATHENA_INNERFUNCTIONS_H

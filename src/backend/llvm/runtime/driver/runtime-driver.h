@@ -14,6 +14,7 @@
 #ifndef ATHENA_RUNTIME_DRIVER_H
 #define ATHENA_RUNTIME_DRIVER_H
 
+#include <athena/backend/llvm/driver/driver_export.h>
 #include <athena/core/FatalError.h>
 
 #include "llvm/IR/IRBuilder.h"
@@ -24,7 +25,7 @@
 #include <string_view>
 
 namespace athena::backend::llvm {
-class RuntimeDriver {
+class ATH_RT_LLVM_DRIVER_EXPORT RuntimeDriver {
     private:
     void *mLibraryHandle;
 

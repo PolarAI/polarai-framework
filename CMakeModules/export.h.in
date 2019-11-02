@@ -1,0 +1,39 @@
+/*
+ * Copyright (c) 2019 Athena. All rights reserved.
+ * https://getathena.ml
+ *
+ * Licensed under MIT license.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+#ifndef ATHENA_@export_name@_EXPORT_H
+#define ATHENA_@export_name@_EXPORT_H
+
+#ifdef @target_name@_EXPORT
+    #ifdef WIN32
+    #define @export_name@_EXPORT __declspec(dllexport)
+    #else
+    #define @export_name@_EXPORT __attribute__ ((visibility("default")))
+    #endif
+#else
+    #ifdef @target_name@_WEAK
+        #ifdef WIN32
+        #define @export_name@_EXPORT __declspec(dllimport)
+        #else
+        #define @export_name@_EXPORT __attribute__ ((visibility("default"), weak))
+        #endif
+    #else
+        #ifdef WIN32
+        #define @export_name@_EXPORT __declspec(dllimport)
+        #else
+        #define @export_name@_EXPORT __attribute__ ((visibility("default")))
+        #endif
+    #endif
+#endif
+
+#endif  // ATHENA_@export_name@_EXPORT_H

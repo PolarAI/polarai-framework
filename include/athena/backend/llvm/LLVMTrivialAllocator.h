@@ -14,6 +14,7 @@
 #ifndef ATHENA_LLVMTRIVIALALLOCATOR_H
 #define ATHENA_LLVMTRIVIALALLOCATOR_H
 
+#include <athena/backend/llvm/llvm_export.h>
 #include <athena/core/Allocator.h>
 #include <athena/core/inner/Tensor.h>
 
@@ -23,7 +24,8 @@ namespace athena::backend::llvm {
 /**
  * The simplest Allocator that uses OS malloc/free
  */
-class LLVMTrivialAllocator : public athena::core::Allocator {
+class ATH_BACKEND_LLVM_EXPORT LLVMTrivialAllocator :
+    public athena::core::Allocator {
     private:
     std::unordered_map<size_t, void*> mAllocatedMap;
     std::allocator<uint8_t> mAllocator;

@@ -1,6 +1,6 @@
 include(AthenaRuntime)
 
-function(add_athena_library target_name modifier)
+function(add_athena_library target_name modifier export_name export_header_name)
     set(source_list ${ARGN})
     add_library(${target_name} ${modifier} ${source_list})
 
@@ -12,6 +12,12 @@ function(add_athena_library target_name modifier)
     if (UNIX)
         target_compile_options(${target_name} PRIVATE "-fPIC")
     endif ()
+
+    configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/export.h.in
+            ${CMAKE_BINARY_DIR}/export/athena/${export_header_name})
+    target_include_directories(${target_name} PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/export>)
+    target_compile_definitions(${target_name} PRIVATE -D${target_name}_EXPORT)
 
     find_package(codecov)
     add_coverage(${target_name})

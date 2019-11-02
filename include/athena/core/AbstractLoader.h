@@ -15,6 +15,7 @@
 #define ATHENA_ABSTRACTLOADER_H
 
 #include <athena/core/Allocator.h>
+#include <athena/core/core_export.h>
 
 #include <string>
 #include <string_view>
@@ -24,7 +25,7 @@ namespace athena::core {
 /**
  * Loaders is a concept that helps Athena put user data into Graph
  */
-class AbstractLoader {
+class ATH_CORE_EXPORT AbstractLoader {
     public:
     /**
      * Do actual data load
@@ -60,7 +61,7 @@ class AbstractLoader {
 /**
  * Dummy loader for testing purposes only
  */
-class DummyLoader : public AbstractLoader {
+class ATH_CORE_EXPORT DummyLoader : public AbstractLoader {
     public:
     void load(Allocator*, inner::Tensor* tensor) override {}
     std::string getLoadCName() const override {

@@ -14,6 +14,7 @@
 #ifndef ATHENA_ALLOCATOR_H
 #define ATHENA_ALLOCATOR_H
 
+#include <athena/core/core_export.h>
 #include <athena/core/inner/Tensor.h>
 
 #include <cstddef>
@@ -23,7 +24,7 @@ namespace athena::core {
 /**
  * Interface used by backend to manage memory
  */
-class Allocator {
+class ATH_CORE_EXPORT Allocator {
     public:
     virtual ~Allocator() = default;
     virtual void allocate(const inner::Tensor&) = 0;

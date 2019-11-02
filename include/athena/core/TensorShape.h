@@ -17,13 +17,14 @@
 #include "FatalError.h"
 
 #include <athena/core/ShapeView.h>
+#include <athena/core/core_export.h>
 
 #include <initializer_list>
 #include <utility>
 #include <vector>
 
 namespace athena::core {
-class TensorShape {
+class ATH_CORE_EXPORT TensorShape {
     private:
     std::vector<size_t> mShape;
     size_t mTotalSize;
@@ -84,7 +85,7 @@ class TensorShape {
 };
 
 template <typename CopyableIterator>
-TensorShape::TensorShape(CopyableIterator begin, CopyableIterator end)
+ATH_CORE_EXPORT TensorShape::TensorShape(CopyableIterator begin, CopyableIterator end)
     : mShape(begin, end), mTotalSize(calculateTotalSize()) {}
 
 }  // namespace athena::core

@@ -16,12 +16,13 @@
 
 #include <athena/core/AbstractLoader.h>
 #include <athena/core/Allocator.h>
+#include <athena/loaders/MemoryLoader/mem_loader_export.h>
 
 namespace athena::loaders {
 /**
  * Load data from RAM to Tensor
  */
-class MemoryLoader : public core::AbstractLoader {
+class ATH_MEM_LOADER_EXPORT MemoryLoader : public core::AbstractLoader {
     private:
     void *mData;
     size_t mSize;
@@ -57,8 +58,8 @@ class MemoryLoader : public core::AbstractLoader {
 }  // namespace athena::loaders
 
 extern "C" {
-void MemoryLoaderLoad(void *, void *, void *);
-void *CreateMemoryLoader(void *, size_t);
+void ATH_MEM_LOADER_EXPORT MemoryLoaderLoad(void *, void *, void *);
+void ATH_MEM_LOADER_EXPORT *CreateMemoryLoader(void *, size_t);
 }
 
 #endif  // ATHENA_MEMORYLOADER_H

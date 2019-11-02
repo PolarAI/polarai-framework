@@ -14,11 +14,12 @@
 #ifndef ATHENA_ABSTRACTNODE_H
 #define ATHENA_ABSTRACTNODE_H
 
+#include <athena/core/Context.h>
 #include <athena/core/DataType.h>
 #include <athena/core/NodeType.h>
+#include <athena/core/core_export.h>
 #include <athena/core/inner/InnerFunctions.h>
 #include <athena/core/inner/Tensor.h>
-#include <athena/core/Context.h>
 
 #include <string>
 #include <string_view>
@@ -29,7 +30,7 @@ using EdgeMark = size_t;
 /**
  * A Node represents a piece of computation in Graph
  */
-class AbstractNode {
+class ATH_CORE_EXPORT AbstractNode {
     private:
     void fullClear();
     inner::Tensor* mTensor;

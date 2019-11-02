@@ -14,12 +14,13 @@
 #ifndef ATHENA_CONTEXT_H
 #define ATHENA_CONTEXT_H
 
+#include <athena/core/core_export.h>
 #include <athena/core/inner/ForwardDeclarations.h>
 #include <athena/core/inner/InnerFunctions.h>
 #include <athena/core/inner/Table.h>
 
 namespace athena::core {
-class Context {
+class ATH_CORE_EXPORT Context {
     public:
     friend inner::Table<AbstractNode*>& inner::getNodeTable(athena::core::Context& context);
     friend inner::Table<inner::AllocationRecord>& inner::getAllocationTable(athena::core::Context& context);

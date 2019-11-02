@@ -14,6 +14,7 @@
 #ifndef ATHENA_TABLE_H
 #define ATHENA_TABLE_H
 
+#include <athena/core/core_export.h>
 #include <athena/core/inner/NullRecord.h>
 
 #include <vector>
@@ -22,7 +23,7 @@ namespace athena::core::inner {
 constexpr size_t kKUndefinedIndex = 0;
 
 template <typename Content>
-class Table {
+class ATH_CORE_EXPORT Table {
     private:
     static inline Content const mNullRecord = NullRecord<Content>::value;
     std::vector<Content> mRegisteredContents;
@@ -44,35 +45,35 @@ class Table {
 };
 
 template <typename Content>
-Table<Content>::Table() {
+ATH_CORE_EXPORT Table<Content>::Table() {
     mRegisteredContents.emplace_back(mNullRecord);
 }
 
 template <typename Content>
-Content &Table<Content>::operator[](size_t index) {
+ATH_CORE_EXPORT Content &Table<Content>::operator[](size_t index) {
     return mRegisteredContents[index];
 }
 
 template <typename Content>
 template <typename... Args>
-size_t Table<Content>::registerRecord(Args &&... args) {
+ATH_CORE_EXPORT size_t Table<Content>::registerRecord(Args &&... args) {
     mRegisteredContents.emplace_back(std::forward<Args>(args)...);
     return mRegisteredContents.size() - 1;
 }
 
 template <typename Content>
-size_t Table<Content>::size() {
+ATH_CORE_EXPORT size_t Table<Content>::size() {
     return mRegisteredContents.size();
 }
 
 template <typename Content>
-void Table<Content>::clear() {
+ATH_CORE_EXPORT void Table<Content>::clear() {
     mRegisteredContents.clear();
     mRegisteredContents.emplace_back(mNullRecord);
 }
 
 template <>
-class Table<AllocationRecord> {
+class ATH_CORE_EXPORT Table<AllocationRecord> {
     private:
     size_t mLastId;
     static inline const AllocationRecord mNullRecord =
@@ -96,7 +97,8 @@ class Table<AllocationRecord> {
 };
 
 template <typename... Args>
-size_t Table<AllocationRecord>::registerRecord(Args &&... args) {
+ATH_CORE_EXPORT size_t
+Table<AllocationRecord>::registerRecord(Args &&... args) {
     mRegisteredContents.emplace_back(std::forward<Args>(args)...);
     size_t lastIdCopy = mLastId;
     mLastId += mRegisteredContents.back().getSize();
