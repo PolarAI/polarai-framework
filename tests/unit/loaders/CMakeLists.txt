@@ -1,8 +1,6 @@
 add_athena_executable(TestUnitLoadersRunnable MemoryLoader.cpp)
 target_link_libraries(TestUnitLoadersRunnable PRIVATE
-        athena-core
-        backend-llvm
-        MemoryLoader
+        athena
         Threads::Threads
         AthenaDep::googletest)
 

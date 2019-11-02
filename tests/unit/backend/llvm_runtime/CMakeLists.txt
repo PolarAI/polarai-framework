@@ -11,4 +11,4 @@ function(add_rt_unit_test NAME RT)
     add_test(NAME Core${NAME}Test COMMAND TestUnit${NAME}Runnable)
 endfunction(add_rt_unit_test)
 
-add_rt_unit_test(CPU runtime-llvm-cpu)
+add_rt_unit_test(CPU ${ATH_RT_LLVM_CPU})

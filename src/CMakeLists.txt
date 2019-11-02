@@ -51,10 +51,11 @@ endif()
 target_link_libraries(athena
         PRIVATE
         ${WHOLE_ARCHIVE}
-        backend-llvm
-        athena-core
-        athena-ops
-        athena-model
+        ${ATH_BACKEND_LLVM}
+        ${ATH_CORE}
+        ${ATH_MEM_LOADER}
+        ${ATH_OPS}
+        ${ATH_MODEL}
         ${NOWHOLE_ARCHIVE})
 
 target_compile_features(athena
@@ -93,4 +94,4 @@ write_basic_package_version_file(
 )
 
 # This makes the project importable from the build directory
-export(TARGETS athena athena-core athena-ops FILE AthenaConfig.cmake)
+export(TARGETS athena ${ATH_CORE} FILE AthenaConfig.cmake)

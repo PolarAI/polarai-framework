@@ -1,3 +1,5 @@
+set(ATH_BACKEND_LLVM "AthenaBackendLLVM" CACHE STRING "" FORCE)
+
 find_package(LLVM CONFIG)
 find_package(PythonInterp REQUIRED)
 
@@ -26,7 +28,7 @@ add_subdirectory(runtime/driver)
 
 file(GLOB codegen_src "codegen/*.cpp")
 
-add_athena_library(backend-llvm STATIC
+add_athena_library(${ATH_BACKEND_LLVM} STATIC
         LLVMExecutor.cpp
         LLVMGenerator.cpp
         jit/AthenaJIT.cpp
@@ -34,12 +36,22 @@ add_athena_library(backend-llvm STATIC
         utils.cpp
         ${codegen_src})
 
-target_include_directories(backend-llvm PRIVATE ${LLVM_INCLUDE_DIRS})
-target_compile_definitions(backend-llvm PRIVATE ${LLVM_DEFINITIONS})
+target_include_directories(${ATH_BACKEND_LLVM} PRIVATE ${LLVM_INCLUDE_DIRS})
+target_compile_definitions(${ATH_BACKEND_LLVM} PRIVATE ${LLVM_DEFINITIONS})
 
-llvm_map_components_to_libnames(llvm_libs core irreader support transformutils passes codegen orcjit x86asmparser x86codegen lto)
+llvm_map_components_to_libnames(llvm_libs
+        core
+        irreader
+        support
+        transformutils
+        passes
+        codegen
+        orcjit
+        x86asmparser
+        x86codegen
+        lto)
 
-add_dependencies(backend-llvm runtime-llvm-cpu)
-target_link_libraries(backend-llvm
+add_dependencies(${ATH_BACKEND_LLVM} ${ATH_RT_LLVM_CPU})
+target_link_libraries(${ATH_BACKEND_LLVM}
         PRIVATE ${llvm_libs}
-        PRIVATE runtime-driver MemoryLoader)
+        PRIVATE ${ATH_RT_LLVM_DRIVER})

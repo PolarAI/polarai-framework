@@ -5,10 +5,11 @@ llvm_map_components_to_libnames(llvm_libs core irreader support transformutils p
 
 add_athena_executable(TestUnitBackendLLVMRunnable ${CORE_TEST_SRC})
 target_link_libraries(TestUnitBackendLLVMRunnable PRIVATE
-        athena-core
-        backend-llvm
+        athena
         Threads::Threads
         AthenaDep::googletest)
+
+target_include_directories(TestUnitBackendLLVMRunnable PRIVATE ${CMAKE_SOURCE_DIR}/src/backend/llvm/jit)
 
 target_include_directories(TestUnitBackendLLVMRunnable PRIVATE ${LLVM_INCLUDE_DIRS})
 target_compile_definitions(TestUnitBackendLLVMRunnable PRIVATE ${LLVM_DEFINITIONS})

@@ -3,11 +3,11 @@ commands:
     - set:
         name: PATH_TO_RUNTIME_CPU
         value:
-          ci: "$ENV{ATHENA_BINARY_DIR}/lib/libruntime-llvm-cpu.dylib"
-          dev: "@CMAKE_BINARY_DIR@/src/backend/llvm/cpu/libruntime-llvm-cpu.dylib"
+          ci: "$ENV{ATHENA_BINARY_DIR}/lib/lib@ATH_RT_LLVM_CPU@.dylib"
+          dev: "@CMAKE_BINARY_DIR@/src/backend/llvm/runtime/cpu/lib@ATH_RT_LLVM_CPU@.dylib"
   linux:
     - set:
         name: PATH_TO_RUNTIME_CPU
         value:
-          ci: "$ENV{ATHENA_BINARY_DIR}/lib/libruntime-llvm-cpu.so"
-          dev: "@CMAKE_BINARY_DIR@/src/backend/llvm/cpu/libruntime-llvm-cpu.so"
+          ci: "$ENV{ATHENA_BINARY_DIR}/lib/lib@ATH_RT_LLVM_CPU@.so"
+          dev: "@CMAKE_BINARY_DIR@/src/backend/llvm/runtime/cpu/lib@ATH_RT_LLVM_CPU@.so"

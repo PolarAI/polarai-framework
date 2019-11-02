@@ -1,26 +1,28 @@
-add_athena_library(runtime-llvm-cpu SHARED
+set(ATH_RT_LLVM_CPU "AthenaLLVMCpuRuntime" CACHE STRING "" FORCE)
+
+add_athena_library(${ATH_RT_LLVM_CPU} SHARED
         add.cpp
         allocate.cpp
         fill.cpp
         matrix.cpp
         mse.cpp
         ${WRAPPER_CPP})
-add_dependencies(runtime-llvm-cpu wrapper_cpp)
+add_dependencies(${ATH_RT_LLVM_CPU} wrapper_cpp)
 
 find_package(BLAS)
 
 if (BLAS_FOUND)
     if (APPLE)
-        target_compile_definitions(runtime-llvm-cpu PRIVATE ATHENA_APPLE_ACCELERATE=1)
+        target_compile_definitions(${ATH_RT_LLVM_CPU} PRIVATE ATHENA_APPLE_ACCELERATE=1)
     endif ()
     message(STATUS ${BLAS_LIBRARIES})
     find_path(BLAS_INCLUDE_DIRS cblas.h
             /usr/include
             /usr/local/include
             $ENV{BLAS_HOME}/include)
-    target_link_libraries(runtime-llvm-cpu PRIVATE ${BLAS_LIBRARIES})
+    target_link_libraries(${ATH_RT_LLVM_CPU} PRIVATE ${BLAS_LIBRARIES})
     if (BLAS_INCLUDE_DIRS)
-        target_include_directories(runtime-llvm-cpu PRIVATE ${BLAS_INCLUDE_DIRS})
+        target_include_directories(${ATH_RT_LLVM_CPU} PRIVATE ${BLAS_INCLUDE_DIRS})
     endif ()
 else ()
     include(ExternalProject)
@@ -35,10 +37,10 @@ else ()
             UPDATE_COMMAND ""
             )
     set(OpenBlas_DIR ${CMAKE_BINARY_DIR}/_deps/OpenBLAS-0.3.7/src/OpenBlasDownload)
-    target_link_directories(runtime-llvm-cpu PRIVATE ${OpenBlas_DIR})
-    target_link_libraries(runtime-llvm-cpu PRIVATE openblas)
-    target_include_directories(runtime-llvm-cpu PRIVATE ${OpenBlas_DIR})
-    add_dependencies(runtime-llvm-cpu OpenBlasDownload)
+    target_link_directories(${ATH_RT_LLVM_CPU} PRIVATE ${OpenBlas_DIR})
+    target_link_libraries(${ATH_RT_LLVM_CPU} PRIVATE openblas)
+    target_include_directories(${ATH_RT_LLVM_CPU} PRIVATE ${OpenBlas_DIR})
+    add_dependencies(${ATH_RT_LLVM_CPU} OpenBlasDownload)
 endif ()
 
 set(WEAK_FLAG)
@@ -46,9 +48,9 @@ if (APPLE)
     set(WEAK_FLAG -Wl,-weak_library)
 endif ()
 
-target_link_libraries(runtime-llvm-cpu PRIVATE ${WEAK_FLAG} athena-core)
+target_link_libraries(${ATH_RT_LLVM_CPU} PRIVATE ${WEAK_FLAG} ${ATH_CORE})
 
-install(TARGETS runtime-llvm-cpu EXPORT AthenaConfig
+install(TARGETS ${ATH_RT_LLVM_CPU} EXPORT AthenaConfig
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         COMPONENT Athena_Runtime
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

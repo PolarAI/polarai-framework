@@ -11,8 +11,6 @@
  * the License.
  */
 
-#include <athena/backend/llvm/AthenaJIT.h>
-
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/IRReader/IRReader.h"
@@ -20,6 +18,7 @@
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/TargetSelect.h"
 
+#include <AthenaJIT.h>
 #include <gtest/gtest.h>
 #include <memory>
 
