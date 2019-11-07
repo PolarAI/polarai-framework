@@ -152,7 +152,8 @@ void NativeModel::serializeGraph(core::Graph& graph, std::ostream& stream) {
             serializeOutputNode(savedGraph.add_output_nodes(),
                                 *node_dyncast<OutputNode*>(syncNode));
         } else {
-            new FatalError(1, "Attempt to serialize unsupported node type: ",
+            new FatalError(ATH_NOT_IMPLEMENTED,
+                           "Attempt to serialize unsupported node type: ",
                            syncNode->getName());
         }
     }

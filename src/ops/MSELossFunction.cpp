@@ -64,7 +64,8 @@ void MSELossFunction::genDerivative(
             break;
         }
         default:
-            new core::FatalError(1, "Data type not supported");
+            new core::FatalError(core::ATH_NOT_IMPLEMENTED,
+                                 "Data type not supported");
     }
 
     g.generate("fma", *operationArguments[0], scale, *operationArguments[1],

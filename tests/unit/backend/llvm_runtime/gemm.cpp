@@ -29,7 +29,7 @@ using namespace athena::core;
 // todo move to core
 template <typename T>
 DataType data_type_cast() {
-    new FatalError(-1, "Not implemented");
+    new FatalError(ATH_NOT_IMPLEMENTED, "Not implemented");
 }
 
 template <>

@@ -54,7 +54,8 @@ node_cast(ParentNodeType &node) {
     using PureType = typename std::remove_reference<NodeTypeName>::type;
 #ifdef DEBUG
     if (node.getType() != core::getNodeType<PureType>()) {
-        new core::FatalError(127, "Attempt to cast incompatible types");
+        new core::FatalError(core::ATH_BAD_CAST,
+                             "Attempt to cast incompatible types");
     }
 #endif
 
@@ -68,7 +69,8 @@ node_dyncast(ParentNodeType node) {
     using PureType = typename std::remove_pointer<NodeTypeName>::type;
 #ifdef DEBUG
     if (node->getType() != core::getNodeType<PureType>()) {
-        new core::FatalError(127, "Attempt to cast incompatible types");
+        new core::FatalError(core::ATH_BAD_CAST,
+                             "Attempt to cast incompatible types");
     }
 #endif
 

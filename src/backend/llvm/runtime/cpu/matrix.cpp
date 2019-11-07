@@ -74,7 +74,7 @@ void gemm(Device *,
           Tensor *a,
           Tensor *b,
           Tensor *c) {
-    new FatalError(-1, "Not implemented");
+    new FatalError(ATH_NOT_IMPLEMENTED, "Not implemented");
 };
 
 template <>

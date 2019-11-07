@@ -43,7 +43,7 @@ void GEMMOperation::gen(
         auto *options = new GEMMOptions<double>{false, false, 1.0, 0.};
         opts = static_cast<void *>(options);
     } else {
-        new FatalError(-1, "Unsupported type");
+        new FatalError(ATH_NOT_IMPLEMENTED, "Unsupported type");
     }
     g.generate("gemm", opts, *operationArguments[0], *operationArguments[1],
                *operationArguments[2]);
@@ -69,7 +69,7 @@ void GEMMOperation::genDerivative(
         options->transposeB = argNo == 1;
         opts = static_cast<void *>(options);
     } else {
-        new FatalError(-1, "Unsupported type");
+        new FatalError(core::ATH_NOT_IMPLEMENTED, "Unsupported type");
     }
 
     inner::Tensor *tensorA, *tensorB;

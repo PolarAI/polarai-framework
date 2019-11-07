@@ -19,7 +19,8 @@
 namespace athena::core {
 template <typename TemplateNodeType>
 NodeType ATH_CORE_EXPORT getNodeType() {
-    new FatalError(1, "NodeType is not defined for given type");
+    new FatalError(ATH_NOT_IMPLEMENTED,
+                   "NodeType is not defined for given type");
     return NodeType::UNDEFINED;
 }
 template <>

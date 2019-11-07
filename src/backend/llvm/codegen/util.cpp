@@ -39,7 +39,7 @@ void generateStandardBuiltinCall(const std::string &name,
         generator->findLLVMFunction(Mangler::getMangledName<T>(name));
 
     if (!calledFunction) {
-        core::FatalError(1, "Unknown function referenced");
+        core::FatalError(core::ATH_FATAL_OTHER, "Unknown function referenced");
     }
 
     std::vector<::llvm::Value *> ArgsV;
@@ -82,7 +82,7 @@ void generateStandardBuiltinCall(const std::string &name,
         generator->findLLVMFunction(Mangler::getMangledName<T>(name));
 
     if (!calledFunction) {
-        core::FatalError(1, "Unknown function referenced");
+        core::FatalError(core::ATH_FATAL_OTHER, "Unknown function referenced");
     }
 
     std::vector<::llvm::Value *> ArgsV;
@@ -125,7 +125,7 @@ void generateStandardBuiltinCall(const std::string &name,
         generator->findLLVMFunction(Mangler::getMangledName<T>(name));
 
     if (!calledFunction) {
-        core::FatalError(1, "Unknown function referenced");
+        core::FatalError(core::ATH_FATAL_OTHER, "Unknown function referenced");
     }
 
     std::vector<::llvm::Value *> ArgsV;
@@ -172,7 +172,7 @@ void registerStandardBuiltin<BuiltinThreeTensorArgs>(const std::string &name,
                 generateStandardBuiltinCall<double>(name, generator, ctx,
                                                     module, builder, a, b, c);
             } else {
-                new core::FatalError(1, "Unsupported type");
+                new core::FatalError(core::ATH_FATAL_OTHER, "Unsupported type");
             }
         };
     generator->registerFunctor(name, f);
@@ -206,7 +206,7 @@ void registerStandardBuiltin<BuiltinTATATArgs>(const std::string &name,
                                                     module, builder, a, scaleA,
                                                     b, scaleB, c);
             } else {
-                new core::FatalError(1, "Unsupported type");
+                new core::FatalError(core::ATH_FATAL_OTHER, "Unsupported type");
             }
         };
 
@@ -237,7 +237,7 @@ void registerStandardBuiltin<BuiltinThreeTensorWithOptsArgs>(
                 generateStandardBuiltinCall<double>(
                     name, generator, ctx, module, builder, opts, a, b, c);
             } else {
-                new core::FatalError(1, "Unsupported type");
+                new core::FatalError(core::ATH_FATAL_OTHER, "Unsupported type");
             }
         };
 

@@ -116,7 +116,8 @@ class LLVMGenerator : public core::AbstractGenerator {
     void registerFunctor(const std::string &name,
                          std::function<void(Args...)> &f) {
         if (mFunctorsMap.count(name)) {
-            core::FatalError(1, "Functor already registered: " + name);
+            core::FatalError(core::ATH_FATAL_OTHER,
+                             "Functor already registered: " + name);
         }
         mFunctorsMap[name] = LLVMGeneratorFunctor(f);
     }

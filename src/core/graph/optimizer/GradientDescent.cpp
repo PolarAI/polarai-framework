@@ -43,7 +43,7 @@ void athena::core::GradientDescent::genFix(
             break;
         }
         default:
-            new FatalError(1, "Unsupported type");
+            new FatalError(ATH_NOT_IMPLEMENTED, "Unsupported type");
     }
 
     for (auto *errTensor : errors) {
@@ -69,7 +69,7 @@ void athena::core::GradientDescent::genError(
             break;
         }
         default:
-            new FatalError(-1, "Unsupported type");
+            new FatalError(ATH_NOT_IMPLEMENTED, "Unsupported type");
     }
     void *pzero = static_cast<void *>(&zero);
     generator.generate("fill", totalError, pzero);

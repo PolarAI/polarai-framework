@@ -24,7 +24,8 @@ void registerAllocate(LLVMGenerator *generator) {
                 generator->findLLVMFunction("athn_allocate_v");
 
             if (!calledFunction) {
-                core::FatalError(1, "Unknown function referenced");
+                core::FatalError(core::ATH_FATAL_OTHER,
+                                 "Unknown function referenced");
             }
 
             std::vector<::llvm::Value *> ArgsV;
@@ -43,15 +44,9 @@ void registerAllocate(LLVMGenerator *generator) {
             auto callInst = builder.CreateCall(calledFunction, ArgsV);
             if (!callInst) {
                 new core::FatalError(
-                    -1, "Call instruction for allocate is not created");
+                    core::ATH_FATAL_OTHER,
+                    "Call instruction for allocate is not created");
             }
-//            auto tensorMetaNode = ::llvm::MDNode::get(
-//                ctx,
-//                ::llvm::MDTuple::get(
-//                    ctx, ::llvm::MDString::get(
-//                             ctx, "Virtual address " +
-//                                      std::to_string(a.getVirtualAddress()))));
-//            callInst->setMetadata("athn.tensor", tensorMetaNode);
         };
 
     generator->registerFunctor("allocate", f);

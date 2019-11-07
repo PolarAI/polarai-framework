@@ -27,7 +27,8 @@ void registerFill(LLVMGenerator *generator) {
                 generator->findLLVMFunction("athn_fill_f");
 
             if (!calledFunction) {
-                core::FatalError(1, "Unknown function referenced");
+                core::FatalError(core::ATH_FATAL_OTHER,
+                                 "Unknown function referenced");
             }
 
             std::vector<::llvm::Value *> ArgsV;

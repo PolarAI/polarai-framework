@@ -35,7 +35,7 @@ RuntimeDriver &RuntimeDriver::operator=(RuntimeDriver &&rhs) noexcept {
 void *RuntimeDriver::getFunctionPtr(std::string_view funcName) {
     if (void *function = dlsym(mLibraryHandle, funcName.data()); !function) {
         new ::athena::core::FatalError(
-            1, "RuntimeDriver: " + std::string(dlerror()));
+            core::ATH_FATAL_OTHER, "RuntimeDriver: " + std::string(dlerror()));
         return nullptr;
     } else {
         return function;
@@ -45,14 +45,14 @@ void RuntimeDriver::load(std::string_view nameLibrary) {
     if (mLibraryHandle = dlopen(nameLibrary.data(), RTLD_LAZY);
         !mLibraryHandle) {
         new ::athena::core::FatalError(
-            1, "RuntimeDriver: " + std::string(dlerror()));
+            core::ATH_FATAL_OTHER, "RuntimeDriver: " + std::string(dlerror()));
     }
     prepareModules();
 }
 void RuntimeDriver::unload() {
     if (mLibraryHandle && dlclose(mLibraryHandle)) {
         ::athena::core::FatalError err(
-            1, "RuntimeDriver: " + std::string(dlerror()));
+            core::ATH_FATAL_OTHER, "RuntimeDriver: " + std::string(dlerror()));
     }
     mLibraryHandle = nullptr;
 }
@@ -78,7 +78,7 @@ void RuntimeDriver::prepareModules() {
     if (isBroken || brokenDebugInfo) {
         err() << str;
         newModule->print(::llvm::errs(), nullptr);
-        new core::FatalError(10, "incorrect ir");
+        new core::FatalError(core::ATH_FATAL_OTHER, "incorrect ir");
     }
 #endif
     mModules.push_back(std::move(newModule));

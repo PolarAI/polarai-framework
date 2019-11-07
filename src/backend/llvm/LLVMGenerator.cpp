@@ -57,7 +57,7 @@ void LLVMGenerator::generateLoad(const core::AbstractLoader &loader,
     }
 
     if (!loadFunction) {
-        core::FatalError(1, "Unknown function referenced");
+        core::FatalError(core::ATH_FATAL_OTHER, "Unknown function referenced");
     }
 
     std::vector<::llvm::Value *> ArgsV;

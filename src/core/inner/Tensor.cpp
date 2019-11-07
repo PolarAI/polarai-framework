@@ -56,7 +56,8 @@ ShapeView Tensor::getSubShapeView(size_t offset) const {
 }
 const TensorShape& Tensor::getShape() const {
     if (mShapeOffset != 0) {
-        FatalError(1, "getShape is not supported for subtensors");
+        FatalError(ATH_NOT_IMPLEMENTED,
+                   "getShape is not supported for subtensors");
     }
     return getAllocationTable(*mContext)[mRecordIndex].getShape();
 }

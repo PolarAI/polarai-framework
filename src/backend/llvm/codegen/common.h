@@ -24,7 +24,7 @@ void registerFill(LLVMGenerator *generator);
 
 template <typename T>
 ::llvm::Constant *getFPConstant(::llvm::LLVMContext &ctx, T value) {
-    new core::FatalError(1, "Unable to create FP constant");
+    new core::FatalError(core::ATH_FATAL_OTHER, "Unable to create FP constant");
     return nullptr;  // unreachable
 }
 

@@ -106,7 +106,7 @@ class ATH_CORE_EXPORT OperationDummy : public Operation {
 
     void gen(AbstractGenerator& g,
              std::vector<inner::Tensor*>& operationArguments) const override {
-        new FatalError(1, "NOT IMPL");
+        new FatalError(ATH_NOT_IMPLEMENTED, "NOT IMPL");
     }
 
     void genDerivative(const int order,
@@ -116,7 +116,7 @@ class ATH_CORE_EXPORT OperationDummy : public Operation {
                        std::vector<inner::Tensor*>& operationArguments,
                        inner::Tensor& derivativeTensor,
                        int argNo) const override {
-        new FatalError(1, "NOT IMPL");
+        new FatalError(ATH_NOT_IMPLEMENTED, "NOT IMPL");
     }
 
     size_t getOperandsCount() const override {

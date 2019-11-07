@@ -24,7 +24,7 @@ size_t sizeOfDataType(const DataType& dataType) {
         case DataType::HALF:
             return 2ULL;
         default:
-            FatalError(1, "Size for dataType is not defined");
+            FatalError(ATH_FATAL_OTHER, "Size for dataType is not defined");
             return 0;
     }
 }

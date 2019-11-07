@@ -50,7 +50,7 @@ void MemoryLoader::load(core::Allocator *allocator,
     std::memmove(pointer, mData, mSize);
 }
 std::string MemoryLoader::serialize() const {
-    new core::FatalError(-1, "Not serializable");
+    new core::FatalError(core::ATH_NOT_IMPLEMENTED, "Not serializable");
 }
 
 }  // namespace athena::loaders

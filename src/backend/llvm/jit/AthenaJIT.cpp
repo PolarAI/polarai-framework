@@ -52,13 +52,14 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
 
     if (!JTMB) {
         ::llvm::consumeError(JTMB.takeError());
-        new core::FatalError(2, "Unable to detect host");
+        new core::FatalError(core::ATH_FATAL_OTHER, "Unable to detect host");
     }
 
     auto DL = JTMB->getDefaultDataLayoutForTarget();
     if (!DL) {
         ::llvm::consumeError(DL.takeError());
-        new core::FatalError(2, "Unable to get target data layout");
+        new core::FatalError(core::ATH_FATAL_OTHER,
+                             "Unable to get target data layout");
     }
 
     return std::make_unique<AthenaJIT>(std::move(*JTMB), std::move(*DL));

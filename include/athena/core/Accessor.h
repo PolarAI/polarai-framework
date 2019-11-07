@@ -38,9 +38,8 @@ class ATH_CORE_EXPORT Accessor {
           mAccessIdx(std::move(idx)) {}
 
     Accessor<T> operator[](size_t idx) {
-        if (mAccessIdx.size() == mAccessTensor.getShapeView().dimensions() /*||
-            idx >= mAccessTensor.getShapeView().dim(mAccessIdx.size())*/) {
-            new FatalError(1, "Index is out of range");
+        if (mAccessIdx.size() == mAccessTensor.getShapeView().dimensions()) {
+            new FatalError(ATH_BAD_ACCESS, "Index is out of range");
         }
 
         std::vector<size_t> newIdx(mAccessIdx);
@@ -51,7 +50,8 @@ class ATH_CORE_EXPORT Accessor {
 
     T operator*() {
         if (mAccessIdx.size() != mAccessTensor.getShapeView().dimensions()) {
-            new FatalError(2, "Accessor does not point to an element");
+            new FatalError(ATH_BAD_ACCESS,
+                           "Accessor does not point to an element");
         }
         size_t offset = 0;
         for (int d = 0; d < mAccessIdx.size() - 1; d++) {

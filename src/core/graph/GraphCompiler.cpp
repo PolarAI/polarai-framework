@@ -81,7 +81,7 @@ static void compileLossNodes(
 
         generator.closeNode();
     } else if (lossNodes.size() > 1) {
-        new core::FatalError(1, "More than 1 loss node");
+        new core::FatalError(ATH_FATAL_OTHER, "More than 1 loss node");
     }
 }
 

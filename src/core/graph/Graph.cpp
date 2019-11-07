@@ -111,7 +111,7 @@ const Topology& Graph::getTopology() const {
 void Graph::addNode(AbstractNode& node) {
     if (Graph* graphPointer = inner::getGraphTable(*mContext)[node.getGraphIndex()];
         graphPointer) {
-        FatalError(1, "addNode() in Graph : ", this,
+        FatalError(ATH_FATAL_OTHER, "addNode() in Graph : ", this,
                    ". GraphIndex : ", mGraphIndex,
                    ". Adding Node to the graph to which it does not belong");
     }
@@ -121,7 +121,7 @@ void Graph::addNode(AbstractNode& node) {
 }
 void Graph::saveNode(AbstractNode& node, bool isRepairedNode, bool isErase) {
     if (node.getGraphIndex() != mGraphIndex) {
-        FatalError(1, "saveNode() in Graph : ", this,
+        FatalError(ATH_FATAL_OTHER, "saveNode() in Graph : ", this,
                    ". GraphIndex : ", mGraphIndex,
                    ". Saving Node in the graph to which it does not belong");
     }
@@ -139,7 +139,7 @@ void Graph::saveNode(AbstractNode& node, bool isRepairedNode, bool isErase) {
             saveRealNode(node_cast<LossNode&>(node), isRepairedNode, isErase);
             break;
         default:
-            FatalError(1, "saveNode() in Graph : ", this,
+            FatalError(ATH_FATAL_OTHER, "saveNode() in Graph : ", this,
                        ". GraphIndex : ", mGraphIndex, ". Undefined node type");
     }
 }
@@ -168,7 +168,7 @@ void Graph::link(const AbstractNode& startNode,
                  const AbstractNode& endNode,
                  EdgeMark mark) {
     if (endNode.getType() == NodeType::INPUT) {
-        FatalError(1, "link() in Graph : ", this,
+        FatalError(ATH_FATAL_OTHER, "link() in Graph : ", this,
                    ". GraphIndex : ", mGraphIndex,
                    ". End node of edge can not be InputNode");
     }
@@ -180,7 +180,7 @@ void Graph::link(const AbstractNode& startNode,
             *inner::getNodeTable(*mContext)[endNode.getNodeIndex()]);
         inner::setTraversalValidity(mTraversal, false);
     } else {
-        FatalError(1, "link() in Graph : ", this,
+        FatalError(ATH_FATAL_OTHER, "link() in Graph : ", this,
                    ". GraphIndex : ", mGraphIndex,
                    ". Nodes belong to different graphs");
     }
@@ -243,7 +243,8 @@ const Traversal& Graph::traverse() {
                 if (inputCount == targetInputCount) {
                     newQueue.push(edgeIterator->endNodeIndex);
                 } else if (inputCount > targetInputCount) {
-                    FatalError(1, "traverse() in Graph: ", mGraphIndex,
+                    FatalError(ATH_FATAL_OTHER,
+                               "traverse() in Graph: ", mGraphIndex,
                                ". Graph is have an cycle(s)");
                 }
                 visits[edgeIterator->endNodeIndex].input.emplace_back(
@@ -259,7 +260,8 @@ const Traversal& Graph::traverse() {
                 TRAVERSE_ADD_NODES_TO_CLUSTER(NodeType::LOSS)
                 TRAVERSE_ADD_NODES_TO_CLUSTER(NodeType::OUTPUT)
                 default:
-                    FatalError(1, "Undefined NodeType in traverse()");
+                    FatalError(ATH_NOT_IMPLEMENTED,
+                               "Undefined NodeType in traverse()");
             }
             ++cluster.nodeCount;
         }

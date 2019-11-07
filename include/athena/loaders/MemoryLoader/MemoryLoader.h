@@ -52,7 +52,8 @@ class ATH_MEM_LOADER_EXPORT MemoryLoader : public core::AbstractLoader {
     std::string serialize() const override;
 
     static AbstractLoader *deserialize(const std::string &data) {
-        new core::FatalError(-1, "MemoryLoader is not serializable");
+        new core::FatalError(core::ATH_NOT_IMPLEMENTED,
+                             "MemoryLoader is not serializable");
     }
 };
 }  // namespace athena::loaders

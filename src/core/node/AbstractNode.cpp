@@ -57,14 +57,16 @@ void AbstractNode::after(const AbstractNode& node, EdgeMark mark) const {
     if (auto* graph = inner::getGraphTable(*mContext)[mGraphIndex]; graph) {
         graph->link(node, *this, mark);
     } else {
-        FatalError(1, "Graph which contains node ", this, " does not exists");
+        FatalError(ATH_BAD_ACCESS, "Graph which contains node ", this,
+                   " does not exists");
     }
 }
 void AbstractNode::before(const AbstractNode& node, EdgeMark mark) const {
     if (auto* graph = inner::getGraphTable(*mContext)[mGraphIndex]; graph) {
         graph->link(*this, node, mark);
     } else {
-        FatalError(1, "Graph which contains node ", this, " does not exists");
+        FatalError(ATH_BAD_ACCESS, "Graph which contains node ", this,
+                   " does not exists");
     }
 }
 ShapeView AbstractNode::getShapeView() const {
@@ -100,7 +102,7 @@ const std::string& AbstractNode::name() const {
 void AbstractNode::setShape(const TensorShape& shape) {
     if (mGraphIndex != inner::kKUndefinedIndex) {
         FatalError(
-            1,
+            ATH_FATAL_OTHER,
             "It is forbidden to change shapes of nodes which belongs to graph");
     }
     mTensor->setShape(shape);

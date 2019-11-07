@@ -38,7 +38,8 @@ void LLVMExecutor::setGraph(athena::core::Graph &graph) {
     for (auto &module : modules) {
         auto err = mJITCompiler->addModule(module);
         if (err) {
-            core::FatalError(1, "Error adding module to JIT");
+            core::FatalError(core::ATH_FATAL_OTHER,
+                             "Error adding module to JIT");
         }
     }
 
@@ -46,7 +47,7 @@ void LLVMExecutor::setGraph(athena::core::Graph &graph) {
     for (auto &module : mRuntimeDriver->getModules()) {
         auto err = mJITCompiler->addModule(module);
         if (err) {
-            new core::FatalError(1, "Unable to add module");
+            new core::FatalError(core::ATH_FATAL_OTHER, "Unable to add module");
         }
     }
 }
@@ -77,7 +78,8 @@ void LLVMExecutor::optimizeGraph() {
 
 LLVMExecutor::LLVMExecutor() : mJITCompiler(AthenaJIT::create()) {
     if (!mJITCompiler) {
-        new core::FatalError(1, "Unable to create JIT compiler");
+        new core::FatalError(core::ATH_FATAL_OTHER,
+                             "Unable to create JIT compiler");
     }
 
     mRuntimeDriver =
