@@ -46,16 +46,14 @@ else ()
     add_dependencies(${ATH_RT_LLVM_CPU} OpenBlasDownload)
 endif ()
 
-set(WEAK_FLAG)
-set(NOWEAK_FLAG)
-if (APPLE)
-    set(WEAK_FLAG -Wl,-weak_library)
-elseif (UNIX)
-    set(WEAK_FLAG -Wl,--as-needed)
-    set(NOWEAK_FLAG -Wl,--no-as-needed)
+set(CORE_LIB ${ATH_CORE})
+if (UNIX AND NOT APPLE)
+    set(CORE_LIB -Wl,--as-needed ${ATH_CORE} -Wl,--no-as-needed)
+elseif (APPLE)
+    athena_add_linker_options(${ATH_RT_LLVM_CPU} "-undefined dynamic_lookup")
 endif ()
 
-target_link_libraries(${ATH_RT_LLVM_CPU} PRIVATE ${WEAK_FLAG} ${ATH_CORE} ${NOWEAK_FLAG})
+target_link_libraries(${ATH_RT_LLVM_CPU} PRIVATE ${CORE_LIB})
 target_compile_definitions(${ATH_RT_LLVM_CPU} PRIVATE -D${ATH_CORE}_WEAK)
 
 install(TARGETS ${ATH_RT_LLVM_CPU} EXPORT AthenaConfig
