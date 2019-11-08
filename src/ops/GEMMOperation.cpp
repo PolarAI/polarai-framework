@@ -19,15 +19,25 @@ using namespace athena::backend;
 
 namespace athena::ops {
 inner::Tensor *GEMMOperation::getResultTensor(
-    core::Context& context,
-    std::vector<core::inner::Tensor *> args) const {
-    TensorShape shape{args[0]->getShape().dim(0), args[1]->getShape().dim(1)};
+    core::Context &context, std::vector<core::inner::Tensor *> args) const {
+    size_t m = args[0]->getShapeView().dim(mTransposeA ? 1 : 0);
+    size_t k = args[0]->getShapeView().dim(mTransposeA ? 0 : 1);
+    size_t n = args[0]->getShapeView().dim(mTransposeB ? 0 : 1);
+
+#ifdef DEBUG
+    size_t k2 = args[0]->getShapeView().dim(mTransposeA ? 0 : 1);
+    assert(k == k2 &&
+           "Number of columns of A must be equal to number of rows of B");
+#endif
+
+    TensorShape shape{m, n};
 
     return new core::inner::Tensor(args[0]->getDataType(), shape, context);
 }
 core::inner::Tensor *GEMMOperation::getDerivativeTensor(
-    core::Context& context,
-    std::vector<core::inner::Tensor *> args, int argNo) const {
+    core::Context &context,
+    std::vector<core::inner::Tensor *> args,
+    int argNo) const {
     core::ShapeView shapeView(args[argNo]->getShapeView());
     return new core::inner::Tensor(args[argNo]->getDataType(),
                                    shapeView.toShape(), context);
@@ -37,10 +47,12 @@ void GEMMOperation::gen(
     std::vector<core::inner::Tensor *> &operationArguments) const {
     void *opts;
     if (operationArguments[0]->getDataType() == DataType::FLOAT) {
-        auto *options = new GEMMOptions<float>{false, false, 1.0f, 0.f};
+        auto *options =
+            new GEMMOptions<float>{mTransposeA, mTransposeB, 1.0f, 0.f};
         opts = static_cast<void *>(options);
     } else if (operationArguments[0]->getDataType() == DataType::DOUBLE) {
-        auto *options = new GEMMOptions<double>{false, false, 1.0, 0.};
+        auto *options =
+            new GEMMOptions<double>{mTransposeA, mTransposeB, 1.0, 0.};
         opts = static_cast<void *>(options);
     } else {
         new FatalError(ATH_NOT_IMPLEMENTED, "Unsupported type");
@@ -58,15 +70,23 @@ void GEMMOperation::genDerivative(
     int argNo) const {
     void *opts;
 
+#ifdef DEBUG
+    assert(order == 1 && "Higher orders are not supported");
+#endif
+
     if (operationArguments[0]->getDataType() == DataType::FLOAT) {
         auto *options = new GEMMOptions<float>{false, false, 1.0f, 0.f};
         options->transposeB = argNo == 0;
         options->transposeA = argNo == 1;
+        if (mTransposeB) options->transposeB = !options->transposeB;
+        if (mTransposeA) options->transposeA = !options->transposeA;
         opts = static_cast<void *>(options);
     } else if (operationArguments[0]->getDataType() == DataType::DOUBLE) {
         auto *options = new GEMMOptions<double>{false, false, 1.0, 0.};
         options->transposeA = argNo == 0;
         options->transposeB = argNo == 1;
+        if (mTransposeB) options->transposeB = !options->transposeB;
+        if (mTransposeA) options->transposeA = !options->transposeA;
         opts = static_cast<void *>(options);
     } else {
         new FatalError(core::ATH_NOT_IMPLEMENTED, "Unsupported type");
@@ -84,8 +104,10 @@ void GEMMOperation::genDerivative(
 
     g.generate("gemm", opts, *tensorA, *tensorB, derivativeTensor);
 }
-core::inner::Tensor *GEMMOperation::getErrorTensor(core::Context& context,
-    std::vector<core::inner::Tensor *> args, int) const {
+core::inner::Tensor *GEMMOperation::getErrorTensor(
+    core::Context &context,
+    std::vector<core::inner::Tensor *> args,
+    int) const {
     // todo higher orders not supported
     return getResultTensor(context, args);
 }
