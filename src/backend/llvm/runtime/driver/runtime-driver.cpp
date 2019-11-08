@@ -88,4 +88,18 @@ void RuntimeDriver::setProperAttrs(::llvm::Function *function) {
     function->addFnAttr(::llvm::Attribute::UWTable);
     function->addFnAttr(::llvm::Attribute::AlwaysInline);
 }
+DeviceContainer RuntimeDriver::getAvailableDevices() {
+    auto devicesFunc =
+        (DeviceContainer(*)())getFunctionPtr("getAvailableDevices");
+    return devicesFunc();
+}
+void RuntimeDriver::initializeContext(DeviceContainer devices) {
+    auto initCtxFunc =
+        (void (*)(DeviceContainer))getFunctionPtr("initializeContext");
+    initCtxFunc(devices);
+}
+void RuntimeDriver::releaseContext() {
+    auto releaseCtxFunc = (void (*)())getFunctionPtr("releaseContext");
+    releaseCtxFunc();
+}
 }  // namespace athena::backend::llvm

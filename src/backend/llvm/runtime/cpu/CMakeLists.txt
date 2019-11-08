@@ -8,6 +8,8 @@ add_athena_library(${ATH_RT_LLVM_CPU} SHARED
         fill.cpp
         matrix.cpp
         mse.cpp
+        CpuDevice.cpp
+        api.cpp
         ${WRAPPER_CPP})
 add_dependencies(${ATH_RT_LLVM_CPU} wrapper_cpp)
 target_compile_options(${ATH_RT_LLVM_CPU} PRIVATE -fvisibility=default)

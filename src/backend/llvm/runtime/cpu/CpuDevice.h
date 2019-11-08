@@ -11,28 +11,17 @@
  * the License.
  */
 
-#ifndef ATHENA_DEVICE_H
-#define ATHENA_DEVICE_H
+#ifndef ATHENA_CPUDEVICE_H
+#define ATHENA_CPUDEVICE_H
 
-#include <athena/backend/llvm/llvm_export.h>
-
-#include <cstddef>
+#include <athena/backend/llvm/runtime/Device.h>
 
 namespace athena::backend::llvm {
-
-class Device;
-
-extern "C" struct ATH_BACKEND_LLVM_EXPORT DeviceContainer {
-    Device* devices;
-    size_t count;
-};
-
-class ATH_BACKEND_LLVM_EXPORT Device {
+class CPUDevice : public Device {
     public:
-    enum class PartitionDomain { EQUALLY, BY_COUNT, NUMA };
-    virtual bool isPartitionSupported(PartitionDomain domain) = 0;
-    virtual DeviceContainer partition(PartitionDomain domain) = 0;
+    bool isPartitionSupported(PartitionDomain domain) override;
+    DeviceContainer partition(PartitionDomain domain) override;
 };
 }  // namespace athena::backend::llvm
 
-#endif  // ATHENA_DEVICE_H
+#endif  // ATHENA_CPUDEVICE_H

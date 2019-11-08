@@ -38,7 +38,7 @@ class LLVMGenerator : public core::AbstractGenerator {
     ::llvm::BasicBlock *mCurrentBlock;
     ::llvm::IRBuilder<> mBuilder;
 
-    Device mDevice;
+    Device *mCurrentPreferredDevice;
 
     core::Allocator &mAllocator;
 
@@ -146,7 +146,7 @@ class LLVMGenerator : public core::AbstractGenerator {
     }
 
     Device *getPreferredDevice(const std::string &) {
-        return &mDevice;
+        return mCurrentPreferredDevice;
     }
 
     ::llvm::Function *findLLVMFunction(const std::string &name) {

@@ -15,6 +15,7 @@
 #define ATHENA_RUNTIME_DRIVER_H
 
 #include <athena/backend/llvm/driver/driver_export.h>
+#include <athena/backend/llvm/runtime/Device.h>
 #include <athena/core/FatalError.h>
 
 #include "llvm/IR/IRBuilder.h"
@@ -56,6 +57,10 @@ class ATH_RT_LLVM_DRIVER_EXPORT RuntimeDriver {
     void unload();
     void reload(std::string_view nameLibrary);
     bool isLoaded() const;
+
+    DeviceContainer getAvailableDevices();
+    void initializeContext(DeviceContainer devices);
+    void releaseContext();
 
     std::vector<std::unique_ptr<::llvm::Module>> &getModules() {
         // todo clone modules

@@ -171,7 +171,7 @@ def main():
         inp = open(args.inp, "r")
 
         if args.mode == "wrapper":
-            o.write("#include <athena/backend/llvm/device/Device.h>\n")
+            o.write("#include <athena/backend/llvm/runtime/Device.h>\n")
             o.write("#include <athena/backend/llvm/runtime/builtin.h>\n")
             o.write("#include <athena/core/inner/Tensor.h>\n")
             o.write("#include <athena/core/Allocator.h>\n")
