@@ -14,7 +14,7 @@
 #define ATHENA_LLVMGENERATOR_H
 
 #include <athena/backend/llvm/LLVMGeneratorFunctor.h>
-#include <athena/backend/llvm/device/Device.h>
+#include <athena/backend/llvm/runtime/Device.h>
 #include <athena/core/AbstractGenerator.h>
 #include <athena/core/AbstractLoader.h>
 #include <athena/core/Allocator.h>

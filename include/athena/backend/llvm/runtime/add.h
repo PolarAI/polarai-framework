@@ -13,7 +13,7 @@
 #ifndef ATHENA_ADD_H
 #define ATHENA_ADD_H
 
-#include <athena/backend/llvm/device/Device.h>
+#include <athena/backend/llvm/runtime/Device.h>
 #include <athena/core/Allocator.h>
 #include <athena/core/inner/Tensor.h>
 

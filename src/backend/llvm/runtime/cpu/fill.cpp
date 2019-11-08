@@ -11,7 +11,7 @@
  * the License.
  */
 
-#include <athena/backend/llvm/device/Device.h>
+#include <athena/backend/llvm/runtime/Device.h>
 #include <athena/backend/llvm/runtime/add.h>
 #include <athena/backend/llvm/runtime/fill.h>
 #include <athena/core/Allocator.h>

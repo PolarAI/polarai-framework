@@ -14,7 +14,7 @@
 #ifndef ATHENA_MSE_H
 #define ATHENA_MSE_H
 
-#include <athena/backend/llvm/device/Device.h>
+#include <athena/backend/llvm/runtime/Device.h>
 #include <athena/core/Allocator.h>
 #include <athena/core/inner/Tensor.h>
 
