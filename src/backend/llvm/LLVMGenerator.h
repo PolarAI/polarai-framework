@@ -22,6 +22,7 @@
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Module.h>
 #include <map>
+#include <unordered_map>
 
 namespace athena::backend::llvm {
 /**
@@ -41,6 +42,8 @@ class LLVMGenerator : public core::AbstractGenerator {
     Device *mCurrentPreferredDevice;
 
     core::Allocator &mAllocator;
+
+    std::unordered_map<std::string_view, Device *> mGraphMap;
 
     protected:
     void generateImpl(std::string &, core::inner::Tensor &a) override;
@@ -69,7 +72,8 @@ class LLVMGenerator : public core::AbstractGenerator {
         ::llvm::LLVMContext &ctx,
         const std::unique_ptr<::llvm::Module> &module,
         core::Allocator &allocator,
-        std::vector<std::unique_ptr<::llvm::Module>> &existing);
+        std::vector<std::unique_ptr<::llvm::Module>> &existing,
+        std::unordered_map<std::string_view, Device *> map);
     /**
      * Generate code to execute loaders subroutines
      * @param loader Loader to be used

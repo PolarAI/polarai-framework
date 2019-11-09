@@ -19,20 +19,25 @@
 #include <athena/core/FatalError.h>
 #include <athena/loaders/MemoryLoader/MemoryLoader.h>
 
+#include <utility>
+
 namespace athena::backend::llvm {
 
 llvm::LLVMGenerator::LLVMGenerator(
     ::llvm::LLVMContext &ctx,
     const std::unique_ptr<::llvm::Module> &module,
     core::Allocator &allocator,
-    std::vector<std::unique_ptr<::llvm::Module>> &existing)
+    std::vector<std::unique_ptr<::llvm::Module>> &existing,
+    std::unordered_map<std::string_view, Device *> map)
     : mGeneratedModule(module),
       mCurrentMainBlock(nullptr),
       mCurrentBlock(mCurrentMainBlock),
       mContext(ctx),
       mBuilder(::llvm::IRBuilder(ctx)),
       mAllocator(allocator),
-      mExistingModules(existing) {
+      mExistingModules(existing),
+      mCurrentPreferredDevice(nullptr),
+      mGraphMap(std::move(map)) {
     mBuilder.SetInsertPoint(mCurrentMainBlock);
     codegen::registerDefaultFunctors(this);
 }
@@ -112,6 +117,7 @@ void LLVMGenerator::openNode(std::string_view name) {
 #ifdef DEBUG
     assert(mCurrentBlock == mCurrentMainBlock && "There is an opened node");
 #endif
+    mCurrentPreferredDevice = mGraphMap[name];
     ::llvm::FunctionType *FT =
         ::llvm::FunctionType::get(::llvm::Type::getVoidTy(mContext), false);
     auto nodeFunction = ::llvm::Function::Create(

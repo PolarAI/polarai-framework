@@ -11,6 +11,7 @@
  * the License.
  */
 
+#include "GraphPartitionPlanner.h"
 #include "LLVMGenerator.h"
 #include "jit/AthenaJIT.h"
 #include "runtime/driver/runtime-driver.h"
@@ -20,7 +21,6 @@
 #include <athena/core/GraphCompiler.h>
 #include <athena/core/LossNode.h>
 #include <athena/core/Optimizer.h>
-#include <athena/core/inner/InnerFunctions.h>
 
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 
@@ -109,8 +109,16 @@ std::vector<std::unique_ptr<::llvm::Module>> LLVMExecutor::compileGraph(
     // TODO get real target triple
     llvmModule->setTargetTriple(::llvm::sys::getDefaultTargetTriple());
 
+    GraphPartitionPlanner planner(graph);
+    // todo do actual partitioning
+    auto devices =
+        planner.getPartitionedDevices(mRuntimeDriver->getAvailableDevices());
+    auto partitioning = planner.getGraphPartitioning();
+
+    mRuntimeDriver->initializeContext(devices);
+
     LLVMGenerator generator(mJITCompiler->getContext(), llvmModule, *mAllocator,
-                            mRuntimeDriver->getModules());
+                            mRuntimeDriver->getModules(), partitioning);
 
     core::GraphCompiler::compileForward(graph, generator);
     core::GraphCompiler::compileBackward(graph, generator);
