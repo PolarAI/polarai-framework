@@ -26,3 +26,20 @@ AthenaAddDependency(
         LIBRARIES gtest gtest_main
         INCLUDE_PATH googletest/include
 )
+
+set(RE2_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+AthenaAddDependency(
+        TARGET_NAME re2
+        GIT_URL https://github.com/google/re2.git
+        GIT_TAG master
+        INCLUDE_PATH .
+)
+
+set(EFFCEE_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+set(EFFCEE_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+AthenaAddDependency(
+        TARGET_NAME effcee
+        GIT_URL https://github.com/google/effcee.git
+        GIT_TAG master
+        INCLUDE_PATH .
+)

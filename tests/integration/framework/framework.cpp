@@ -54,9 +54,10 @@ void processSetNode(YAML::Node node) {
         auto name = node["name"].as<std::string>();
         if (node["value"]) {
             std::string value = "";
-            if (isCi() && node["value"]["ci"]) {  // todo improve bool handling
+            if (node["value"].IsMap() && isCi() &&
+                node["value"]["ci"]) {  // todo improve bool handling
                 value = node["value"]["ci"].as<std::string>();
-            } else if (node["value"]["dev"]) {
+            } else if (node["value"].IsMap() && node["value"]["dev"]) {
                 value = node["value"]["dev"].as<std::string>();
             } else {
                 value = node["value"].as<std::string>();
