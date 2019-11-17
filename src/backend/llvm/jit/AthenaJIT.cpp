@@ -17,7 +17,8 @@
 
 #include <cstdlib>
 #include <llvm/Passes/PassBuilder.h>
-#include <llvm/Transforms/InstCombine/InstCombine.h>
+#include <llvm/Transforms/IPO/AlwaysInliner.h>
+#include <llvm/Transforms/IPO/PartialInlining.h>
 #include <llvm/Transforms/Scalar.h>
 #include <llvm/Transforms/Scalar/GVN.h>
 
@@ -96,6 +97,7 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
     ::llvm::FunctionPassManager mFunctionSimplificationPassManager;
     ::llvm::ModulePassManager mModuleOptimizationPassManager;
     ::llvm::ModulePassManager mThinLTOPreLinkPassManager;
+    ::llvm::ModulePassManager mDefaultIPOPassManager;
 
     ::llvm::LoopAnalysisManager loopAnalysisManager;
     ::llvm::FunctionAnalysisManager functionAnalysisManager;
@@ -117,21 +119,25 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
         passBuilder.buildFunctionSimplificationPipeline(
             ::llvm::PassBuilder::O2,
             ::llvm::PassBuilder::ThinLTOPhase::PostLink, false);
-    passBuilder.buildThinLTOPreLinkDefaultPipeline(::llvm::PassBuilder::O3);
+    mThinLTOPreLinkPassManager =
+        passBuilder.buildThinLTOPreLinkDefaultPipeline(::llvm::PassBuilder::O3);
+
+    mDefaultIPOPassManager.addPass(::llvm::AlwaysInlinerPass());
+    mDefaultIPOPassManager.addPass(::llvm::PartialInlinerPass());
 
     auto lock = TSM.getContextLock();
 
     ::llvm::Module &module = *TSM.getModule();
 
     mModuleOptimizationPassManager.run(module, moduleAnalysisManager);
+    mThinLTOPreLinkPassManager.run(module, moduleAnalysisManager);
+    mDefaultIPOPassManager.run(module, moduleAnalysisManager);
 
     for (auto &func : module) {
         if (!func.isDeclaration())
             mFunctionSimplificationPassManager.run(func,
                                                    functionAnalysisManager);
     }
-
-    mThinLTOPreLinkPassManager.run(module, moduleAnalysisManager);
 
 #ifdef DEBUG
     if (getenv("ATHENA_DUMP_LLVM")) {
