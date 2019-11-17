@@ -33,7 +33,7 @@ using EdgeMark = size_t;
 class ATH_CORE_EXPORT AbstractNode {
     private:
     void fullClear();
-    inner::Tensor* mTensor;
+    std::shared_ptr<inner::Tensor> mTensor;
     Context* mContext;
     std::string mName;
     size_t mGraphIndex;
@@ -44,7 +44,10 @@ class ATH_CORE_EXPORT AbstractNode {
     AbstractNode() = delete;
     AbstractNode(const AbstractNode& rhs);
     AbstractNode(AbstractNode&& rhs) noexcept;
-    AbstractNode(TensorShape shape, DataType dataType, Context& context, std::string name);
+    AbstractNode(TensorShape shape,
+                 DataType dataType,
+                 Context& context,
+                 std::string name);
     AbstractNode(Context& context, std::string name);
     virtual ~AbstractNode();
 
@@ -71,8 +74,11 @@ class ATH_CORE_EXPORT AbstractNode {
     friend void inner::setGraphIndex(AbstractNode& node, size_t graphIndex);
     friend void inner::incrementInputCount(athena::core::AbstractNode& node);
     friend inner::Tensor& inner::getTensorFromNode(AbstractNode& node);
-    friend void inner::setResultTensor(athena::core::AbstractNode& node,
-                                       athena::core::inner::Tensor* tensor);
+    friend std::shared_ptr<inner::Tensor> inner::getTensorPtrFromNode(
+        AbstractNode& node);
+    friend void inner::setResultTensor(
+        athena::core::AbstractNode& node,
+        std::shared_ptr<athena::core::inner::Tensor> tensor);
 };
 }  // namespace athena::core
 

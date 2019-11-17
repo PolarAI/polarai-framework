@@ -298,7 +298,13 @@ void Graph::setUpTensors() const {
                 });
 
             inner::setResultTensor(
+<<<<<<< HEAD
                 node, node.getOperation().getResultTensor(*mContext, opArgs));
+=======
+                node,
+                std::shared_ptr<inner::Tensor>(
+                    node.getOperation().getResultTensor(*mContext, opArgs)));
+>>>>>>> fix: Memory leak in AbstractNode
             inner::setErrorTensor(
                 node, node.getOperation().getErrorTensor(
                           *mContext, opArgs, mOptimizer->getRequiredOrder()));
@@ -326,7 +332,13 @@ void Graph::setUpTensors() const {
                 });
 
             inner::setResultTensor(
+<<<<<<< HEAD
                 node, node.getOperation().getResultTensor(*mContext, opArgs));
+=======
+                node,
+                std::shared_ptr<inner::Tensor>(
+                    node.getOperation().getResultTensor(*mContext, opArgs)));
+>>>>>>> fix: Memory leak in AbstractNode
 
             for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
                  idx++) {
@@ -342,12 +354,108 @@ void Graph::setUpTensors() const {
         for (auto& nodeDep : outputNodes) {
             auto& node = node_cast<OutputNode&>(
                 *inner::getNodeTable(*mContext)[nodeDep.nodeIndex]);
+<<<<<<< HEAD
             auto& parentNode = *inner::getNodeTable(
                 *mContext)[nodeDep.input.begin()->nodeIndex];
             inner::setResultTensor(node, &inner::getTensorFromNode(parentNode));
         }
     }
 }
+=======
+            auto& parentNode =
+                *inner::getNodeTable(*mContext)[nodeDep.input[0].nodeIndex];
+            inner::setResultTensor(node,
+                                   inner::getTensorPtrFromNode(parentNode));
+        }
+    }
+}
+void Graph::printDot(std::basic_ostream<char>& stream) {
+    stream << "digraph mygraph {\n";
+    traverse();
+    for (auto& cluster : mTraversal.getClusters()) {
+        auto& inputNodes = cluster.get<core::InputNode>();
+        for (auto& nodeDeps : inputNodes) {
+            auto& inputNode = node_cast<core::InputNode&>(
+                *core::inner::getNodeTable(*mContext)[nodeDeps.nodeIndex]);
+            stream << inputNode.getName() << " [label=\"INP "
+                   << inputNode.getName();
+            auto& tensor = inner::getTensorFromNode(inputNode);
+            stream << "\\nTensor addr: " << tensor.getVirtualAddress();
+            stream << "\\nTensor total size: "
+                   << tensor.getShapeView().getTotalSize();
+            stream << "\"";
+
+            stream << ";style=filled;";
+            if (inputNode.isFrozen()) {
+                stream << "color=\"#91D2FF\"";
+            } else {
+                stream << "color=\"#FFDF9E\"";
+            }
+
+            stream << "]\n";
+        }
+
+        auto& actionNodes = cluster.get<core::Node>();
+        for (auto& nodeDeps : actionNodes) {
+            auto& actionNode = node_cast<core::Node&>(
+                *core::inner::getNodeTable(*mContext)[nodeDeps.nodeIndex]);
+            stream << actionNode.getName() << " [label=\"ACT "
+                   << actionNode.getName();
+            auto& tensor = inner::getTensorFromNode(actionNode);
+            stream << "\\nTensor addr: " << tensor.getVirtualAddress();
+            stream << "\\nTensor total size: "
+                   << tensor.getShapeView().getTotalSize();
+            stream << "\"]\n";
+
+            for (auto& parent : nodeDeps.input) {
+                auto* pNode =
+                    core::inner::getNodeTable(*mContext)[parent.nodeIndex];
+                stream << pNode->getName() << " -> " << actionNode.getName();
+                stream << ";\n";
+            }
+        }
+
+        auto& lossNodes = cluster.get<core::LossNode>();
+        for (auto& nodeDeps : lossNodes) {
+            auto& actionNode = node_cast<core::LossNode&>(
+                *core::inner::getNodeTable(*mContext)[nodeDeps.nodeIndex]);
+            stream << actionNode.getName() << " [label=\"LOSS "
+                   << actionNode.getName();
+            auto& tensor = inner::getTensorFromNode(actionNode);
+            stream << "\\nTensor addr: " << tensor.getVirtualAddress();
+            stream << "\\nTensor total size: "
+                   << tensor.getShapeView().getTotalSize();
+            stream << "\"]\n";
+
+            for (auto& parent : nodeDeps.input) {
+                auto* pNode =
+                    core::inner::getNodeTable(*mContext)[parent.nodeIndex];
+                stream << pNode->getName() << " -> " << actionNode.getName();
+                stream << ";\n";
+            }
+        }
+
+        auto& outputNodes = cluster.get<core::OutputNode>();
+        for (auto& nodeDeps : outputNodes) {
+            auto& outputNode = node_cast<core::OutputNode&>(
+                *core::inner::getNodeTable(*mContext)[nodeDeps.nodeIndex]);
+            stream << outputNode.getName() << " [label=\"OUTP "
+                   << outputNode.getName();
+            auto& tensor = inner::getTensorFromNode(outputNode);
+            stream << "\\nTensor addr: " << tensor.getVirtualAddress();
+            stream << "\\nTensor total size: "
+                   << tensor.getShapeView().getTotalSize();
+            stream << "\"]\n";
+
+            auto* pNode = core::inner::getNodeTable(
+                *mContext)[nodeDeps.input[0].nodeIndex];
+            stream << pNode->getName() << " -> " << outputNode.getName();
+            stream << ";\n";
+        }
+    }
+    stream << "}\n";
+}
+>>>>>>> fix: Memory leak in AbstractNode
 }  // namespace athena::core
 
 namespace athena::core::inner {

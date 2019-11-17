@@ -38,7 +38,8 @@ AbstractNode::AbstractNode(TensorShape shape,
                            DataType dataType,
                            Context& context,
                            std::string name)
-    : mTensor(new inner::Tensor(dataType, std::move(shape), context)),
+    : mTensor(
+          std::make_shared<inner::Tensor>(dataType, std::move(shape), context)),
       mContext(&context),
       mName(std::move(name)),
       mGraphIndex(inner::kKUndefinedIndex),
@@ -128,8 +129,9 @@ AbstractNode::AbstractNode(Context& context, std::string name)
       mGraphIndex(inner::kKUndefinedIndex),
       mNodeIndex(inner::getNodeTable(*mContext).registerRecord(this)),
       mInputsCount(0) {}
-void inner::setResultTensor(athena::core::AbstractNode& node,
-                            athena::core::inner::Tensor* tensor) {
-    node.mTensor = tensor;
+void inner::setResultTensor(
+    athena::core::AbstractNode& node,
+    std::shared_ptr<athena::core::inner::Tensor> tensor) {
+    node.mTensor = std::move(tensor);
 }
 }  // namespace athena::core

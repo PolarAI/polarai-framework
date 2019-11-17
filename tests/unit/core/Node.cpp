@@ -24,7 +24,7 @@ TEST(Node, Create) {
     std::string operationName = "Dummy";
     OperationDummy op(operationName);
     Node n(op, context);
-    auto *tensor1 = new inner::Tensor(dataType, shape, context);
+    auto tensor1 = std::make_shared<inner::Tensor>(dataType, shape, context);
     inner::setResultTensor(n, tensor1);
     ASSERT_EQ(n.getDataType(), dataType);
     ASSERT_EQ(n.getShapeView(), shape);
@@ -40,7 +40,7 @@ TEST(Node, CopyConstructor) {
     std::string operationName = "Dummy";
     OperationDummy op(operationName);
     Node n(op, context);
-    auto *tensor1 = new inner::Tensor(dataType, shape, context);
+    auto tensor1 = std::make_shared<inner::Tensor>(dataType, shape, context);
     inner::setResultTensor(n, tensor1);
     Node nSecond(n);
     ASSERT_EQ(inner::getNodeTable(context).size(), 3);
