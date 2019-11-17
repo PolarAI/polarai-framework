@@ -61,7 +61,7 @@ void AddOperation::genDerivative(
            "derivativeTensor is broken");
 #endif
     // todo this is a workaround because I'm too lazy to implement proper copy
-    auto *options = new HadamardOptions<float>{1.f, 0.0f};
+    static auto *options = new HadamardOptions<float>{1.f, 0.0f};
     void *opts = static_cast<void *>(options);
     g.generate("fill", derivativeTensor, unit);
     g.generate("hadamard", opts, derivativeTensor, internalError,
