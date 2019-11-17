@@ -19,12 +19,7 @@
 #include <cstddef>
 
 namespace athena::core {
-enum class ATH_CORE_EXPORT DataType : int {
-    UNDEFINED = 0,
-    DOUBLE = 1,
-    FLOAT = 2,
-    HALF = 3
-};
+enum class DataType : int { UNDEFINED = 0, DOUBLE = 1, FLOAT = 2, HALF = 3 };
 
 ATH_CORE_EXPORT size_t sizeOfDataType(const DataType& dataType);
 }  // namespace athena::core

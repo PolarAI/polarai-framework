@@ -51,6 +51,7 @@ void MemoryLoader::load(core::Allocator *allocator,
 }
 std::string MemoryLoader::serialize() const {
     new core::FatalError(core::ATH_NOT_IMPLEMENTED, "Not serializable");
+    return "";  // suppress warning
 }
 
 }  // namespace athena::loaders

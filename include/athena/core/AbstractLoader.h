@@ -47,6 +47,7 @@ class ATH_CORE_EXPORT AbstractLoader {
     template <typename T>
     static std::string getLoaderName() {
         new FatalError(ATH_NOT_IMPLEMENTED, "Not implemented");
+        return "";  // suppress warning
     };
 
     virtual std::string getName() const = 0;
@@ -55,6 +56,7 @@ class ATH_CORE_EXPORT AbstractLoader {
 
     static AbstractLoader* deserialize(const std::string& data) {
         new FatalError(ATH_NOT_IMPLEMENTED, "Not implemented");
+        return nullptr;  // suppress warning
     }
 };
 
