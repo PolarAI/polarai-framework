@@ -136,12 +136,6 @@ class ATH_CORE_EXPORT Graph {
     friend Context& inner::getContext(athena::core::Graph& graph);
 
     /**
-     * Print Graph in dot format. For debug purposes only.
-     * @param stream Output stream
-     */
-    void printDot(std::basic_ostream<char>& stream);
-
-    /**
      * Set up Graph optimizer
      * @tparam Opt Optimizer class
      * @tparam Args Optimizer arguments type

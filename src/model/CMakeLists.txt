@@ -3,7 +3,8 @@ set(ATH_MODEL "AthenaModel" CACHE STRING "" FORCE)
 add_athena_library(${ATH_MODEL} STATIC
         ATH_MODEL # export name
         model/model_export.h # export file name
-        NativeModel.cpp)
+        NativeModel.cpp
+        DotModel.cpp)
 
 include(AthenaCompileProtobuf)
 
