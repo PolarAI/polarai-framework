@@ -89,8 +89,13 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
         auto lock = TSM.getContextLock();
         ::llvm::raw_fd_ostream preOptStream(fileNamePrefix + "_pre_opt.ll",
                                             errorCode);
-        TSM.getModule()->print(preOptStream, nullptr);
-        preOptStream.close();
+        if (!errorCode) {
+            TSM.getModule()->print(preOptStream, nullptr);
+            preOptStream.close();
+        } else {
+            log() << "Unable to open file for writing "
+                  << fileNamePrefix + "_pre_opt.ll";
+        }
     }
 #endif
 
@@ -143,7 +148,13 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
     if (getenv("ATHENA_DUMP_LLVM")) {
         ::llvm::raw_fd_ostream postOptStream(fileNamePrefix + "_post_opt.ll",
                                              errorCode);
-        TSM.getModule()->print(postOptStream, nullptr);
+        if (!errorCode) {
+            TSM.getModule()->print(postOptStream, nullptr);
+            postOptStream.close();
+        } else {
+            log() << "Unable to open file for writing "
+                  << fileNamePrefix + "_post_opt.ll";
+        }
     }
 #endif
 
