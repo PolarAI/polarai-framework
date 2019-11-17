@@ -14,6 +14,8 @@
 #ifndef ATHENA_ATHENAJIT_H
 #define ATHENA_ATHENAJIT_H
 
+#include "MergeLayer.h"
+
 #include <athena/backend/llvm/llvm_export.h>
 
 #include <llvm/ADT/StringRef.h>
@@ -44,6 +46,7 @@ class ATH_BACKEND_LLVM_EXPORT AthenaJIT {
     ::llvm::orc::RTDyldObjectLinkingLayer mObjectLayer;
     ::llvm::orc::IRCompileLayer mCompileLayer;
     ::llvm::orc::IRTransformLayer mOptimizeLayer;
+    MergeLayer mMergeLayer;
 
     ::llvm::DataLayout mDataLayout;
     ::llvm::orc::MangleAndInterner mMangle;

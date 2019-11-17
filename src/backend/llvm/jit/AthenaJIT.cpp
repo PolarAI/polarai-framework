@@ -36,6 +36,7 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
                     mObjectLayer,
                     ::llvm::orc::ConcurrentIRCompiler(std::move(JTMB))),
       mOptimizeLayer(mExecutionSession, mCompileLayer, optimizeModule),
+      mMergeLayer(mExecutionSession, mOptimizeLayer),
       mDataLayout(DL),
       mMangle(mExecutionSession, mDataLayout),
       mContext(::llvm::make_unique<::llvm::LLVMContext>()) {
@@ -65,9 +66,10 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
     return std::make_unique<AthenaJIT>(std::move(*JTMB), std::move(*DL));
 }
 ::llvm::Error AthenaJIT::addModule(std::unique_ptr<::llvm::Module> &M) {
-    return mOptimizeLayer.add(
+    return mMergeLayer.add(
         mExecutionSession.getMainJITDylib(),
-        ::llvm::orc::ThreadSafeModule(std::move(M), mContext));
+        ::llvm::orc::ThreadSafeModule(std::move(M), mContext),
+        mExecutionSession.allocateVModule());
 }
 ::llvm::Expected<::llvm::JITEvaluatedSymbol> AthenaJIT::lookup(
     ::llvm::StringRef Name) {
@@ -81,7 +83,9 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
     size_t fileId = getNextFileId();
     std::error_code errorCode;
     const std::string fileNamePrefix = "program" + std::to_string(fileId);
+
     if (getenv("ATHENA_DUMP_LLVM")) {
+        auto lock = TSM.getContextLock();
         ::llvm::raw_fd_ostream preOptStream(fileNamePrefix + "_pre_opt.ll",
                                             errorCode);
         TSM.getModule()->print(preOptStream, nullptr);
@@ -89,8 +93,9 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
     }
 #endif
 
-    ::llvm::FunctionPassManager mFunctionPassManager;
-    ::llvm::ModulePassManager mModulePassManager;
+    ::llvm::FunctionPassManager mFunctionSimplificationPassManager;
+    ::llvm::ModulePassManager mModuleOptimizationPassManager;
+    ::llvm::ModulePassManager mThinLTOPreLinkPassManager;
 
     ::llvm::LoopAnalysisManager loopAnalysisManager;
     ::llvm::FunctionAnalysisManager functionAnalysisManager;
@@ -105,22 +110,28 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
     passBuilder.crossRegisterProxies(
         loopAnalysisManager, functionAnalysisManager, cGSCCAnalysisManager,
         moduleAnalysisManager);
-    mModulePassManager = passBuilder.buildModuleOptimizationPipeline(
-        ::llvm::PassBuilder::O2, false);
-    mFunctionPassManager = passBuilder.buildFunctionSimplificationPipeline(
-        ::llvm::PassBuilder::O2, ::llvm::PassBuilder::ThinLTOPhase::PostLink,
-        false);
+    mModuleOptimizationPassManager =
+        passBuilder.buildModuleOptimizationPipeline(::llvm::PassBuilder::O2,
+                                                    false);
+    mFunctionSimplificationPassManager =
+        passBuilder.buildFunctionSimplificationPipeline(
+            ::llvm::PassBuilder::O2,
+            ::llvm::PassBuilder::ThinLTOPhase::PostLink, false);
+    passBuilder.buildThinLTOPreLinkDefaultPipeline(::llvm::PassBuilder::O3);
 
     auto lock = TSM.getContextLock();
 
     ::llvm::Module &module = *TSM.getModule();
 
-    mModulePassManager.run(module, moduleAnalysisManager);
+    mModuleOptimizationPassManager.run(module, moduleAnalysisManager);
 
     for (auto &func : module) {
         if (!func.isDeclaration())
-            mFunctionPassManager.run(func, functionAnalysisManager);
+            mFunctionSimplificationPassManager.run(func,
+                                                   functionAnalysisManager);
     }
+
+    mThinLTOPreLinkPassManager.run(module, moduleAnalysisManager);
 
 #ifdef DEBUG
     if (getenv("ATHENA_DUMP_LLVM")) {

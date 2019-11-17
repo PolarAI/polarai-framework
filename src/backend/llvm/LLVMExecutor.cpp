@@ -45,6 +45,7 @@ void LLVMExecutor::setGraph(athena::core::Graph &graph) {
 
     // Prepare runtime library
     for (auto &module : mRuntimeDriver->getModules()) {
+        module->setDataLayout(mJITCompiler->getDataLayout());  // fixme hack
         auto err = mJITCompiler->addModule(module);
         if (err) {
             new core::FatalError(core::ATH_FATAL_OTHER, "Unable to add module");

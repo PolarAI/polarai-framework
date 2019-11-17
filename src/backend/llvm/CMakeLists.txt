@@ -34,6 +34,7 @@ add_athena_library(${ATH_BACKEND_LLVM} STATIC
         LLVMExecutor.cpp
         LLVMGenerator.cpp
         jit/AthenaJIT.cpp
+        jit/MergeLayer.cpp
         LLVMTrivialAllocator.cpp
         GraphPartitionPlanner.cpp
         utils.cpp
