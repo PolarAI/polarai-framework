@@ -30,7 +30,7 @@ using namespace athena::ops;
 using namespace athena::backend::llvm;
 using namespace athena::loaders;
 
-TEST(JIT, SimpleVectorAdd) {
+TEST(JIT, DISABLED_SimpleVectorAdd) {
     // Arrange
     TensorShape shape({3});
 

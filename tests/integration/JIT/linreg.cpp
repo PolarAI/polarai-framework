@@ -21,6 +21,7 @@
 #include <athena/core/inner/InnerFunctions.h>
 #include <athena/core/inner/Tensor.h>
 #include <athena/loaders/MemoryLoader/MemoryLoader.h>
+#include <athena/model/DotModel.h>
 #include <athena/ops/GEMMOperation.h>
 #include <athena/ops/MSELossFunction.h>
 
@@ -34,16 +35,15 @@ using namespace athena::loaders;
 TEST(JIT, LinReg) {
     // Arrange
     TensorShape shape({1, 9});
+    TensorShape shapeScalar({1});
 
     float input[] = {10, 20, 20, 20, 20, 20, 20, 70, 50};
     float weights[] = {3, 3, 3, 3, 3, 3, 3, 3, 3};
-    float target[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    float target[] = {1};
 
     MemoryLoader inputLoader(input, 9 * sizeof(float));
     MemoryLoader weightsLoader(weights, 9 * sizeof(float));
-    MemoryLoader targetLoader(target, 9 * sizeof(float));
-
-
+    MemoryLoader targetLoader(target, 1 * sizeof(float));
 
     Context context;
     Graph graph(context);
@@ -68,7 +68,8 @@ TEST(JIT, LinReg) {
     outputNode.after(gemm, 1);
 
     MSELossFunction lossFunction;
-    InputNode cInp(shape, DataType::FLOAT, targetLoader, context, true, "c");
+    InputNode cInp(shapeScalar, DataType::FLOAT, targetLoader, context, true,
+                   "c");
     graph.addNode(cInp);
     LossNode lossNode(lossFunction, Criterion::MIN, context, "mse_loss");
     graph.addNode(lossNode);
@@ -81,6 +82,8 @@ TEST(JIT, LinReg) {
     executor.setAllocator(trivialAllocator);
     executor.setGraph(graph);
 
+    athena::model::DotModel::exportGraph(graph, std::cerr);
+
     // Act
     executor.evaluate();
     executor.optimizeGraph();
@@ -88,9 +91,9 @@ TEST(JIT, LinReg) {
     // Assert
     auto accessor = outputNode.getAccessor<float>(*executor.getAllocator());
 
-//    EXPECT_FLOAT_EQ(*accessor[0][0], 18.0);
-//    EXPECT_FLOAT_EQ(*accessor[0][1], 18.0);
-//    EXPECT_FLOAT_EQ(*accessor[0][2], 18.0);
+    //    EXPECT_FLOAT_EQ(*accessor[0][0], 18.0);
+    //    EXPECT_FLOAT_EQ(*accessor[0][1], 18.0);
+    //    EXPECT_FLOAT_EQ(*accessor[0][2], 18.0);
 //    EXPECT_FLOAT_EQ(*accessor[1][0], 18.0);
 //    EXPECT_FLOAT_EQ(*accessor[1][1], 18.0);
 //    EXPECT_FLOAT_EQ(*accessor[1][2], 18.0);

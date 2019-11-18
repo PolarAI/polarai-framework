@@ -68,7 +68,7 @@ void MSELossFunction::genDerivative(
                                  "Data type not supported");
     }
 
-    g.generate("fma", *operationArguments[0], scale, *operationArguments[1],
+    g.generate("fma", operationResult, scale, *operationArguments[argNo],
                negScale, derivativeTensor);
 }
 core::inner::Tensor *MSELossFunction::getErrorTensor(core::Context& context,
