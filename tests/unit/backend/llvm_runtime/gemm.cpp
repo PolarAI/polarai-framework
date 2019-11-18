@@ -48,8 +48,8 @@ TYPED_TEST(RuntimeTest, GEMMSimple) {
 
     Context ctx;
 
-    Tensor a(data_type_cast<TypeParam>(), {2, 4}, ctx);
-    Tensor b(data_type_cast<TypeParam>(), {4, 2}, ctx);
+    Tensor a(data_type_cast<TypeParam>(), {4, 2}, ctx);
+    Tensor b(data_type_cast<TypeParam>(), {2, 4}, ctx);
     Tensor c(data_type_cast<TypeParam>(), {4, 4}, ctx);
 
     LLVMTrivialAllocator allocator;
@@ -91,8 +91,8 @@ TYPED_TEST(RuntimeTest, GEMMTransposeA) {
 
     Context ctx;
 
-    Tensor a(data_type_cast<TypeParam>(), {4, 2}, ctx);
-    Tensor b(data_type_cast<TypeParam>(), {4, 2}, ctx);
+    Tensor a(data_type_cast<TypeParam>(), {2, 4}, ctx);
+    Tensor b(data_type_cast<TypeParam>(), {2, 4}, ctx);
     Tensor c(data_type_cast<TypeParam>(), {4, 4}, ctx);
 
     LLVMTrivialAllocator allocator;
@@ -134,8 +134,8 @@ TYPED_TEST(RuntimeTest, GEMMTransposeB) {
 
     Context ctx;
 
-    Tensor a(data_type_cast<TypeParam>(), {2, 4}, ctx);
-    Tensor b(data_type_cast<TypeParam>(), {2, 4}, ctx);
+    Tensor a(data_type_cast<TypeParam>(), {4, 2}, ctx);
+    Tensor b(data_type_cast<TypeParam>(), {4, 2}, ctx);
     Tensor c(data_type_cast<TypeParam>(), {4, 4}, ctx);
 
     LLVMTrivialAllocator allocator;
@@ -178,8 +178,8 @@ TYPED_TEST(RuntimeTest, GEMMTransposeBoth) {
 
     Context ctx;
 
-    Tensor a(data_type_cast<TypeParam>(), {4, 2}, ctx);
-    Tensor b(data_type_cast<TypeParam>(), {2, 4}, ctx);
+    Tensor a(data_type_cast<TypeParam>(), {2, 4}, ctx);
+    Tensor b(data_type_cast<TypeParam>(), {4, 2}, ctx);
     Tensor c(data_type_cast<TypeParam>(), {4, 4}, ctx);
 
     LLVMTrivialAllocator allocator;
