@@ -17,8 +17,8 @@ namespace athena::core {
 Node::Node(Node&& rhs) noexcept
     : AbstractNode(std::move(rhs)),
       mOperation(rhs.mOperation),
-      mDerivativeTensors(std::move(rhs.mDerivativeTensors)),
-      mErrorTensor(std::move(rhs.mErrorTensor)) {
+      mOutcomingGradients(std::move(rhs.mOutcomingGradients)),
+      mIncomingGradientTensor(std::move(rhs.mIncomingGradientTensor)) {
     rhs.mOperation = nullptr;
 }
 Node::Node(Operation& operation, Context& context, std::string name)
@@ -49,15 +49,15 @@ void Node::clear() {
     AbstractNode::clear();
 }
 void inner::addDerivativeTensor(Node& node, inner::Tensor& tensor) {
-    node.mDerivativeTensors.push_back(&tensor);
+    node.mOutcomingGradients.push_back(&tensor);
 }
 inner::Tensor& inner::getDerivativeTensor(Node& node, size_t index) {
-    return *node.mDerivativeTensors[index];
+    return *node.mOutcomingGradients[index];
 }
 void inner::setErrorTensor(Node& node, Tensor* tensor) {
-    node.mErrorTensor = tensor;
+    node.mIncomingGradientTensor = tensor;
 }
-inner::Tensor& inner::getErrorTensor(Node& node) {
-    return *node.mErrorTensor;
+inner::Tensor& inner::getIncomingGradient(Node& node) {
+    return *node.mIncomingGradientTensor;
 }
 }  // namespace athena::core

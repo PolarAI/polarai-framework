@@ -103,9 +103,25 @@ void gemm<float>(Device *,
 
     std::cout << M << ' ' << N << ' ' << K << std::endl;
 
+    std::cout << "Gemm A: ";
+
+    for (size_t i = 0; i < a->getShapeView().getTotalSize(); i++) {
+        std::cout << aData[i] << " ";
+    }
+
+    std::cout << "\nGemm B: ";
+    for (size_t i = 0; i < b->getShapeView().getTotalSize(); i++) {
+        std::cout << bData[i] << " ";
+    }
+
     cblas_sgemm(CBLAS_ORDER::CblasRowMajor, transposeA, transposeB, M, N, K,
                 options->alpha, aData, options->transposeA ? M : K, bData,
                 options->transposeB ? K : N, options->beta, cData, N);
+
+    std::cout << "\nGemm C: ";
+    for (size_t i = 0; i < c->getShapeView().getTotalSize(); i++) {
+        std::cout << cData[i] << " ";
+    }
 }
 
 template <>

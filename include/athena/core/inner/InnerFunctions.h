@@ -31,7 +31,7 @@ ATH_CORE_EXPORT void setTraversalValidity(Traversal &traversal, bool flag);
 ATH_CORE_EXPORT void addDerivativeTensor(Node &node, inner::Tensor &tensor);
 ATH_CORE_EXPORT Tensor &getDerivativeTensor(Node &node, size_t index);
 ATH_CORE_EXPORT void setErrorTensor(Node &node, Tensor *tensor);
-ATH_CORE_EXPORT inner::Tensor &getErrorTensor(Node &node);
+ATH_CORE_EXPORT inner::Tensor &getIncomingGradient(Node &node);
 ATH_CORE_EXPORT void setResultTensor(AbstractNode &node, inner::Tensor *tensor);
 ATH_CORE_EXPORT Tensor *getNullTensor(Context &context);
 ATH_CORE_EXPORT inner::Table<AllocationRecord> &getAllocationTable(

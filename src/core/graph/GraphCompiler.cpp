@@ -155,7 +155,7 @@ static void compileNodeDerivatives(
             }
         }
 
-        auto &errorTensor = core::inner::getErrorTensor(node);
+        auto &errorTensor = core::inner::getIncomingGradient(node);
         generator.generate("allocate", errorTensor);
         graphOptimizer.genError(generator, incomingErrors, errorTensor);
 

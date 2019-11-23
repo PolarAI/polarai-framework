@@ -35,6 +35,7 @@ using namespace athena::loaders;
 TEST(JIT, LinReg) {
     // Arrange
     TensorShape shape({1, 9});
+    TensorShape shape2({9, 1});
     TensorShape shapeScalar({1});
 
     float input[] = {10, 20, 20, 20, 20, 20, 20, 70, 50};
@@ -47,9 +48,11 @@ TEST(JIT, LinReg) {
 
     Context context;
     Graph graph(context);
-    graph.setUpOptimizer<GradientDescent>(/*learningRate*/ 0.001);
-    InputNode inputInp(shape, DataType::FLOAT, inputLoader, context, false, "a");
-    InputNode weightsInp(shape, DataType::FLOAT, weightsLoader, context, false, "b");
+    graph.setUpOptimizer<GradientDescent>(/*learningRate*/ -0.001);
+    InputNode inputInp(shape, DataType::FLOAT, inputLoader, context, false,
+                       "a");
+    InputNode weightsInp(shape2, DataType::FLOAT, weightsLoader, context, false,
+                         "b");
     graph.addNode(inputInp);
     graph.addNode(weightsInp);
 
@@ -57,7 +60,7 @@ TEST(JIT, LinReg) {
     graph.addNode(outputNodeDbg);
     outputNodeDbg.after(weightsInp, 1);
 
-    GEMMOperation gemmOp(false, true);
+    GEMMOperation gemmOp(false, false);
     Node gemm(gemmOp, context, "gemm_1");
     graph.addNode(gemm);
     gemm.after(inputInp, 1);
@@ -65,7 +68,7 @@ TEST(JIT, LinReg) {
 
     OutputNode outputNode(DataType::FLOAT, context, "out");
     graph.addNode(outputNode);
-    outputNode.after(gemm, 1);
+    outputNode.after(gemm, 2);
 
     MSELossFunction lossFunction;
     InputNode cInp(shapeScalar, DataType::FLOAT, targetLoader, context, true,
@@ -75,6 +78,10 @@ TEST(JIT, LinReg) {
     graph.addNode(lossNode);
     lossNode.after(gemm, 1);
     lossNode.after(cInp, 2);
+
+    OutputNode lossOut(DataType::FLOAT, context, "lossOut");
+    graph.addNode(lossOut);
+    lossOut.after(lossNode, 1);
 
     LLVMExecutor executor;
     std::unique_ptr<Allocator> trivialAllocator =
@@ -99,16 +106,22 @@ TEST(JIT, LinReg) {
 //    EXPECT_FLOAT_EQ(*accessor[1][2], 18.0);
 //    EXPECT_FLOAT_EQ(*accessor[2][0], 18.0);
 //    EXPECT_FLOAT_EQ(*accessor[2][1], 18.0);
-//    EXPECT_FLOAT_EQ(*accessor[2][2], 18.0);
+    //    EXPECT_FLOAT_EQ(*accessor[2][2], 18.0);
 
     std::cout << "Result: " << *accessor[0][0] << std::endl;
     std::cout << std::endl;
-    auto accessorDbg = outputNodeDbg.getAccessor<float>(*executor.getAllocator());
+    auto accessorDbg =
+        outputNodeDbg.getAccessor<float>(*executor.getAllocator());
     std::cout << "Weights" << std::endl;
     for (size_t index = 0; index < 9; ++index) {
         std::cout << *accessorDbg[0][index] << ' ';
     }
     std::cout << std::endl;
+    auto lossAcc = lossOut.getAccessor<float>(*executor.getAllocator());
+    std::cout << "Loss " << *lossAcc[0] << std::endl;
+    auto err = reinterpret_cast<float*>(executor.getAllocator()->getRAMPointer(
+        inner::getDerivativeTensor(lossNode, 0)));
+    std::cout << "Err " << err[0];
     /*std::cout << "\n\n@@@\n" << std::endl;
     for (size_t index = 0; index < 9; ++index) {
         std::cout << weights[index] << std::endl;

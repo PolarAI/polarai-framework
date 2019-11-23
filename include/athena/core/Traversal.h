@@ -20,6 +20,8 @@
 #include <athena/core/core_export.h>
 #include <athena/core/inner/TupleContainers.h>
 
+#include <set>
+
 namespace athena::core {
 namespace inner {
 struct ATH_CORE_EXPORT Dependency {
@@ -27,16 +29,19 @@ struct ATH_CORE_EXPORT Dependency {
     size_t mark;
     Dependency(size_t nodeIndex, size_t mark)
         : nodeIndex(nodeIndex), mark(mark) {}
+    bool operator<(const Dependency &rhs) const {
+        return mark < rhs.mark;
+    }
 };
 
 template <typename TemplateNodeType>
 struct ATH_CORE_EXPORT NodeDependencies {
     size_t nodeIndex;
-    std::vector<Dependency> input;
-    std::vector<Dependency> output;
+    std::set<Dependency> input;
+    std::set<Dependency> output;
     NodeDependencies(size_t nodeIndex,
-                     std::vector<Dependency> input,
-                     std::vector<Dependency> output)
+                     std::set<Dependency> input,
+                     std::set<Dependency> output)
         : nodeIndex(nodeIndex),
           input(std::move(input)),
           output(std::move(output)) {}
@@ -44,8 +49,8 @@ struct ATH_CORE_EXPORT NodeDependencies {
 
 struct ATH_CORE_EXPORT NodeState {
     size_t inputCount;
-    std::vector<Dependency> input;
-    std::vector<Dependency> output;
+    std::set<Dependency> input;
+    std::set<Dependency> output;
 };
 
 struct ATH_CORE_EXPORT Cluster {

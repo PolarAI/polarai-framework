@@ -75,7 +75,7 @@ static void processActionNode(
         auto& dTensor = inner::getDerivativeTensor(actionNode, i);
         processTensor(dTensor, DERIVATIVE, stream);
     }
-    auto& eTensor = inner::getErrorTensor(actionNode);
+    auto& eTensor = inner::getIncomingGradient(actionNode);
     processTensor(eTensor, ERR, stream);
     stream << "}\n";
 
@@ -101,7 +101,7 @@ static void processLossNode(
         auto& dTensor = inner::getDerivativeTensor(lossNode, i);
         processTensor(dTensor, DERIVATIVE, stream);
     }
-    auto& eTensor = inner::getErrorTensor(lossNode);
+    auto& eTensor = inner::getIncomingGradient(lossNode);
     stream << "}\n";
 
     for (auto& parent : nodeDeps.input) {
