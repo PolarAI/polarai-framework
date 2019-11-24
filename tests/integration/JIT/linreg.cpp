@@ -98,32 +98,18 @@ TEST(JIT, LinReg) {
     // Assert
     auto accessor = outputNode.getAccessor<float>(*executor.getAllocator());
 
-    //    EXPECT_FLOAT_EQ(*accessor[0][0], 18.0);
-    //    EXPECT_FLOAT_EQ(*accessor[0][1], 18.0);
-    //    EXPECT_FLOAT_EQ(*accessor[0][2], 18.0);
-//    EXPECT_FLOAT_EQ(*accessor[1][0], 18.0);
-//    EXPECT_FLOAT_EQ(*accessor[1][1], 18.0);
-//    EXPECT_FLOAT_EQ(*accessor[1][2], 18.0);
-//    EXPECT_FLOAT_EQ(*accessor[2][0], 18.0);
-//    EXPECT_FLOAT_EQ(*accessor[2][1], 18.0);
-    //    EXPECT_FLOAT_EQ(*accessor[2][2], 18.0);
+    EXPECT_FLOAT_EQ(*accessor[0][0], 750.0f);
 
-    std::cout << "Result: " << *accessor[0][0] << std::endl;
-    std::cout << std::endl;
-    auto accessorDbg =
+    auto accessorWeights =
         outputNodeDbg.getAccessor<float>(*executor.getAllocator());
-    std::cout << "Weights" << std::endl;
-    for (size_t index = 0; index < 9; ++index) {
-        std::cout << *accessorDbg[0][index] << ' ';
-    }
-    std::cout << std::endl;
-    auto lossAcc = lossOut.getAccessor<float>(*executor.getAllocator());
-    std::cout << "Loss " << *lossAcc[0] << std::endl;
-    auto err = reinterpret_cast<float*>(executor.getAllocator()->getRAMPointer(
-        inner::getDerivativeTensor(lossNode, 0)));
-    std::cout << "Err " << err[0];
-    /*std::cout << "\n\n@@@\n" << std::endl;
-    for (size_t index = 0; index < 9; ++index) {
-        std::cout << weights[index] << std::endl;
-    }*/
+
+    EXPECT_FLOAT_EQ(*accessorWeights[0][0], 1.873498);
+    EXPECT_FLOAT_EQ(*accessorWeights[0][1], 0.746996);
+    EXPECT_FLOAT_EQ(*accessorWeights[0][2], 0.746996);
+    EXPECT_FLOAT_EQ(*accessorWeights[0][3], 0.746996);
+    EXPECT_FLOAT_EQ(*accessorWeights[0][4], 0.746996);
+    EXPECT_FLOAT_EQ(*accessorWeights[0][5], 0.746996);
+    EXPECT_FLOAT_EQ(*accessorWeights[0][6], 0.746996);
+    EXPECT_FLOAT_EQ(*accessorWeights[0][7], -4.8855138);
+    EXPECT_FLOAT_EQ(*accessorWeights[0][8], -2.63251);
 }
