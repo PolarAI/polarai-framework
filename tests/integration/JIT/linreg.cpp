@@ -48,7 +48,7 @@ TEST(JIT, LinReg) {
 
     Context context;
     Graph graph(context);
-    graph.setUpOptimizer<GradientDescent>(/*learningRate*/ -0.001);
+    graph.setUpOptimizer<GradientDescent>(/*learningRate*/ -0.0000001);
     InputNode inputInp(shape, DataType::FLOAT, inputLoader, context, false,
                        "a");
     InputNode weightsInp(shape2, DataType::FLOAT, weightsLoader, context, false,
