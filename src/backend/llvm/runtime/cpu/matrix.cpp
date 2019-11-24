@@ -122,11 +122,11 @@ void gemm<double>(Device *,
     auto cData = reinterpret_cast<double *>(allocator->getRAMPointer(*c));
 
     const int M =
-        static_cast<const int>(a->getShape().dim(options->transposeA ? 0 : 1));
-    const int K =
         static_cast<const int>(a->getShape().dim(options->transposeA ? 1 : 0));
+    const int K =
+        static_cast<const int>(a->getShape().dim(options->transposeA ? 0 : 1));
     const int N =
-        static_cast<const int>(b->getShape().dim(options->transposeB ? 1 : 0));
+        static_cast<const int>(b->getShape().dim(options->transposeB ? 0 : 1));
 
     cblas_dgemm(CBLAS_ORDER::CblasRowMajor, transposeA, transposeB, M, N, K,
                 options->alpha, aData, options->transposeA ? M : K, bData,
