@@ -149,26 +149,27 @@ TEST_F(GraphTest, DeepTestTraverse) {
     {
         ASSERT_EQ(0, traversal.getClusters()[1].get<InputNode>().size());
         ASSERT_EQ(1, traversal.getClusters()[1].get<Node>().size());
-        ASSERT_EQ(std::string("Node1"),
-                  inner::getNodeTable(context)
-                      [traversal.getClusters()[1].get<Node>()[0].nodeIndex]
-                          ->name());
+        ASSERT_EQ(
+            std::string("Node1"),
+            inner::getNodeTable(
+                context)[traversal.getClusters()[1].get<Node>()[0].nodeIndex]
+                ->name());
         ASSERT_EQ(node_dyncast<Node*>(
                       inner::getNodeTable(context)
                           [traversal.getClusters()[1].get<Node>()[0].nodeIndex])
                       ->getOperationPtr(),
                   &operation);
-        ASSERT_EQ(2, traversal.getClusters()[1].get<Node>()[0].output.size());
-        ASSERT_EQ(2, traversal.getClusters()[1].get<Node>()[0].input.size());
+        ASSERT_EQ(1, traversal.getClusters()[1].get<Node>()[0].output.size());
+        ASSERT_EQ(1, traversal.getClusters()[1].get<Node>()[0].input.size());
     }
     {
         ASSERT_EQ(0, traversal.getClusters()[2].get<InputNode>().size());
         ASSERT_EQ(2, traversal.getClusters()[2].get<Node>().size());
         std::set<std::string> setNames, targetSetNames;
         setNames.insert(
-            inner::getNodeTable(context)
-                [traversal.getClusters()[2].get<Node>()[0].nodeIndex]
-                    ->name());
+            inner::getNodeTable(
+                context)[traversal.getClusters()[2].get<Node>()[0].nodeIndex]
+                ->name());
         setNames.insert(
             inner::getNodeTable(context)
                 [traversal.getClusters()[2].get<Node>()[1].nodeIndex]
@@ -241,26 +242,27 @@ TEST_F(GraphTest, TraverseOnOtherGraph) {
         setNames.insert(
             inner::getNodeTable(context)
                 [traversal.getClusters()[1].get<Node>()[0].nodeIndex]
-                    ->name());
+                ->name());
         setNames.insert(
-            inner::getNodeTable(context)
-                [traversal.getClusters()[1].get<Node>()[1].nodeIndex]
-                    ->name());
+            inner::getNodeTable(
+                context)[traversal.getClusters()[1].get<Node>()[1].nodeIndex]
+                ->name());
         targetSetNames.insert("Node1");
         targetSetNames.insert("Node2");
         ASSERT_EQ(setNames, targetSetNames);
         ASSERT_EQ(1, traversal.getClusters()[1].get<Node>()[0].output.size());
         ASSERT_EQ(1, traversal.getClusters()[1].get<Node>()[1].output.size());
-        ASSERT_EQ(2, traversal.getClusters()[1].get<Node>()[0].input.size());
-        ASSERT_EQ(2, traversal.getClusters()[1].get<Node>()[1].input.size());
+        ASSERT_EQ(1, traversal.getClusters()[1].get<Node>()[0].input.size());
+        ASSERT_EQ(1, traversal.getClusters()[1].get<Node>()[1].input.size());
     }
     {
         ASSERT_EQ(0, traversal.getClusters()[2].get<InputNode>().size());
         ASSERT_EQ(1, traversal.getClusters()[2].get<Node>().size());
-        ASSERT_EQ(std::string("NodeOut"),
-                  inner::getNodeTable(context)
-                      [traversal.getClusters()[2].get<Node>()[0].nodeIndex]
-                          ->name());
+        ASSERT_EQ(
+            std::string("NodeOut"),
+            inner::getNodeTable(
+                context)[traversal.getClusters()[2].get<Node>()[0].nodeIndex]
+                ->name());
         ASSERT_EQ(0, traversal.getClusters()[2].get<Node>()[0].output.size());
         ASSERT_EQ(2, traversal.getClusters()[2].get<Node>()[0].input.size());
     }
