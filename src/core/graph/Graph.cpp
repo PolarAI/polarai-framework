@@ -90,11 +90,6 @@ void Graph::saveRealNode(TemplateNodeType& node,
     }
     std::get<std::vector<TemplateNodeType>>(mOwningStorage)
         .emplace_back(std::move(node));
-    //    if (isRepairedNode) {
-    //        TemplateNodeType newNode(
-    //            std::get<std::vector<TemplateNodeType>>(mOwningStorage).back());
-    //        node = std::move(newNode);
-    //    }
 }
 void Graph::fullClear() {
     clear();

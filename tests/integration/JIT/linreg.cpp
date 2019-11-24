@@ -89,8 +89,6 @@ TEST(JIT, LinReg) {
     executor.setAllocator(trivialAllocator);
     executor.setGraph(graph);
 
-    athena::model::DotModel::exportGraph(graph, std::cerr);
-
     // Act
     executor.evaluate();
     executor.optimizeGraph();
