@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Prepare Env
-        run: docker pull athenaml/build:latest
+        run: docker pull athenaml/build:llvm10
       - name: Test
         env:
           BUILD_TYPE: ${{ matrix.build_type }}

@@ -32,7 +32,7 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
                      ::llvm::DataLayout &&DL)
     : mObjectLayer(
           mExecutionSession,
-          []() { return ::llvm::make_unique<::llvm::SectionMemoryManager>(); }),
+          []() { return std::make_unique<::llvm::SectionMemoryManager>(); }),
       mCompileLayer(mExecutionSession,
                     mObjectLayer,
                     ::llvm::orc::ConcurrentIRCompiler(std::move(JTMB))),
@@ -40,10 +40,11 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
       mMergeLayer(mExecutionSession, mOptimizeLayer),
       mDataLayout(DL),
       mMangle(mExecutionSession, mDataLayout),
-      mContext(::llvm::make_unique<::llvm::LLVMContext>()) {
+      mContext(std::make_unique<::llvm::LLVMContext>()) {
     ::llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
-    mExecutionSession.getMainJITDylib().setGenerator(cantFail(
-        ::llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(DL)));
+    mExecutionSession.getMainJITDylib().addGenerator(cantFail(
+        ::llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(
+            DL.getGlobalPrefix())));
 }
 std::unique_ptr<AthenaJIT> AthenaJIT::create() {
     LLVMInitializeNativeTarget();
@@ -86,16 +87,17 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
     const std::string fileNamePrefix = "program" + std::to_string(fileId);
 
     if (getenv("ATHENA_DUMP_LLVM")) {
-        auto lock = TSM.getContextLock();
-        ::llvm::raw_fd_ostream preOptStream(fileNamePrefix + "_pre_opt.ll",
-                                            errorCode);
-        if (!errorCode) {
-            TSM.getModule()->print(preOptStream, nullptr);
-            preOptStream.close();
-        } else {
-            log() << "Unable to open file for writing "
-                  << fileNamePrefix + "_pre_opt.ll";
-        }
+        TSM.withModuleDo([&](::llvm::Module &module) {
+            ::llvm::raw_fd_ostream preOptStream(fileNamePrefix + "_pre_opt.ll",
+                                                errorCode);
+            if (!errorCode) {
+                module.print(preOptStream, nullptr);
+                preOptStream.close();
+            } else {
+                log() << "Unable to open file for writing "
+                      << fileNamePrefix + "_pre_opt.ll";
+            }
+        });
     }
 #endif
 
@@ -130,31 +132,31 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
     mDefaultIPOPassManager.addPass(::llvm::AlwaysInlinerPass());
     mDefaultIPOPassManager.addPass(::llvm::PartialInlinerPass());
 
-    auto lock = TSM.getContextLock();
+    TSM.withModuleDo([&](::llvm::Module &module) {
+        mModuleOptimizationPassManager.run(module, moduleAnalysisManager);
+        mThinLTOPreLinkPassManager.run(module, moduleAnalysisManager);
+        mDefaultIPOPassManager.run(module, moduleAnalysisManager);
 
-    ::llvm::Module &module = *TSM.getModule();
-
-    mModuleOptimizationPassManager.run(module, moduleAnalysisManager);
-    mThinLTOPreLinkPassManager.run(module, moduleAnalysisManager);
-    mDefaultIPOPassManager.run(module, moduleAnalysisManager);
-
-    for (auto &func : module) {
-        if (!func.isDeclaration())
-            mFunctionSimplificationPassManager.run(func,
-                                                   functionAnalysisManager);
-    }
+        for (auto &func : module) {
+            if (!func.isDeclaration())
+                mFunctionSimplificationPassManager.run(func,
+                                                       functionAnalysisManager);
+        }
+    });
 
 #ifdef DEBUG
     if (getenv("ATHENA_DUMP_LLVM")) {
-        ::llvm::raw_fd_ostream postOptStream(fileNamePrefix + "_post_opt.ll",
-                                             errorCode);
-        if (!errorCode) {
-            TSM.getModule()->print(postOptStream, nullptr);
-            postOptStream.close();
-        } else {
-            log() << "Unable to open file for writing "
-                  << fileNamePrefix + "_post_opt.ll";
-        }
+        TSM.withModuleDo([&](::llvm::Module &module) {
+            ::llvm::raw_fd_ostream postOptStream(
+                fileNamePrefix + "_post_opt.ll", errorCode);
+            if (!errorCode) {
+                module.print(postOptStream, nullptr);
+                postOptStream.close();
+            } else {
+                log() << "Unable to open file for writing "
+                      << fileNamePrefix + "_post_opt.ll";
+            }
+        });
     }
 #endif
 

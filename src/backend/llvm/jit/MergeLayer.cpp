@@ -33,29 +33,29 @@ void MergeLayer::emit(::llvm::orc::MaterializationResponsibility responsibility,
 
     if (mLinkedModuleMap.count(name) == 0) {
         // fixme work correctly with contexts
-        auto lock = threadSafeModule.getContextLock();
-        auto ctx = std::make_unique<::llvm::LLVMContext>();
-        ::llvm::orc::ThreadSafeContext tsc(std::move(ctx));
-        auto llvmModule =
-            std::make_unique<::llvm::Module>(name, *tsc.getContext());
-        llvmModule->setSourceFileName("<null>");
-        llvmModule->setDataLayout(
-            threadSafeModule.getModule()->getDataLayout());
-        llvmModule->setTargetTriple(
-            threadSafeModule.getModule()->getTargetTriple());
-        ::llvm::orc::ThreadSafeModule module(std::move(llvmModule),
-                                             std::move(tsc));
-        mLinkedModuleMap[name] = std::move(module);
-        mMaterializedMap[name] = false;
+        threadSafeModule.withModuleDo([&](::llvm::Module& module) {
+            auto ctx = std::make_unique<::llvm::LLVMContext>();
+            ::llvm::orc::ThreadSafeContext tsc(std::move(ctx));
+            auto llvmModule =
+                std::make_unique<::llvm::Module>(name, *tsc.getContext());
+            llvmModule->setSourceFileName("<null>");
+            llvmModule->setDataLayout(module.getDataLayout());
+            llvmModule->setTargetTriple(module.getTargetTriple());
+            ::llvm::orc::ThreadSafeModule tsModule(std::move(llvmModule),
+                                                   std::move(tsc));
+            mLinkedModuleMap[name] = std::move(tsModule);
+            mMaterializedMap[name] = false;
+        });
+        //        auto lock = threadSafeModule.getContextLock();
     }
-    {
-        auto& myModule = mLinkedModuleMap[name];
-        auto lock = threadSafeModule.getContextLock();
-        auto ownedLock = myModule.getContextLock();
-        auto clone = ::llvm::CloneModule(*threadSafeModule.getModule());
-        ::llvm::Linker linker(*myModule.getModule());
-        linker.linkInModule(std::move(clone));
-    }
+    auto& myModule = mLinkedModuleMap[name];
+    myModule.withModuleDo([&](::llvm::Module& module1) {
+        threadSafeModule.withModuleDo([&](::llvm::Module& module2) {
+            auto clone = ::llvm::CloneModule(module2);
+            ::llvm::Linker linker(module1);
+            linker.linkInModule(std::move(clone));
+        });
+    });
 
     return dylib.define(std::make_unique<MergeMaterializationUnit>(
         dylib.getExecutionSession(), *this, std::move(threadSafeModule), key));
@@ -67,23 +67,20 @@ MergeMaterializationUnit::MergeMaterializationUnit(
     ::llvm::orc::VModuleKey key)
     : ::llvm::orc::MaterializationUnit(::llvm::orc::SymbolFlagsMap(), key),
       mParent(parent) {
-    ::llvm::orc::MangleAndInterner mangle(executionSession,
-                                          module.getModule()->getDataLayout());
-
-    auto lock = module.getContextLock();
-    auto* plainModule = module.getModule();
-
-    for (auto& globalValue : plainModule->global_values()) {
-        if (globalValue.hasName() && !globalValue.isDeclaration() &&
-            !globalValue.hasLocalLinkage() &&
-            !globalValue.hasAvailableExternallyLinkage() &&
-            !globalValue.hasAppendingLinkage()) {
-            auto mangledName = mangle(globalValue.getName());
-            SymbolFlags[mangledName] =
-                ::llvm::JITSymbolFlags::fromGlobalValue(globalValue);
-            //            SymbolToDefinition[MangledName] = &G;
+    module.withModuleDo([&](::llvm::Module& plainModule) {
+        ::llvm::orc::MangleAndInterner mangle(executionSession,
+                                              plainModule.getDataLayout());
+        for (auto& globalValue : plainModule.global_values()) {
+            if (globalValue.hasName() && !globalValue.isDeclaration() &&
+                !globalValue.hasLocalLinkage() &&
+                !globalValue.hasAvailableExternallyLinkage() &&
+                !globalValue.hasAppendingLinkage()) {
+                auto mangledName = mangle(globalValue.getName());
+                SymbolFlags[mangledName] =
+                    ::llvm::JITSymbolFlags::fromGlobalValue(globalValue);
+            }
         }
-    }
+    });
 }
 void MergeMaterializationUnit::materialize(
     ::llvm::orc::MaterializationResponsibility R) {
