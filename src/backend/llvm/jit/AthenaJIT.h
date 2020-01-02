@@ -47,9 +47,10 @@ class ATH_BACKEND_LLVM_EXPORT AthenaJIT {
     ::llvm::orc::IRCompileLayer mCompileLayer;
     ::llvm::orc::IRTransformLayer mOptimizeLayer;
     MergeLayer mMergeLayer;
-
     ::llvm::DataLayout mDataLayout;
+
     ::llvm::orc::MangleAndInterner mMangle;
+    ::llvm::orc::JITDylib &mMainJD;
     ::llvm::orc::ThreadSafeContext mContext;
 
     static ::llvm::Expected<::llvm::orc::ThreadSafeModule> optimizeModule(

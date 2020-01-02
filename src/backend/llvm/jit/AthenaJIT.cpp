@@ -40,9 +40,10 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
       mMergeLayer(mExecutionSession, mOptimizeLayer),
       mDataLayout(DL),
       mMangle(mExecutionSession, mDataLayout),
+      mMainJD(mExecutionSession.createJITDylib("<main>")),
       mContext(std::make_unique<::llvm::LLVMContext>()) {
     ::llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
-    mExecutionSession.getMainJITDylib().addGenerator(cantFail(
+    mMainJD.addGenerator(cantFail(
         ::llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(
             DL.getGlobalPrefix())));
 }
@@ -69,14 +70,12 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
 }
 ::llvm::Error AthenaJIT::addModule(std::unique_ptr<::llvm::Module> &M) {
     return mMergeLayer.add(
-        mExecutionSession.getMainJITDylib(),
-        ::llvm::orc::ThreadSafeModule(std::move(M), mContext),
+        mMainJD, ::llvm::orc::ThreadSafeModule(std::move(M), mContext),
         mExecutionSession.allocateVModule());
 }
 ::llvm::Expected<::llvm::JITEvaluatedSymbol> AthenaJIT::lookup(
     ::llvm::StringRef Name) {
-    return mExecutionSession.lookup({&mExecutionSession.getMainJITDylib()},
-                                    mMangle(Name.str()));
+    return mExecutionSession.lookup({&mMainJD}, mMangle(Name.str()));
 }
 ::llvm::Expected<::llvm::orc::ThreadSafeModule> AthenaJIT::optimizeModule(
     ::llvm::orc::ThreadSafeModule TSM,
