@@ -7,6 +7,8 @@ add_athena_library(
         MLIRGenerator.cpp
 )
 
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tablegen)
+
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/tablegen/GraphDialect.h.inc
         ${CMAKE_CURRENT_BINARY_DIR}/tablegen/GraphDialect.h.fake
         COMMAND ${MLIR_TBLGEN} --gen-op-decls -o=${CMAKE_CURRENT_BINARY_DIR}/tablegen/GraphDialect.h.inc
