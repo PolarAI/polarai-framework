@@ -84,23 +84,31 @@ This is useful for loader invocation and user-defined operations.
 1. &laquo;unnamed&raquo;: tensor of any type values
 
 ### graph.matmul (athena::backend::llvm::MatmulOp)
-matrix-matrix multiplication operation
+generic matrix-matrix multiplication operation
 
 #### Description:
 
 
-The `graph.matmul` operation performs matrix-matrix multiplication of tensors.
+The `graph.matmul` operation performs generic matrix-matrix multiplication of tensors.
 The operands are expected to be rank 2 tensor with shapes, that allow such operation.
+
+```
+C = alpha * A * B + beta * C
+```
 
 #### Operands:
 
 1. `lhs`: 2D tensor of any type values
 1. `rhs`: 2D tensor of any type values
+1. `alpha`: any type
+1. `beta`: any type
 
 #### Attributes:
 
 | Attribute | MLIR Type | Description |
 | :-------: | :-------: | ----------- |
+| `transposeA` | `BoolAttr` | bool attribute attribute |
+| `transposeB` | `BoolAttr` | bool attribute attribute |
 | `tensor_addr` | `IntegerAttr` | 64-bit integer attribute attribute |
 | `node_id` | `IntegerAttr` | 64-bit integer attribute attribute |
 | `node_name` | `StringAttr` | string attribute attribute |

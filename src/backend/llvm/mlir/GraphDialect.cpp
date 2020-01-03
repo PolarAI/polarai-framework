@@ -146,6 +146,10 @@ void athena::backend::llvm::MatmulOp::build(
     OperationState &result,
     const mlir::Value &a,
     const mlir::Value &b,
+    bool transposeA,
+    bool transposeB,
+    uint64_t alpha,
+    uint64_t beta,
     const athena::core::inner::Tensor &c,
     int64_t node_id,
     StringRef node_name,
@@ -165,7 +169,29 @@ void athena::backend::llvm::MatmulOp::build(
     auto nodeIdAttr = builder->getI64IntegerAttr(node_id);
     auto clusterIdAttr = builder->getI64IntegerAttr(cluster_id);
     auto nodeNameAttr = builder->getStringAttr(node_name);
+    auto trasnpAAttr = builder->getBoolAttr(transposeA);
+    auto trasnpBAttr = builder->getBoolAttr(transposeB);
+    mlir::Attribute alphaAttr, betaAttr;
 
+    switch (c.getDataType()) {
+        case core::DataType::FLOAT:
+            alphaAttr =
+                builder->getF32FloatAttr(*reinterpret_cast<float *>(&alpha));
+            betaAttr =
+                builder->getF32FloatAttr(*reinterpret_cast<float *>(&beta));
+            break;
+        case core::DataType::DOUBLE:
+            alphaAttr =
+                builder->getF64FloatAttr(*reinterpret_cast<double *>(&alpha));
+            betaAttr =
+                builder->getF64FloatAttr(*reinterpret_cast<double *>(&beta));
+            break;
+        default:
+            llvm_unreachable("Unsupported type");
+    }
+
+    result.addAttribute("transposeA", trasnpAAttr);
+    result.addAttribute("transposeB", trasnpBAttr);
     result.addAttribute("tensor_addr", tensorAddrAttr);
     result.addAttribute("node_id", nodeIdAttr);
     result.addAttribute("node_name", nodeNameAttr);

@@ -90,13 +90,19 @@ def MulOp : Graph_Op<"mul", [NoSideEffect]> {
 }
 
 def MatmulOp : Graph_Op<"matmul", [NoSideEffect]> {
-  let summary = "matrix-matrix multiplication operation";
+  let summary = "generic matrix-matrix multiplication operation";
   let description = [{
-    The `graph.matmul` operation performs matrix-matrix multiplication of tensors.
+    The `graph.matmul` operation performs generic matrix-matrix multiplication of tensors.
     The operands are expected to be rank 2 tensor with shapes, that allow such operation.
+
+    ```
+    C = alpha * A * B + beta * C
+    ```
   }];
 
   let arguments = (ins 2DTensorOf<[AnyType]>:$lhs, 2DTensorOf<[AnyType]>:$rhs,
+                   BoolAttr:$transposeA, BoolAttr:$transposeB,
+                   AnyType:$alpha, AnyType:$beta,
                    I64Attr:$tensor_addr, I64Attr:$node_id, StrAttr:$node_name,
                    I64Attr:$cluster_id);
   let results = (outs 2DTensorOf<[AnyType]>);
@@ -104,6 +110,8 @@ def MatmulOp : Graph_Op<"matmul", [NoSideEffect]> {
   let builders = [OpBuilder<"Builder *builder, OperationState &result, "
                                   "const Value &a, "
                                   "const Value &b, "
+                                  "bool transposeA, bool transposeB, "
+                                  "uint64_t alpha, uint64_t beta, "
                                   "const core::inner::Tensor &c, "
                                   "int64_t node_id, StringRef node_name, int64_t cluster_id">];
 }
