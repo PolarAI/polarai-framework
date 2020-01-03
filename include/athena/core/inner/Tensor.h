@@ -20,37 +20,34 @@
 
 namespace athena::core::inner {
 class ATH_CORE_EXPORT Tensor {
-    private:
-    Context* mContext;
-    size_t mVirtualAddress;
-    size_t mRecordIndex;
-    size_t mShapeOffset;
-    size_t mShapePartialProduct;
-    Tensor(Context& context,
-           size_t id,
-           size_t recordIndex,
-           size_t shapeOffset,
-           size_t shapePartialProduct);
+private:
+  Context* mContext;
+  size_t mVirtualAddress;
+  size_t mRecordIndex;
+  size_t mShapeOffset;
+  size_t mShapePartialProduct;
+  Tensor(Context& context, size_t id, size_t recordIndex, size_t shapeOffset,
+         size_t shapePartialProduct);
 
-    public:
-    Tensor(const Tensor& rhs) = default;
-    Tensor(Tensor&& rhs) noexcept = default;
-    Tensor(DataType dataType, TensorShape shape, Context& context);
-    ~Tensor() = default;
+public:
+  Tensor(const Tensor& rhs) = default;
+  Tensor(Tensor&& rhs) noexcept = default;
+  Tensor(DataType dataType, TensorShape shape, Context& context);
+  ~Tensor() = default;
 
-    Tensor& operator=(const Tensor& rhs) = default;
-    Tensor& operator=(Tensor&& rhs) noexcept = default;
-    Tensor operator[](size_t index) const;
+  Tensor& operator=(const Tensor& rhs) = default;
+  Tensor& operator=(Tensor&& rhs) noexcept = default;
+  Tensor operator[](size_t index) const;
 
-    DataType getDataType() const;
-    ShapeView getShapeView() const;
-    ShapeView getSubShapeView(size_t offset = 1) const;
-    const TensorShape& getShape() const;
-    size_t getVirtualAddress() const;
-    size_t getSize() const;
-    void setShape(const TensorShape& shape);
-    void clear();
+  DataType getDataType() const;
+  ShapeView getShapeView() const;
+  ShapeView getSubShapeView(size_t offset = 1) const;
+  const TensorShape& getShape() const;
+  size_t getVirtualAddress() const;
+  size_t getSize() const;
+  void setShape(const TensorShape& shape);
+  void clear();
 };
-}  // namespace athena::core::inner
+} // namespace athena::core::inner
 
-#endif  // ATHENA_TENSOR_H
+#endif // ATHENA_TENSOR_H

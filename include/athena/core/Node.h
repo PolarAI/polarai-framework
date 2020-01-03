@@ -23,35 +23,35 @@ namespace athena::core {
  * Node holds Operation and Tensors to perform computation
  */
 class ATH_CORE_EXPORT Node : public AbstractNode {
-    protected:
-    Operation* mOperation;
-    std::vector<inner::Tensor*> mOutcomingGradients;
-    /// Total incoming error
-    inner::Tensor* mIncomingGradientTensor;
+protected:
+  Operation* mOperation;
+  std::vector<inner::Tensor*> mOutcomingGradients;
+  /// Total incoming error
+  inner::Tensor* mIncomingGradientTensor;
 
-    friend void inner::addDerivativeTensor(Node& node, inner::Tensor& tensor);
-    friend inner::Tensor& inner::getDerivativeTensor(Node& node, size_t index);
-    friend void inner::setErrorTensor(Node& node, inner::Tensor* tensor);
-    friend inner::Tensor& inner::getIncomingGradient(Node& node);
+  friend void inner::addDerivativeTensor(Node& node, inner::Tensor& tensor);
+  friend inner::Tensor& inner::getDerivativeTensor(Node& node, size_t index);
+  friend void inner::setErrorTensor(Node& node, inner::Tensor* tensor);
+  friend inner::Tensor& inner::getIncomingGradient(Node& node);
 
-    public:
-    Node() = delete;
-    Node(const Node& rhs) = default;
-    Node(Node&& rhs) noexcept;
-    explicit Node(Operation& operation, Context& context, std::string name = "");
-    ~Node() override;
+public:
+  Node() = delete;
+  Node(const Node& rhs) = default;
+  Node(Node&& rhs) noexcept;
+  explicit Node(Operation& operation, Context& context, std::string name = "");
+  ~Node() override;
 
-    Node& operator=(const Node& rhs) = delete;
-    Node& operator=(Node&& rhs) = delete;
+  Node& operator=(const Node& rhs) = delete;
+  Node& operator=(Node&& rhs) = delete;
 
-    NodeType getType() const override;
-    const Operation& getOperation() const;
-    const Operation* getOperationPtr() const;
-    Operation& operation();
-    const Operation& operation() const;
-    void setOperation(Operation& operation);
-    void clear() override;
+  NodeType getType() const override;
+  const Operation& getOperation() const;
+  const Operation* getOperationPtr() const;
+  Operation& operation();
+  const Operation& operation() const;
+  void setOperation(Operation& operation);
+  void clear() override;
 };
-}  // namespace athena::core
+} // namespace athena::core
 
-#endif  // ATHENA_NODE
+#endif // ATHENA_NODE

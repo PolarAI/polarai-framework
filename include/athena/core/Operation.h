@@ -29,108 +29,101 @@ namespace athena::core {
  * Operation is an abstract computation, like addition or multiplication
  */
 class ATH_CORE_EXPORT Operation {
-    protected:
-    std::string mName;
+protected:
+  std::string mName;
 
-    public:
-    explicit Operation(std::string name) : mName(std::move(name)){};
-    virtual inner::Tensor* getResultTensor(
-        core::Context& context, std::vector<inner::Tensor*> args) const = 0;
-    virtual inner::Tensor* getErrorTensor(core::Context& context,
-                                          std::vector<inner::Tensor*> args,
-                                          int derivativeOrder) const = 0;
-    virtual inner::Tensor* getDerivativeTensor(core::Context& context,
-                                               std::vector<inner::Tensor*> args,
-                                               int argNo) const = 0;
+public:
+  explicit Operation(std::string name) : mName(std::move(name)){};
+  virtual inner::Tensor*
+  getResultTensor(core::Context& context,
+                  std::vector<inner::Tensor*> args) const = 0;
+  virtual inner::Tensor* getErrorTensor(core::Context& context,
+                                        std::vector<inner::Tensor*> args,
+                                        int derivativeOrder) const = 0;
+  virtual inner::Tensor* getDerivativeTensor(core::Context& context,
+                                             std::vector<inner::Tensor*> args,
+                                             int argNo) const = 0;
 
-    /**
-     * Generate code for Operation
-     * @param g Generator to be used
-     * @param operationArguments Necessary arguments specific
-     * to Generator implementation
-     */
-    virtual void gen(AbstractGenerator& g,
-                     std::vector<inner::Tensor*>& operationArguments) const = 0;
+  /**
+   * Generate code for Operation
+   * @param g Generator to be used
+   * @param operationArguments Necessary arguments specific
+   * to Generator implementation
+   */
+  virtual void gen(AbstractGenerator& g,
+                   std::vector<inner::Tensor*>& operationArguments) const = 0;
 
-    /**
-     * Generate code for Operation derivative
-     * @param g Generator to be used
-     * @param operationArguments Necessary arguments specific
-     * to Generator implementation
-     * @param argNo Index of argument that derivative will be computed to
-     */
-    virtual void genDerivative(int order,
-                               AbstractGenerator& g,
-                               inner::Tensor& operationResult,
-                               inner::Tensor& internalError,
-                               std::vector<inner::Tensor*>& operationArguments,
-                               inner::Tensor& derivativeTensor,
-                               int argNo) const = 0;
+  /**
+   * Generate code for Operation derivative
+   * @param g Generator to be used
+   * @param operationArguments Necessary arguments specific
+   * to Generator implementation
+   * @param argNo Index of argument that derivative will be computed to
+   */
+  virtual void genDerivative(int order, AbstractGenerator& g,
+                             inner::Tensor& operationResult,
+                             inner::Tensor& internalError,
+                             std::vector<inner::Tensor*>& operationArguments,
+                             inner::Tensor& derivativeTensor,
+                             int argNo) const = 0;
 
-    /**
-     *
-     * @return Name of Operation
-     */
-    std::string getName() const;
+  /**
+   *
+   * @return Name of Operation
+   */
+  std::string getName() const;
 
-    virtual size_t getOperandsCount() const = 0;
+  virtual size_t getOperandsCount() const = 0;
 
-    virtual std::string serialize() const = 0;
+  virtual std::string serialize() const = 0;
 
-    static Operation* deserialize(const std::string& data) {
-        return nullptr;
-    };
+  static Operation* deserialize(const std::string& data) { return nullptr; };
 };
 
 class ATH_CORE_EXPORT OperationDummy : public Operation {
-    public:
-    explicit OperationDummy(std::string name) : Operation(std::move(name)){};
+public:
+  explicit OperationDummy(std::string name) : Operation(std::move(name)){};
 
-    inner::Tensor* getResultTensor(
-        core::Context& context,
-        std::vector<inner::Tensor*> args) const override {
-        return inner::getNullTensor(context);
-    }
+  inner::Tensor*
+  getResultTensor(core::Context& context,
+                  std::vector<inner::Tensor*> args) const override {
+    return inner::getNullTensor(context);
+  }
 
-    inner::Tensor* getErrorTensor(core::Context& context,
-                                  std::vector<inner::Tensor*>,
-                                  int) const override {
-        return inner::getNullTensor(context);
-    }
+  inner::Tensor* getErrorTensor(core::Context& context,
+                                std::vector<inner::Tensor*>,
+                                int) const override {
+    return inner::getNullTensor(context);
+  }
 
-    inner::Tensor* getDerivativeTensor(core::Context& context,
-                                       std::vector<inner::Tensor*> args,
-                                       int argNo) const override {
-        return inner::getNullTensor(context);
-    }
+  inner::Tensor* getDerivativeTensor(core::Context& context,
+                                     std::vector<inner::Tensor*> args,
+                                     int argNo) const override {
+    return inner::getNullTensor(context);
+  }
 
-    void gen(AbstractGenerator& g,
-             std::vector<inner::Tensor*>& operationArguments) const override {
-        new FatalError(ATH_NOT_IMPLEMENTED, "NOT IMPL");
-    }
+  void gen(AbstractGenerator& g,
+           std::vector<inner::Tensor*>& operationArguments) const override {
+    new FatalError(ATH_NOT_IMPLEMENTED, "NOT IMPL");
+  }
 
-    void genDerivative(const int order,
-                       AbstractGenerator& g,
-                       inner::Tensor& operationResult,
-                       inner::Tensor& internalError,
-                       std::vector<inner::Tensor*>& operationArguments,
-                       inner::Tensor& derivativeTensor,
-                       int argNo) const override {
-        new FatalError(ATH_NOT_IMPLEMENTED, "NOT IMPL");
-    }
+  void genDerivative(const int order, AbstractGenerator& g,
+                     inner::Tensor& operationResult,
+                     inner::Tensor& internalError,
+                     std::vector<inner::Tensor*>& operationArguments,
+                     inner::Tensor& derivativeTensor,
+                     int argNo) const override {
+    new FatalError(ATH_NOT_IMPLEMENTED, "NOT IMPL");
+  }
 
-    size_t getOperandsCount() const override {
-        return 0;
-    }
+  size_t getOperandsCount() const override { return 0; }
 
-    std::string serialize() const override {
-        return "";
-    }
+  std::string serialize() const override { return ""; }
 
-    static Operation* deserialize(const std::string&) {
-        return new OperationDummy("dummy");
-    };
+  static Operation* deserialize(const std::string&) {
+    return new OperationDummy("dummy");
+  };
 };
-}  // namespace athena::core
+} // namespace athena::core
 
-#endif  // ATHENA_OPERATION_H
+#endif // ATHENA_OPERATION_H

@@ -18,17 +18,17 @@
 
 namespace athena::backend::llvm {
 void LLVMTrivialAllocator::allocate(const athena::core::inner::Tensor& tensor) {
-    auto mem = static_cast<void*>(mAllocator.allocate(
-        tensor.getShapeView().getTotalSize() *
-        athena::core::sizeOfDataType(tensor.getDataType())));
-    mAllocatedMap[tensor.getVirtualAddress()] = mem;
+  auto mem = static_cast<void*>(
+      mAllocator.allocate(tensor.getShapeView().getTotalSize() *
+                          athena::core::sizeOfDataType(tensor.getDataType())));
+  mAllocatedMap[tensor.getVirtualAddress()] = mem;
 }
-size_t LLVMTrivialAllocator::getRAMPointer(
-    const athena::core::inner::Tensor& t) {
-    return reinterpret_cast<size_t>(mAllocatedMap[t.getVirtualAddress()]);
+size_t
+LLVMTrivialAllocator::getRAMPointer(const athena::core::inner::Tensor& t) {
+  return reinterpret_cast<size_t>(mAllocatedMap[t.getVirtualAddress()]);
 }
-size_t LLVMTrivialAllocator::getFastPointer(
-    const athena::core::inner::Tensor& t) {
-    return reinterpret_cast<size_t>(mAllocatedMap[t.getVirtualAddress()]);
+size_t
+LLVMTrivialAllocator::getFastPointer(const athena::core::inner::Tensor& t) {
+  return reinterpret_cast<size_t>(mAllocatedMap[t.getVirtualAddress()]);
 }
-}  // namespace athena::backend::llvm
+} // namespace athena::backend::llvm

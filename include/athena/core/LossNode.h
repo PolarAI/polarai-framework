@@ -23,28 +23,26 @@ namespace athena::core {
  * Special type of node that use for backward propagation on graph
  */
 class ATH_CORE_EXPORT LossNode : public Node {
-    private:
-    Criterion mCriterion;
+private:
+  Criterion mCriterion;
 
-    public:
-    LossNode() = delete;
-    LossNode(const LossNode& rhs) = default;
-    LossNode(LossNode&& rhs) noexcept;
-    LossNode(Operation& operation,
-             Criterion criterion,
-             Context& context,
-             std::string name = "");
-    ~LossNode() override;
+public:
+  LossNode() = delete;
+  LossNode(const LossNode& rhs) = default;
+  LossNode(LossNode&& rhs) noexcept;
+  LossNode(Operation& operation, Criterion criterion, Context& context,
+           std::string name = "");
+  ~LossNode() override;
 
-    LossNode& operator=(const LossNode& rhs) = delete;
-    LossNode& operator=(LossNode&& rhs) = delete;
+  LossNode& operator=(const LossNode& rhs) = delete;
+  LossNode& operator=(LossNode&& rhs) = delete;
 
-    NodeType getType() const override;
-    Criterion getCriterion() const;
-    Criterion& criterion();
-    const Criterion& criterion() const;
-    void clear() override;
+  NodeType getType() const override;
+  Criterion getCriterion() const;
+  Criterion& criterion();
+  const Criterion& criterion() const;
+  void clear() override;
 };
-}  // namespace athena::core
+} // namespace athena::core
 
-#endif  // ATHENA_LOSSNODE_H
+#endif // ATHENA_LOSSNODE_H

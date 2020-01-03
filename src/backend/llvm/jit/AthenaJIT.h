@@ -41,40 +41,35 @@ namespace athena::backend::llvm {
  * Execute LLVM IR
  */
 class ATH_BACKEND_LLVM_EXPORT AthenaJIT {
-    private:
-    ::llvm::orc::ExecutionSession mExecutionSession;
-    ::llvm::orc::RTDyldObjectLinkingLayer mObjectLayer;
-    ::llvm::orc::IRCompileLayer mCompileLayer;
-    ::llvm::orc::IRTransformLayer mOptimizeLayer;
-    MergeLayer mMergeLayer;
-    ::llvm::DataLayout mDataLayout;
+private:
+  ::llvm::orc::ExecutionSession mExecutionSession;
+  ::llvm::orc::RTDyldObjectLinkingLayer mObjectLayer;
+  ::llvm::orc::IRCompileLayer mCompileLayer;
+  ::llvm::orc::IRTransformLayer mOptimizeLayer;
+  MergeLayer mMergeLayer;
+  ::llvm::DataLayout mDataLayout;
 
-    ::llvm::orc::MangleAndInterner mMangle;
-    ::llvm::orc::JITDylib &mMainJD;
-    ::llvm::orc::ThreadSafeContext mContext;
+  ::llvm::orc::MangleAndInterner mMangle;
+  ::llvm::orc::JITDylib& mMainJD;
+  ::llvm::orc::ThreadSafeContext mContext;
 
-    static ::llvm::Expected<::llvm::orc::ThreadSafeModule> optimizeModule(
-        ::llvm::orc::ThreadSafeModule TSM,
-        const ::llvm::orc::MaterializationResponsibility &R);
+  static ::llvm::Expected<::llvm::orc::ThreadSafeModule>
+  optimizeModule(::llvm::orc::ThreadSafeModule TSM,
+                 const ::llvm::orc::MaterializationResponsibility& R);
 
-    public:
-    AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
-              ::llvm::DataLayout &&DL);
-    AthenaJIT(const AthenaJIT &) = delete;
-    AthenaJIT &operator=(const AthenaJIT &) = delete;
-    ~AthenaJIT() = default;
+public:
+  AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB, ::llvm::DataLayout&& DL);
+  AthenaJIT(const AthenaJIT&) = delete;
+  AthenaJIT& operator=(const AthenaJIT&) = delete;
+  ~AthenaJIT() = default;
 
-    static std::unique_ptr<AthenaJIT> create();
-    const ::llvm::DataLayout &getDataLayout() const {
-        return mDataLayout;
-    }
-    ::llvm::LLVMContext &getContext() {
-        return *mContext.getContext();
-    }
+  static std::unique_ptr<AthenaJIT> create();
+  const ::llvm::DataLayout& getDataLayout() const { return mDataLayout; }
+  ::llvm::LLVMContext& getContext() { return *mContext.getContext(); }
 
-    ::llvm::Error addModule(std::unique_ptr<::llvm::Module> &M);
-    ::llvm::Expected<::llvm::JITEvaluatedSymbol> lookup(::llvm::StringRef Name);
+  ::llvm::Error addModule(std::unique_ptr<::llvm::Module>& M);
+  ::llvm::Expected<::llvm::JITEvaluatedSymbol> lookup(::llvm::StringRef Name);
 };
-}  // namespace athena::backend::llvm
+} // namespace athena::backend::llvm
 
-#endif  // ATHENA_ATHENAJIT_H
+#endif // ATHENA_ATHENAJIT_H

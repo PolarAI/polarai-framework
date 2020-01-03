@@ -22,4 +22,4 @@ void initializeContext(athena::backend::llvm::DeviceContainer);
 void releaseContext();
 };
 
-#endif  // ATHENA_API_H
+#endif // ATHENA_API_H

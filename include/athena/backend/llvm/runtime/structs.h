@@ -15,19 +15,17 @@
 #define ATHENA_STRUCTS_H
 
 namespace athena::backend {
-template <typename T>
-struct GEMMOptions {
-    bool transposeA;
-    bool transposeB;
-    T alpha;
-    T beta;
+template <typename T> struct GEMMOptions {
+  bool transposeA;
+  bool transposeB;
+  T alpha;
+  T beta;
 };
 
-template <typename T>
-struct HadamardOptions {
-    T alpha;
-    T beta;
+template <typename T> struct HadamardOptions {
+  T alpha;
+  T beta;
 };
-}  // namespace athena::backend
+} // namespace athena::backend
 
-#endif  // ATHENA_STRUCTS_H
+#endif // ATHENA_STRUCTS_H

@@ -20,18 +20,16 @@
 
 namespace athena::core {
 enum class ATH_CORE_EXPORT NodeType {
-    UNDEFINED = 0,
-    INPUT = 1,
-    DEFAULT = 2,
-    OUTPUT = 3,
-    LOSS = 4
+  UNDEFINED = 0,
+  INPUT = 1,
+  DEFAULT = 2,
+  OUTPUT = 3,
+  LOSS = 4
 };
 
-template <typename TemplateNodeType>
-ATH_CORE_EXPORT NodeType getNodeType();
+template <typename TemplateNodeType> ATH_CORE_EXPORT NodeType getNodeType();
 
-template <NodeType Type>
-struct ATH_CORE_EXPORT NodeTypeId {};
+template <NodeType Type> struct ATH_CORE_EXPORT NodeTypeId {};
 
 template <>
 struct ATH_CORE_EXPORT NodeTypeId<NodeType::DEFAULT> : std::decay<Node> {};
@@ -44,38 +42,38 @@ struct ATH_CORE_EXPORT NodeTypeId<NodeType::LOSS> : std::decay<LossNode> {};
 
 template <>
 struct ATH_CORE_EXPORT NodeTypeId<NodeType::OUTPUT> : std::decay<OutputNode> {};
-}  // namespace athena::core
+} // namespace athena::core
 
 namespace athena {
 template <typename NodeTypeName, typename ParentNodeType>
 ATH_CORE_EXPORT typename std::enable_if<std::is_reference<NodeTypeName>::value,
-                        NodeTypeName>::type
-node_cast(ParentNodeType &node) {
-    using PureType = typename std::remove_reference<NodeTypeName>::type;
+                                        NodeTypeName>::type
+node_cast(ParentNodeType& node) {
+  using PureType = typename std::remove_reference<NodeTypeName>::type;
 #ifdef DEBUG
-    if (node.getType() != core::getNodeType<PureType>()) {
-        new core::FatalError(core::ATH_BAD_CAST,
-                             "Attempt to cast incompatible types");
-    }
+  if (node.getType() != core::getNodeType<PureType>()) {
+    new core::FatalError(core::ATH_BAD_CAST,
+                         "Attempt to cast incompatible types");
+  }
 #endif
 
-    return *reinterpret_cast<PureType *>(&node);
+  return *reinterpret_cast<PureType*>(&node);
 }
 
 template <typename NodeTypeName, typename ParentNodeType>
 ATH_CORE_EXPORT typename std::enable_if<std::is_pointer<NodeTypeName>::value,
-                        NodeTypeName>::type
+                                        NodeTypeName>::type
 node_dyncast(ParentNodeType node) {
-    using PureType = typename std::remove_pointer<NodeTypeName>::type;
+  using PureType = typename std::remove_pointer<NodeTypeName>::type;
 #ifdef DEBUG
-    if (node->getType() != core::getNodeType<PureType>()) {
-        new core::FatalError(core::ATH_BAD_CAST,
-                             "Attempt to cast incompatible types");
-    }
+  if (node->getType() != core::getNodeType<PureType>()) {
+    new core::FatalError(core::ATH_BAD_CAST,
+                         "Attempt to cast incompatible types");
+  }
 #endif
 
-    return reinterpret_cast<PureType *>(node);
+  return reinterpret_cast<PureType*>(node);
 }
-}  // namespace athena
+} // namespace athena
 
-#endif  // ATHENA_NODETYPE_H
+#endif // ATHENA_NODETYPE_H

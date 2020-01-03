@@ -19,8 +19,6 @@
 #include <athena/core/inner/Tensor.h>
 
 template <typename T>
-extern void fill(athena::backend::llvm::Device *,
-                 athena::core::Allocator *,
-                 athena::core::inner::Tensor *a,
-                 T value);
-#endif  // ATHENA_FILL_H
+extern void fill(athena::backend::llvm::Device*, athena::core::Allocator*,
+                 athena::core::inner::Tensor* a, T value);
+#endif // ATHENA_FILL_H

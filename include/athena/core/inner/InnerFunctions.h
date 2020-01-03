@@ -21,29 +21,29 @@
 #include <cstddef>
 
 namespace athena::core::inner {
-ATH_CORE_EXPORT void setGraphIndex(AbstractNode &node, size_t graphIndex);
-ATH_CORE_EXPORT void incrementInputCount(AbstractNode &node);
-ATH_CORE_EXPORT Tensor &getTensorFromNode(AbstractNode &node);
-ATH_CORE_EXPORT std::shared_ptr<Tensor> getTensorPtrFromNode(
-    AbstractNode &node);
-ATH_CORE_EXPORT Traversal &getTraversal(Graph &graph);
-ATH_CORE_EXPORT Clusters &getClusters(Graph &graph);
-ATH_CORE_EXPORT Clusters &getClusters(Traversal &traversal);
-ATH_CORE_EXPORT void setTraversalValidity(Traversal &traversal, bool flag);
-ATH_CORE_EXPORT void addDerivativeTensor(Node &node, inner::Tensor &tensor);
-ATH_CORE_EXPORT Tensor &getDerivativeTensor(Node &node, size_t index);
-ATH_CORE_EXPORT void setErrorTensor(Node &node, Tensor *tensor);
-ATH_CORE_EXPORT inner::Tensor &getIncomingGradient(Node &node);
-ATH_CORE_EXPORT void setResultTensor(AbstractNode &node,
+ATH_CORE_EXPORT void setGraphIndex(AbstractNode& node, size_t graphIndex);
+ATH_CORE_EXPORT void incrementInputCount(AbstractNode& node);
+ATH_CORE_EXPORT Tensor& getTensorFromNode(AbstractNode& node);
+ATH_CORE_EXPORT std::shared_ptr<Tensor>
+getTensorPtrFromNode(AbstractNode& node);
+ATH_CORE_EXPORT Traversal& getTraversal(Graph& graph);
+ATH_CORE_EXPORT Clusters& getClusters(Graph& graph);
+ATH_CORE_EXPORT Clusters& getClusters(Traversal& traversal);
+ATH_CORE_EXPORT void setTraversalValidity(Traversal& traversal, bool flag);
+ATH_CORE_EXPORT void addDerivativeTensor(Node& node, inner::Tensor& tensor);
+ATH_CORE_EXPORT Tensor& getDerivativeTensor(Node& node, size_t index);
+ATH_CORE_EXPORT void setErrorTensor(Node& node, Tensor* tensor);
+ATH_CORE_EXPORT inner::Tensor& getIncomingGradient(Node& node);
+ATH_CORE_EXPORT void setResultTensor(AbstractNode& node,
                                      std::shared_ptr<inner::Tensor> tensor);
-ATH_CORE_EXPORT Tensor *getNullTensor(Context &context);
-ATH_CORE_EXPORT inner::Table<AllocationRecord> &getAllocationTable(
-    athena::core::Context &context);
-ATH_CORE_EXPORT inner::Table<Graph *> &getGraphTable(
-    athena::core::Context &context);
-ATH_CORE_EXPORT inner::Table<AbstractNode *> &getNodeTable(
-    athena::core::Context &context);
-ATH_CORE_EXPORT Context &getContext(athena::core::Graph &graph);
-}  // namespace athena::core::inner
+ATH_CORE_EXPORT Tensor* getNullTensor(Context& context);
+ATH_CORE_EXPORT inner::Table<AllocationRecord>&
+getAllocationTable(athena::core::Context& context);
+ATH_CORE_EXPORT inner::Table<Graph*>&
+getGraphTable(athena::core::Context& context);
+ATH_CORE_EXPORT inner::Table<AbstractNode*>&
+getNodeTable(athena::core::Context& context);
+ATH_CORE_EXPORT Context& getContext(athena::core::Graph& graph);
+} // namespace athena::core::inner
 
-#endif  // ATHENA_INNERFUNCTIONS_H
+#endif // ATHENA_INNERFUNCTIONS_H

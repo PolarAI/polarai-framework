@@ -32,12 +32,11 @@
  * @param c Result Tensor
  */
 template <typename T>
-extern void hadamard(athena::backend::llvm::Device *,
-                     athena::core::Allocator *allocator,
-                     athena::backend::HadamardOptions<T> *options,
-                     athena::core::inner::Tensor *a,
-                     athena::core::inner::Tensor *b,
-                     athena::core::inner::Tensor *c);
+extern void
+hadamard(athena::backend::llvm::Device*, athena::core::Allocator* allocator,
+         athena::backend::HadamardOptions<T>* options,
+         athena::core::inner::Tensor* a, athena::core::inner::Tensor* b,
+         athena::core::inner::Tensor* c);
 
 /**
  * General matrix-matrix multiplication
@@ -52,11 +51,9 @@ extern void hadamard(athena::backend::llvm::Device *,
  * @param c Result Tensor
  */
 template <typename T>
-extern void gemm(athena::backend::llvm::Device *,
-                 athena::core::Allocator *allocator,
-                 athena::backend::GEMMOptions<T> *options,
-                 athena::core::inner::Tensor *a,
-                 athena::core::inner::Tensor *b,
-                 athena::core::inner::Tensor *c);
+extern void
+gemm(athena::backend::llvm::Device*, athena::core::Allocator* allocator,
+     athena::backend::GEMMOptions<T>* options, athena::core::inner::Tensor* a,
+     athena::core::inner::Tensor* b, athena::core::inner::Tensor* c);
 
-#endif  // ATHENA_MATRIX_H
+#endif // ATHENA_MATRIX_H

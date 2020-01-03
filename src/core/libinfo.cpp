@@ -13,22 +13,16 @@
 
 #include <athena/core/libinfo.h>
 
-const char* getMajorVersion() {
-    return ATHENA_MAJOR_VERSION;
-}
+const char* getMajorVersion() { return ATHENA_MAJOR_VERSION; }
 
-const char* getMinorVersion() {
-    return ATHENA_MINOR_VERSION;
-}
+const char* getMinorVersion() { return ATHENA_MINOR_VERSION; }
 
-const char* getPatchVersion() {
-    return ATHENA_PATCH_VERSION;
-}
+const char* getPatchVersion() { return ATHENA_PATCH_VERSION; }
 
 const char* getBuildVersion() {
 #ifdef ATHENA_CI_BUILD_NUMBER
-    return ATHENA_CI_BUILD_NUMBER;
+  return ATHENA_CI_BUILD_NUMBER;
 #else
-    return "dev";
+  return "dev";
 #endif
 }

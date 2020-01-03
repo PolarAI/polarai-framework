@@ -18,10 +18,10 @@
 
 namespace athena::backend::llvm {
 class CPUDevice : public Device {
-    public:
-    bool isPartitionSupported(PartitionDomain domain) override;
-    DeviceContainer partition(PartitionDomain domain) override;
+public:
+  bool isPartitionSupported(PartitionDomain domain) override;
+  DeviceContainer partition(PartitionDomain domain) override;
 };
-}  // namespace athena::backend::llvm
+} // namespace athena::backend::llvm
 
-#endif  // ATHENA_CPUDEVICE_H
+#endif // ATHENA_CPUDEVICE_H

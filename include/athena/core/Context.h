@@ -21,16 +21,19 @@
 
 namespace athena::core {
 class ATH_CORE_EXPORT Context {
-    public:
-    friend inner::Table<AbstractNode*>& inner::getNodeTable(athena::core::Context& context);
-    friend inner::Table<inner::AllocationRecord>& inner::getAllocationTable(athena::core::Context& context);
-    friend inner::Table<Graph*>& inner::getGraphTable(athena::core::Context& context);
+public:
+  friend inner::Table<AbstractNode*>&
+  inner::getNodeTable(athena::core::Context& context);
+  friend inner::Table<inner::AllocationRecord>&
+  inner::getAllocationTable(athena::core::Context& context);
+  friend inner::Table<Graph*>&
+  inner::getGraphTable(athena::core::Context& context);
 
-    private:
-    inner::Table<inner::AllocationRecord> allocationTable;
-    inner::Table<AbstractNode*> nodeTable;
-    inner::Table<Graph*> graphTable;
+private:
+  inner::Table<inner::AllocationRecord> allocationTable;
+  inner::Table<AbstractNode*> nodeTable;
+  inner::Table<Graph*> graphTable;
 };
-}
+} // namespace athena::core
 
-#endif  // ATHENA_CONTEXT_H
+#endif // ATHENA_CONTEXT_H

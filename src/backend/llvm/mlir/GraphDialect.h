@@ -21,20 +21,18 @@
 
 namespace athena::backend::llvm {
 class GraphDialect : public mlir::Dialect {
-    public:
-    explicit GraphDialect(mlir::MLIRContext *ctx);
+public:
+  explicit GraphDialect(mlir::MLIRContext* ctx);
 
-    /// Provide a utility accessor to the dialect namespace. This is used by
-    /// several utilities for casting between dialects.
-    static ::llvm::StringRef getDialectNamespace() {
-        return "graph";
-    }
+  /// Provide a utility accessor to the dialect namespace. This is used by
+  /// several utilities for casting between dialects.
+  static ::llvm::StringRef getDialectNamespace() { return "graph"; }
 };
 
-using namespace mlir;  // WTF, Google?
+using namespace mlir; // WTF, Google?
 #define GET_OP_CLASSES
 #include "GraphDialect.h.inc"
 
-}  // namespace athena::backend::llvm
+} // namespace athena::backend::llvm
 
-#endif  // ATHENA_GRAPHDIALECT_H
+#endif // ATHENA_GRAPHDIALECT_H

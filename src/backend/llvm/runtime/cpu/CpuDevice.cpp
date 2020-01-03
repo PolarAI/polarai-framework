@@ -14,10 +14,10 @@
 #include "CpuDevice.h"
 bool athena::backend::llvm::CPUDevice::isPartitionSupported(
     athena::backend::llvm::Device::PartitionDomain) {
-    return false;
+  return false;
 }
 athena::backend::llvm::DeviceContainer
 athena::backend::llvm::CPUDevice::partition(
     athena::backend::llvm::Device::PartitionDomain) {
-    return DeviceContainer();
+  return DeviceContainer();
 }

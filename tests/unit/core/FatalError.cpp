@@ -19,10 +19,10 @@ using namespace athena::core;
 
 TEST(FatalError, FatalErrorAbortsExecution) {
 #ifdef DEBUG
-    ASSERT_DEBUG_DEATH(new FatalError(ATH_FATAL_OTHER, "FatalError test"),
-                       "FatalError test");
+  ASSERT_DEBUG_DEATH(new FatalError(ATH_FATAL_OTHER, "FatalError test"),
+                     "FatalError test");
 #else
-    EXPECT_EXIT(new FatalError(ATH_FATAL_OTHER, "FatalError test"),
-                ::testing::ExitedWithCode(ATH_FATAL_OTHER), "FatalError test");
+  EXPECT_EXIT(new FatalError(ATH_FATAL_OTHER, "FatalError test"),
+              ::testing::ExitedWithCode(ATH_FATAL_OTHER), "FatalError test");
 #endif
 }

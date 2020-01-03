@@ -23,34 +23,30 @@ namespace athena::core {
  * Special type of Node that can not have predecessors
  */
 class ATH_CORE_EXPORT InputNode : public AbstractNode {
-    protected:
-    AbstractLoader* mLoader;
-    bool mIsFrozen;
+protected:
+  AbstractLoader* mLoader;
+  bool mIsFrozen;
 
-    public:
-    InputNode() = delete;
-    InputNode(const InputNode& rhs) = default;
-    InputNode(InputNode&& rhs) noexcept;
-    InputNode(TensorShape shape,
-              DataType dataType,
-              AbstractLoader& loader,
-              Context& context,
-              bool isFrozen = true,
-              std::string name = "");
-    ~InputNode() override;
+public:
+  InputNode() = delete;
+  InputNode(const InputNode& rhs) = default;
+  InputNode(InputNode&& rhs) noexcept;
+  InputNode(TensorShape shape, DataType dataType, AbstractLoader& loader,
+            Context& context, bool isFrozen = true, std::string name = "");
+  ~InputNode() override;
 
-    InputNode& operator=(const InputNode& rhs) = delete;
-    InputNode& operator=(InputNode&& rhs) = delete;
+  InputNode& operator=(const InputNode& rhs) = delete;
+  InputNode& operator=(InputNode&& rhs) = delete;
 
-    NodeType getType() const override;
-    const AbstractLoader& getLoader() const;
-    const AbstractLoader* getLoaderPtr() const;
-    AbstractLoader& loader();
-    const AbstractLoader& loader() const;
-    void setLoader(AbstractLoader& loader);
-    void clear() override;
-    bool isFrozen();
+  NodeType getType() const override;
+  const AbstractLoader& getLoader() const;
+  const AbstractLoader* getLoaderPtr() const;
+  AbstractLoader& loader();
+  const AbstractLoader& loader() const;
+  void setLoader(AbstractLoader& loader);
+  void clear() override;
+  bool isFrozen();
 };
-}  // namespace athena::core
+} // namespace athena::core
 
-#endif  // ATHENA_INPUTNODE_H
+#endif // ATHENA_INPUTNODE_H

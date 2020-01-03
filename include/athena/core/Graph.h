@@ -28,26 +28,25 @@
 namespace athena::core {
 namespace inner {
 struct ATH_CORE_EXPORT Edge {
-    size_t startNodeIndex;
-    size_t endNodeIndex;
-    EdgeMark mark;
-    Edge(size_t startNodeIndex, size_t endNodeIndex, EdgeMark mark)
-        : startNodeIndex(startNodeIndex),
-          endNodeIndex(endNodeIndex),
-          mark(mark) {}
-    bool operator==(const Edge& rhs) const {
-        return startNodeIndex == rhs.startNodeIndex &&
-               endNodeIndex == rhs.endNodeIndex;
-    }
-    bool operator<(const Edge& rhs) const {
-        return startNodeIndex < rhs.startNodeIndex;
-    }
+  size_t startNodeIndex;
+  size_t endNodeIndex;
+  EdgeMark mark;
+  Edge(size_t startNodeIndex, size_t endNodeIndex, EdgeMark mark)
+      : startNodeIndex(startNodeIndex), endNodeIndex(endNodeIndex), mark(mark) {
+  }
+  bool operator==(const Edge& rhs) const {
+    return startNodeIndex == rhs.startNodeIndex &&
+           endNodeIndex == rhs.endNodeIndex;
+  }
+  bool operator<(const Edge& rhs) const {
+    return startNodeIndex < rhs.startNodeIndex;
+  }
 };
-}  // namespace inner
+} // namespace inner
 
 using SyncStorage = std::unordered_set<size_t>;
-using OwningStorage = inner::
-    TupleContainers<std::vector, Node, InputNode, OutputNode, LossNode>::Holder;
+using OwningStorage = inner::TupleContainers<std::vector, Node, InputNode,
+                                             OutputNode, LossNode>::Holder;
 using Topology = std::vector<inner::Edge>;
 
 /**
@@ -55,109 +54,101 @@ using Topology = std::vector<inner::Edge>;
  * in a way that is suitable for computation.
  */
 class ATH_CORE_EXPORT Graph {
-    private:
-    SyncStorage mSyncStorage;
-    OwningStorage mOwningStorage;
-    Topology mTopology;
-    Context* mContext;
-    size_t mGraphIndex;
-    Traversal mTraversal;
-    std::unique_ptr<Optimizer> mOptimizer;
+private:
+  SyncStorage mSyncStorage;
+  OwningStorage mOwningStorage;
+  Topology mTopology;
+  Context* mContext;
+  size_t mGraphIndex;
+  Traversal mTraversal;
+  std::unique_ptr<Optimizer> mOptimizer;
 
-    const std::string mGraphName;
+  const std::string mGraphName;
 
-    template <typename TemplateNodeType>
-    void saveRealNode(TemplateNodeType& node,
-                      bool isRepairedNode,
-                      bool isErase);
-    void saveNode(AbstractNode& node, bool isRepairedNode, bool isErase);
-    ATHENA_REINITIALIZE void fullClear();
+  template <typename TemplateNodeType>
+  void saveRealNode(TemplateNodeType& node, bool isRepairedNode, bool isErase);
+  void saveNode(AbstractNode& node, bool isRepairedNode, bool isErase);
+  ATHENA_REINITIALIZE void fullClear();
 
-    void setUpTensors() const;
+  void setUpTensors() const;
 
-    public:
-    explicit Graph(Context& context);
-    Graph(const Graph& rhs) = delete;
-    Graph(Graph&& rhs) noexcept;
-    ~Graph();
+public:
+  explicit Graph(Context& context);
+  Graph(const Graph& rhs) = delete;
+  Graph(Graph&& rhs) noexcept;
+  ~Graph();
 
-    Graph& operator=(const Graph& rhs) = delete;
-    Graph& operator=(Graph&& rhs) = delete;
+  Graph& operator=(const Graph& rhs) = delete;
+  Graph& operator=(Graph&& rhs) = delete;
 
-    const SyncStorage& getSyncStorage() const;
-    const OwningStorage& getOwningStorage() const;
-    const Topology& getTopology() const;
-    /**
-     * Add node to Graph
-     * @param node A node to be added
-     */
-    void addNode(AbstractNode& node);
-    void saveNode(AbstractNode& node, bool isRepairedNode = true);
-    void saveAllSyncNodes(bool isRepairedNode = true);
-    /**
-     * Remove node from Graph
-     * @param node Node to be removed
-     */
-    void removeNode(AbstractNode& node);
-    /**
-     * Add oriented edge between two nodes
-     * @param startNode Start Node
-     * @param endNode End Node
-     * @param mark
-     */
-    void link(const AbstractNode& startNode,
-              const AbstractNode& endNode,
-              EdgeMark mark);
-    size_t countOwningNodes() const;
-    size_t countSyncNodes() const;
-    size_t getGraphIndex() const;
-    /**
-     * Resets object to initial state
-     */
-    void clear();
-    /**
-     *
-     * @return if traversal is still valid
-     */
-    bool isValidTraversal() const;
-    /**
-     * Traverse current Graph and save the results inside object
-     * @return A reference to result traversal
-     */
-    const Traversal& traverse();
+  const SyncStorage& getSyncStorage() const;
+  const OwningStorage& getOwningStorage() const;
+  const Topology& getTopology() const;
+  /**
+   * Add node to Graph
+   * @param node A node to be added
+   */
+  void addNode(AbstractNode& node);
+  void saveNode(AbstractNode& node, bool isRepairedNode = true);
+  void saveAllSyncNodes(bool isRepairedNode = true);
+  /**
+   * Remove node from Graph
+   * @param node Node to be removed
+   */
+  void removeNode(AbstractNode& node);
+  /**
+   * Add oriented edge between two nodes
+   * @param startNode Start Node
+   * @param endNode End Node
+   * @param mark
+   */
+  void link(const AbstractNode& startNode, const AbstractNode& endNode,
+            EdgeMark mark);
+  size_t countOwningNodes() const;
+  size_t countSyncNodes() const;
+  size_t getGraphIndex() const;
+  /**
+   * Resets object to initial state
+   */
+  void clear();
+  /**
+   *
+   * @return if traversal is still valid
+   */
+  bool isValidTraversal() const;
+  /**
+   * Traverse current Graph and save the results inside object
+   * @return A reference to result traversal
+   */
+  const Traversal& traverse();
 
-    /**
-     * Get last traversal for given Graph
-     * @param graph An instance of Graph
-     * @return A reference to last traversal
-     */
-    friend Traversal& inner::getTraversal(Graph& graph);
+  /**
+   * Get last traversal for given Graph
+   * @param graph An instance of Graph
+   * @return A reference to last traversal
+   */
+  friend Traversal& inner::getTraversal(Graph& graph);
 
-    friend Context& inner::getContext(athena::core::Graph& graph);
+  friend Context& inner::getContext(athena::core::Graph& graph);
 
-    /**
-     * Set up Graph optimizer
-     * @tparam Opt Optimizer class
-     * @tparam Args Optimizer arguments type
-     * @param args Optimizer arguments
-     */
-    template <typename Opt, typename... Args>
-    void setUpOptimizer(Args... args) {
-        mOptimizer = std::make_unique<Opt>(args...);
-    }
+  /**
+   * Set up Graph optimizer
+   * @tparam Opt Optimizer class
+   * @tparam Args Optimizer arguments type
+   * @param args Optimizer arguments
+   */
+  template <typename Opt, typename... Args> void setUpOptimizer(Args... args) {
+    mOptimizer = std::make_unique<Opt>(args...);
+  }
 
-    std::unique_ptr<Optimizer>& getOptimizer() {
-        return mOptimizer;
-    }
+  std::unique_ptr<Optimizer>& getOptimizer() { return mOptimizer; }
 
-    /**
-     *
-     * @return Current graph name
-     */
-    std::string getGraphName() {
-        return mGraphName;
-    };
+  /**
+   *
+   * @return Current graph name
+   */
+  std::string getGraphName() { return mGraphName; };
 };
-}  // namespace athena::core
+} // namespace athena::core
 
-#endif  // ATHENA_GRAPH_H
+#endif // ATHENA_GRAPH_H

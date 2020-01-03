@@ -20,26 +20,26 @@ using namespace athena::core::inner;
 using namespace athena::core;
 
 template <typename T>
-void mse(Device *, Allocator *allocator, Tensor *a, Tensor *b, Tensor *c) {
-    auto *af = reinterpret_cast<T *>(allocator->getRAMPointer(*a));
-    auto *bf = reinterpret_cast<T *>(allocator->getRAMPointer(*b));
-    auto *cf = reinterpret_cast<T *>(allocator->getRAMPointer(*c));
+void mse(Device*, Allocator* allocator, Tensor* a, Tensor* b, Tensor* c) {
+  auto* af = reinterpret_cast<T*>(allocator->getRAMPointer(*a));
+  auto* bf = reinterpret_cast<T*>(allocator->getRAMPointer(*b));
+  auto* cf = reinterpret_cast<T*>(allocator->getRAMPointer(*c));
 
-    for (size_t i = 0; i < a->getShape().getTotalSize(); i++) {
-        T part = af[i] + bf[i];
-        *cf += part * part;
-    }
-    *cf /= a->getShape().getTotalSize();
+  for (size_t i = 0; i < a->getShape().getTotalSize(); i++) {
+    T part = af[i] + bf[i];
+    *cf += part * part;
+  }
+  *cf /= a->getShape().getTotalSize();
 }
 
-template void mse<float>(athena::backend::llvm::Device *,
-                         athena::core::Allocator *,
-                         athena::core::inner::Tensor *a,
-                         athena::core::inner::Tensor *b,
-                         athena::core::inner::Tensor *c);
+template void mse<float>(athena::backend::llvm::Device*,
+                         athena::core::Allocator*,
+                         athena::core::inner::Tensor* a,
+                         athena::core::inner::Tensor* b,
+                         athena::core::inner::Tensor* c);
 
-template void mse<double>(athena::backend::llvm::Device *,
-                          athena::core::Allocator *,
-                          athena::core::inner::Tensor *a,
-                          athena::core::inner::Tensor *b,
-                          athena::core::inner::Tensor *c);
+template void mse<double>(athena::backend::llvm::Device*,
+                          athena::core::Allocator*,
+                          athena::core::inner::Tensor* a,
+                          athena::core::inner::Tensor* b,
+                          athena::core::inner::Tensor* c);

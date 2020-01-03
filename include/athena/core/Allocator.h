@@ -25,13 +25,13 @@ namespace athena::core {
  * Interface used by backend to manage memory
  */
 class ATH_CORE_EXPORT Allocator {
-    public:
-    virtual ~Allocator() = default;
-    virtual void allocate(const inner::Tensor&) = 0;
-    virtual size_t getRAMPointer(const inner::Tensor&) = 0;
-    virtual size_t getFastPointer(const inner::Tensor&) = 0;
+public:
+  virtual ~Allocator() = default;
+  virtual void allocate(const inner::Tensor&) = 0;
+  virtual size_t getRAMPointer(const inner::Tensor&) = 0;
+  virtual size_t getFastPointer(const inner::Tensor&) = 0;
 };
 
-}  // namespace athena::core
+} // namespace athena::core
 
-#endif  // ATHENA_ALLOCATOR_H
+#endif // ATHENA_ALLOCATOR_H

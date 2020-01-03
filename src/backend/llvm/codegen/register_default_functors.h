@@ -17,7 +17,7 @@
 #include "../LLVMGenerator.h"
 
 namespace athena::backend::llvm::codegen {
-void registerDefaultFunctors(LLVMGenerator *generator);
+void registerDefaultFunctors(LLVMGenerator* generator);
 }
 
-#endif  // ATHENA_REGISTER_DEFAULT_FUNCTORS_H
+#endif // ATHENA_REGISTER_DEFAULT_FUNCTORS_H

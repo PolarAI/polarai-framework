@@ -21,47 +21,45 @@
 namespace athena::core {
 
 class LogTest : public ::testing::Test {
-    protected:
-    std::streambuf *sbuf;
-    std::stringstream buffer;
+protected:
+  std::streambuf* sbuf;
+  std::stringstream buffer;
 
-    void SetUp() override {
-        sbuf = std::cout.rdbuf();
-        std::cout.rdbuf(buffer.rdbuf());
-    }
+  void SetUp() override {
+    sbuf = std::cout.rdbuf();
+    std::cout.rdbuf(buffer.rdbuf());
+  }
 
-    void TearDown() override {
-        std::cout.rdbuf(sbuf);
-    }
+  void TearDown() override { std::cout.rdbuf(sbuf); }
 };
 
 TEST_F(LogTest, CanLogToCout) {
-    setLogStream<Logger>(std::cout);
-    log() << "Test phrase";
-    EXPECT_EQ(this->buffer.str(), "Test phrase");
+  setLogStream<Logger>(std::cout);
+  log() << "Test phrase";
+  EXPECT_EQ(this->buffer.str(), "Test phrase");
 }
 
 TEST_F(LogTest, CanErrToCout) {
-    setErrStream<Logger>(std::cout);
-    log() << "Test phrase";
-    EXPECT_EQ(this->buffer.str(), "Test phrase");
+  setErrStream<Logger>(std::cout);
+  log() << "Test phrase";
+  EXPECT_EQ(this->buffer.str(), "Test phrase");
 }
 
 TEST_F(LogTest, CanSetLogtream) {
-    std::stringstream ss;
-    setLogStream<Logger>(ss);
-    std::string firstPart = "Hello", secondPart = "Log";
-    std::string fullString = firstPart + secondPart;
-    log() << firstPart << secondPart;
-    EXPECT_EQ(ss.str(), fullString);
+  std::stringstream ss;
+  setLogStream<Logger>(ss);
+  std::string firstPart = "Hello", secondPart = "Log";
+  std::string fullString = firstPart + secondPart;
+  log() << firstPart << secondPart;
+  EXPECT_EQ(ss.str(), fullString);
 }
 
 TEST_F(LogTest, CanSetErrtream) {
-    std::stringstream ss;
-    setErrStream<Logger>(ss);
-    std::string firstPart = "Hello", secondPart = "Log";
-    std::string fullString = firstPart + secondPart;
-    err() << firstPart << secondPart;
-    EXPECT_EQ(ss.str(), fullString);
+  std::stringstream ss;
+  setErrStream<Logger>(ss);
+  std::string firstPart = "Hello", secondPart = "Log";
+  std::string fullString = firstPart + secondPart;
+  err() << firstPart << secondPart;
+  EXPECT_EQ(ss.str(), fullString);
 }
-}  // namespace athena::core
+} // namespace athena::core

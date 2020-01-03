@@ -22,33 +22,33 @@ static const std::string kPathToRuntimeCPUName = "PATH_TO_RUNTIME_CPU";
 namespace athena::backend::llvm {
 
 class RuntimeDriverTest : public ::testing::Test {
-    protected:
-    std::string mPathToRuntimeCPU;
-    std::unique_ptr<::llvm::LLVMContext> mContext =
-        std::make_unique<::llvm::LLVMContext>();
-    RuntimeDriver mDriver;
+protected:
+  std::string mPathToRuntimeCPU;
+  std::unique_ptr<::llvm::LLVMContext> mContext =
+      std::make_unique<::llvm::LLVMContext>();
+  RuntimeDriver mDriver;
 
-    void SetUp() override {
-        ::llvm::InitializeNativeTarget();
-        ::llvm::InitializeNativeTargetAsmParser();
-        ::llvm::InitializeNativeTargetAsmPrinter();
-        mPathToRuntimeCPU = ::getenv(kPathToRuntimeCPUName.data());
-    }
+  void SetUp() override {
+    ::llvm::InitializeNativeTarget();
+    ::llvm::InitializeNativeTargetAsmParser();
+    ::llvm::InitializeNativeTargetAsmPrinter();
+    mPathToRuntimeCPU = ::getenv(kPathToRuntimeCPUName.data());
+  }
 
-    public:
-    RuntimeDriverTest() : mDriver(*mContext) {}
+public:
+  RuntimeDriverTest() : mDriver(*mContext) {}
 };
 
 TEST_F(RuntimeDriverTest, TestCreation) {
-    mDriver.reload(mPathToRuntimeCPU);
-    ASSERT_TRUE(mDriver.isLoaded());
+  mDriver.reload(mPathToRuntimeCPU);
+  ASSERT_TRUE(mDriver.isLoaded());
 }
 
 TEST_F(RuntimeDriverTest, TestFunctionLoad) {
-    mDriver.load(mPathToRuntimeCPU);
-    auto &modules = mDriver.getModules();
-    ASSERT_GT(modules.size(), 0);
+  mDriver.load(mPathToRuntimeCPU);
+  auto& modules = mDriver.getModules();
+  ASSERT_GT(modules.size(), 0);
 
-    ASSERT_NE(modules[0]->getFunction("athn_add_f"), nullptr);
+  ASSERT_NE(modules[0]->getFunction("athn_add_f"), nullptr);
 }
-}  // namespace athena::backend::llvm
+} // namespace athena::backend::llvm

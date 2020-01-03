@@ -16,14 +16,14 @@
 #include "common.h"
 
 namespace athena::backend::llvm::codegen {
-void registerDefaultFunctors(LLVMGenerator *generator) {
-    registerStandardBuiltin<BuiltinThreeTensorArgs>("add", generator);
-    registerAllocate(generator);
-    registerFill(generator);
-    registerStandardBuiltin<BuiltinTATATArgs>("fma", generator);
-    registerStandardBuiltin<BuiltinThreeTensorArgs>("mse", generator);
-    registerStandardBuiltin<BuiltinThreeTensorWithOptsArgs>("gemm", generator);
-    registerStandardBuiltin<BuiltinThreeTensorWithOptsArgs>("hadamard",
-                                                            generator);
+void registerDefaultFunctors(LLVMGenerator* generator) {
+  registerStandardBuiltin<BuiltinThreeTensorArgs>("add", generator);
+  registerAllocate(generator);
+  registerFill(generator);
+  registerStandardBuiltin<BuiltinTATATArgs>("fma", generator);
+  registerStandardBuiltin<BuiltinThreeTensorArgs>("mse", generator);
+  registerStandardBuiltin<BuiltinThreeTensorWithOptsArgs>("gemm", generator);
+  registerStandardBuiltin<BuiltinThreeTensorWithOptsArgs>("hadamard",
+                                                          generator);
 }
-}  // namespace athena::backend::llvm::codegen
+} // namespace athena::backend::llvm::codegen

@@ -20,17 +20,17 @@
 
 namespace athena::core {
 class ATH_CORE_EXPORT Logger : public AbstractLogger {
-    private:
-    std::ostream &mOutStream;
+private:
+  std::ostream& mOutStream;
 
-    public:
-    explicit Logger(std::ostream &stream) : mOutStream(stream){};
-    ~Logger() override = default;
+public:
+  explicit Logger(std::ostream& stream) : mOutStream(stream){};
+  ~Logger() override = default;
 
-    AbstractLogger &streamImpl(const std::string &data) override;
-    AbstractLogger &streamImpl(const char *data) override;
-    AbstractLogger &streamImpl(const std::string_view &data) override;
-    AbstractLogger &streamImpl(const Error &data) override;
+  AbstractLogger& streamImpl(const std::string& data) override;
+  AbstractLogger& streamImpl(const char* data) override;
+  AbstractLogger& streamImpl(const std::string_view& data) override;
+  AbstractLogger& streamImpl(const Error& data) override;
 };
-}  // namespace athena::core
-#endif  // ATHENA_LOGGER_H
+} // namespace athena::core
+#endif // ATHENA_LOGGER_H

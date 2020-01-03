@@ -48,11 +48,11 @@ set(NOWHOLE_ARCHIVE)
 
 if (APPLE)
     set(WHOLE_ARCHIVE -Wl,-all_load)
-    set(NOWHOLE_ARCHIVE )
+    set(NOWHOLE_ARCHIVE)
 elseif (UNIX)
     set(WHOLE_ARCHIVE -Wl,--whole-archive)
     set(NOWHOLE_ARCHIVE -Wl,--no-whole-archive)
-endif()
+endif ()
 
 target_link_libraries(athena
         PRIVATE

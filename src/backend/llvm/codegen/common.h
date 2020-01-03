@@ -19,47 +19,35 @@
 #include <functional>
 
 namespace athena::backend::llvm::codegen {
-void registerAllocate(LLVMGenerator *generator);
-void registerFill(LLVMGenerator *generator);
+void registerAllocate(LLVMGenerator* generator);
+void registerFill(LLVMGenerator* generator);
 
 template <typename T>
-::llvm::Constant *getFPConstant(::llvm::LLVMContext &ctx, T value) {
-    new core::FatalError(core::ATH_FATAL_OTHER, "Unable to create FP constant");
-    return nullptr;  // unreachable
+::llvm::Constant* getFPConstant(::llvm::LLVMContext& ctx, T value) {
+  new core::FatalError(core::ATH_FATAL_OTHER, "Unable to create FP constant");
+  return nullptr; // unreachable
 }
 
 template <>
-::llvm::Constant *getFPConstant<float>(::llvm::LLVMContext &ctx, float value);
+::llvm::Constant* getFPConstant<float>(::llvm::LLVMContext& ctx, float value);
 template <>
-::llvm::Constant *getFPConstant<double>(::llvm::LLVMContext &ctx, double value);
+::llvm::Constant* getFPConstant<double>(::llvm::LLVMContext& ctx, double value);
 
-using BuiltinThreeTensorArgs = std::function<void(::llvm::LLVMContext &,
-                                                  ::llvm::Module &,
-                                                  ::llvm::IRBuilder<> &,
-                                                  core::inner::Tensor &,
-                                                  core::inner::Tensor &,
-                                                  core::inner::Tensor &)>;
+using BuiltinThreeTensorArgs = std::function<void(
+    ::llvm::LLVMContext&, ::llvm::Module&, ::llvm::IRBuilder<>&,
+    core::inner::Tensor&, core::inner::Tensor&, core::inner::Tensor&)>;
 
-using BuiltinThreeTensorWithOptsArgs =
-    std::function<void(::llvm::LLVMContext &,
-                       ::llvm::Module &,
-                       ::llvm::IRBuilder<> &,
-                       void *,
-                       core::inner::Tensor &,
-                       core::inner::Tensor &,
-                       core::inner::Tensor &)>;
+using BuiltinThreeTensorWithOptsArgs = std::function<void(
+    ::llvm::LLVMContext&, ::llvm::Module&, ::llvm::IRBuilder<>&, void*,
+    core::inner::Tensor&, core::inner::Tensor&, core::inner::Tensor&)>;
 
-using BuiltinTATATArgs = std::function<void(::llvm::LLVMContext &,
-                                            ::llvm::Module &,
-                                            ::llvm::IRBuilder<> &,
-                                            core::inner::Tensor &,
-                                            uint64_t,
-                                            core::inner::Tensor &,
-                                            uint64_t,
-                                            core::inner::Tensor &)>;
+using BuiltinTATATArgs =
+    std::function<void(::llvm::LLVMContext&, ::llvm::Module&,
+                       ::llvm::IRBuilder<>&, core::inner::Tensor&, uint64_t,
+                       core::inner::Tensor&, uint64_t, core::inner::Tensor&)>;
 
 template <typename T>
-void registerStandardBuiltin(const std::string &name, LLVMGenerator *generator);
-}  // namespace athena::backend::llvm::codegen
+void registerStandardBuiltin(const std::string& name, LLVMGenerator* generator);
+} // namespace athena::backend::llvm::codegen
 
-#endif  // ATHENA_COMMON_H
+#endif // ATHENA_COMMON_H

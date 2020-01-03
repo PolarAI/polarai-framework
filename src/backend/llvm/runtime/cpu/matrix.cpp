@@ -38,97 +38,71 @@ using namespace athena::core;
  * @param c Result Tensor
  */
 template <typename T>
-void hadamard(Device *,
-              Allocator *allocator,
-              HadamardOptions<T> *options,
-              Tensor *a,
-              Tensor *b,
-              Tensor *c) {
-    auto *ap = reinterpret_cast<T *>(allocator->getRAMPointer(*a));
-    auto *bp = reinterpret_cast<T *>(allocator->getRAMPointer(*b));
-    auto *cp = reinterpret_cast<T *>(allocator->getRAMPointer(*c));
+void hadamard(Device*, Allocator* allocator, HadamardOptions<T>* options,
+              Tensor* a, Tensor* b, Tensor* c) {
+  auto* ap = reinterpret_cast<T*>(allocator->getRAMPointer(*a));
+  auto* bp = reinterpret_cast<T*>(allocator->getRAMPointer(*b));
+  auto* cp = reinterpret_cast<T*>(allocator->getRAMPointer(*c));
 
-    for (size_t i = 0; i < c->getShapeView().getTotalSize(); i++) {
-        cp[i] = options->alpha * ap[i] * bp[i] + options->beta * cp[i];
-    }
+  for (size_t i = 0; i < c->getShapeView().getTotalSize(); i++) {
+    cp[i] = options->alpha * ap[i] * bp[i] + options->beta * cp[i];
+  }
 }
 
-template void hadamard<float>(Device *,
-                              Allocator *allocator,
-                              HadamardOptions<float> *options,
-                              Tensor *a,
-                              Tensor *b,
-                              Tensor *c);
+template void hadamard<float>(Device*, Allocator* allocator,
+                              HadamardOptions<float>* options, Tensor* a,
+                              Tensor* b, Tensor* c);
 
-template void hadamard<double>(Device *,
-                               Allocator *allocator,
-                               HadamardOptions<double> *options,
-                               Tensor *a,
-                               Tensor *b,
-                               Tensor *c);
+template void hadamard<double>(Device*, Allocator* allocator,
+                               HadamardOptions<double>* options, Tensor* a,
+                               Tensor* b, Tensor* c);
 
 template <typename T>
-void gemm(Device *,
-          Allocator *allocator,
-          GEMMOptions<T> *options,
-          Tensor *a,
-          Tensor *b,
-          Tensor *c) {
-    new FatalError(ATH_NOT_IMPLEMENTED, "Not implemented");
+void gemm(Device*, Allocator* allocator, GEMMOptions<T>* options, Tensor* a,
+          Tensor* b, Tensor* c) {
+  new FatalError(ATH_NOT_IMPLEMENTED, "Not implemented");
 };
 
 template <>
-void gemm<float>(Device *,
-                 Allocator *allocator,
-                 GEMMOptions<float> *options,
-                 Tensor *a,
-                 Tensor *b,
-                 Tensor *c) {
-    CBLAS_TRANSPOSE transposeA =
-        options->transposeA ? CblasTrans : CblasNoTrans;
-    CBLAS_TRANSPOSE transposeB =
-        options->transposeB ? CblasTrans : CblasNoTrans;
+void gemm<float>(Device*, Allocator* allocator, GEMMOptions<float>* options,
+                 Tensor* a, Tensor* b, Tensor* c) {
+  CBLAS_TRANSPOSE transposeA = options->transposeA ? CblasTrans : CblasNoTrans;
+  CBLAS_TRANSPOSE transposeB = options->transposeB ? CblasTrans : CblasNoTrans;
 
-    auto aData = reinterpret_cast<float *>(allocator->getRAMPointer(*a));
-    auto bData = reinterpret_cast<float *>(allocator->getRAMPointer(*b));
-    auto cData = reinterpret_cast<float *>(allocator->getRAMPointer(*c));
+  auto aData = reinterpret_cast<float*>(allocator->getRAMPointer(*a));
+  auto bData = reinterpret_cast<float*>(allocator->getRAMPointer(*b));
+  auto cData = reinterpret_cast<float*>(allocator->getRAMPointer(*c));
 
-    const int M =
-        static_cast<const int>(a->getShape().dim(options->transposeA ? 1 : 0));
-    const int N =
-        static_cast<const int>(b->getShape().dim(options->transposeB ? 0 : 1));
-    const int K =
-        static_cast<const int>(a->getShape().dim(options->transposeA ? 0 : 1));
+  const int M =
+      static_cast<const int>(a->getShape().dim(options->transposeA ? 1 : 0));
+  const int N =
+      static_cast<const int>(b->getShape().dim(options->transposeB ? 0 : 1));
+  const int K =
+      static_cast<const int>(a->getShape().dim(options->transposeA ? 0 : 1));
 
-    cblas_sgemm(CBLAS_ORDER::CblasRowMajor, transposeA, transposeB, M, N, K,
-                options->alpha, aData, options->transposeA ? M : K, bData,
-                options->transposeB ? K : N, options->beta, cData, N);
+  cblas_sgemm(CBLAS_ORDER::CblasRowMajor, transposeA, transposeB, M, N, K,
+              options->alpha, aData, options->transposeA ? M : K, bData,
+              options->transposeB ? K : N, options->beta, cData, N);
 }
 
 template <>
-void gemm<double>(Device *,
-                  Allocator *allocator,
-                  GEMMOptions<double> *options,
-                  Tensor *a,
-                  Tensor *b,
-                  Tensor *c) {
-    CBLAS_TRANSPOSE transposeA =
-        options->transposeA ? CblasTrans : CblasNoTrans;
-    CBLAS_TRANSPOSE transposeB =
-        options->transposeB ? CblasTrans : CblasNoTrans;
+void gemm<double>(Device*, Allocator* allocator, GEMMOptions<double>* options,
+                  Tensor* a, Tensor* b, Tensor* c) {
+  CBLAS_TRANSPOSE transposeA = options->transposeA ? CblasTrans : CblasNoTrans;
+  CBLAS_TRANSPOSE transposeB = options->transposeB ? CblasTrans : CblasNoTrans;
 
-    auto aData = reinterpret_cast<double *>(allocator->getRAMPointer(*a));
-    auto bData = reinterpret_cast<double *>(allocator->getRAMPointer(*b));
-    auto cData = reinterpret_cast<double *>(allocator->getRAMPointer(*c));
+  auto aData = reinterpret_cast<double*>(allocator->getRAMPointer(*a));
+  auto bData = reinterpret_cast<double*>(allocator->getRAMPointer(*b));
+  auto cData = reinterpret_cast<double*>(allocator->getRAMPointer(*c));
 
-    const int M =
-        static_cast<const int>(a->getShape().dim(options->transposeA ? 1 : 0));
-    const int K =
-        static_cast<const int>(a->getShape().dim(options->transposeA ? 0 : 1));
-    const int N =
-        static_cast<const int>(b->getShape().dim(options->transposeB ? 0 : 1));
+  const int M =
+      static_cast<const int>(a->getShape().dim(options->transposeA ? 1 : 0));
+  const int K =
+      static_cast<const int>(a->getShape().dim(options->transposeA ? 0 : 1));
+  const int N =
+      static_cast<const int>(b->getShape().dim(options->transposeB ? 0 : 1));
 
-    cblas_dgemm(CBLAS_ORDER::CblasRowMajor, transposeA, transposeB, M, N, K,
-                options->alpha, aData, options->transposeA ? M : K, bData,
-                options->transposeB ? K : N, options->beta, cData, N);
+  cblas_dgemm(CBLAS_ORDER::CblasRowMajor, transposeA, transposeB, M, N, K,
+              options->alpha, aData, options->transposeA ? M : K, bData,
+              options->transposeB ? K : N, options->beta, cData, N);
 }

@@ -22,49 +22,43 @@
 
 namespace athena::core {
 
-template <typename T>
-class ATH_CORE_EXPORT Accessor {
-    private:
-    Allocator &mAllocator;
-    inner::Tensor &mAccessTensor;
-    std::vector<size_t> mAccessIdx;
+template <typename T> class ATH_CORE_EXPORT Accessor {
+private:
+  Allocator& mAllocator;
+  inner::Tensor& mAccessTensor;
+  std::vector<size_t> mAccessIdx;
 
-    public:
-    Accessor(Allocator &allocator,
-             inner::Tensor &tensor,
-             std::vector<size_t> idx)
-        : mAllocator(allocator),
-          mAccessTensor(tensor),
-          mAccessIdx(std::move(idx)) {}
+public:
+  Accessor(Allocator& allocator, inner::Tensor& tensor, std::vector<size_t> idx)
+      : mAllocator(allocator), mAccessTensor(tensor),
+        mAccessIdx(std::move(idx)) {}
 
-    Accessor<T> operator[](size_t idx) {
-        if (mAccessIdx.size() == mAccessTensor.getShapeView().dimensions()) {
-            new FatalError(ATH_BAD_ACCESS, "Index is out of range");
-        }
-
-        std::vector<size_t> newIdx(mAccessIdx);
-        newIdx.push_back(idx);
-
-        return Accessor<T>(mAllocator, mAccessTensor, newIdx);
+  Accessor<T> operator[](size_t idx) {
+    if (mAccessIdx.size() == mAccessTensor.getShapeView().dimensions()) {
+      new FatalError(ATH_BAD_ACCESS, "Index is out of range");
     }
 
-    T operator*() {
-        if (mAccessIdx.size() != mAccessTensor.getShapeView().dimensions()) {
-            new FatalError(ATH_BAD_ACCESS,
-                           "Accessor does not point to an element");
-        }
-        size_t offset = 0;
-        for (int d = 0; d < mAccessIdx.size() - 1; d++) {
-            offset += mAccessIdx[d] * mAccessTensor.getShapeView().dim(d);
-        }
-        offset += mAccessIdx.back();
+    std::vector<size_t> newIdx(mAccessIdx);
+    newIdx.push_back(idx);
 
-        auto elPtr =
-            reinterpret_cast<T *>(mAllocator.getRAMPointer(mAccessTensor));
+    return Accessor<T>(mAllocator, mAccessTensor, newIdx);
+  }
 
-        return *(elPtr + offset);
+  T operator*() {
+    if (mAccessIdx.size() != mAccessTensor.getShapeView().dimensions()) {
+      new FatalError(ATH_BAD_ACCESS, "Accessor does not point to an element");
     }
+    size_t offset = 0;
+    for (int d = 0; d < mAccessIdx.size() - 1; d++) {
+      offset += mAccessIdx[d] * mAccessTensor.getShapeView().dim(d);
+    }
+    offset += mAccessIdx.back();
+
+    auto elPtr = reinterpret_cast<T*>(mAllocator.getRAMPointer(mAccessTensor));
+
+    return *(elPtr + offset);
+  }
 };
-}  // namespace athena::core
+} // namespace athena::core
 
-#endif  // ATHENA_ACCESSOR_H
+#endif // ATHENA_ACCESSOR_H

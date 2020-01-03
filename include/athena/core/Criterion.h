@@ -20,4 +20,4 @@ namespace athena::core {
 enum class ATH_CORE_EXPORT Criterion { UNDEFINED = 0, MAX = 1, MIN = 2 };
 }
 
-#endif  // ATHENA_CRITERION_H
+#endif // ATHENA_CRITERION_H

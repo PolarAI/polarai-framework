@@ -18,36 +18,36 @@
 
 namespace athena::core {
 TEST(Node, Create) {
-    Context context;
-    TensorShape shape{2, 3, 4};
-    DataType dataType = DataType::DOUBLE;
-    std::string operationName = "Dummy";
-    OperationDummy op(operationName);
-    Node n(op, context);
-    auto tensor1 = std::make_shared<inner::Tensor>(dataType, shape, context);
-    inner::setResultTensor(n, tensor1);
-    ASSERT_EQ(n.getDataType(), dataType);
-    ASSERT_EQ(n.getShapeView(), shape);
-    ASSERT_EQ(n.getType(), NodeType::DEFAULT);
-    ASSERT_EQ(n.getName(), "");
-    ASSERT_EQ(&n.getOperation(), &op);
+  Context context;
+  TensorShape shape{2, 3, 4};
+  DataType dataType = DataType::DOUBLE;
+  std::string operationName = "Dummy";
+  OperationDummy op(operationName);
+  Node n(op, context);
+  auto tensor1 = std::make_shared<inner::Tensor>(dataType, shape, context);
+  inner::setResultTensor(n, tensor1);
+  ASSERT_EQ(n.getDataType(), dataType);
+  ASSERT_EQ(n.getShapeView(), shape);
+  ASSERT_EQ(n.getType(), NodeType::DEFAULT);
+  ASSERT_EQ(n.getName(), "");
+  ASSERT_EQ(&n.getOperation(), &op);
 }
 TEST(Node, CopyConstructor) {
-    Context context;
-    inner::getNodeTable(context).clear();
-    TensorShape shape{2, 3, 4};
-    DataType dataType = DataType::DOUBLE;
-    std::string operationName = "Dummy";
-    OperationDummy op(operationName);
-    Node n(op, context);
-    auto tensor1 = std::make_shared<inner::Tensor>(dataType, shape, context);
-    inner::setResultTensor(n, tensor1);
-    Node nSecond(n);
-    ASSERT_EQ(inner::getNodeTable(context).size(), 3);
-    ASSERT_EQ(n.getShapeView(), nSecond.getShapeView());
-    ASSERT_EQ(n.getType(), nSecond.getType());
-    ASSERT_EQ(n.getDataType(), nSecond.getDataType());
-    ASSERT_EQ(n.getName(), nSecond.getName());
-    ASSERT_EQ(n.name(), nSecond.name());
+  Context context;
+  inner::getNodeTable(context).clear();
+  TensorShape shape{2, 3, 4};
+  DataType dataType = DataType::DOUBLE;
+  std::string operationName = "Dummy";
+  OperationDummy op(operationName);
+  Node n(op, context);
+  auto tensor1 = std::make_shared<inner::Tensor>(dataType, shape, context);
+  inner::setResultTensor(n, tensor1);
+  Node nSecond(n);
+  ASSERT_EQ(inner::getNodeTable(context).size(), 3);
+  ASSERT_EQ(n.getShapeView(), nSecond.getShapeView());
+  ASSERT_EQ(n.getType(), nSecond.getType());
+  ASSERT_EQ(n.getDataType(), nSecond.getDataType());
+  ASSERT_EQ(n.getName(), nSecond.getName());
+  ASSERT_EQ(n.name(), nSecond.name());
 }
-}  // namespace athena::core
+} // namespace athena::core

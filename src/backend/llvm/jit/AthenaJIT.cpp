@@ -23,143 +23,138 @@
 #include <llvm/Transforms/Scalar/GVN.h>
 
 static size_t getNextFileId() {
-    static size_t count = 0;
-    return ++count;
+  static size_t count = 0;
+  return ++count;
 }
 
 namespace athena::backend::llvm {
 AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
-                     ::llvm::DataLayout &&DL)
+                     ::llvm::DataLayout&& DL)
     : mObjectLayer(
           mExecutionSession,
           []() { return std::make_unique<::llvm::SectionMemoryManager>(); }),
-      mCompileLayer(mExecutionSession,
-                    mObjectLayer,
+      mCompileLayer(mExecutionSession, mObjectLayer,
                     ::llvm::orc::ConcurrentIRCompiler(std::move(JTMB))),
       mOptimizeLayer(mExecutionSession, mCompileLayer, optimizeModule),
-      mMergeLayer(mExecutionSession, mOptimizeLayer),
-      mDataLayout(DL),
+      mMergeLayer(mExecutionSession, mOptimizeLayer), mDataLayout(DL),
       mMangle(mExecutionSession, mDataLayout),
       mMainJD(mExecutionSession.createJITDylib("<main>")),
       mContext(std::make_unique<::llvm::LLVMContext>()) {
-    ::llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
-    mMainJD.addGenerator(cantFail(
-        ::llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(
-            DL.getGlobalPrefix())));
+  ::llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
+  mMainJD.addGenerator(
+      cantFail(::llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(
+          DL.getGlobalPrefix())));
 }
 std::unique_ptr<AthenaJIT> AthenaJIT::create() {
-    LLVMInitializeNativeTarget();
-    LLVMInitializeNativeAsmPrinter();
-    LLVMInitializeNativeAsmParser();
+  LLVMInitializeNativeTarget();
+  LLVMInitializeNativeAsmPrinter();
+  LLVMInitializeNativeAsmParser();
 
-    auto JTMB = ::llvm::orc::JITTargetMachineBuilder::detectHost();
+  auto JTMB = ::llvm::orc::JITTargetMachineBuilder::detectHost();
 
-    if (!JTMB) {
-        ::llvm::consumeError(JTMB.takeError());
-        new core::FatalError(core::ATH_FATAL_OTHER, "Unable to detect host");
-    }
+  if (!JTMB) {
+    ::llvm::consumeError(JTMB.takeError());
+    new core::FatalError(core::ATH_FATAL_OTHER, "Unable to detect host");
+  }
 
-    auto DL = JTMB->getDefaultDataLayoutForTarget();
-    if (!DL) {
-        ::llvm::consumeError(DL.takeError());
-        new core::FatalError(core::ATH_FATAL_OTHER,
-                             "Unable to get target data layout");
-    }
+  auto DL = JTMB->getDefaultDataLayoutForTarget();
+  if (!DL) {
+    ::llvm::consumeError(DL.takeError());
+    new core::FatalError(core::ATH_FATAL_OTHER,
+                         "Unable to get target data layout");
+  }
 
-    return std::make_unique<AthenaJIT>(std::move(*JTMB), std::move(*DL));
+  return std::make_unique<AthenaJIT>(std::move(*JTMB), std::move(*DL));
 }
-::llvm::Error AthenaJIT::addModule(std::unique_ptr<::llvm::Module> &M) {
-    return mMergeLayer.add(
-        mMainJD, ::llvm::orc::ThreadSafeModule(std::move(M), mContext),
-        mExecutionSession.allocateVModule());
+::llvm::Error AthenaJIT::addModule(std::unique_ptr<::llvm::Module>& M) {
+  return mMergeLayer.add(mMainJD,
+                         ::llvm::orc::ThreadSafeModule(std::move(M), mContext),
+                         mExecutionSession.allocateVModule());
 }
-::llvm::Expected<::llvm::JITEvaluatedSymbol> AthenaJIT::lookup(
-    ::llvm::StringRef Name) {
-    return mExecutionSession.lookup({&mMainJD}, mMangle(Name.str()));
+::llvm::Expected<::llvm::JITEvaluatedSymbol>
+AthenaJIT::lookup(::llvm::StringRef Name) {
+  return mExecutionSession.lookup({&mMainJD}, mMangle(Name.str()));
 }
-::llvm::Expected<::llvm::orc::ThreadSafeModule> AthenaJIT::optimizeModule(
-    ::llvm::orc::ThreadSafeModule TSM,
-    const ::llvm::orc::MaterializationResponsibility &R) {
+::llvm::Expected<::llvm::orc::ThreadSafeModule>
+AthenaJIT::optimizeModule(::llvm::orc::ThreadSafeModule TSM,
+                          const ::llvm::orc::MaterializationResponsibility& R) {
 #ifdef DEBUG
-    size_t fileId = getNextFileId();
-    std::error_code errorCode;
-    const std::string fileNamePrefix = "program" + std::to_string(fileId);
+  size_t fileId = getNextFileId();
+  std::error_code errorCode;
+  const std::string fileNamePrefix = "program" + std::to_string(fileId);
 
-    if (getenv("ATHENA_DUMP_LLVM")) {
-        TSM.withModuleDo([&](::llvm::Module &module) {
-            ::llvm::raw_fd_ostream preOptStream(fileNamePrefix + "_pre_opt.ll",
-                                                errorCode);
-            if (!errorCode) {
-                module.print(preOptStream, nullptr);
-                preOptStream.close();
-            } else {
-                log() << "Unable to open file for writing "
-                      << fileNamePrefix + "_pre_opt.ll";
-            }
-        });
-    }
-#endif
-
-    ::llvm::FunctionPassManager mFunctionSimplificationPassManager;
-    ::llvm::ModulePassManager mModuleOptimizationPassManager;
-    ::llvm::ModulePassManager mThinLTOPreLinkPassManager;
-    ::llvm::ModulePassManager mDefaultIPOPassManager;
-
-    ::llvm::LoopAnalysisManager loopAnalysisManager;
-    ::llvm::FunctionAnalysisManager functionAnalysisManager;
-    ::llvm::CGSCCAnalysisManager cGSCCAnalysisManager;
-    ::llvm::ModuleAnalysisManager moduleAnalysisManager;
-
-    ::llvm::PassBuilder passBuilder;
-    passBuilder.registerModuleAnalyses(moduleAnalysisManager);
-    passBuilder.registerCGSCCAnalyses(cGSCCAnalysisManager);
-    passBuilder.registerFunctionAnalyses(functionAnalysisManager);
-    passBuilder.registerLoopAnalyses(loopAnalysisManager);
-    passBuilder.crossRegisterProxies(
-        loopAnalysisManager, functionAnalysisManager, cGSCCAnalysisManager,
-        moduleAnalysisManager);
-    mModuleOptimizationPassManager =
-        passBuilder.buildModuleOptimizationPipeline(::llvm::PassBuilder::O2,
-                                                    false);
-    mFunctionSimplificationPassManager =
-        passBuilder.buildFunctionSimplificationPipeline(
-            ::llvm::PassBuilder::O2,
-            ::llvm::PassBuilder::ThinLTOPhase::PostLink, false);
-    mThinLTOPreLinkPassManager =
-        passBuilder.buildThinLTOPreLinkDefaultPipeline(::llvm::PassBuilder::O3);
-
-    mDefaultIPOPassManager.addPass(::llvm::AlwaysInlinerPass());
-    mDefaultIPOPassManager.addPass(::llvm::PartialInlinerPass());
-
-    TSM.withModuleDo([&](::llvm::Module &module) {
-        mModuleOptimizationPassManager.run(module, moduleAnalysisManager);
-        mThinLTOPreLinkPassManager.run(module, moduleAnalysisManager);
-        mDefaultIPOPassManager.run(module, moduleAnalysisManager);
-
-        for (auto &func : module) {
-            if (!func.isDeclaration())
-                mFunctionSimplificationPassManager.run(func,
-                                                       functionAnalysisManager);
-        }
+  if (getenv("ATHENA_DUMP_LLVM")) {
+    TSM.withModuleDo([&](::llvm::Module& module) {
+      ::llvm::raw_fd_ostream preOptStream(fileNamePrefix + "_pre_opt.ll",
+                                          errorCode);
+      if (!errorCode) {
+        module.print(preOptStream, nullptr);
+        preOptStream.close();
+      } else {
+        log() << "Unable to open file for writing "
+              << fileNamePrefix + "_pre_opt.ll";
+      }
     });
-
-#ifdef DEBUG
-    if (getenv("ATHENA_DUMP_LLVM")) {
-        TSM.withModuleDo([&](::llvm::Module &module) {
-            ::llvm::raw_fd_ostream postOptStream(
-                fileNamePrefix + "_post_opt.ll", errorCode);
-            if (!errorCode) {
-                module.print(postOptStream, nullptr);
-                postOptStream.close();
-            } else {
-                log() << "Unable to open file for writing "
-                      << fileNamePrefix + "_post_opt.ll";
-            }
-        });
-    }
+  }
 #endif
 
-    return TSM;
+  ::llvm::FunctionPassManager mFunctionSimplificationPassManager;
+  ::llvm::ModulePassManager mModuleOptimizationPassManager;
+  ::llvm::ModulePassManager mThinLTOPreLinkPassManager;
+  ::llvm::ModulePassManager mDefaultIPOPassManager;
+
+  ::llvm::LoopAnalysisManager loopAnalysisManager;
+  ::llvm::FunctionAnalysisManager functionAnalysisManager;
+  ::llvm::CGSCCAnalysisManager cGSCCAnalysisManager;
+  ::llvm::ModuleAnalysisManager moduleAnalysisManager;
+
+  ::llvm::PassBuilder passBuilder;
+  passBuilder.registerModuleAnalyses(moduleAnalysisManager);
+  passBuilder.registerCGSCCAnalyses(cGSCCAnalysisManager);
+  passBuilder.registerFunctionAnalyses(functionAnalysisManager);
+  passBuilder.registerLoopAnalyses(loopAnalysisManager);
+  passBuilder.crossRegisterProxies(loopAnalysisManager, functionAnalysisManager,
+                                   cGSCCAnalysisManager, moduleAnalysisManager);
+  mModuleOptimizationPassManager = passBuilder.buildModuleOptimizationPipeline(
+      ::llvm::PassBuilder::O2, false);
+  mFunctionSimplificationPassManager =
+      passBuilder.buildFunctionSimplificationPipeline(
+          ::llvm::PassBuilder::O2, ::llvm::PassBuilder::ThinLTOPhase::PostLink,
+          false);
+  mThinLTOPreLinkPassManager =
+      passBuilder.buildThinLTOPreLinkDefaultPipeline(::llvm::PassBuilder::O3);
+
+  mDefaultIPOPassManager.addPass(::llvm::AlwaysInlinerPass());
+  mDefaultIPOPassManager.addPass(::llvm::PartialInlinerPass());
+
+  TSM.withModuleDo([&](::llvm::Module& module) {
+    mModuleOptimizationPassManager.run(module, moduleAnalysisManager);
+    mThinLTOPreLinkPassManager.run(module, moduleAnalysisManager);
+    mDefaultIPOPassManager.run(module, moduleAnalysisManager);
+
+    for (auto& func : module) {
+      if (!func.isDeclaration())
+        mFunctionSimplificationPassManager.run(func, functionAnalysisManager);
+    }
+  });
+
+#ifdef DEBUG
+  if (getenv("ATHENA_DUMP_LLVM")) {
+    TSM.withModuleDo([&](::llvm::Module& module) {
+      ::llvm::raw_fd_ostream postOptStream(fileNamePrefix + "_post_opt.ll",
+                                           errorCode);
+      if (!errorCode) {
+        module.print(postOptStream, nullptr);
+        postOptStream.close();
+      } else {
+        log() << "Unable to open file for writing "
+              << fileNamePrefix + "_post_opt.ll";
+      }
+    });
+  }
+#endif
+
+  return TSM;
 }
 
-}  // namespace athena::backend::llvm
+} // namespace athena::backend::llvm

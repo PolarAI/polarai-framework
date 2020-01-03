@@ -1,36 +1,6 @@
-BasedOnStyle: "Google"
-AccessModifierOffset: 0
-AllowShortBlocksOnASingleLine: false
-AllowShortCaseLabelsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: Empty
-AllowShortLoopsOnASingleLine: false
-AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: false
-AlignConsecutiveDeclarations: false
-AlwaysBreakTemplateDeclarations: Yes
-BreakBeforeBraces: Attach
-BinPackParameters: false
-BreakInheritanceList: AfterColon
-ColumnLimit: 80
-FixNamespaceComments: true
-IncludeBlocks: Regroup
-IndentWidth: 4
-IncludeCategories:
-  - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
-    Priority:        3
-  - Regex:           '^(<athena/)'
-    Priority:        2
-  - Regex:           '^(<|"(gtest|gmock|isl|json)/)'
-    Priority:        4
-  - Regex:           '<[[:alnum:].]+>'
-    Priority:        5
-  - Regex:           '.*'
-    Priority:        1
+BasedOnStyle: "LLVM"
+---
 Language: Cpp
-NamespaceIndentation: None
-SpaceAfterCStyleCast: false
-SpaceBeforeAssignmentOperators: true
-SpaceBeforeParens: ControlStatements
-Standard: Cpp11
-SortIncludes: true
-UseTab: Never
+# Force pointers to the type for C++.
+DerivePointerAlignment: false
+PointerAlignment: Left

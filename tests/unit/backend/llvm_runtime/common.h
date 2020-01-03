@@ -16,10 +16,9 @@
 
 #include <gtest/gtest.h>
 
-template <typename T>
-class RuntimeTest : public ::testing::Test {};
+template <typename T> class RuntimeTest : public ::testing::Test {};
 
 using TestTypes = ::testing::Types<float, double>;
 TYPED_TEST_CASE(RuntimeTest, TestTypes);
 
-#endif  // ATHENA_COMMON_H
+#endif // ATHENA_COMMON_H

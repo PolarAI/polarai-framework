@@ -16,43 +16,23 @@
 namespace athena::core {
 InputNode::InputNode(InputNode&& rhs) noexcept
     : AbstractNode(std::move(rhs)), mLoader(rhs.mLoader) {
-    rhs.mLoader = nullptr;
+  rhs.mLoader = nullptr;
 }
-InputNode::InputNode(TensorShape shape,
-                     DataType dataType,
-                     AbstractLoader& loader,
-                     Context& context,
-                     bool isFrozen,
+InputNode::InputNode(TensorShape shape, DataType dataType,
+                     AbstractLoader& loader, Context& context, bool isFrozen,
                      std::string name)
     : AbstractNode(std::move(shape), dataType, context, std::move(name)),
-      mIsFrozen(isFrozen),
-      mLoader(&loader) {}
-InputNode::~InputNode() {
-    saveInGraph(false);
-}
-NodeType InputNode::getType() const {
-    return NodeType::INPUT;
-}
-const AbstractLoader& InputNode::getLoader() const {
-    return *mLoader;
-}
-const AbstractLoader* InputNode::getLoaderPtr() const {
-    return mLoader;
-}
-AbstractLoader& InputNode::loader() {
-    return *mLoader;
-}
-const AbstractLoader& InputNode::loader() const {
-    return *mLoader;
-}
-void InputNode::setLoader(AbstractLoader& loader) {
-    mLoader = &loader;
-}
+      mIsFrozen(isFrozen), mLoader(&loader) {}
+InputNode::~InputNode() { saveInGraph(false); }
+NodeType InputNode::getType() const { return NodeType::INPUT; }
+const AbstractLoader& InputNode::getLoader() const { return *mLoader; }
+const AbstractLoader* InputNode::getLoaderPtr() const { return mLoader; }
+AbstractLoader& InputNode::loader() { return *mLoader; }
+const AbstractLoader& InputNode::loader() const { return *mLoader; }
+void InputNode::setLoader(AbstractLoader& loader) { mLoader = &loader; }
 void InputNode::clear() {
-    mLoader = nullptr;
-    AbstractNode::clear();
+  mLoader = nullptr;
+  AbstractNode::clear();
 }
-bool InputNode::isFrozen() {
-    return mIsFrozen;
-}
-}  // namespace athena::core
+bool InputNode::isFrozen() { return mIsFrozen; }
+} // namespace athena::core

@@ -14,13 +14,7 @@
 #include "Mangler.h"
 
 namespace athena::backend::llvm {
-template <>
-std::string Mangler::getTypePostfix<float>() {
-    return "_f";
-}
-template <>
-std::string Mangler::getTypePostfix<double>() {
-    return "_d";
-}
+template <> std::string Mangler::getTypePostfix<float>() { return "_f"; }
+template <> std::string Mangler::getTypePostfix<double>() { return "_d"; }
 
-}  // namespace athena::backend::llvm
+} // namespace athena::backend::llvm

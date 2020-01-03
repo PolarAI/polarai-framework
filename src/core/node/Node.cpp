@@ -15,49 +15,34 @@
 
 namespace athena::core {
 Node::Node(Node&& rhs) noexcept
-    : AbstractNode(std::move(rhs)),
-      mOperation(rhs.mOperation),
+    : AbstractNode(std::move(rhs)), mOperation(rhs.mOperation),
       mOutcomingGradients(std::move(rhs.mOutcomingGradients)),
       mIncomingGradientTensor(std::move(rhs.mIncomingGradientTensor)) {
-    rhs.mOperation = nullptr;
+  rhs.mOperation = nullptr;
 }
 Node::Node(Operation& operation, Context& context, std::string name)
     : AbstractNode(context, std::move(name)), mOperation(&operation) {}
-Node::~Node() {
-    saveInGraph(false);
-}
-NodeType Node::getType() const {
-    return NodeType::DEFAULT;
-}
-const Operation& Node::getOperation() const {
-    return *mOperation;
-}
-const Operation* Node::getOperationPtr() const {
-    return mOperation;
-}
-Operation& Node::operation() {
-    return *mOperation;
-}
-const Operation& Node::operation() const {
-    return *mOperation;
-}
-void Node::setOperation(Operation& operation) {
-    mOperation = &operation;
-}
+Node::~Node() { saveInGraph(false); }
+NodeType Node::getType() const { return NodeType::DEFAULT; }
+const Operation& Node::getOperation() const { return *mOperation; }
+const Operation* Node::getOperationPtr() const { return mOperation; }
+Operation& Node::operation() { return *mOperation; }
+const Operation& Node::operation() const { return *mOperation; }
+void Node::setOperation(Operation& operation) { mOperation = &operation; }
 void Node::clear() {
-    mOperation = nullptr;
-    AbstractNode::clear();
+  mOperation = nullptr;
+  AbstractNode::clear();
 }
 void inner::addDerivativeTensor(Node& node, inner::Tensor& tensor) {
-    node.mOutcomingGradients.push_back(&tensor);
+  node.mOutcomingGradients.push_back(&tensor);
 }
 inner::Tensor& inner::getDerivativeTensor(Node& node, size_t index) {
-    return *node.mOutcomingGradients[index];
+  return *node.mOutcomingGradients[index];
 }
 void inner::setErrorTensor(Node& node, Tensor* tensor) {
-    node.mIncomingGradientTensor = tensor;
+  node.mIncomingGradientTensor = tensor;
 }
 inner::Tensor& inner::getIncomingGradient(Node& node) {
-    return *node.mIncomingGradientTensor;
+  return *node.mIncomingGradientTensor;
 }
-}  // namespace athena::core
+} // namespace athena::core

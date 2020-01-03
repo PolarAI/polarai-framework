@@ -30,50 +30,38 @@ namespace athena::backend::llvm {
 /// The old Generator interface is not suitable for MLIR. This is for testing
 /// only.
 class ATH_MLIR_EXPORT MLIRGenerator : public core::AbstractGenerator {
-    private:
-    mlir::MLIRContext mContext;
-    mlir::ModuleOp mModule;
-    mlir::OpBuilder mBuilder;
-    std::map<size_t, mlir::Value> mTensorValueMap;
+private:
+  mlir::MLIRContext mContext;
+  mlir::ModuleOp mModule;
+  mlir::OpBuilder mBuilder;
+  std::map<size_t, mlir::Value> mTensorValueMap;
 
-    public:
-    MLIRGenerator();
-    void openNode(std::string_view name) override;
-    void closeNode() override;
-    void generateFunctionHeader(const std::string& name) override;
-    void generateFunctionFooter() override;
-    void generateLoad(const core::AbstractLoader& loader,
-                      core::inner::Tensor& tensor) override;
-    ~MLIRGenerator() = default;
+public:
+  MLIRGenerator();
+  void openNode(std::string_view name) override;
+  void closeNode() override;
+  void generateFunctionHeader(const std::string& name) override;
+  void generateFunctionFooter() override;
+  void generateLoad(const core::AbstractLoader& loader,
+                    core::inner::Tensor& tensor) override;
+  ~MLIRGenerator() = default;
 
-    mlir::ModuleOp& getModule() {
-        return mModule;
-    }
+  mlir::ModuleOp& getModule() { return mModule; }
 
-    protected:
-    void generateImpl(std::string& string, core::inner::Tensor& a) override;
-    void generateImpl(std::string& string,
-                      core::inner::Tensor& a,
-                      void*& b) override;
-    void generateImpl(std::string& string,
-                      core::inner::Tensor& a,
-                      core::inner::Tensor& b) override;
-    void generateImpl(std::string& string,
-                      core::inner::Tensor& a,
-                      core::inner::Tensor& b,
-                      core::inner::Tensor& c) override;
-    void generateImpl(std::string& string,
-                      core::inner::Tensor& a,
-                      uint64_t scaleA,
-                      core::inner::Tensor& b,
-                      uint64_t scaleB,
-                      core::inner::Tensor& c) override;
-    void generateImpl(std::string& string,
-                      void* pVoid,
-                      core::inner::Tensor& a,
-                      core::inner::Tensor& b,
-                      core::inner::Tensor& c) override;
+protected:
+  void generateImpl(std::string& string, core::inner::Tensor& a) override;
+  void generateImpl(std::string& string, core::inner::Tensor& a,
+                    void*& b) override;
+  void generateImpl(std::string& string, core::inner::Tensor& a,
+                    core::inner::Tensor& b) override;
+  void generateImpl(std::string& string, core::inner::Tensor& a,
+                    core::inner::Tensor& b, core::inner::Tensor& c) override;
+  void generateImpl(std::string& string, core::inner::Tensor& a,
+                    uint64_t scaleA, core::inner::Tensor& b, uint64_t scaleB,
+                    core::inner::Tensor& c) override;
+  void generateImpl(std::string& string, void* pVoid, core::inner::Tensor& a,
+                    core::inner::Tensor& b, core::inner::Tensor& c) override;
 };
-}  // namespace athena::backend::llvm
+} // namespace athena::backend::llvm
 
-#endif  // ATHENA_MLIRGENERATOR_H
+#endif // ATHENA_MLIRGENERATOR_H

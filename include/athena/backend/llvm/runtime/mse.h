@@ -19,10 +19,8 @@
 #include <athena/core/inner/Tensor.h>
 
 template <typename T>
-extern void mse(athena::backend::llvm::Device *,
-                athena::core::Allocator *,
-                athena::core::inner::Tensor *a,
-                athena::core::inner::Tensor *b,
-                athena::core::inner::Tensor *c);
+extern void mse(athena::backend::llvm::Device*, athena::core::Allocator*,
+                athena::core::inner::Tensor* a, athena::core::inner::Tensor* b,
+                athena::core::inner::Tensor* c);
 
-#endif  // ATHENA_MSE_H
+#endif // ATHENA_MSE_H

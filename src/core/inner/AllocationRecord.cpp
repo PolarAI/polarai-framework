@@ -18,16 +18,10 @@
 namespace athena::core::inner {
 AllocationRecord::AllocationRecord(DataType dataType, TensorShape shape)
     : mDataType(dataType), mShape(std::move(shape)) {}
-DataType AllocationRecord::getDataType() const {
-    return mDataType;
-}
-const TensorShape& AllocationRecord::getShape() const {
-    return mShape;
-}
+DataType AllocationRecord::getDataType() const { return mDataType; }
+const TensorShape& AllocationRecord::getShape() const { return mShape; }
 ShapeView AllocationRecord::getShapeView(size_t offset) const {
-    return mShape.getSubShapeView(offset);
+  return mShape.getSubShapeView(offset);
 }
-size_t AllocationRecord::getSize() const {
-    return mShape.getTotalSize();
-}
-}  // namespace athena::core::inner
+size_t AllocationRecord::getSize() const { return mShape.getTotalSize(); }
+} // namespace athena::core::inner

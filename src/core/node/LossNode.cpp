@@ -14,33 +14,20 @@
 #include <athena/core/LossNode.h>
 
 namespace athena::core {
-LossNode::LossNode(Operation& operation,
-                   Criterion criterion,
-                   Context& context,
+LossNode::LossNode(Operation& operation, Criterion criterion, Context& context,
                    std::string name)
-    : Node(operation, context, std::move(name)),
-      mCriterion(criterion) {}
+    : Node(operation, context, std::move(name)), mCriterion(criterion) {}
 LossNode::LossNode(LossNode&& rhs) noexcept
     : Node(std::move(rhs)), mCriterion(rhs.mCriterion) {
-    rhs.mCriterion = Criterion::UNDEFINED;
+  rhs.mCriterion = Criterion::UNDEFINED;
 }
-LossNode::~LossNode() {
-    saveInGraph(false);
-}
-NodeType LossNode::getType() const {
-    return NodeType::LOSS;
-}
+LossNode::~LossNode() { saveInGraph(false); }
+NodeType LossNode::getType() const { return NodeType::LOSS; }
 void LossNode::clear() {
-    mCriterion = Criterion::UNDEFINED;
-    Node::clear();
+  mCriterion = Criterion::UNDEFINED;
+  Node::clear();
 }
-Criterion LossNode::getCriterion() const {
-    return mCriterion;
-}
-Criterion& LossNode::criterion() {
-    return mCriterion;
-}
-const Criterion& LossNode::criterion() const {
-    return mCriterion;
-}
-}  // namespace athena::core
+Criterion LossNode::getCriterion() const { return mCriterion; }
+Criterion& LossNode::criterion() { return mCriterion; }
+const Criterion& LossNode::criterion() const { return mCriterion; }
+} // namespace athena::core

@@ -19,63 +19,59 @@
 using namespace athena::backend;
 
 namespace athena::core {
-size_t GradientDescent::getRequiredOrder() const {
-    return 1;
-}
+size_t GradientDescent::getRequiredOrder() const { return 1; }
 void athena::core::GradientDescent::genFix(
-    AbstractGenerator &generator,
-    inner::Tensor &target,
-    std::vector<inner::Tensor *> &errors) {
-    float fltUnit = 1.0;
-    double dblUnit = 1.0;
-    uint64_t unit = 0;
-    uint64_t learningRate;
+    AbstractGenerator& generator, inner::Tensor& target,
+    std::vector<inner::Tensor*>& errors) {
+  float fltUnit = 1.0;
+  double dblUnit = 1.0;
+  uint64_t unit = 0;
+  uint64_t learningRate;
 
-    switch (target.getDataType()) {
-        case DataType::DOUBLE:
-            unit = *reinterpret_cast<uint64_t *>(&dblUnit);
-            learningRate = *reinterpret_cast<uint64_t *>(&mLearningRate);
-            break;
-        case DataType::FLOAT: {
-            unit = *reinterpret_cast<uint64_t *>(&fltUnit);
-            auto fltLR = static_cast<float>(mLearningRate);
-            learningRate = *reinterpret_cast<uint64_t *>(&fltLR);
-            break;
-        }
-        default:
-            new FatalError(ATH_NOT_IMPLEMENTED, "Unsupported type");
-    }
+  switch (target.getDataType()) {
+  case DataType::DOUBLE:
+    unit = *reinterpret_cast<uint64_t*>(&dblUnit);
+    learningRate = *reinterpret_cast<uint64_t*>(&mLearningRate);
+    break;
+  case DataType::FLOAT: {
+    unit = *reinterpret_cast<uint64_t*>(&fltUnit);
+    auto fltLR = static_cast<float>(mLearningRate);
+    learningRate = *reinterpret_cast<uint64_t*>(&fltLR);
+    break;
+  }
+  default:
+    new FatalError(ATH_NOT_IMPLEMENTED, "Unsupported type");
+  }
 
-    for (auto *errTensor : errors) {
-        generator.generate("fma", *errTensor, learningRate, target, unit,
-                           target);
-    }
+  for (auto* errTensor : errors) {
+    generator.generate("fma", *errTensor, learningRate, target, unit, target);
+  }
 }
 void athena::core::GradientDescent::genError(
-    AbstractGenerator &generator,
-    std::vector<inner::Tensor *> &incomingDerivatives,
-    inner::Tensor &totalError) {
-    double dblZero = 0.0;
-    float fltZero = 0.0;
-    uint64_t zero;
+    AbstractGenerator& generator,
+    std::vector<inner::Tensor*>& incomingDerivatives,
+    inner::Tensor& totalError) {
+  double dblZero = 0.0;
+  float fltZero = 0.0;
+  uint64_t zero;
 
-    switch (totalError.getDataType()) {
-        case DataType::DOUBLE: {
-            zero = *reinterpret_cast<uint64_t *>(&dblZero);
-            break;
-        }
-        case DataType::FLOAT: {
-            zero = *reinterpret_cast<uint64_t *>(&fltZero);
-            break;
-        }
-        default:
-            new FatalError(ATH_NOT_IMPLEMENTED, "Unsupported type");
-    }
-    void *pzero = static_cast<void *>(&zero);
-    generator.generate("fill", totalError, pzero);
+  switch (totalError.getDataType()) {
+  case DataType::DOUBLE: {
+    zero = *reinterpret_cast<uint64_t*>(&dblZero);
+    break;
+  }
+  case DataType::FLOAT: {
+    zero = *reinterpret_cast<uint64_t*>(&fltZero);
+    break;
+  }
+  default:
+    new FatalError(ATH_NOT_IMPLEMENTED, "Unsupported type");
+  }
+  void* pzero = static_cast<void*>(&zero);
+  generator.generate("fill", totalError, pzero);
 
-    for (auto &incomingDerivative : incomingDerivatives) {
-        generator.generate("add", totalError, *incomingDerivative, totalError);
-    }
+  for (auto& incomingDerivative : incomingDerivatives) {
+    generator.generate("add", totalError, *incomingDerivative, totalError);
+  }
 }
-}  // namespace athena::core
+} // namespace athena::core

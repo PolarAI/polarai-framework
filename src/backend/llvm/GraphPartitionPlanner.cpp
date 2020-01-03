@@ -16,40 +16,36 @@
 using namespace athena::core;
 
 namespace athena::backend::llvm {
-DeviceContainer GraphPartitionPlanner::getPartitionedDevices(
-    DeviceContainer devices) {
-    // todo abatashev: implement a more complex logic: partition by NUMA and
-    // graph requirements
-    mDevices = devices;
-    return devices;
+DeviceContainer
+GraphPartitionPlanner::getPartitionedDevices(DeviceContainer devices) {
+  // todo abatashev: implement a more complex logic: partition by NUMA and
+  // graph requirements
+  mDevices = devices;
+  return devices;
 }
-std::unordered_map<std::string_view, Device *>
+std::unordered_map<std::string_view, Device*>
 GraphPartitionPlanner::getGraphPartitioning() {
-    auto topology = mGraph.traverse();
-    std::unordered_map<std::string_view, Device *> partitioning;
+  auto topology = mGraph.traverse();
+  std::unordered_map<std::string_view, Device*> partitioning;
 
-    auto &ctx = inner::getContext(mGraph);
-    auto &nodeTable = inner::getNodeTable(ctx);
+  auto& ctx = inner::getContext(mGraph);
+  auto& nodeTable = inner::getNodeTable(ctx);
 
-    for (auto cluster : topology.getClusters()) {
-        for (auto &node : cluster.get<InputNode>()) {
-            partitioning[nodeTable[node.nodeIndex]->getName()] =
-                mDevices.devices;
-        }
-        for (auto &node : cluster.get<Node>()) {
-            partitioning[nodeTable[node.nodeIndex]->getName()] =
-                mDevices.devices;
-        }
-        for (auto &node : cluster.get<LossNode>()) {
-            partitioning[nodeTable[node.nodeIndex]->getName()] =
-                mDevices.devices;
-        }
-        for (auto &node : cluster.get<OutputNode>()) {
-            partitioning[nodeTable[node.nodeIndex]->getName()] =
-                mDevices.devices;
-        }
+  for (auto cluster : topology.getClusters()) {
+    for (auto& node : cluster.get<InputNode>()) {
+      partitioning[nodeTable[node.nodeIndex]->getName()] = mDevices.devices;
     }
+    for (auto& node : cluster.get<Node>()) {
+      partitioning[nodeTable[node.nodeIndex]->getName()] = mDevices.devices;
+    }
+    for (auto& node : cluster.get<LossNode>()) {
+      partitioning[nodeTable[node.nodeIndex]->getName()] = mDevices.devices;
+    }
+    for (auto& node : cluster.get<OutputNode>()) {
+      partitioning[nodeTable[node.nodeIndex]->getName()] = mDevices.devices;
+    }
+  }
 
-    return partitioning;
+  return partitioning;
 }
-}  // namespace athena::backend::llvm
+} // namespace athena::backend::llvm

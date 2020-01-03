@@ -22,54 +22,55 @@ using namespace athena::backend;
 namespace athena::ops {
 
 void AddOperation::gen(
-    core::AbstractGenerator &g,
-    std::vector<core::inner::Tensor *> &operationArguments) const {
-    core::inner::Tensor *c = operationArguments[2];
-    core::inner::Tensor *b = operationArguments[1];
-    core::inner::Tensor *a = operationArguments[0];
+    core::AbstractGenerator& g,
+    std::vector<core::inner::Tensor*>& operationArguments) const {
+  core::inner::Tensor* c = operationArguments[2];
+  core::inner::Tensor* b = operationArguments[1];
+  core::inner::Tensor* a = operationArguments[0];
 
-    g.generate("add", *a, *b, *c);
+  g.generate("add", *a, *b, *c);
 }
-core::inner::Tensor *AddOperation::getResultTensor(
-    core::Context& context, std::vector<core::inner::Tensor *> args) const {
-    core::ShapeView shapeView(args[0]->getShapeView());
-    return new core::inner::Tensor(args[0]->getDataType(), shapeView.toShape(), context);
+core::inner::Tensor*
+AddOperation::getResultTensor(core::Context& context,
+                              std::vector<core::inner::Tensor*> args) const {
+  core::ShapeView shapeView(args[0]->getShapeView());
+  return new core::inner::Tensor(args[0]->getDataType(), shapeView.toShape(),
+                                 context);
 }
 
-core::inner::Tensor *AddOperation::getDerivativeTensor(
-    core::Context& context, std::vector<core::inner::Tensor *> args, int argNo) const {
+core::inner::Tensor*
+AddOperation::getDerivativeTensor(core::Context& context,
+                                  std::vector<core::inner::Tensor*> args,
+                                  int argNo) const {
 #ifdef DEBUG
-    assert(argNo < 2 && "AddOperation takes 2 arguments!");
+  assert(argNo < 2 && "AddOperation takes 2 arguments!");
 #endif
-    core::ShapeView shapeView(args[argNo]->getShapeView());
-    return new core::inner::Tensor(args[argNo]->getDataType(),
-                                   shapeView.toShape(), context);
+  core::ShapeView shapeView(args[argNo]->getShapeView());
+  return new core::inner::Tensor(args[argNo]->getDataType(),
+                                 shapeView.toShape(), context);
 }
 void AddOperation::genDerivative(
-    const int order,
-    core::AbstractGenerator &g,
-    core::inner::Tensor &operationResult,
-    core::inner::Tensor &internalError,
-    std::vector<core::inner::Tensor *> &operationArguments,
-    core::inner::Tensor &derivativeTensor,
-    int argNo) const {
-    float f_unit = 1;
-    void *unit = reinterpret_cast<void *>(&f_unit);
+    const int order, core::AbstractGenerator& g,
+    core::inner::Tensor& operationResult, core::inner::Tensor& internalError,
+    std::vector<core::inner::Tensor*>& operationArguments,
+    core::inner::Tensor& derivativeTensor, int argNo) const {
+  float f_unit = 1;
+  void* unit = reinterpret_cast<void*>(&f_unit);
 #ifdef DEBUG
-    // We need to make sure the derivative tensor exists
-    assert(derivativeTensor.getDataType() != core::DataType::UNDEFINED &&
-           "derivativeTensor is broken");
+  // We need to make sure the derivative tensor exists
+  assert(derivativeTensor.getDataType() != core::DataType::UNDEFINED &&
+         "derivativeTensor is broken");
 #endif
-    // todo this is a workaround because I'm too lazy to implement proper copy
-    static auto *options = new HadamardOptions<float>{1.f, 0.0f};
-    void *opts = static_cast<void *>(options);
-    g.generate("fill", derivativeTensor, unit);
-    g.generate("hadamard", opts, derivativeTensor, internalError,
-               derivativeTensor);
+  // todo this is a workaround because I'm too lazy to implement proper copy
+  static auto* options = new HadamardOptions<float>{1.f, 0.0f};
+  void* opts = static_cast<void*>(options);
+  g.generate("fill", derivativeTensor, unit);
+  g.generate("hadamard", opts, derivativeTensor, internalError,
+             derivativeTensor);
 }
-core::inner::Tensor *AddOperation::getErrorTensor(
-    core::Context& context, std::vector<core::inner::Tensor *> args, int) const {
-    return getResultTensor(context, args);
+core::inner::Tensor* AddOperation::getErrorTensor(
+    core::Context& context, std::vector<core::inner::Tensor*> args, int) const {
+  return getResultTensor(context, args);
 }
 
-}  // namespace athena::ops
+} // namespace athena::ops

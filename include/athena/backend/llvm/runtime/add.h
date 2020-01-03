@@ -18,11 +18,9 @@
 #include <athena/core/inner/Tensor.h>
 
 template <typename T>
-extern void add(athena::backend::llvm::Device *,
-                athena::core::Allocator *,
-                athena::core::inner::Tensor *a,
-                athena::core::inner::Tensor *b,
-                athena::core::inner::Tensor *c);
+extern void add(athena::backend::llvm::Device*, athena::core::Allocator*,
+                athena::core::inner::Tensor* a, athena::core::inner::Tensor* b,
+                athena::core::inner::Tensor* c);
 
 /**
  * Fused multiplication and addition
@@ -36,12 +34,9 @@ extern void add(athena::backend::llvm::Device *,
  * @param c
  */
 template <typename T>
-extern void fma(athena::backend::llvm::Device *,
-                athena::core::Allocator *allocator,
-                athena::core::inner::Tensor *a,
-                T scaleA,
-                athena::core::inner::Tensor *b,
-                T scaleB,
-                athena::core::inner::Tensor *c);
+extern void
+fma(athena::backend::llvm::Device*, athena::core::Allocator* allocator,
+    athena::core::inner::Tensor* a, T scaleA, athena::core::inner::Tensor* b,
+    T scaleB, athena::core::inner::Tensor* c);
 
-#endif  // ATHENA_ADD_H
+#endif // ATHENA_ADD_H

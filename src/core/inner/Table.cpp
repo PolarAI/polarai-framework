@@ -16,20 +16,18 @@
 #include <vector>
 namespace athena::core::inner {
 Table<AllocationRecord>::Table() : mLastId(1) {
-    mRegisteredContents.emplace_back(mNullRecord);
+  mRegisteredContents.emplace_back(mNullRecord);
 }
 
-AllocationRecord &Table<AllocationRecord>::operator[](size_t index) {
-    return mRegisteredContents[index];
+AllocationRecord& Table<AllocationRecord>::operator[](size_t index) {
+  return mRegisteredContents[index];
 }
 
-size_t Table<AllocationRecord>::size() {
-    return mRegisteredContents.size();
-}
+size_t Table<AllocationRecord>::size() { return mRegisteredContents.size(); }
 
 void Table<AllocationRecord>::clear() {
-    mRegisteredContents.clear();
-    mRegisteredContents.emplace_back(mNullRecord);
-    mLastId = 1;
+  mRegisteredContents.clear();
+  mRegisteredContents.emplace_back(mNullRecord);
+  mLastId = 1;
 }
-}  // namespace athena::core::inner
+} // namespace athena::core::inner

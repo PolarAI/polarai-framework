@@ -20,13 +20,13 @@
 
 namespace athena::core {
 class ATH_CORE_EXPORT GraphCompiler {
-    public:
-    static void compileForward(Graph &graph, AbstractGenerator &generator);
-    static void compileBackward(Graph &graph, AbstractGenerator &generator);
+public:
+  static void compileForward(Graph& graph, AbstractGenerator& generator);
+  static void compileBackward(Graph& graph, AbstractGenerator& generator);
 
-    template <typename T>
-    using ClusterContainer = std::vector<core::inner::NodeDependencies<T>>;
+  template <typename T>
+  using ClusterContainer = std::vector<core::inner::NodeDependencies<T>>;
 };
-}  // namespace athena::core
+} // namespace athena::core
 
-#endif  // ATHENA_GRAPHCOMPILER_H
+#endif // ATHENA_GRAPHCOMPILER_H

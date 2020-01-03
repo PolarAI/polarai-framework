@@ -24,57 +24,56 @@
 
 using namespace athena::backend::llvm;
 
-std::string jit_test_add_ir =
-    "define i32 @jit_test_add(i32, i32) {\n"
-    "  %3 = alloca i32, align 4\n"
-    "  %4 = alloca i32, align 4\n"
-    "  store i32 %0, i32* %3, align 4\n"
-    "  store i32 %1, i32* %4, align 4\n"
-    "  %5 = load i32, i32* %3, align 4\n"
-    "  %6 = load i32, i32* %4, align 4\n"
-    "  %7 = add nsw i32 %5, %6\n"
-    "  ret i32 %7\n"
-    "}";
+std::string jit_test_add_ir = "define i32 @jit_test_add(i32, i32) {\n"
+                              "  %3 = alloca i32, align 4\n"
+                              "  %4 = alloca i32, align 4\n"
+                              "  store i32 %0, i32* %3, align 4\n"
+                              "  store i32 %1, i32* %4, align 4\n"
+                              "  %5 = load i32, i32* %3, align 4\n"
+                              "  %6 = load i32, i32* %4, align 4\n"
+                              "  %7 = add nsw i32 %5, %6\n"
+                              "  ret i32 %7\n"
+                              "}";
 
 class LLVMJITTestType : public ::testing::Test {
-    protected:
-    std::unique_ptr<AthenaJIT> jitCompiler;
+protected:
+  std::unique_ptr<AthenaJIT> jitCompiler;
 
-    void SetUp() override {
-        ::llvm::InitializeNativeTarget();
-        LLVMInitializeNativeAsmPrinter();
-        LLVMInitializeNativeAsmParser();
-        jitCompiler = AthenaJIT::create();
-    }
+  void SetUp() override {
+    ::llvm::InitializeNativeTarget();
+    LLVMInitializeNativeAsmPrinter();
+    LLVMInitializeNativeAsmParser();
+    jitCompiler = AthenaJIT::create();
+  }
 };
 
 TEST_F(LLVMJITTestType, JITIsAbleToExecuteCode) {
-    // Arrange
-    std::string irStr = "target datalayout = \"";
-    irStr += jitCompiler->getDataLayout().getStringRepresentation();
-    irStr += "\"\n";
-    irStr += jit_test_add_ir;
+  // Arrange
+  std::string irStr = "target datalayout = \"";
+  irStr += jitCompiler->getDataLayout().getStringRepresentation();
+  irStr += "\"\n";
+  irStr += jit_test_add_ir;
 
-    auto irBuffer = llvm::MemoryBuffer::getMemBuffer(irStr);
-    llvm::SMDiagnostic err;
-    auto ir = llvm::parseIR(*irBuffer, err, jitCompiler->getContext());
+  auto irBuffer = llvm::MemoryBuffer::getMemBuffer(irStr);
+  llvm::SMDiagnostic err;
+  auto ir = llvm::parseIR(*irBuffer, err, jitCompiler->getContext());
 
-    auto jitErr = jitCompiler->addModule(ir);
-    if (jitErr) {
-        llvm::errs() << jitErr;
-        FAIL();
-    }
+  auto jitErr = jitCompiler->addModule(ir);
+  if (jitErr) {
+    llvm::errs() << jitErr;
+    FAIL();
+  }
 
-    // Act
-    auto sym = jitCompiler->lookup("jit_test_add");
-    if (!sym) {
-        llvm::consumeError(sym.takeError());
-        FAIL();
-    }
+  // Act
+  auto sym = jitCompiler->lookup("jit_test_add");
+  if (!sym) {
+    llvm::consumeError(sym.takeError());
+    FAIL();
+  }
 
-    auto addFunction = (int (*)(int, int))(intptr_t)sym.get().getAddress();
-    auto res = addFunction(5, 4);
+  auto addFunction = (int (*)(int, int))(intptr_t)sym.get().getAddress();
+  auto res = addFunction(5, 4);
 
-    // Assert
-    ASSERT_EQ(res, 9);
+  // Assert
+  ASSERT_EQ(res, 9);
 }

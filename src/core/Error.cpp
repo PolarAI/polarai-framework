@@ -15,11 +15,9 @@
 
 namespace athena::core {
 Error::Error() : mErrorCode(0) {}
-Error::operator bool() const {
-    return mErrorCode != 0;
+Error::operator bool() const { return mErrorCode != 0; }
+std::ostream& operator<<(std::ostream& stream, const Error& err) {
+  stream << err.mErrorMessage << "\n";
+  return stream;
 }
-std::ostream &operator<<(std::ostream &stream, const Error &err) {
-    stream << err.mErrorMessage << "\n";
-    return stream;
-}
-}  // namespace athena::core
+} // namespace athena::core

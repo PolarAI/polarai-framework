@@ -15,17 +15,17 @@
 
 namespace athena::backend::llvm::impl {
 
-::llvm::Function *create_get_fast_pointer_decl(::llvm::LLVMContext &ctx,
-                                               ::llvm::Module &module) {
-    std::vector<::llvm::Type *> args(2, ::llvm::Type::getInt64Ty(ctx));
-    ::llvm::FunctionType *FT =
-        ::llvm::FunctionType::get(::llvm::Type::getInt64Ty(ctx), args, false);
+::llvm::Function* create_get_fast_pointer_decl(::llvm::LLVMContext& ctx,
+                                               ::llvm::Module& module) {
+  std::vector<::llvm::Type*> args(2, ::llvm::Type::getInt64Ty(ctx));
+  ::llvm::FunctionType* FT =
+      ::llvm::FunctionType::get(::llvm::Type::getInt64Ty(ctx), args, false);
 
-    ::llvm::Function *F =
-        ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage,
-                                 "athena_get_fast_pointer", &module);
+  ::llvm::Function* F =
+      ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage,
+                               "athena_get_fast_pointer", &module);
 
-    return F;
+  return F;
 }
 
-}  // namespace athena::backend::llvm::impl
+} // namespace athena::backend::llvm::impl

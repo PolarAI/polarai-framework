@@ -22,20 +22,18 @@ using namespace athena::core::inner;
 using namespace athena::core;
 
 template <typename T>
-void fill(Device *, Allocator *allocator, Tensor *a, T value) {
-    auto *memory = reinterpret_cast<T *>(allocator->getRAMPointer(*a));
+void fill(Device*, Allocator* allocator, Tensor* a, T value) {
+  auto* memory = reinterpret_cast<T*>(allocator->getRAMPointer(*a));
 
-    for (size_t i = 0; i < a->getShape().getTotalSize(); i++) {
-        memory[i] = value;
-    }
+  for (size_t i = 0; i < a->getShape().getTotalSize(); i++) {
+    memory[i] = value;
+  }
 }
 
-template void fill<float>(athena::backend::llvm::Device *,
-                          athena::core::Allocator *,
-                          athena::core::inner::Tensor *a,
-                          float value);
+template void fill<float>(athena::backend::llvm::Device*,
+                          athena::core::Allocator*,
+                          athena::core::inner::Tensor* a, float value);
 
-template void fill<double>(athena::backend::llvm::Device *,
-                           athena::core::Allocator *,
-                           athena::core::inner::Tensor *a,
-                           double value);
+template void fill<double>(athena::backend::llvm::Device*,
+                           athena::core::Allocator*,
+                           athena::core::inner::Tensor* a, double value);

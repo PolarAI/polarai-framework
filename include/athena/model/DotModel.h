@@ -24,9 +24,9 @@ namespace athena::model {
  * Print graph to DOT format for debug purposes
  */
 class ATH_MODEL_EXPORT DotModel {
-    public:
-    static void exportGraph(core::Graph &graph, std::ostream &stream);
+public:
+  static void exportGraph(core::Graph& graph, std::ostream& stream);
 };
-}  // namespace athena::model
+} // namespace athena::model
 
-#endif  // ATHENA_DOTMODEL_H
+#endif // ATHENA_DOTMODEL_H

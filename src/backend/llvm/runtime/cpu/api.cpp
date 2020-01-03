@@ -20,8 +20,8 @@ using namespace athena::backend::llvm;
 static CPUDevice kCpuDevice;
 
 DeviceContainer getAvailableDevices() {
-    DeviceContainer deviceContainer{&kCpuDevice, 1};
-    return deviceContainer;
+  DeviceContainer deviceContainer{&kCpuDevice, 1};
+  return deviceContainer;
 }
 void initializeContext(athena::backend::llvm::DeviceContainer) {}
 void releaseContext() {}

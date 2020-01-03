@@ -15,28 +15,18 @@
 #include <athena/core/Graph.h>
 
 namespace athena::core::inner {
-void setGraphIndex(AbstractNode &node, size_t graphIndex) {
-    node.mGraphIndex = graphIndex;
+void setGraphIndex(AbstractNode& node, size_t graphIndex) {
+  node.mGraphIndex = graphIndex;
 }
-void incrementInputCount(AbstractNode &node) {
-    ++node.mInputsCount;
+void incrementInputCount(AbstractNode& node) { ++node.mInputsCount; }
+Tensor& getTensorFromNode(AbstractNode& node) { return *node.mTensor; }
+std::shared_ptr<Tensor> getTensorPtrFromNode(AbstractNode& node) {
+  return node.mTensor;
 }
-Tensor &getTensorFromNode(AbstractNode &node) {
-    return *node.mTensor;
+Traversal& getTraversal(Graph& graph) { return graph.mTraversal; }
+Clusters& getClusters(Graph& graph) { return getClusters(getTraversal(graph)); }
+Clusters& getClusters(Traversal& traversal) { return traversal.clusters; }
+void setTraversalValidity(Traversal& traversal, bool flag) {
+  traversal.mIsValidTraversal = flag;
 }
-std::shared_ptr<Tensor> getTensorPtrFromNode(AbstractNode &node) {
-    return node.mTensor;
-}
-Traversal &getTraversal(Graph &graph) {
-    return graph.mTraversal;
-}
-Clusters &getClusters(Graph &graph) {
-    return getClusters(getTraversal(graph));
-}
-Clusters &getClusters(Traversal &traversal) {
-    return traversal.clusters;
-}
-void setTraversalValidity(Traversal &traversal, bool flag) {
-    traversal.mIsValidTraversal = flag;
-}
-}  // namespace athena::core::inner
+} // namespace athena::core::inner

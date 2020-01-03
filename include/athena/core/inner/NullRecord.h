@@ -20,21 +20,17 @@
 #include <athena/core/inner/ForwardDeclarations.h>
 
 namespace athena::core::inner {
-template <typename Content>
-struct ATH_CORE_EXPORT NullRecord;
-template <>
-struct ATH_CORE_EXPORT NullRecord<AllocationRecord> {
-    static inline const AllocationRecord value =
-        AllocationRecord(DataType::UNDEFINED, TensorShape{});
+template <typename Content> struct ATH_CORE_EXPORT NullRecord;
+template <> struct ATH_CORE_EXPORT NullRecord<AllocationRecord> {
+  static inline const AllocationRecord value =
+      AllocationRecord(DataType::UNDEFINED, TensorShape{});
 };
-template <>
-struct ATH_CORE_EXPORT NullRecord<Graph*> {
-    static inline Graph* const value = nullptr;
+template <> struct ATH_CORE_EXPORT NullRecord<Graph*> {
+  static inline Graph* const value = nullptr;
 };
-template <>
-struct ATH_CORE_EXPORT NullRecord<AbstractNode*> {
-    static inline AbstractNode* const value = nullptr;
+template <> struct ATH_CORE_EXPORT NullRecord<AbstractNode*> {
+  static inline AbstractNode* const value = nullptr;
 };
-}  // namespace athena::core::inner
+} // namespace athena::core::inner
 
-#endif  // ATHENA_NULLRECORD_H
+#endif // ATHENA_NULLRECORD_H

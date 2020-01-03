@@ -20,4 +20,4 @@
 #define ATHENA_REINITIALIZE
 #endif
 
-#endif  // ATHENA_SETTINGS_H
+#endif // ATHENA_SETTINGS_H

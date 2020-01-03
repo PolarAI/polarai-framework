@@ -20,17 +20,17 @@
 
 namespace athena::core::inner {
 struct ATH_CORE_EXPORT AllocationRecord {
-    private:
-    DataType mDataType;
-    TensorShape mShape;
+private:
+  DataType mDataType;
+  TensorShape mShape;
 
-    public:
-    AllocationRecord(DataType dataType, TensorShape shape);
-    DataType getDataType() const;
-    const TensorShape& getShape() const;
-    ShapeView getShapeView(size_t offset = 0) const;
-    size_t getSize() const;
+public:
+  AllocationRecord(DataType dataType, TensorShape shape);
+  DataType getDataType() const;
+  const TensorShape& getShape() const;
+  ShapeView getShapeView(size_t offset = 0) const;
+  size_t getSize() const;
 };
-}  // namespace athena::core::inner
+} // namespace athena::core::inner
 
-#endif  // ATHENA_ALLOCATIONTABLERECORD_H
+#endif // ATHENA_ALLOCATIONTABLERECORD_H

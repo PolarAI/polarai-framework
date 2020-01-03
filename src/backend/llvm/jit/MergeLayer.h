@@ -24,48 +24,47 @@ namespace athena::backend::llvm {
 class MergeMaterializationUnit;
 
 class ATH_BACKEND_LLVM_EXPORT MergeLayer : public ::llvm::orc::IRLayer {
-    friend MergeMaterializationUnit;
+  friend MergeMaterializationUnit;
 
-    private:
-    ::llvm::orc::IRLayer &mBaseLayer;
-    std::map<std::string, ::llvm::orc::ThreadSafeModule> mLinkedModuleMap;
-    std::map<std::string, bool> mMaterializedMap;
+private:
+  ::llvm::orc::IRLayer& mBaseLayer;
+  std::map<std::string, ::llvm::orc::ThreadSafeModule> mLinkedModuleMap;
+  std::map<std::string, bool> mMaterializedMap;
 
-    public:
-    MergeLayer(::llvm::orc::ExecutionSession &ES,
-               ::llvm::orc::IRLayer &baseLayer)
-        : IRLayer(ES), mBaseLayer(baseLayer){};
-    ~MergeLayer() override = default;
-    ::llvm::Error add(::llvm::orc::JITDylib &dylib,
-                      ::llvm::orc::ThreadSafeModule threadSafeModule,
-                      ::llvm::orc::VModuleKey key) override;
-    void emit(::llvm::orc::MaterializationResponsibility responsibility,
-              ::llvm::orc::ThreadSafeModule threadSafeModule) override;
+public:
+  MergeLayer(::llvm::orc::ExecutionSession& ES, ::llvm::orc::IRLayer& baseLayer)
+      : IRLayer(ES), mBaseLayer(baseLayer){};
+  ~MergeLayer() override = default;
+  ::llvm::Error add(::llvm::orc::JITDylib& dylib,
+                    ::llvm::orc::ThreadSafeModule threadSafeModule,
+                    ::llvm::orc::VModuleKey key) override;
+  void emit(::llvm::orc::MaterializationResponsibility responsibility,
+            ::llvm::orc::ThreadSafeModule threadSafeModule) override;
 };
 
-class ATH_BACKEND_LLVM_EXPORT MergeMaterializationUnit :
-    public ::llvm::orc::MaterializationUnit {
-    protected:
-    MergeLayer &mParent;
+class ATH_BACKEND_LLVM_EXPORT MergeMaterializationUnit
+    : public ::llvm::orc::MaterializationUnit {
+protected:
+  MergeLayer& mParent;
 
-    public:
-    MergeMaterializationUnit(::llvm::orc::ExecutionSession &executionSession,
-                             MergeLayer &parent,
-                             ::llvm::orc::ThreadSafeModule module,
-                             ::llvm::orc::VModuleKey key);
+public:
+  MergeMaterializationUnit(::llvm::orc::ExecutionSession& executionSession,
+                           MergeLayer& parent,
+                           ::llvm::orc::ThreadSafeModule module,
+                           ::llvm::orc::VModuleKey key);
 
-    [[nodiscard]] ::llvm::StringRef getName() const override {
-        // todo return module name
-        return "MergeMaterializationUnit";
-    }
+  [[nodiscard]] ::llvm::StringRef getName() const override {
+    // todo return module name
+    return "MergeMaterializationUnit";
+  }
 
-    private:
-    void materialize(::llvm::orc::MaterializationResponsibility R) override;
-    void discard(const ::llvm::orc::JITDylib &JD,
-                 const ::llvm::orc::SymbolStringPtr &Name) override {
-        // todo there's no way to remove symbols
-    }
+private:
+  void materialize(::llvm::orc::MaterializationResponsibility R) override;
+  void discard(const ::llvm::orc::JITDylib& JD,
+               const ::llvm::orc::SymbolStringPtr& Name) override {
+    // todo there's no way to remove symbols
+  }
 };
-}  // namespace athena::backend::llvm
+} // namespace athena::backend::llvm
 
-#endif  // ATHENA_MERGELAYER_H
+#endif // ATHENA_MERGELAYER_H

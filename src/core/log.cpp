@@ -16,11 +16,7 @@ namespace athena {
 
 const std::unique_ptr<LogHolder> logHolder = std::make_unique<LogHolder>();
 
-core::AbstractLogger &log() {
-    return *(logHolder->mLog);
-}
+core::AbstractLogger& log() { return *(logHolder->mLog); }
 
-core::AbstractLogger &err() {
-    return *(logHolder->mErr);
-}
-}  // namespace athena
+core::AbstractLogger& err() { return *(logHolder->mErr); }
+} // namespace athena

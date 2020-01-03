@@ -16,16 +16,16 @@
 
 namespace athena::core {
 size_t sizeOfDataType(const DataType& dataType) {
-    switch (dataType) {
-        case DataType::DOUBLE:
-            return 8ULL;
-        case DataType::FLOAT:
-            return 4ULL;
-        case DataType::HALF:
-            return 2ULL;
-        default:
-            FatalError(ATH_FATAL_OTHER, "Size for dataType is not defined");
-            return 0;
-    }
+  switch (dataType) {
+  case DataType::DOUBLE:
+    return 8ULL;
+  case DataType::FLOAT:
+    return 4ULL;
+  case DataType::HALF:
+    return 2ULL;
+  default:
+    FatalError(ATH_FATAL_OTHER, "Size for dataType is not defined");
+    return 0;
+  }
 }
-}  // namespace athena::core
+} // namespace athena::core

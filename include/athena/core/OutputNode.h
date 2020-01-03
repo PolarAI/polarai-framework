@@ -23,25 +23,23 @@ namespace athena::core {
  * Special type of Node that use for output of data
  */
 class ATH_CORE_EXPORT OutputNode : public AbstractNode {
-    public:
-    OutputNode() = delete;
-    OutputNode(const OutputNode& rhs) = default;
-    OutputNode(OutputNode&& rhs) = default;
-    explicit OutputNode(DataType dataType,
-                        Context& context,
-                        std::string name = "");
-    ~OutputNode() override;
+public:
+  OutputNode() = delete;
+  OutputNode(const OutputNode& rhs) = default;
+  OutputNode(OutputNode&& rhs) = default;
+  explicit OutputNode(DataType dataType, Context& context,
+                      std::string name = "");
+  ~OutputNode() override;
 
-    OutputNode& operator=(const OutputNode& rhs) = delete;
-    OutputNode& operator=(OutputNode&& rhs) = delete;
+  OutputNode& operator=(const OutputNode& rhs) = delete;
+  OutputNode& operator=(OutputNode&& rhs) = delete;
 
-    NodeType getType() const override;
+  NodeType getType() const override;
 
-    template <typename T>
-    Accessor<T> getAccessor(Allocator& allocator) {
-        return Accessor<T>(allocator, inner::getTensorFromNode(*this), {});
-    }
+  template <typename T> Accessor<T> getAccessor(Allocator& allocator) {
+    return Accessor<T>(allocator, inner::getTensorFromNode(*this), {});
+  }
 };
-}  // namespace athena::core
+} // namespace athena::core
 
-#endif  // ATHENA_OUTPUTNODE_H
+#endif // ATHENA_OUTPUTNODE_H

@@ -127,7 +127,7 @@ def generate_llvm(name, signature, gentypes):
 
         arg_count = 0
         for _ in signature:
-            res += get_mangled_name(name, template) + "_fargs->setName(\"arg"+str(arg_count)+"\");\n"
+            res += get_mangled_name(name, template) + "_fargs->setName(\"arg" + str(arg_count) + "\");\n"
             arg_count += 1
             res += "++" + get_mangled_name(name, template) + "_fargs;\n"
 
@@ -145,8 +145,8 @@ def generate_llvm(name, signature, gentypes):
         res += "builder.CreateIntToPtr(" + get_mangled_name(name, template) + "_ptr_val, "
         res += get_mangled_name(name, template) + "_FT->getPointerTo());\n"
 
-        res += "std::vector<::llvm::Value *> "+get_mangled_name(name, template)+"_argValues;\n"
-        res += "for (auto &arg : "+get_mangled_name(name, template)+"_F->args())\n"
+        res += "std::vector<::llvm::Value *> " + get_mangled_name(name, template) + "_argValues;\n"
+        res += "for (auto &arg : " + get_mangled_name(name, template) + "_F->args())\n"
         res += "  " + get_mangled_name(name, template) + "_argValues.push_back(&arg);\n"
 
         res += "builder.CreateCall(" + get_mangled_name(name, template) + "_FT, "

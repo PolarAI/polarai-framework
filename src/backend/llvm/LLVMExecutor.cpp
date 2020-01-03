@@ -29,104 +29,100 @@
 
 namespace athena::backend::llvm {
 
-void LLVMExecutor::setGraph(athena::core::Graph &graph) {
-    auto modules = compileGraph(graph);
+void LLVMExecutor::setGraph(athena::core::Graph& graph) {
+  auto modules = compileGraph(graph);
 
-    // At the moment compileGraph method always returns exactly 1 module.
-    // That may change in future when we decide to go with a more complex
-    // structure of neural networks.
-    for (auto &module : modules) {
-        auto err = mJITCompiler->addModule(module);
-        if (err) {
-            core::FatalError(core::ATH_FATAL_OTHER,
-                             "Error adding module to JIT");
-        }
+  // At the moment compileGraph method always returns exactly 1 module.
+  // That may change in future when we decide to go with a more complex
+  // structure of neural networks.
+  for (auto& module : modules) {
+    auto err = mJITCompiler->addModule(module);
+    if (err) {
+      core::FatalError(core::ATH_FATAL_OTHER, "Error adding module to JIT");
     }
+  }
 
-    // Prepare runtime library
-    for (auto &module : mRuntimeDriver->getModules()) {
-        module->setDataLayout(mJITCompiler->getDataLayout());  // fixme hack
-        auto err = mJITCompiler->addModule(module);
-        if (err) {
-            new core::FatalError(core::ATH_FATAL_OTHER, "Unable to add module");
-        }
+  // Prepare runtime library
+  for (auto& module : mRuntimeDriver->getModules()) {
+    module->setDataLayout(mJITCompiler->getDataLayout()); // fixme hack
+    auto err = mJITCompiler->addModule(module);
+    if (err) {
+      new core::FatalError(core::ATH_FATAL_OTHER, "Unable to add module");
     }
+  }
 }
 
 void LLVMExecutor::evaluate() {
-    auto sym = mJITCompiler->lookup("evaluateGraph");
+  auto sym = mJITCompiler->lookup("evaluateGraph");
 #ifdef DEBUG
-    assert(
-        sym &&
-        "Failed to find evaluateGraph function. Did you forget to set Graph?");
+  assert(sym &&
+         "Failed to find evaluateGraph function. Did you forget to set Graph?");
 #endif
 
-    auto evaluateFunction = (void (*)())(intptr_t)sym.get().getAddress();
-    evaluateFunction();
+  auto evaluateFunction = (void (*)())(intptr_t)sym.get().getAddress();
+  evaluateFunction();
 }
 
 void LLVMExecutor::optimizeGraph() {
-    auto sym = mJITCompiler->lookup("optimizeGraph");
+  auto sym = mJITCompiler->lookup("optimizeGraph");
 #ifdef DEBUG
-    assert(
-        sym &&
-        "Failed to find optimizeGraph function. Did you forget to set Graph?");
+  assert(sym &&
+         "Failed to find optimizeGraph function. Did you forget to set Graph?");
 #endif
 
-    auto optimizeFunction = (void (*)())(intptr_t)sym.get().getAddress();
-    optimizeFunction();
+  auto optimizeFunction = (void (*)())(intptr_t)sym.get().getAddress();
+  optimizeFunction();
 }
 
 LLVMExecutor::LLVMExecutor() : mJITCompiler(AthenaJIT::create()) {
-    if (!mJITCompiler) {
-        new core::FatalError(core::ATH_FATAL_OTHER,
-                             "Unable to create JIT compiler");
-    }
+  if (!mJITCompiler) {
+    new core::FatalError(core::ATH_FATAL_OTHER,
+                         "Unable to create JIT compiler");
+  }
 
-    mRuntimeDriver =
-        std::make_unique<RuntimeDriver>(mJITCompiler->getContext());
+  mRuntimeDriver = std::make_unique<RuntimeDriver>(mJITCompiler->getContext());
 
-    // TODO better RT lib handling
-    auto libName = std::getenv("ATHENA_RT_LIBRARY");
-    mRuntimeDriver->load(libName);
+  // TODO better RT lib handling
+  auto libName = std::getenv("ATHENA_RT_LIBRARY");
+  mRuntimeDriver->load(libName);
 #ifdef DEBUG
-    assert(mRuntimeDriver->isLoaded());
+  assert(mRuntimeDriver->isLoaded());
 #endif
 }
 
-std::unique_ptr<core::Allocator> &LLVMExecutor::getAllocator() {
-    return mAllocator;
+std::unique_ptr<core::Allocator>& LLVMExecutor::getAllocator() {
+  return mAllocator;
 }
-void LLVMExecutor::setAllocator(std::unique_ptr<core::Allocator> &allocator) {
-    mAllocator = std::move(allocator);
+void LLVMExecutor::setAllocator(std::unique_ptr<core::Allocator>& allocator) {
+  mAllocator = std::move(allocator);
 }
 
-std::vector<std::unique_ptr<::llvm::Module>> LLVMExecutor::compileGraph(
-    athena::core::Graph &graph) {
-    auto llvmModule = std::make_unique<::llvm::Module>(
-        graph.getGraphName(), mJITCompiler->getContext());
+std::vector<std::unique_ptr<::llvm::Module>>
+LLVMExecutor::compileGraph(athena::core::Graph& graph) {
+  auto llvmModule = std::make_unique<::llvm::Module>(
+      graph.getGraphName(), mJITCompiler->getContext());
 
-    llvmModule->setDataLayout(mJITCompiler->getDataLayout());
-    // TODO get real target triple
-    llvmModule->setTargetTriple(::llvm::sys::getDefaultTargetTriple());
+  llvmModule->setDataLayout(mJITCompiler->getDataLayout());
+  // TODO get real target triple
+  llvmModule->setTargetTriple(::llvm::sys::getDefaultTargetTriple());
 
-    GraphPartitionPlanner planner(graph);
-    // todo do actual partitioning
-    auto devices =
-        planner.getPartitionedDevices(mRuntimeDriver->getAvailableDevices());
-    auto partitioning = planner.getGraphPartitioning();
+  GraphPartitionPlanner planner(graph);
+  // todo do actual partitioning
+  auto devices =
+      planner.getPartitionedDevices(mRuntimeDriver->getAvailableDevices());
+  auto partitioning = planner.getGraphPartitioning();
 
-    mRuntimeDriver->initializeContext(devices);
+  mRuntimeDriver->initializeContext(devices);
 
-    LLVMGenerator generator(mJITCompiler->getContext(), llvmModule, *mAllocator,
-                            mRuntimeDriver->getModules(), partitioning);
+  LLVMGenerator generator(mJITCompiler->getContext(), llvmModule, *mAllocator,
+                          mRuntimeDriver->getModules(), partitioning);
 
-    core::GraphCompiler::compileForward(graph, generator);
-    core::GraphCompiler::compileBackward(graph, generator);
+  core::GraphCompiler::compileForward(graph, generator);
+  core::GraphCompiler::compileBackward(graph, generator);
 
-    std::vector<std::unique_ptr<::llvm::Module>> resultModules;
-    resultModules.push_back(std::move(llvmModule));
+  std::vector<std::unique_ptr<::llvm::Module>> resultModules;
+  resultModules.push_back(std::move(llvmModule));
 
-    return resultModules;
+  return resultModules;
 }
-}  // namespace athena::backend::llvm
+} // namespace athena::backend::llvm

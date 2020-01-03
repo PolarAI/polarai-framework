@@ -22,13 +22,12 @@
 
 namespace athena::model {
 class ATH_MODEL_EXPORT NativeModel {
-    public:
-    static void serializeGraph(core::Graph &graph, std::ostream &stream);
-    static void deserializeGraph(core::Graph &graph, std::istream &stream);
-    static void saveGraphToFile(core::Graph &graph,
-                                const std::string &filename);
-    static void readGraphFromFile(core::Graph &graph, const std::string &name);
+public:
+  static void serializeGraph(core::Graph& graph, std::ostream& stream);
+  static void deserializeGraph(core::Graph& graph, std::istream& stream);
+  static void saveGraphToFile(core::Graph& graph, const std::string& filename);
+  static void readGraphFromFile(core::Graph& graph, const std::string& name);
 };
-}  // namespace athena::model
+} // namespace athena::model
 
-#endif  // ATHENA_NATIVEMODEL_H
+#endif // ATHENA_NATIVEMODEL_H

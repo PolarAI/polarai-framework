@@ -15,41 +15,39 @@
 
 namespace athena::backend::llvm::codegen {
 
-void registerFill(LLVMGenerator *generator) {
-    std::function<void(::llvm::LLVMContext &, ::llvm::Module &,
-                       ::llvm::IRBuilder<> &, core::inner::Tensor &, void *&)>
-        f = [generator](::llvm::LLVMContext &ctx, ::llvm::Module &module,
-                        ::llvm::IRBuilder<> &builder, core::inner::Tensor &a,
-                        void *&filler) {
-            // todo handle different data types
+void registerFill(LLVMGenerator* generator) {
+  std::function<void(::llvm::LLVMContext&, ::llvm::Module&,
+                     ::llvm::IRBuilder<>&, core::inner::Tensor&, void*&)>
+      f = [generator](::llvm::LLVMContext& ctx, ::llvm::Module& module,
+                      ::llvm::IRBuilder<>& builder, core::inner::Tensor& a,
+                      void*& filler) {
+        // todo handle different data types
 
-            ::llvm::Function *calledFunction =
-                generator->findLLVMFunction("athn_fill_f");
+        ::llvm::Function* calledFunction =
+            generator->findLLVMFunction("athn_fill_f");
 
-            if (!calledFunction) {
-                core::FatalError(core::ATH_FATAL_OTHER,
-                                 "Unknown function referenced");
-            }
+        if (!calledFunction) {
+          core::FatalError(core::ATH_FATAL_OTHER,
+                           "Unknown function referenced");
+        }
 
-            std::vector<::llvm::Value *> ArgsV;
-            ::llvm::Constant *device = ::llvm::ConstantInt::get(
-                ::llvm::Type::getInt64Ty(ctx),
-                reinterpret_cast<size_t>(
-                    generator->getPreferredDevice("fill")));
-            ArgsV.push_back(device);
-            ::llvm::Constant *allocatorConst =
-                ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(ctx),
-                                         (size_t)(&generator->getAllocator()));
-            ArgsV.push_back(allocatorConst);
-            ::llvm::Constant *tensorConst = ::llvm::ConstantInt::get(
-                ::llvm::Type::getInt64Ty(ctx), (size_t)(&a));
-            ArgsV.push_back(tensorConst);
-            ::llvm::Constant *fillerConst =
-                ::llvm::ConstantFP::get(::llvm::Type::getFloatTy(ctx),
-                                        *reinterpret_cast<float *>(filler));
-            ArgsV.push_back(fillerConst);
-            builder.CreateCall(calledFunction, ArgsV);
-        };
-    generator->registerFunctor("fill", f);
+        std::vector<::llvm::Value*> ArgsV;
+        ::llvm::Constant* device = ::llvm::ConstantInt::get(
+            ::llvm::Type::getInt64Ty(ctx),
+            reinterpret_cast<size_t>(generator->getPreferredDevice("fill")));
+        ArgsV.push_back(device);
+        ::llvm::Constant* allocatorConst =
+            ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(ctx),
+                                     (size_t)(&generator->getAllocator()));
+        ArgsV.push_back(allocatorConst);
+        ::llvm::Constant* tensorConst = ::llvm::ConstantInt::get(
+            ::llvm::Type::getInt64Ty(ctx), (size_t)(&a));
+        ArgsV.push_back(tensorConst);
+        ::llvm::Constant* fillerConst = ::llvm::ConstantFP::get(
+            ::llvm::Type::getFloatTy(ctx), *reinterpret_cast<float*>(filler));
+        ArgsV.push_back(fillerConst);
+        builder.CreateCall(calledFunction, ArgsV);
+      };
+  generator->registerFunctor("fill", f);
 }
-}  // namespace athena::backend::llvm::codegen
+} // namespace athena::backend::llvm::codegen

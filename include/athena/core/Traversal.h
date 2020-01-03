@@ -25,74 +25,63 @@
 namespace athena::core {
 namespace inner {
 struct ATH_CORE_EXPORT Dependency {
-    size_t nodeIndex;
-    size_t mark;
-    Dependency(size_t nodeIndex, size_t mark)
-        : nodeIndex(nodeIndex), mark(mark) {}
-    bool operator<(const Dependency &rhs) const {
-        return mark < rhs.mark;
-    }
+  size_t nodeIndex;
+  size_t mark;
+  Dependency(size_t nodeIndex, size_t mark)
+      : nodeIndex(nodeIndex), mark(mark) {}
+  bool operator<(const Dependency& rhs) const { return mark < rhs.mark; }
 };
 
-template <typename TemplateNodeType>
-struct ATH_CORE_EXPORT NodeDependencies {
-    size_t nodeIndex;
-    std::set<Dependency> input;
-    std::set<Dependency> output;
-    NodeDependencies(size_t nodeIndex,
-                     std::set<Dependency> input,
-                     std::set<Dependency> output)
-        : nodeIndex(nodeIndex),
-          input(std::move(input)),
-          output(std::move(output)) {}
+template <typename TemplateNodeType> struct ATH_CORE_EXPORT NodeDependencies {
+  size_t nodeIndex;
+  std::set<Dependency> input;
+  std::set<Dependency> output;
+  NodeDependencies(size_t nodeIndex, std::set<Dependency> input,
+                   std::set<Dependency> output)
+      : nodeIndex(nodeIndex), input(std::move(input)),
+        output(std::move(output)) {}
 };
 
 struct ATH_CORE_EXPORT NodeState {
-    size_t inputCount;
-    std::set<Dependency> input;
-    std::set<Dependency> output;
+  size_t inputCount;
+  std::set<Dependency> input;
+  std::set<Dependency> output;
 };
 
 struct ATH_CORE_EXPORT Cluster {
-    using Content = inner::TupleContainersWithWrappers<std::vector,
-                                                       inner::NodeDependencies,
-                                                       Node,
-                                                       InputNode,
-                                                       OutputNode,
-                                                       LossNode>::Holder;
-    size_t nodeCount;
-    Content content;
-    template <typename TemplateNodeType>
-    std::vector<inner::NodeDependencies<TemplateNodeType>> &get() {
-        return std::get<std::vector<inner::NodeDependencies<TemplateNodeType>>>(
-            content);
-    }
-    template <typename TemplateNodeType>
-    const std::vector<inner::NodeDependencies<TemplateNodeType>> &get() const {
-        return std::get<std::vector<inner::NodeDependencies<TemplateNodeType>>>(
-            content);
-    }
+  using Content =
+      inner::TupleContainersWithWrappers<std::vector, inner::NodeDependencies,
+                                         Node, InputNode, OutputNode,
+                                         LossNode>::Holder;
+  size_t nodeCount;
+  Content content;
+  template <typename TemplateNodeType>
+  std::vector<inner::NodeDependencies<TemplateNodeType>>& get() {
+    return std::get<std::vector<inner::NodeDependencies<TemplateNodeType>>>(
+        content);
+  }
+  template <typename TemplateNodeType>
+  const std::vector<inner::NodeDependencies<TemplateNodeType>>& get() const {
+    return std::get<std::vector<inner::NodeDependencies<TemplateNodeType>>>(
+        content);
+  }
 };
-}  // namespace inner
+} // namespace inner
 
 /**
  * Graph traversal
  */
 class ATH_CORE_EXPORT Traversal {
-    private:
-    inner::Clusters clusters;
-    bool mIsValidTraversal;
+private:
+  inner::Clusters clusters;
+  bool mIsValidTraversal;
 
-    public:
-    const inner::Clusters &getClusters() const {
-        return clusters;
-    }
-    bool isValidTraversal() const {
-        return mIsValidTraversal;
-    }
-    friend inner::Clusters &inner::getClusters(Traversal &traversal);
-    friend void inner::setTraversalValidity(Traversal &traversal, bool flag);
+public:
+  const inner::Clusters& getClusters() const { return clusters; }
+  bool isValidTraversal() const { return mIsValidTraversal; }
+  friend inner::Clusters& inner::getClusters(Traversal& traversal);
+  friend void inner::setTraversalValidity(Traversal& traversal, bool flag);
 };
-}  // namespace athena::core
+} // namespace athena::core
 
-#endif  // ATHENA_TRAVERSAL_H
+#endif // ATHENA_TRAVERSAL_H

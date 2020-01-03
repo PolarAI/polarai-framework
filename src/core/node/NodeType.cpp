@@ -17,26 +17,20 @@
 #include <athena/core/inner/ForwardDeclarations.h>
 
 namespace athena::core {
-template <typename TemplateNodeType>
-NodeType ATH_CORE_EXPORT getNodeType() {
-    new FatalError(ATH_NOT_IMPLEMENTED,
-                   "NodeType is not defined for given type");
-    return NodeType::UNDEFINED;
+template <typename TemplateNodeType> NodeType ATH_CORE_EXPORT getNodeType() {
+  new FatalError(ATH_NOT_IMPLEMENTED, "NodeType is not defined for given type");
+  return NodeType::UNDEFINED;
 }
-template <>
-NodeType ATH_CORE_EXPORT getNodeType<Node>() {
-    return NodeType::DEFAULT;
+template <> NodeType ATH_CORE_EXPORT getNodeType<Node>() {
+  return NodeType::DEFAULT;
 }
-template <>
-NodeType ATH_CORE_EXPORT getNodeType<InputNode>() {
-    return NodeType::INPUT;
+template <> NodeType ATH_CORE_EXPORT getNodeType<InputNode>() {
+  return NodeType::INPUT;
 }
-template <>
-NodeType ATH_CORE_EXPORT getNodeType<OutputNode>() {
-    return NodeType::OUTPUT;
+template <> NodeType ATH_CORE_EXPORT getNodeType<OutputNode>() {
+  return NodeType::OUTPUT;
 }
-template <>
-NodeType ATH_CORE_EXPORT getNodeType<LossNode>() {
-    return NodeType::LOSS;
+template <> NodeType ATH_CORE_EXPORT getNodeType<LossNode>() {
+  return NodeType::LOSS;
 }
-}  // namespace athena::core
+} // namespace athena::core

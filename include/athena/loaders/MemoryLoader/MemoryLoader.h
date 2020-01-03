@@ -23,45 +23,43 @@ namespace athena::loaders {
  * Load data from RAM to Tensor
  */
 class ATH_MEM_LOADER_EXPORT MemoryLoader : public core::AbstractLoader {
-    private:
-    void *mData;
-    size_t mSize;
+private:
+  void* mData;
+  size_t mSize;
 
-    public:
-    MemoryLoader(void *data, size_t size) : mData(data), mSize(size){};
-    MemoryLoader(const MemoryLoader &) = default;
-    MemoryLoader(MemoryLoader &&src) noexcept;
-    ~MemoryLoader() = default;
-    MemoryLoader &operator=(const MemoryLoader &) = default;
-    MemoryLoader &operator=(MemoryLoader &&src) noexcept;
+public:
+  MemoryLoader(void* data, size_t size) : mData(data), mSize(size){};
+  MemoryLoader(const MemoryLoader&) = default;
+  MemoryLoader(MemoryLoader&& src) noexcept;
+  ~MemoryLoader() = default;
+  MemoryLoader& operator=(const MemoryLoader&) = default;
+  MemoryLoader& operator=(MemoryLoader&& src) noexcept;
 
-    virtual void load(core::Allocator *, core::inner::Tensor *) override;
-    std::string getLoadCName() const override {
-        static const std::string loadName = "MemoryLoaderLoad";
-        return loadName;
-    };
-    std::string getCreateCName() const override {
-        static const std::string createName = "CreateMemoryLoader";
-        return createName;
-    };
+  virtual void load(core::Allocator*, core::inner::Tensor*) override;
+  std::string getLoadCName() const override {
+    static const std::string loadName = "MemoryLoaderLoad";
+    return loadName;
+  };
+  std::string getCreateCName() const override {
+    static const std::string createName = "CreateMemoryLoader";
+    return createName;
+  };
 
-    virtual std::string getName() const override {
-        return "MemoryLoader";
-    }
+  virtual std::string getName() const override { return "MemoryLoader"; }
 
-    std::string serialize() const override;
+  std::string serialize() const override;
 
-    static AbstractLoader *deserialize(const std::string &data) {
-        new core::FatalError(core::ATH_NOT_IMPLEMENTED,
-                             "MemoryLoader is not serializable");
-        return nullptr;  // suppress warning
-    }
+  static AbstractLoader* deserialize(const std::string& data) {
+    new core::FatalError(core::ATH_NOT_IMPLEMENTED,
+                         "MemoryLoader is not serializable");
+    return nullptr; // suppress warning
+  }
 };
-}  // namespace athena::loaders
+} // namespace athena::loaders
 
 extern "C" {
-void ATH_MEM_LOADER_EXPORT MemoryLoaderLoad(void *, void *, void *);
-void ATH_MEM_LOADER_EXPORT *CreateMemoryLoader(void *, size_t);
+void ATH_MEM_LOADER_EXPORT MemoryLoaderLoad(void*, void*, void*);
+void ATH_MEM_LOADER_EXPORT* CreateMemoryLoader(void*, size_t);
 }
 
-#endif  // ATHENA_MEMORYLOADER_H
+#endif // ATHENA_MEMORYLOADER_H

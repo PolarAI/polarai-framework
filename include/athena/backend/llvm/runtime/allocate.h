@@ -19,8 +19,7 @@
 #include <athena/core/inner/Tensor.h>
 
 template <typename T>
-extern void allocate(athena::backend::llvm::Device *,
-                     athena::core::Allocator *,
-                     athena::core::inner::Tensor *a);
+extern void allocate(athena::backend::llvm::Device*, athena::core::Allocator*,
+                     athena::core::inner::Tensor* a);
 
-#endif  // ATHENA_ALLOCATE_H
+#endif // ATHENA_ALLOCATE_H

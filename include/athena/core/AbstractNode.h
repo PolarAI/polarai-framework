@@ -31,55 +31,53 @@ using EdgeMark = size_t;
  * A Node represents a piece of computation in Graph
  */
 class ATH_CORE_EXPORT AbstractNode {
-    private:
-    void fullClear();
-    std::shared_ptr<inner::Tensor> mTensor;
-    Context* mContext;
-    std::string mName;
-    size_t mGraphIndex;
-    size_t mNodeIndex;
-    size_t mInputsCount;
+private:
+  void fullClear();
+  std::shared_ptr<inner::Tensor> mTensor;
+  Context* mContext;
+  std::string mName;
+  size_t mGraphIndex;
+  size_t mNodeIndex;
+  size_t mInputsCount;
 
-    public:
-    AbstractNode() = delete;
-    AbstractNode(const AbstractNode& rhs);
-    AbstractNode(AbstractNode&& rhs) noexcept;
-    AbstractNode(TensorShape shape,
-                 DataType dataType,
-                 Context& context,
-                 std::string name);
-    AbstractNode(Context& context, std::string name);
-    virtual ~AbstractNode();
+public:
+  AbstractNode() = delete;
+  AbstractNode(const AbstractNode& rhs);
+  AbstractNode(AbstractNode&& rhs) noexcept;
+  AbstractNode(TensorShape shape, DataType dataType, Context& context,
+               std::string name);
+  AbstractNode(Context& context, std::string name);
+  virtual ~AbstractNode();
 
-    AbstractNode& operator=(const AbstractNode& rhs) = delete;
-    AbstractNode& operator=(AbstractNode&& rhs) = delete;
+  AbstractNode& operator=(const AbstractNode& rhs) = delete;
+  AbstractNode& operator=(AbstractNode&& rhs) = delete;
 
-    void after(const AbstractNode& node, EdgeMark mark) const;
-    void before(const AbstractNode& node, EdgeMark mark) const;
-    ShapeView getShapeView() const;
-    ShapeView getSubShapeView(size_t offset = 1) const;
-    const TensorShape& getShape() const;
-    DataType getDataType() const;
-    virtual NodeType getType() const = 0;
-    size_t getNodeIndex() const;
-    size_t getGraphIndex() const;
-    size_t getInputsCount() const;
-    std::string_view getName() const;
-    std::string& name();
-    const std::string& name() const;
-    void setShape(const TensorShape& shape);
-    void removeFromGraph();
-    void saveInGraph(bool isRepairedNode = true);
-    virtual void clear();
-    friend void inner::setGraphIndex(AbstractNode& node, size_t graphIndex);
-    friend void inner::incrementInputCount(athena::core::AbstractNode& node);
-    friend inner::Tensor& inner::getTensorFromNode(AbstractNode& node);
-    friend std::shared_ptr<inner::Tensor> inner::getTensorPtrFromNode(
-        AbstractNode& node);
-    friend void inner::setResultTensor(
-        athena::core::AbstractNode& node,
-        std::shared_ptr<athena::core::inner::Tensor> tensor);
+  void after(const AbstractNode& node, EdgeMark mark) const;
+  void before(const AbstractNode& node, EdgeMark mark) const;
+  ShapeView getShapeView() const;
+  ShapeView getSubShapeView(size_t offset = 1) const;
+  const TensorShape& getShape() const;
+  DataType getDataType() const;
+  virtual NodeType getType() const = 0;
+  size_t getNodeIndex() const;
+  size_t getGraphIndex() const;
+  size_t getInputsCount() const;
+  std::string_view getName() const;
+  std::string& name();
+  const std::string& name() const;
+  void setShape(const TensorShape& shape);
+  void removeFromGraph();
+  void saveInGraph(bool isRepairedNode = true);
+  virtual void clear();
+  friend void inner::setGraphIndex(AbstractNode& node, size_t graphIndex);
+  friend void inner::incrementInputCount(athena::core::AbstractNode& node);
+  friend inner::Tensor& inner::getTensorFromNode(AbstractNode& node);
+  friend std::shared_ptr<inner::Tensor>
+  inner::getTensorPtrFromNode(AbstractNode& node);
+  friend void
+  inner::setResultTensor(athena::core::AbstractNode& node,
+                         std::shared_ptr<athena::core::inner::Tensor> tensor);
 };
-}  // namespace athena::core
+} // namespace athena::core
 
-#endif  // ATHENA_ABSTRACTNODE_H
+#endif // ATHENA_ABSTRACTNODE_H

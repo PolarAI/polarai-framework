@@ -21,33 +21,34 @@
 
 namespace athena::ops {
 class ATH_OPS_EXPORT MSELossFunction : public core::Operation {
-    public:
-    MSELossFunction() : Operation("mse") {}
+public:
+  MSELossFunction() : Operation("mse") {}
 
-    core::inner::Tensor *getResultTensor(
-        core::Context& context, std::vector<core::inner::Tensor *> args) const override;
-    core::inner::Tensor *getErrorTensor(core::Context& context, std::vector<core::inner::Tensor *> args,
-                                        int derivativeOrder) const override;
-    core::inner::Tensor *getDerivativeTensor(
-        core::Context& context, std::vector<core::inner::Tensor *> args, int argNo) const override;
-    void gen(
-        core::AbstractGenerator &g,
-        std::vector<core::inner::Tensor *> &operationArguments) const override;
-    void genDerivative(int order,
-                       core::AbstractGenerator &g,
-                       core::inner::Tensor &operationResult,
-                       core::inner::Tensor &internalError,
-                       std::vector<core::inner::Tensor *> &operationArguments,
-                       core::inner::Tensor &derivativeTensor,
-                       int argNo) const override;
-    size_t getOperandsCount() const override {
-        return 2;
-    }
-    std::string serialize() const override;
+  core::inner::Tensor*
+  getResultTensor(core::Context& context,
+                  std::vector<core::inner::Tensor*> args) const override;
+  core::inner::Tensor* getErrorTensor(core::Context& context,
+                                      std::vector<core::inner::Tensor*> args,
+                                      int derivativeOrder) const override;
+  core::inner::Tensor*
+  getDerivativeTensor(core::Context& context,
+                      std::vector<core::inner::Tensor*> args,
+                      int argNo) const override;
+  void
+  gen(core::AbstractGenerator& g,
+      std::vector<core::inner::Tensor*>& operationArguments) const override;
+  void genDerivative(int order, core::AbstractGenerator& g,
+                     core::inner::Tensor& operationResult,
+                     core::inner::Tensor& internalError,
+                     std::vector<core::inner::Tensor*>& operationArguments,
+                     core::inner::Tensor& derivativeTensor,
+                     int argNo) const override;
+  size_t getOperandsCount() const override { return 2; }
+  std::string serialize() const override;
 
-    static Operation *deserialize(const std::string &) {
-        return new MSELossFunction();
-    };
+  static Operation* deserialize(const std::string&) {
+    return new MSELossFunction();
+  };
 };
-}  // namespace athena::ops
-#endif  // ATHENA_MSELOSSFUNCTION_H
+} // namespace athena::ops
+#endif // ATHENA_MSELOSSFUNCTION_H

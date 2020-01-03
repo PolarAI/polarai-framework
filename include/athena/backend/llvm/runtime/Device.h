@@ -23,16 +23,16 @@ namespace athena::backend::llvm {
 class Device;
 
 extern "C" struct ATH_BACKEND_LLVM_EXPORT DeviceContainer {
-    Device* devices;
-    size_t count;
+  Device* devices;
+  size_t count;
 };
 
 class ATH_BACKEND_LLVM_EXPORT Device {
-    public:
-    enum class PartitionDomain { EQUALLY, BY_COUNT, NUMA };
-    virtual bool isPartitionSupported(PartitionDomain domain) = 0;
-    virtual DeviceContainer partition(PartitionDomain domain) = 0;
+public:
+  enum class PartitionDomain { EQUALLY, BY_COUNT, NUMA };
+  virtual bool isPartitionSupported(PartitionDomain domain) = 0;
+  virtual DeviceContainer partition(PartitionDomain domain) = 0;
 };
-}  // namespace athena::backend::llvm
+} // namespace athena::backend::llvm
 
-#endif  // ATHENA_DEVICE_H
+#endif // ATHENA_DEVICE_H

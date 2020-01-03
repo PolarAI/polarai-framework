@@ -22,6 +22,6 @@ namespace athena::core {
 enum class DataType : int { UNDEFINED = 0, DOUBLE = 1, FLOAT = 2, HALF = 3 };
 
 ATH_CORE_EXPORT size_t sizeOfDataType(const DataType& dataType);
-}  // namespace athena::core
+} // namespace athena::core
 
-#endif  // ATHENA_DATATYPE_H
+#endif // ATHENA_DATATYPE_H

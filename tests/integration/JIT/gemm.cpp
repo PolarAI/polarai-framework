@@ -32,63 +32,63 @@ using namespace athena::backend::llvm;
 using namespace athena::loaders;
 
 TEST(JIT, GEMM) {
-    // Arrange
-    TensorShape shape({3, 3});
+  // Arrange
+  TensorShape shape({3, 3});
 
-    float aData[] = {2, 2, 2, 2, 2, 2, 2, 2, 2};
-    float bData[] = {3, 3, 3, 3, 3, 3, 3, 3, 3};
-    float cData[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+  float aData[] = {2, 2, 2, 2, 2, 2, 2, 2, 2};
+  float bData[] = {3, 3, 3, 3, 3, 3, 3, 3, 3};
+  float cData[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-    MemoryLoader aLoader(aData, 9 * sizeof(float));
-    MemoryLoader bLoader(bData, 9 * sizeof(float));
-    MemoryLoader cLoader(cData, 9 * sizeof(float));
+  MemoryLoader aLoader(aData, 9 * sizeof(float));
+  MemoryLoader bLoader(bData, 9 * sizeof(float));
+  MemoryLoader cLoader(cData, 9 * sizeof(float));
 
-    Context context;
-    Graph graph(context);
-    graph.setUpOptimizer<Optimizer>(/*learningRate0.01*/);
-    graph.setUpOptimizer<GradientDescent>(/*learningRate*/ 0.01);
-    InputNode aInp(shape, DataType::FLOAT, aLoader, context, false, "a");
-    InputNode bInp(shape, DataType::FLOAT, bLoader, context, false, "b");
-    graph.addNode(aInp);
-    graph.addNode(bInp);
+  Context context;
+  Graph graph(context);
+  graph.setUpOptimizer<Optimizer>(/*learningRate0.01*/);
+  graph.setUpOptimizer<GradientDescent>(/*learningRate*/ 0.01);
+  InputNode aInp(shape, DataType::FLOAT, aLoader, context, false, "a");
+  InputNode bInp(shape, DataType::FLOAT, bLoader, context, false, "b");
+  graph.addNode(aInp);
+  graph.addNode(bInp);
 
-    GEMMOperation gemmOp(false, false);
-    Node gemm(gemmOp, context, "gemm_1");
-    graph.addNode(gemm);
-    gemm.after(aInp, 1);
-    gemm.after(bInp, 2);
+  GEMMOperation gemmOp(false, false);
+  Node gemm(gemmOp, context, "gemm_1");
+  graph.addNode(gemm);
+  gemm.after(aInp, 1);
+  gemm.after(bInp, 2);
 
-    OutputNode outputNode(DataType::FLOAT, context, "out");
-    graph.addNode(outputNode);
-    outputNode.after(gemm, 1);
+  OutputNode outputNode(DataType::FLOAT, context, "out");
+  graph.addNode(outputNode);
+  outputNode.after(gemm, 1);
 
-    MSELossFunction lossFunction;
-    InputNode cInp(shape, DataType::FLOAT, cLoader, context, true, "c");
-    graph.addNode(cInp);
-    LossNode lossNode(lossFunction, Criterion::MIN, context, "mse_loss");
-    graph.addNode(lossNode);
-    lossNode.after(gemm, 1);
-    lossNode.after(cInp, 2);
+  MSELossFunction lossFunction;
+  InputNode cInp(shape, DataType::FLOAT, cLoader, context, true, "c");
+  graph.addNode(cInp);
+  LossNode lossNode(lossFunction, Criterion::MIN, context, "mse_loss");
+  graph.addNode(lossNode);
+  lossNode.after(gemm, 1);
+  lossNode.after(cInp, 2);
 
-    LLVMExecutor executor;
-    std::unique_ptr<Allocator> trivialAllocator =
-        std::make_unique<LLVMTrivialAllocator>();
-    executor.setAllocator(trivialAllocator);
-    executor.setGraph(graph);
+  LLVMExecutor executor;
+  std::unique_ptr<Allocator> trivialAllocator =
+      std::make_unique<LLVMTrivialAllocator>();
+  executor.setAllocator(trivialAllocator);
+  executor.setGraph(graph);
 
-    // Act
-    executor.evaluate();
+  // Act
+  executor.evaluate();
 
-    // Assert
-    auto accessor = outputNode.getAccessor<float>(*executor.getAllocator());
+  // Assert
+  auto accessor = outputNode.getAccessor<float>(*executor.getAllocator());
 
-    EXPECT_FLOAT_EQ(*accessor[0][0], 18.0);
-    EXPECT_FLOAT_EQ(*accessor[0][1], 18.0);
-    EXPECT_FLOAT_EQ(*accessor[0][2], 18.0);
-    EXPECT_FLOAT_EQ(*accessor[1][0], 18.0);
-    EXPECT_FLOAT_EQ(*accessor[1][1], 18.0);
-    EXPECT_FLOAT_EQ(*accessor[1][2], 18.0);
-    EXPECT_FLOAT_EQ(*accessor[2][0], 18.0);
-    EXPECT_FLOAT_EQ(*accessor[2][1], 18.0);
-    EXPECT_FLOAT_EQ(*accessor[2][2], 18.0);
+  EXPECT_FLOAT_EQ(*accessor[0][0], 18.0);
+  EXPECT_FLOAT_EQ(*accessor[0][1], 18.0);
+  EXPECT_FLOAT_EQ(*accessor[0][2], 18.0);
+  EXPECT_FLOAT_EQ(*accessor[1][0], 18.0);
+  EXPECT_FLOAT_EQ(*accessor[1][1], 18.0);
+  EXPECT_FLOAT_EQ(*accessor[1][2], 18.0);
+  EXPECT_FLOAT_EQ(*accessor[2][0], 18.0);
+  EXPECT_FLOAT_EQ(*accessor[2][1], 18.0);
+  EXPECT_FLOAT_EQ(*accessor[2][2], 18.0);
 }

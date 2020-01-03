@@ -19,21 +19,18 @@
 
 namespace athena::core {
 class ATH_CORE_EXPORT Optimizer {
-    public:
-    Optimizer() = default;
-    Optimizer(const Optimizer &) = default;
-    Optimizer(Optimizer &&) = default;
-    virtual ~Optimizer() = default;
-    [[nodiscard]] virtual size_t getRequiredOrder() const {
-        return 0;
-    };
-    virtual void genFix(AbstractGenerator &generator,
-                        inner::Tensor &target,
-                        std::vector<inner::Tensor *> &errors){};
-    virtual void genError(AbstractGenerator &generator,
-                          std::vector<inner::Tensor *> &incomingDerivatives,
-                          inner::Tensor &totalError){};
+public:
+  Optimizer() = default;
+  Optimizer(const Optimizer&) = default;
+  Optimizer(Optimizer&&) = default;
+  virtual ~Optimizer() = default;
+  [[nodiscard]] virtual size_t getRequiredOrder() const { return 0; };
+  virtual void genFix(AbstractGenerator& generator, inner::Tensor& target,
+                      std::vector<inner::Tensor*>& errors){};
+  virtual void genError(AbstractGenerator& generator,
+                        std::vector<inner::Tensor*>& incomingDerivatives,
+                        inner::Tensor& totalError){};
 };
-}  // namespace athena::core
+} // namespace athena::core
 
-#endif  // ATHENA_OPTIMIZER_H
+#endif // ATHENA_OPTIMIZER_H

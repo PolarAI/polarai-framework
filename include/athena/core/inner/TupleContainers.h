@@ -20,16 +20,14 @@
 
 namespace athena::core::inner {
 template <template <typename, typename...> typename Container,
-          template <typename>
-          typename Wrapper,
-          typename... Args>
+          template <typename> typename Wrapper, typename... Args>
 struct ATH_CORE_EXPORT TupleContainersWithWrappers {
-    using Holder = std::tuple<Container<Wrapper<Args>>...>;
+  using Holder = std::tuple<Container<Wrapper<Args>>...>;
 };
 template <template <typename, typename...> typename Container, typename... Args>
 struct ATH_CORE_EXPORT TupleContainers {
-    using Holder = std::tuple<Container<Args>...>;
+  using Holder = std::tuple<Container<Args>...>;
 };
-}  // namespace athena::core::inner
+} // namespace athena::core::inner
 
-#endif  // ATHENA_TUPLECONTAINERS_H
+#endif // ATHENA_TUPLECONTAINERS_H

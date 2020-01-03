@@ -14,13 +14,14 @@
 #include <athena/core/Context.h>
 
 namespace athena::core::inner {
-inner::Table<AllocationRecord>& getAllocationTable(athena::core::Context& context) {
-    return context.allocationTable;
+inner::Table<AllocationRecord>&
+getAllocationTable(athena::core::Context& context) {
+  return context.allocationTable;
 }
 inner::Table<Graph*>& getGraphTable(athena::core::Context& context) {
-    return context.graphTable;
+  return context.graphTable;
 }
 inner::Table<AbstractNode*>& getNodeTable(athena::core::Context& context) {
-    return context.nodeTable;
+  return context.nodeTable;
 }
-}
+} // namespace athena::core::inner

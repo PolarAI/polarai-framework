@@ -22,44 +22,39 @@
 #include <functional>
 
 namespace athena::backend::llvm {
-template <typename Ret>
-struct ATH_BACKEND_LLVM_EXPORT LLVMGeneratorFunctor {
-    LLVMGeneratorFunctor() = default;
-    template <typename F>
-    LLVMGeneratorFunctor(F&& fun) : LLVMGeneratorFunctor(std::function(fun)){};
-    template <typename... Args>
-    LLVMGeneratorFunctor(std::function<Ret(Args...)> fun)
-        : mFunctor(std::move(fun)) {}
-    template <typename... Args>
-    Ret operator()(Args&&... args) {
-        return std::invoke(
-            std::any_cast<std::function<Ret(Args && ...)>>(mFunctor),
-            std::forward<Args&&>(args)...);
-    }
+template <typename Ret> struct ATH_BACKEND_LLVM_EXPORT LLVMGeneratorFunctor {
+  LLVMGeneratorFunctor() = default;
+  template <typename F>
+  LLVMGeneratorFunctor(F&& fun) : LLVMGeneratorFunctor(std::function(fun)){};
+  template <typename... Args>
+  LLVMGeneratorFunctor(std::function<Ret(Args...)> fun)
+      : mFunctor(std::move(fun)) {}
+  template <typename... Args> Ret operator()(Args&&... args) {
+    return std::invoke(std::any_cast<std::function<Ret(Args && ...)>>(mFunctor),
+                       std::forward<Args&&>(args)...);
+  }
 
-    private:
-    std::any mFunctor;
+private:
+  std::any mFunctor;
 };
 
-template <>
-struct ATH_BACKEND_LLVM_EXPORT LLVMGeneratorFunctor<void> {
-    LLVMGeneratorFunctor() = default;
-    template <typename F>
-    explicit LLVMGeneratorFunctor(F&& fun)
-        : LLVMGeneratorFunctor(std::function(fun)){};
-    template <typename... Args>
-    explicit LLVMGeneratorFunctor(std::function<void(Args...)> fun)
-        : mFunctor(std::move(fun)) {}
-    template <typename... Args>
-    void operator()(Args&&... args) {
-        return std::invoke(
-            std::any_cast<std::function<void(Args && ...)>>(mFunctor),
-            std::forward<Args&&>(args)...);
-    }
+template <> struct ATH_BACKEND_LLVM_EXPORT LLVMGeneratorFunctor<void> {
+  LLVMGeneratorFunctor() = default;
+  template <typename F>
+  explicit LLVMGeneratorFunctor(F&& fun)
+      : LLVMGeneratorFunctor(std::function(fun)){};
+  template <typename... Args>
+  explicit LLVMGeneratorFunctor(std::function<void(Args...)> fun)
+      : mFunctor(std::move(fun)) {}
+  template <typename... Args> void operator()(Args&&... args) {
+    return std::invoke(
+        std::any_cast<std::function<void(Args && ...)>>(mFunctor),
+        std::forward<Args&&>(args)...);
+  }
 
-    private:
-    std::any mFunctor;
+private:
+  std::any mFunctor;
 };
-}  // namespace athena::backend::llvm
+} // namespace athena::backend::llvm
 
-#endif  // ATHENA_LLVMGENERATORFUNCTOR_H
+#endif // ATHENA_LLVMGENERATORFUNCTOR_H

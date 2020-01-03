@@ -14,8 +14,7 @@
 #include <athena/core/AbstractLoader.h>
 
 namespace athena::core {
-template <>
-std::string AbstractLoader::getLoaderName<DummyLoader>() {
-    return "dummy";
+template <> std::string AbstractLoader::getLoaderName<DummyLoader>() {
+  return "dummy";
 }
-}
+} // namespace athena::core

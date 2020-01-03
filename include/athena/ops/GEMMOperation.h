@@ -19,43 +19,43 @@
 
 namespace athena::ops {
 class ATH_OPS_EXPORT GEMMOperation : public core::Operation {
-    private:
-    bool mTransposeA;
-    bool mTransposeB;
+private:
+  bool mTransposeA;
+  bool mTransposeB;
 
-    public:
-    GEMMOperation(bool transposeA, bool transposeB)
-        : Operation("gemm"),
-          mTransposeA(transposeA), mTransposeB(transposeB) {}
-    core::inner::Tensor *getResultTensor(
-        core::Context& context, std::vector<core::inner::Tensor *> args) const override;
-    core::inner::Tensor *getErrorTensor(core::Context& context,
-        std::vector<core::inner::Tensor *> args, int derivativeOrder) const override;
-    core::inner::Tensor *getDerivativeTensor(core::Context& context,
-        std::vector<core::inner::Tensor *> args, int argNo) const override;
-    void gen(
-        core::AbstractGenerator &g,
-        std::vector<core::inner::Tensor *> &operationArguments) const override;
-    void genDerivative(int order,
-                       core::AbstractGenerator &g,
-                       core::inner::Tensor &operationResult,
-                       core::inner::Tensor &internalError,
-                       std::vector<core::inner::Tensor *> &operationArguments,
-                       core::inner::Tensor &derivativeTensor,
-                       int argNo) const override;
-    size_t getOperandsCount() const override {
-        return 2;
-    }
-    std::string serialize() const override;
+public:
+  GEMMOperation(bool transposeA, bool transposeB)
+      : Operation("gemm"), mTransposeA(transposeA), mTransposeB(transposeB) {}
+  core::inner::Tensor*
+  getResultTensor(core::Context& context,
+                  std::vector<core::inner::Tensor*> args) const override;
+  core::inner::Tensor* getErrorTensor(core::Context& context,
+                                      std::vector<core::inner::Tensor*> args,
+                                      int derivativeOrder) const override;
+  core::inner::Tensor*
+  getDerivativeTensor(core::Context& context,
+                      std::vector<core::inner::Tensor*> args,
+                      int argNo) const override;
+  void
+  gen(core::AbstractGenerator& g,
+      std::vector<core::inner::Tensor*>& operationArguments) const override;
+  void genDerivative(int order, core::AbstractGenerator& g,
+                     core::inner::Tensor& operationResult,
+                     core::inner::Tensor& internalError,
+                     std::vector<core::inner::Tensor*>& operationArguments,
+                     core::inner::Tensor& derivativeTensor,
+                     int argNo) const override;
+  size_t getOperandsCount() const override { return 2; }
+  std::string serialize() const override;
 
-    static Operation *deserialize(const std::string &data) {
-        std::stringstream stream(data);
-        bool transpA, transpB;
-        stream >> transpA;
-        stream >> transpB;
-        return new GEMMOperation(transpA, transpB);
-    };
+  static Operation* deserialize(const std::string& data) {
+    std::stringstream stream(data);
+    bool transpA, transpB;
+    stream >> transpA;
+    stream >> transpB;
+    return new GEMMOperation(transpA, transpB);
+  };
 };
-}  // namespace athena::ops
+} // namespace athena::ops
 
-#endif  // ATHENA_GEMMOPERATION_H
+#endif // ATHENA_GEMMOPERATION_H

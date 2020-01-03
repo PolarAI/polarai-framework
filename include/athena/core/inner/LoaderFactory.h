@@ -23,30 +23,29 @@
 namespace athena::core::inner {
 
 class ATH_CORE_EXPORT LoaderFactory {
-    private:
-    std::unordered_map<std::string, AbstractLoader *(*)(const std::string &)>
-        loadersMap;
+private:
+  std::unordered_map<std::string, AbstractLoader* (*)(const std::string&)>
+      loadersMap;
 
-    LoaderFactory() {
-        registerLoader<loaders::MemoryLoader>();
-        registerLoader<DummyLoader>();
-    }
+  LoaderFactory() {
+    registerLoader<loaders::MemoryLoader>();
+    registerLoader<DummyLoader>();
+  }
 
-    public:
-    static LoaderFactory &getInstance() {
-        static LoaderFactory loaderFactory;
-        return loaderFactory;
-    }
+public:
+  static LoaderFactory& getInstance() {
+    static LoaderFactory loaderFactory;
+    return loaderFactory;
+  }
 
-    static AbstractLoader *createLoader(const std::string &name,
-                                        const std::string &data) {
-        return getInstance().loadersMap[name](data);
-    }
-    template <typename T>
-    void registerLoader() {
-        loadersMap[T::template getLoaderName<T>()] = &T::deserialize;
-    }
+  static AbstractLoader* createLoader(const std::string& name,
+                                      const std::string& data) {
+    return getInstance().loadersMap[name](data);
+  }
+  template <typename T> void registerLoader() {
+    loadersMap[T::template getLoaderName<T>()] = &T::deserialize;
+  }
 };
-}  // namespace athena::core::inner
+} // namespace athena::core::inner
 
-#endif  // ATHENA_LOADERFACTORY_H
+#endif // ATHENA_LOADERFACTORY_H

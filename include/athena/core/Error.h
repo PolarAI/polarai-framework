@@ -25,30 +25,30 @@ namespace athena::core {
  * A non-fatal error
  */
 class ATH_CORE_EXPORT Error {
-    protected:
-    int32_t mErrorCode;
-    std::string mErrorMessage;
+protected:
+  int32_t mErrorCode;
+  std::string mErrorMessage;
 
-    public:
-    Error();
-    template <typename... Args>
-    explicit Error(int32_t errorCode, Args &&... messages);
-    Error(const Error &error) = default;
-    Error(Error &&error) noexcept = default;
-    Error &operator=(const Error &error) = default;
-    Error &operator=(Error &&error) noexcept = default;
-    ~Error() = default;
+public:
+  Error();
+  template <typename... Args>
+  explicit Error(int32_t errorCode, Args&&... messages);
+  Error(const Error& error) = default;
+  Error(Error&& error) noexcept = default;
+  Error& operator=(const Error& error) = default;
+  Error& operator=(Error&& error) noexcept = default;
+  ~Error() = default;
 
-    operator bool() const;
-    friend std::ostream &operator<<(std::ostream &stream, const Error &err);
+  operator bool() const;
+  friend std::ostream& operator<<(std::ostream& stream, const Error& err);
 };
 template <typename... Args>
-ATH_CORE_EXPORT Error::Error(int32_t errorCode, Args &&... messages)
+ATH_CORE_EXPORT Error::Error(int32_t errorCode, Args&&... messages)
     : mErrorCode(errorCode) {
-    std::stringstream ss;
-    (ss << ... << std::forward<Args>(messages));
-    mErrorMessage = ss.str();
+  std::stringstream ss;
+  (ss << ... << std::forward<Args>(messages));
+  mErrorMessage = ss.str();
 }
-}  // namespace athena::core
+} // namespace athena::core
 
-#endif  // ATHENA_ERROR_H
+#endif // ATHENA_ERROR_H

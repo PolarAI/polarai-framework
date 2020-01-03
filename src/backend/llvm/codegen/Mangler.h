@@ -18,16 +18,15 @@
 
 namespace athena::backend::llvm {
 class Mangler {
-    private:
-    template <typename T>
-    static std::string getTypePostfix();
+private:
+  template <typename T> static std::string getTypePostfix();
 
-    public:
-    template <typename T>
-    static std::string getMangledName(const std::string &name) {
-        return "athn_" + name + getTypePostfix<T>();
-    }
+public:
+  template <typename T>
+  static std::string getMangledName(const std::string& name) {
+    return "athn_" + name + getTypePostfix<T>();
+  }
 };
-}  // namespace athena::backend::llvm
+} // namespace athena::backend::llvm
 
-#endif  // ATHENA_MANGLER_H
+#endif // ATHENA_MANGLER_H

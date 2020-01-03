@@ -14,20 +14,20 @@
 
 namespace athena::core {
 class Error;
-AbstractLogger &Logger::streamImpl(const std::string &data) {
-    mOutStream << data;
-    return *this;
+AbstractLogger& Logger::streamImpl(const std::string& data) {
+  mOutStream << data;
+  return *this;
 }
-AbstractLogger &Logger::streamImpl(const char *data) {
-    mOutStream << data;
-    return *this;
+AbstractLogger& Logger::streamImpl(const char* data) {
+  mOutStream << data;
+  return *this;
 }
-AbstractLogger &Logger::streamImpl(const std::string_view &data) {
-    mOutStream << data;
-    return *this;
+AbstractLogger& Logger::streamImpl(const std::string_view& data) {
+  mOutStream << data;
+  return *this;
 }
-AbstractLogger &Logger::streamImpl(const Error &data) {
-    mOutStream << data;
-    return *this;
+AbstractLogger& Logger::streamImpl(const Error& data) {
+  mOutStream << data;
+  return *this;
 }
-}  // namespace athena::core
+} // namespace athena::core

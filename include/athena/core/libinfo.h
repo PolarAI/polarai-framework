@@ -25,4 +25,4 @@ ATH_CORE_EXPORT const char* getPatchVersion();
 ATH_CORE_EXPORT const char* getBuildVersion();
 }
 
-#endif  // ATHENA_LIBINFO_H
+#endif // ATHENA_LIBINFO_H

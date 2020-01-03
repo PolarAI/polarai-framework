@@ -28,10 +28,9 @@ class Context;
 namespace inner {
 struct Cluster;
 using Clusters = std::vector<Cluster>;
-template <typename Content>
-class Table;
+template <typename Content> class Table;
 class AllocationRecord;
-}  // namespace inner
-}  // namespace athena::core
+} // namespace inner
+} // namespace athena::core
 
-#endif  // ATHENA_FORWARDDECLARATIONS_H
+#endif // ATHENA_FORWARDDECLARATIONS_H

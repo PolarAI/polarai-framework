@@ -24,17 +24,17 @@ namespace athena::backend::llvm {
 /**
  * The simplest Allocator that uses OS malloc/free
  */
-class ATH_BACKEND_LLVM_EXPORT LLVMTrivialAllocator :
-    public athena::core::Allocator {
-    private:
-    std::unordered_map<size_t, void*> mAllocatedMap;
-    std::allocator<uint8_t> mAllocator;
+class ATH_BACKEND_LLVM_EXPORT LLVMTrivialAllocator
+    : public athena::core::Allocator {
+private:
+  std::unordered_map<size_t, void*> mAllocatedMap;
+  std::allocator<uint8_t> mAllocator;
 
-    public:
-    void allocate(const athena::core::inner::Tensor&) override;
-    size_t getRAMPointer(const athena::core::inner::Tensor&) override;
-    size_t getFastPointer(const athena::core::inner::Tensor&) override;
+public:
+  void allocate(const athena::core::inner::Tensor&) override;
+  size_t getRAMPointer(const athena::core::inner::Tensor&) override;
+  size_t getFastPointer(const athena::core::inner::Tensor&) override;
 };
-}  // namespace athena::backend::llvm
+} // namespace athena::backend::llvm
 
-#endif  // ATHENA_LLVMTRIVIALALLOCATOR_H
+#endif // ATHENA_LLVMTRIVIALALLOCATOR_H

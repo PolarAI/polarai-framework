@@ -16,10 +16,6 @@
 namespace athena::core {
 OutputNode::OutputNode(DataType dataType, Context& context, std::string name)
     : AbstractNode({}, dataType, context, std::move(name)) {}
-OutputNode::~OutputNode() {
-    saveInGraph(false);
-}
-NodeType OutputNode::getType() const {
-    return NodeType::OUTPUT;
-}
-}  // namespace athena::core
+OutputNode::~OutputNode() { saveInGraph(false); }
+NodeType OutputNode::getType() const { return NodeType::OUTPUT; }
+} // namespace athena::core

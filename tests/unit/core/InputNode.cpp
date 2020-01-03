@@ -18,32 +18,32 @@
 
 namespace athena::core {
 TEST(InputNode, Create) {
-    Context context;
-    TensorShape shape{2, 3, 4};
-    DataType dataType = DataType::DOUBLE;
-    std::string name = "Dummy";
-    DummyLoader loader;
-    InputNode n(shape, dataType, loader, context, false, name);
-    ASSERT_EQ(n.getDataType(), dataType);
-    ASSERT_EQ(n.getShapeView(), shape);
-    ASSERT_EQ(n.getType(), NodeType::INPUT);
-    ASSERT_EQ(n.getName(), name);
-    ASSERT_EQ(&n.getLoader(), &loader);
+  Context context;
+  TensorShape shape{2, 3, 4};
+  DataType dataType = DataType::DOUBLE;
+  std::string name = "Dummy";
+  DummyLoader loader;
+  InputNode n(shape, dataType, loader, context, false, name);
+  ASSERT_EQ(n.getDataType(), dataType);
+  ASSERT_EQ(n.getShapeView(), shape);
+  ASSERT_EQ(n.getType(), NodeType::INPUT);
+  ASSERT_EQ(n.getName(), name);
+  ASSERT_EQ(&n.getLoader(), &loader);
 }
 TEST(InputNode, CopyConstructor) {
-    Context context;
-    TensorShape shape{2, 3, 4};
-    DataType dataType = DataType::DOUBLE;
-    std::string name = "Dummy";
-    DummyLoader loader;
-    InputNode n(shape, dataType, loader, context, false, name);
-    InputNode nSecond(n);
-    ASSERT_EQ(inner::getNodeTable(context).size(), 3);
-    ASSERT_EQ(n.getShapeView(), nSecond.getShapeView());
-    ASSERT_EQ(n.getType(), nSecond.getType());
-    ASSERT_EQ(n.getDataType(), nSecond.getDataType());
-    ASSERT_EQ(n.getName(), nSecond.getName());
-    ASSERT_EQ(n.name(), nSecond.name());
-    ASSERT_EQ(&n.getLoader(), &loader);
+  Context context;
+  TensorShape shape{2, 3, 4};
+  DataType dataType = DataType::DOUBLE;
+  std::string name = "Dummy";
+  DummyLoader loader;
+  InputNode n(shape, dataType, loader, context, false, name);
+  InputNode nSecond(n);
+  ASSERT_EQ(inner::getNodeTable(context).size(), 3);
+  ASSERT_EQ(n.getShapeView(), nSecond.getShapeView());
+  ASSERT_EQ(n.getType(), nSecond.getType());
+  ASSERT_EQ(n.getDataType(), nSecond.getDataType());
+  ASSERT_EQ(n.getName(), nSecond.getName());
+  ASSERT_EQ(n.name(), nSecond.name());
+  ASSERT_EQ(&n.getLoader(), &loader);
 }
-}  // namespace athena::core
+} // namespace athena::core

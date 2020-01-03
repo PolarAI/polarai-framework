@@ -27,46 +27,45 @@
 
 namespace athena::backend::llvm {
 class ATH_RT_LLVM_DRIVER_EXPORT RuntimeDriver {
-    private:
-    void *mLibraryHandle;
+private:
+  void* mLibraryHandle;
 
-    void *getFunctionPtr(std::string_view funcName);
+  void* getFunctionPtr(std::string_view funcName);
 
-    std::vector<std::unique_ptr<::llvm::Module>> mModules;
+  std::vector<std::unique_ptr<::llvm::Module>> mModules;
 
-    void generateLLVMIrBindings(::llvm::LLVMContext &ctx,
-                                ::llvm::Module &module,
-                                ::llvm::IRBuilder<> &builder);
+  void generateLLVMIrBindings(::llvm::LLVMContext& ctx, ::llvm::Module& module,
+                              ::llvm::IRBuilder<>& builder);
 
-    static void setProperAttrs(::llvm::Function *function);
+  static void setProperAttrs(::llvm::Function* function);
 
-    void prepareModules();
+  void prepareModules();
 
-    ::llvm::LLVMContext &mContext;
+  ::llvm::LLVMContext& mContext;
 
-    public:
-    explicit RuntimeDriver(::llvm::LLVMContext &ctx);
-    RuntimeDriver(const RuntimeDriver &rhs) = delete;
-    RuntimeDriver(RuntimeDriver &&rhs) noexcept = default;
-    ~RuntimeDriver();
+public:
+  explicit RuntimeDriver(::llvm::LLVMContext& ctx);
+  RuntimeDriver(const RuntimeDriver& rhs) = delete;
+  RuntimeDriver(RuntimeDriver&& rhs) noexcept = default;
+  ~RuntimeDriver();
 
-    RuntimeDriver &operator=(const RuntimeDriver &rhs) = delete;
-    RuntimeDriver &operator=(RuntimeDriver &&rhs) noexcept;
+  RuntimeDriver& operator=(const RuntimeDriver& rhs) = delete;
+  RuntimeDriver& operator=(RuntimeDriver&& rhs) noexcept;
 
-    void load(std::string_view nameLibrary);
-    void unload();
-    void reload(std::string_view nameLibrary);
-    bool isLoaded() const;
+  void load(std::string_view nameLibrary);
+  void unload();
+  void reload(std::string_view nameLibrary);
+  bool isLoaded() const;
 
-    DeviceContainer getAvailableDevices();
-    void initializeContext(DeviceContainer devices);
-    void releaseContext();
+  DeviceContainer getAvailableDevices();
+  void initializeContext(DeviceContainer devices);
+  void releaseContext();
 
-    std::vector<std::unique_ptr<::llvm::Module>> &getModules() {
-        // todo clone modules
-        return mModules;
-    };
+  std::vector<std::unique_ptr<::llvm::Module>>& getModules() {
+    // todo clone modules
+    return mModules;
+  };
 };
-}  // namespace athena::backend::llvm
+} // namespace athena::backend::llvm
 
-#endif  // ATHENA_RUNTIME_DRIVER_H
+#endif // ATHENA_RUNTIME_DRIVER_H

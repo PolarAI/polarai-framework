@@ -19,22 +19,21 @@
 
 namespace athena::core {
 class ATH_CORE_EXPORT GradientDescent : public Optimizer {
-    protected:
-    double mLearningRate;
+protected:
+  double mLearningRate;
 
-    public:
-    GradientDescent() : mLearningRate(0.01){};
-    explicit GradientDescent(double learningRate)
-        : Optimizer(), mLearningRate(learningRate){};
-    ~GradientDescent() override = default;
-    [[nodiscard]] size_t getRequiredOrder() const override;
-    void genFix(AbstractGenerator &generator,
-                inner::Tensor &target,
-                std::vector<inner::Tensor *> &errors) override;
-    void genError(AbstractGenerator &generator,
-                  std::vector<inner::Tensor *> &incomingDerivatives,
-                  inner::Tensor &totalError) override;
+public:
+  GradientDescent() : mLearningRate(0.01){};
+  explicit GradientDescent(double learningRate)
+      : Optimizer(), mLearningRate(learningRate){};
+  ~GradientDescent() override = default;
+  [[nodiscard]] size_t getRequiredOrder() const override;
+  void genFix(AbstractGenerator& generator, inner::Tensor& target,
+              std::vector<inner::Tensor*>& errors) override;
+  void genError(AbstractGenerator& generator,
+                std::vector<inner::Tensor*>& incomingDerivatives,
+                inner::Tensor& totalError) override;
 };
-}  // namespace athena::core
+} // namespace athena::core
 
-#endif  // ATHENA_GRADIENTDESCENT_H
+#endif // ATHENA_GRADIENTDESCENT_H
