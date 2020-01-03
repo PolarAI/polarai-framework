@@ -11,7 +11,7 @@ element-wise addition operation
 #### Description:
 
 
-The "add" operation performs element-wise addition between two tensors.
+The `graph.add` operation performs element-wise addition between two tensors.
 The shapes of the tensor operands are expected to match.
 
 #### Operands:
@@ -33,11 +33,12 @@ The shapes of the tensor operands are expected to match.
 1. &laquo;unnamed&raquo;: tensor of any type values
 
 ### graph.alloca (athena::backend::llvm::AllocaOp)
-Allocate memory for tensor
+memory allocation operation
 
 #### Description:
 
 
+The `graph.alloca` operation performs memory allocation for tensor.
 
 #### Operands:
 
@@ -61,6 +62,8 @@ call operation
 #### Description:
 
 
+The `graph.call` operation allows one to make calls to arbitrary functions outside the graph.
+This is useful for loader invocation and user-defined operations.
 
 #### Operands:
 
@@ -86,8 +89,8 @@ matrix-matrix multiplication operation
 #### Description:
 
 
-The "mul" operation performs element-wise addition between two tensors.
-The shapes of the tensor operands are expected to match.
+The `graph.matmul` operation performs matrix-matrix multiplication of tensors.
+The operands are expected to be rank 2 tensor with shapes, that allow such operation.
 
 #### Operands:
 
@@ -108,11 +111,13 @@ The shapes of the tensor operands are expected to match.
 1. &laquo;unnamed&raquo;: 2D tensor of any type values
 
 ### graph.memlock (athena::backend::llvm::MemlockOp)
-Lock tensor data in memory
+memory lock operation
 
 #### Description:
 
 
+The `graph.memlock` operation locks tensor in device memory
+preventing it from being forced out by other memory operations.
 
 #### Operands:
 
@@ -130,11 +135,12 @@ Lock tensor data in memory
 
 
 ### graph.memrelease (athena::backend::llvm::MemreleaseOp)
-Unlock tensor data in memory
+memory release operation
 
 #### Description:
 
 
+The `graph.memrelease` operation marks memory region as free.
 
 #### Operands:
 
@@ -157,7 +163,7 @@ element-wise multiplication operation
 #### Description:
 
 
-The "mul" operation performs element-wise addition between two tensors.
+The `graph.mul` operation performs element-wise multiplication between two tensors.
 The shapes of the tensor operands are expected to match.
 
 #### Operands:
@@ -184,6 +190,7 @@ return operation
 #### Description:
 
 
+The `graph.return` operation denotes the end of the graph.
 
 #### Operands:
 
@@ -203,12 +210,12 @@ Mark tensor as non-removable
 
 #### Operands:
 
+1. `tensor`: tensor of any type values
 
 #### Attributes:
 
 | Attribute | MLIR Type | Description |
 | :-------: | :-------: | ----------- |
-| `tensor_addr` | `IntegerAttr` | 64-bit integer attribute attribute |
 | `node_id` | `IntegerAttr` | 64-bit integer attribute attribute |
 | `node_name` | `StringAttr` | string attribute attribute |
 | `cluster_id` | `IntegerAttr` | 64-bit integer attribute attribute |

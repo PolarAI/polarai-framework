@@ -19,7 +19,10 @@ class Graph_Op<string mnemonic, list<OpTrait> traits = []> :
 
 def CallOp : Graph_Op<"call"> {
   let summary = "call operation";
-  let description = [{}];
+  let description = [{
+    The `graph.call` operation allows one to make calls to arbitrary functions outside the graph.
+    This is useful for loader invocation and user-defined operations.
+  }];
 
   let arguments = (ins FlatSymbolRefAttr:$callee, Variadic<AnyTensor>:$inputs,
                     I64Attr:$tensor_addr, I64Attr:$node_id, StrAttr:$node_name,
@@ -36,11 +39,9 @@ def CallOp : Graph_Op<"call"> {
 
 def ReturnOp : Graph_Op<"return", [Terminator, HasParent<"FuncOp">]> {
   let summary = "return operation";
-  let description = [{}];
-
-/*  let builders = [OpBuilder<
-    "Builder *b, OperationState &state", [{ build(b, state, llvm::None); }]
-  >];*/
+  let description = [{
+    The `graph.return` operation denotes the end of the graph.
+  }];
 
   // Invoke a static verify method to verify this return operation.
   let verifier = [{ return ::verify(*this); }];
@@ -53,7 +54,7 @@ def ReturnOp : Graph_Op<"return", [Terminator, HasParent<"FuncOp">]> {
 def AddOp : Graph_Op<"add", [NoSideEffect]> {
   let summary = "element-wise addition operation";
   let description = [{
-    The "add" operation performs element-wise addition between two tensors.
+    The `graph.add` operation performs element-wise addition between two tensors.
     The shapes of the tensor operands are expected to match.
   }];
 
@@ -72,7 +73,7 @@ def AddOp : Graph_Op<"add", [NoSideEffect]> {
 def MulOp : Graph_Op<"mul", [NoSideEffect]> {
   let summary = "element-wise multiplication operation";
   let description = [{
-    The "mul" operation performs element-wise addition between two tensors.
+    The `graph.mul` operation performs element-wise multiplication between two tensors.
     The shapes of the tensor operands are expected to match.
   }];
 
@@ -91,8 +92,8 @@ def MulOp : Graph_Op<"mul", [NoSideEffect]> {
 def MatmulOp : Graph_Op<"matmul", [NoSideEffect]> {
   let summary = "matrix-matrix multiplication operation";
   let description = [{
-    The "mul" operation performs element-wise addition between two tensors.
-    The shapes of the tensor operands are expected to match.
+    The `graph.matmul` operation performs matrix-matrix multiplication of tensors.
+    The operands are expected to be rank 2 tensor with shapes, that allow such operation.
   }];
 
   let arguments = (ins 2DTensorOf<[AnyType]>:$lhs, 2DTensorOf<[AnyType]>:$rhs,
@@ -112,7 +113,11 @@ def MatmulOp : Graph_Op<"matmul", [NoSideEffect]> {
 //===-------------------------------------------------------------------------===/
 
 def AllocaOp : Graph_Op<"alloca", [NoSideEffect]> {
-    let summary = "Allocate memory for tensor";
+    let summary = "memory allocation operation";
+
+    let description = [{
+      The `graph.alloca` operation performs memory allocation for tensor.
+    }];
 
     let arguments = (ins
                      I64Attr:$tensor_addr, I64Attr:$node_id,
@@ -125,7 +130,12 @@ def AllocaOp : Graph_Op<"alloca", [NoSideEffect]> {
 }
 
 def MemlockOp : Graph_Op<"memlock"> {
-    let summary = "Lock tensor data in memory";
+    let summary = "memory lock operation";
+
+    let description = [{
+      The `graph.memlock` operation locks tensor in device memory
+      preventing it from being forced out by other memory operations.
+    }];
 
     let arguments = (ins I64Attr:$tensor_addr, I64Attr:$node_id,
                      StrAttr:$node_name,
@@ -133,7 +143,11 @@ def MemlockOp : Graph_Op<"memlock"> {
 }
 
 def MemreleaseOp : Graph_Op<"memrelease"> {
-    let summary = "Unlock tensor data in memory";
+    let summary = "memory release operation";
+
+    let description = [{
+      The `graph.memrelease` operation marks memory region as free.
+    }];
 
     let arguments = (ins I64Attr:$tensor_addr, I64Attr:$node_id,
                      StrAttr:$node_name,
@@ -143,7 +157,7 @@ def MemreleaseOp : Graph_Op<"memrelease"> {
 def TouchOp : Graph_Op<"touch"> {
     let summary = "Mark tensor as non-removable";
 
-    let arguments = (ins I64Attr:$tensor_addr, I64Attr:$node_id,
+    let arguments = (ins AnyTensor:$tensor, I64Attr:$node_id,
                      StrAttr:$node_name,
                      I64Attr:$cluster_id);
 }
