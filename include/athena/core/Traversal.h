@@ -24,34 +24,31 @@
 
 namespace athena::core {
 namespace inner {
-struct ATH_CORE_EXPORT Dependency {
-    size_t nodeIndex;
-    size_t mark;
-    Dependency(size_t nodeIndex, size_t mark)
-        : nodeIndex(nodeIndex), mark(mark) {}
-    bool operator<(const Dependency &rhs) const {
-        return mark < rhs.mark;
-    }
-};
+//struct ATH_CORE_EXPORT Dependency {
+//    size_t nodeIndex;
+//    size_t mark;
+//    Dependency(size_t nodeIndex, size_t mark)
+//        : nodeIndex(nodeIndex), mark(mark) {}
+//    bool operator<(const Dependency &rhs) const {
+//        return mark < rhs.mark;
+//    }
+//};
 
 template <typename TemplateNodeType>
 struct ATH_CORE_EXPORT NodeDependencies {
-    size_t nodeIndex;
-    std::set<Dependency> input;
-    std::set<Dependency> output;
+    NodeIndexType nodeIndex;
+    std::map<MarkType, NodeIndexType> input;     // mark -> nodeIndex
+    std::set<NodeIndexType> output;
+    NodeDependencies() : nodeIndex(0) {}
     NodeDependencies(size_t nodeIndex,
-                     std::set<Dependency> input,
-                     std::set<Dependency> output)
+                     std::map<MarkType, NodeIndexType> input,
+                     std::set<NodeIndexType> output)
         : nodeIndex(nodeIndex),
           input(std::move(input)),
           output(std::move(output)) {}
 };
 
-struct ATH_CORE_EXPORT NodeState {
-    size_t inputCount;
-    std::set<Dependency> input;
-    std::set<Dependency> output;
-};
+using NodeState = NodeDependencies<AbstractNode>;
 
 struct ATH_CORE_EXPORT Cluster {
     using Content = inner::TupleContainersWithWrappers<std::vector,

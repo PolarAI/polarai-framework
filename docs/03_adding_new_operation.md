@@ -11,7 +11,7 @@ Create a class derived from ahtena::core::Operation.
 For this class the following methods must be implemented:
 
 - `core::inner::Tensor *getResultTensor(std::vector<core::inner::Tensor *> args) const`: Generates tensor of proper size and type for operation result based on incoming arguments.
-- `core::inner::Tensor *getDerivativeTensor(std::vector<core::inner::Tensor *> args, int argNo) const`: Generates tensor of proper size and type for operation derivative result based on incoming arguments.
+- `core::inner::Tensor *getOutgoingDerivative(std::vector<core::inner::Tensor *> args, int argNo) const`: Generates tensor of proper size and type for operation derivative result based on incoming arguments.
 - `void gen(core::AbstractGenerator &g, std::vector<core::inner::Tensor *> &operationArguments) const`: Generates code for operation using provided Generator
 - `void genDerivative(int order,
                           core::AbstractGenerator &g,

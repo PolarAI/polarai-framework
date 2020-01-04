@@ -29,7 +29,6 @@ class ATH_CORE_EXPORT OperationFactory {
     std::unordered_map<std::string, Operation *(*)(const std::string &)> opsMap;
 
     OperationFactory() {
-        registerOperation<OperationDummy>("dummy");
         registerOperation<ops::AddOperation>("add");
         registerOperation<ops::MSELossFunction>("mse");
         registerOperation<ops::GEMMOperation>("gemm");

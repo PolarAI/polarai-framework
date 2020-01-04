@@ -18,14 +18,18 @@
 
 namespace athena::core {
 AbstractNode::AbstractNode(const AbstractNode& rhs)
-    : mTensor(rhs.mTensor),
+    : mResultTensor(rhs.mResultTensor),
+      mOutgoingDerivatives(rhs.mOutgoingDerivatives),
+      mOwnDerivativeTensor(rhs.mOwnDerivativeTensor),
       mContext(rhs.mContext),
       mName(rhs.mName),
       mGraphIndex(inner::kKUndefinedIndex),
       mNodeIndex(inner::getNodeTable(*mContext).registerRecord(this)),
       mInputsCount(0) {}
 AbstractNode::AbstractNode(AbstractNode&& rhs) noexcept
-    : mTensor(rhs.mTensor),
+    : mResultTensor(std::move(rhs.mResultTensor)),
+      mOutgoingDerivatives(std::move(rhs.mOutgoingDerivatives)),
+      mOwnDerivativeTensor(std::move(rhs.mOwnDerivativeTensor)),
       mContext(rhs.mContext),
       mName(std::move(rhs.mName)),
       mGraphIndex(rhs.mGraphIndex),
@@ -38,7 +42,7 @@ AbstractNode::AbstractNode(TensorShape shape,
                            DataType dataType,
                            Context& context,
                            std::string name)
-    : mTensor(
+    : mResultTensor(
           std::make_shared<inner::Tensor>(dataType, std::move(shape), context)),
       mContext(&context),
       mName(std::move(name)),
@@ -71,18 +75,18 @@ void AbstractNode::before(const AbstractNode& node, EdgeMark mark) const {
     }
 }
 ShapeView AbstractNode::getShapeView() const {
-    return mTensor->getShapeView();
+    return mResultTensor->getShapeView();
 }
 ShapeView AbstractNode::getSubShapeView(size_t offset) const {
-    return mTensor->getSubShapeView(offset);
+    return mResultTensor->getSubShapeView(offset);
 }
 const TensorShape& AbstractNode::getShape() const {
-    return mTensor->getShape();
+    return mResultTensor->getShape();
 }
 DataType AbstractNode::getDataType() const {
-    return mTensor->getDataType();
+    return mResultTensor->getDataType();
 }
-size_t AbstractNode::getNodeIndex() const {
+NodeIndexType AbstractNode::getNodeIndex() const {
     return mNodeIndex;
 }
 size_t AbstractNode::getGraphIndex() const {
@@ -106,10 +110,10 @@ void AbstractNode::setShape(const TensorShape& shape) {
             ATH_FATAL_OTHER,
             "It is forbidden to change shapes of nodes which belongs to graph");
     }
-    mTensor->setShape(shape);
+    mResultTensor->setShape(shape);
 }
 void AbstractNode::clear() {
-    mTensor->clear();
+    mResultTensor->clear();
     mName.clear();
 }
 void AbstractNode::removeFromGraph() {
@@ -123,7 +127,7 @@ void AbstractNode::saveInGraph(bool isRepairedNode) {
     }
 }
 AbstractNode::AbstractNode(Context& context, std::string name)
-    : mTensor(inner::getNullTensor(context)),
+    : mResultTensor(inner::getNullTensor(context)),
       mContext(&context),
       mName(std::move(name)),
       mGraphIndex(inner::kKUndefinedIndex),
@@ -132,6 +136,18 @@ AbstractNode::AbstractNode(Context& context, std::string name)
 void inner::setResultTensor(
     athena::core::AbstractNode& node,
     std::shared_ptr<athena::core::inner::Tensor> tensor) {
-    node.mTensor = std::move(tensor);
+    node.mResultTensor = std::move(tensor);
+}
+void inner::addOutgoingDerivative(AbstractNode& node, std::shared_ptr<inner::Tensor> tensor, size_t outgoingNodeIndex) {
+    node.mOutgoingDerivatives[outgoingNodeIndex] = std::move(tensor);
+}
+inner::Tensor& inner::getOutgoingDerivative(AbstractNode& node, NodeIndexType index) {
+    return *node.mOutgoingDerivatives[index];
+}
+inner::Tensor& inner::getOwnDerivative(AbstractNode& node) {
+    return *node.mOwnDerivativeTensor;
+}
+std::map<size_t, std::shared_ptr<inner::Tensor>> &inner::getOutgoingDerivatives(AbstractNode &node) {
+    return node.mOutgoingDerivatives;
 }
 }  // namespace athena::core

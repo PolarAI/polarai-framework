@@ -19,21 +19,22 @@
 #include <athena/core/inner/Tensor.h>
 
 #include <cstddef>
+#include <vector>
+#include <memory>
 
 namespace athena::core::inner {
 ATH_CORE_EXPORT void setGraphIndex(AbstractNode &node, size_t graphIndex);
 ATH_CORE_EXPORT void incrementInputCount(AbstractNode &node);
 ATH_CORE_EXPORT Tensor &getTensorFromNode(AbstractNode &node);
-ATH_CORE_EXPORT std::shared_ptr<Tensor> getTensorPtrFromNode(
-    AbstractNode &node);
+ATH_CORE_EXPORT Tensor* getTensorPtrFromNode(AbstractNode &node);
+ATH_CORE_EXPORT std::shared_ptr<Tensor> getTensorSmartPtrFromNode(AbstractNode &node);
 ATH_CORE_EXPORT Traversal &getTraversal(Graph &graph);
 ATH_CORE_EXPORT Clusters &getClusters(Graph &graph);
 ATH_CORE_EXPORT Clusters &getClusters(Traversal &traversal);
 ATH_CORE_EXPORT void setTraversalValidity(Traversal &traversal, bool flag);
-ATH_CORE_EXPORT void addDerivativeTensor(Node &node, inner::Tensor &tensor);
-ATH_CORE_EXPORT Tensor &getDerivativeTensor(Node &node, size_t index);
-ATH_CORE_EXPORT void setErrorTensor(Node &node, Tensor *tensor);
-ATH_CORE_EXPORT inner::Tensor &getIncomingGradient(Node &node);
+ATH_CORE_EXPORT void addOutgoingDerivative(AbstractNode &node, std::shared_ptr<inner::Tensor> tensor, size_t outgoingNodeIndex);
+ATH_CORE_EXPORT Tensor &getOutgoingDerivative(AbstractNode &node, athena::core::NodeIndexType index);
+ATH_CORE_EXPORT inner::Tensor &getOwnDerivative(AbstractNode &node);
 ATH_CORE_EXPORT void setResultTensor(AbstractNode &node,
                                      std::shared_ptr<inner::Tensor> tensor);
 ATH_CORE_EXPORT Tensor *getNullTensor(Context &context);
@@ -44,6 +45,7 @@ ATH_CORE_EXPORT inner::Table<Graph *> &getGraphTable(
 ATH_CORE_EXPORT inner::Table<AbstractNode *> &getNodeTable(
     athena::core::Context &context);
 ATH_CORE_EXPORT Context &getContext(athena::core::Graph &graph);
+ATH_CORE_EXPORT std::map<size_t, std::shared_ptr<inner::Tensor>> &getOutgoingDerivatives(AbstractNode &node);
 }  // namespace athena::core::inner
 
 #endif  // ATHENA_INNERFUNCTIONS_H

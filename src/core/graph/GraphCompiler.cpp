@@ -15,6 +15,9 @@
 #include <athena/core/InputNode.h>
 #include <athena/core/LossNode.h>
 #include <athena/core/Node.h>
+#include <athena/core/Graph.h>
+
+using namespace athena::core::inner;
 
 namespace athena::core {
 
@@ -39,19 +42,20 @@ static void compileActionNodes(
     const GraphCompiler::ClusterContainer<core::Node> &actionNodes,
     athena::core::Graph &graph) {
     for (auto &nodeDeps : actionNodes) {
-        std::vector<core::inner::Tensor *> preparedTensors;
-        for (auto &input : nodeDeps.input) {
-            auto *node = core::inner::getNodeTable(
-                core::inner::getContext(graph))[input.nodeIndex];
-            preparedTensors.push_back(&core::inner::getTensorFromNode(*node));
-        }
+        //std::vector<core::inner::Tensor *> preparedTensors;
+//        for (auto &input : nodeDeps.input) {
+//            auto *node = core::inner::getNodeTable(
+//                core::inner::getContext(graph))[input.nodeIndex];
+//            preparedTensors.push_back(&core::inner::getTensorFromNode(*node));
+//        }
+        auto inputs = getOperationArgs(core::inner::getContext(graph), nodeDeps);
         auto &node = node_cast<core::Node &>(*core::inner::getNodeTable(
             core::inner::getContext(graph))[nodeDeps.nodeIndex]);
         generator.openNode(node.getName());
         generator.generate("allocate", core::inner::getTensorFromNode(node));
-        preparedTensors.push_back(&core::inner::getTensorFromNode(node));
+        //preparedTensors.push_back(&core::inner::getTensorFromNode(node));
         // todo lock tensors in memory
-        node.getOperation().gen(generator, preparedTensors);
+        node.getOperation().gen(generator, inputs);
         // todo unlock tensors in memory
 
         generator.closeNode();
@@ -61,63 +65,40 @@ static void compileLossNodes(
     AbstractGenerator &generator,
     const GraphCompiler::ClusterContainer<core::LossNode> &lossNodes,
     athena::core::Graph &graph) {
-    if (lossNodes.size() == 1) {
-        auto &nodeDeps = lossNodes[0];
-        std::vector<core::inner::Tensor *> preparedTensors;
-        for (auto &input : nodeDeps.input) {
-            auto *node = core::inner::getNodeTable(
-                core::inner::getContext(graph))[input.nodeIndex];
-            preparedTensors.push_back(&core::inner::getTensorFromNode(*node));
-        }
+    for (auto &nodeDeps : lossNodes) {
+        auto inputs =
+            getOperationArgs(core::inner::getContext(graph), nodeDeps);
         auto &node =
             *reinterpret_cast<core::LossNode *>(core::inner::getNodeTable(
                 core::inner::getContext(graph))[nodeDeps.nodeIndex]);
         generator.openNode(node.getName());
         generator.generate("allocate", core::inner::getTensorFromNode(node));
-        preparedTensors.push_back(&core::inner::getTensorFromNode(node));
         // todo lock tensors in memory
-        node.getOperation().gen(generator, preparedTensors);
+        node.getOperation().gen(generator, inputs);
         // todo unlock tensors in memory
-
         generator.closeNode();
-    } else if (lossNodes.size() > 1) {
-        new core::FatalError(ATH_FATAL_OTHER, "More than 1 loss node");
     }
 }
 
 static void compileLossDerivatives(
     AbstractGenerator &generator,
-    const GraphCompiler::ClusterContainer<core::LossNode> &lossNodes,
-    core::Optimizer &graphOptimizer,
-    core::Graph &graph) {
+    const GraphCompiler::ClusterContainer<LossNode> &lossNodes,
+    Optimizer &graphOptimizer,
+    Graph &graph) {
     for (auto &nodeDeps : lossNodes) {
-        // Collect inputs
-        std::vector<core::inner::Tensor *> inputs;
-        for (auto &inp : nodeDeps.input) {
-            auto &tensor =
-                core::inner::getTensorFromNode(*core::inner::getNodeTable(
-                    core::inner::getContext(graph))[inp.nodeIndex]);
-
-            inputs.push_back(&tensor);
-        }
-
-        auto &lossNode = node_cast<core::LossNode &>(*core::inner::getNodeTable(
-            core::inner::getContext(graph))[nodeDeps.nodeIndex]);
-
-        auto &outputTensor = core::inner::getTensorFromNode(lossNode);
-
-        for (size_t idx = 0;
-             idx < lossNode.getOperation().getOperandsCount() - 1; idx++) {
-            auto &derivativeTensor =
-                core::inner::getDerivativeTensor(lossNode, idx);
-
+        auto operationArgs = getOperationArgs(getContext(graph), nodeDeps);
+        auto &lossNode = node_cast<core::LossNode &>(*getNodeTable(
+            getContext(graph))[nodeDeps.nodeIndex]);
+        generator.generate("allocate", getOwnDerivative(lossNode));
+        lossNode.getOperation().genOwnDerivative(generator, getOutgoingDerivatives(lossNode),
+            getOwnDerivative(lossNode));
+        for (auto& inputNode : nodeDeps.input) {
+            auto inputNodeIndex = inputNode.second;
+            auto inputNodeMark = inputNode.first;
+            auto &derivativeTensor = getOutgoingDerivative(*getNodeTable(getContext(graph))[inputNodeIndex], lossNode.getNodeIndex());
             generator.generate("allocate", derivativeTensor);
             // todo lock tensors in memory
-            lossNode.getOperation().genDerivative(
-                graphOptimizer.getRequiredOrder(), generator, outputTensor,
-                *core::inner::getNullTensor(
-                    core::inner::getContext(graph)),  // todo re-think this
-                inputs, derivativeTensor, idx);
+            lossNode.getOperation().genIncomingDerivative(generator, operationArgs, derivativeTensor, getOwnDerivative(lossNode), inputNodeMark);
             // TODO memory clean up
         }
     }
@@ -129,99 +110,67 @@ static void compileNodeDerivatives(
     core::Optimizer &graphOptimizer,
     core::Graph &graph) {
     for (auto &nodeDeps : nodes) {
-        std::vector<core::inner::Tensor *> inputs;
-        for (auto &inp : nodeDeps.input) {
-            auto &tensor =
-                core::inner::getTensorFromNode(*core::inner::getNodeTable(
-                    core::inner::getContext(graph))[inp.nodeIndex]);
-
-            inputs.push_back(&tensor);
-        }
+//        std::vector<core::inner::Tensor *> inputs;
+//        for (auto &inp : nodeDeps.input) {
+//            auto &tensor =
+//                core::inner::getTensorFromNode(*core::inner::getNodeTable(
+//                    core::inner::getContext(graph))[inp.nodeIndex]);
+//
+//            inputs.push_back(&tensor);
+//        }
+        auto operationArgs = getOperationArgs(getContext(graph), nodeDeps);
 
         auto &node = node_cast<core::Node &>(*core::inner::getNodeTable(
             core::inner::getContext(graph))[nodeDeps.nodeIndex]);
-
-        // Calculate total error before this node
-        std::vector<core::inner::Tensor *> incomingErrors;
-        for (auto &outp : nodeDeps.output) {
-            auto &abstractNode = *core::inner::getNodeTable(
-                core::inner::getContext(graph))[outp.nodeIndex];
-            if (abstractNode.getType() == core::NodeType::LOSS ||
-                abstractNode.getType() == core::NodeType::DEFAULT) {
-                auto &outpNode = *reinterpret_cast<core::Node *>(&abstractNode);
-                auto &tensor =
-                    core::inner::getDerivativeTensor(outpNode, outp.mark - 1);
-                incomingErrors.push_back(&tensor);
-            }
-        }
-
-        auto &errorTensor = core::inner::getIncomingGradient(node);
-        generator.generate("allocate", errorTensor);
-        graphOptimizer.genError(generator, incomingErrors, errorTensor);
-
-        auto &outputTensor = core::inner::getTensorFromNode(node);
-
-        std::vector<core::inner::Tensor *> derivativeTensors;
-
-        for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
-             idx++) {
-            auto &derivativeTensor =
-                core::inner::getDerivativeTensor(node, idx);
-
-            derivativeTensors.push_back(&derivativeTensor);
-
+        generator.generate("allocate", getOwnDerivative(node));
+        node.getOperation().genOwnDerivative(generator, getOutgoingDerivatives(node),
+            getOwnDerivative(node));
+        for (auto& inputNode : nodeDeps.input) {
+            //auto &derivativeTensor = getOutgoingDerivative(lossNode, idx);
+            auto inputNodeIndex = inputNode.second;
+            auto inputNodeMark = inputNode.first;
+            auto &derivativeTensor = getOutgoingDerivative(*getNodeTable(getContext(graph))[inputNodeIndex], node.getNodeIndex());
             generator.generate("allocate", derivativeTensor);
             // todo lock tensors in memory
-            node.getOperation().genDerivative(
-                graphOptimizer.getRequiredOrder(), generator, outputTensor,
-                errorTensor, inputs, derivativeTensor, idx);
+            node.getOperation().genIncomingDerivative(generator, operationArgs, derivativeTensor, getOwnDerivative(node), inputNodeMark);
             // TODO memory clean up
         }
-
-        std::vector<core::inner::Tensor *> internalErrors;
-
-        for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
-             idx++) {
-            internalErrors.push_back(&errorTensor);
-
-            generator.generate("allocate", errorTensor);
-        }
     }
 }
 
-static void adjustWeights(
-    AbstractGenerator &generator,
-    const GraphCompiler::ClusterContainer<core::InputNode> &inputNodes,
-    core::Optimizer &graphOptimizer,
-    core::Graph &graph) {
-    for (auto &nodeDeps : inputNodes) {
-        auto &inputNode =
-            node_cast<core::InputNode &>(*core::inner::getNodeTable(
-                core::inner::getContext(graph))[nodeDeps.nodeIndex]);
-
-        // Frozen nodes are usually user data thus not updated
-        if (inputNode.isFrozen()) continue;
-
-        // todo lock in memory
-        auto &tensor = core::inner::getTensorFromNode(inputNode);
-
-        std::vector<core::inner::Tensor *> incomingErrors;
-        for (auto &outp : nodeDeps.output) {
-            auto &abstractNode = *core::inner::getNodeTable(
-                core::inner::getContext(graph))[outp.nodeIndex];
-            if (abstractNode.getType() == core::NodeType::LOSS ||
-                abstractNode.getType() == core::NodeType::DEFAULT) {
-                auto &outpNode = *reinterpret_cast<core::Node *>(&abstractNode);
-                auto &derivativeTensor =
-                    core::inner::getDerivativeTensor(outpNode, outp.mark - 1);
-                incomingErrors.push_back(&derivativeTensor);
-            }
-        }
-
-        // Apply error correction
-        graphOptimizer.genFix(generator, tensor, incomingErrors);
-    }
-}
+//static void adjustWeights(
+//    AbstractGenerator &generator,
+//    const GraphCompiler::ClusterContainer<core::InputNode> &inputNodes,
+//    core::Optimizer &graphOptimizer,
+//    core::Graph &graph) {
+//    for (auto &nodeDeps : inputNodes) {
+//        auto &inputNode =
+//            node_cast<core::InputNode &>(*core::inner::getNodeTable(
+//                core::inner::getContext(graph))[nodeDeps.nodeIndex]);
+//
+//        // Frozen nodes are usually user data thus not updated
+//        if (inputNode.isFrozen()) continue;
+//
+//        // todo lock in memory
+//        auto &tensor = core::inner::getTensorFromNode(inputNode);
+//
+//        std::vector<core::inner::Tensor *> incomingErrors;
+//        for (auto &outp : nodeDeps.output) {
+//            auto &abstractNode = *core::inner::getNodeTable(
+//                core::inner::getContext(graph))[outp.nodeIndex];
+//            if (abstractNode.getType() == core::NodeType::LOSS ||
+//                abstractNode.getType() == core::NodeType::DEFAULT) {
+//                auto &outpNode = *reinterpret_cast<core::Node *>(&abstractNode);
+//                auto &derivativeTensor =
+//                    core::inner::getOutgoingDerivative(outpNode, outp.mark - 1);
+//                incomingErrors.push_back(&derivativeTensor);
+//            }
+//        }
+//
+//        // Apply error correction
+//        graphOptimizer.genFix(generator, tensor, incomingErrors);
+//    }
+//}
 
 static void compileDerivatives(AbstractGenerator &generator,
                                const core::Traversal &traversal,
@@ -238,7 +187,7 @@ static void compileDerivatives(AbstractGenerator &generator,
         compileNodeDerivatives(generator, actionNodes, graphOptimizer, graph);
 
         auto &inputNodes = clusterIt->get<core::InputNode>();
-        adjustWeights(generator, inputNodes, graphOptimizer, graph);
+        //adjustWeights(generator, inputNodes, graphOptimizer, graph);
     }
 }
 

@@ -34,14 +34,9 @@ class ATH_CORE_EXPORT Operation {
 
     public:
     explicit Operation(std::string name) : mName(std::move(name)){};
-    virtual inner::Tensor* getResultTensor(
-        core::Context& context, std::vector<inner::Tensor*> args) const = 0;
-    virtual inner::Tensor* getErrorTensor(core::Context& context,
-                                          std::vector<inner::Tensor*> args,
-                                          int derivativeOrder) const = 0;
-    virtual inner::Tensor* getDerivativeTensor(core::Context& context,
-                                               std::vector<inner::Tensor*> args,
-                                               int argNo) const = 0;
+
+    virtual std::shared_ptr<core::inner::Tensor> createTensor(
+        core::Context& context, std::vector<core::inner::Tensor *> args) const = 0;
 
     /**
      * Generate code for Operation
@@ -59,13 +54,16 @@ class ATH_CORE_EXPORT Operation {
      * to Generator implementation
      * @param argNo Index of argument that derivative will be computed to
      */
-    virtual void genDerivative(int order,
-                               AbstractGenerator& g,
-                               inner::Tensor& operationResult,
-                               inner::Tensor& internalError,
-                               std::vector<inner::Tensor*>& operationArguments,
-                               inner::Tensor& derivativeTensor,
-                               int argNo) const = 0;
+    virtual void genIncomingDerivative(
+        core::AbstractGenerator &g,
+        std::vector<core::inner::Tensor *> &operationArguments,
+        core::inner::Tensor &derivativeOfIncomingNode,
+        core::inner::Tensor &ownDerivative,
+        size_t argumentMark) const = 0;
+
+    virtual void genOwnDerivative(AbstractGenerator& g,
+                                  std::map<size_t, std::shared_ptr<inner::Tensor>> &outgoingDerivatives,
+                                  inner::Tensor &ownDerivative) const;
 
     /**
      *
@@ -79,56 +77,6 @@ class ATH_CORE_EXPORT Operation {
 
     static Operation* deserialize(const std::string& data) {
         return nullptr;
-    };
-};
-
-class ATH_CORE_EXPORT OperationDummy : public Operation {
-    public:
-    explicit OperationDummy(std::string name) : Operation(std::move(name)){};
-
-    inner::Tensor* getResultTensor(
-        core::Context& context,
-        std::vector<inner::Tensor*> args) const override {
-        return inner::getNullTensor(context);
-    }
-
-    inner::Tensor* getErrorTensor(core::Context& context,
-                                  std::vector<inner::Tensor*>,
-                                  int) const override {
-        return inner::getNullTensor(context);
-    }
-
-    inner::Tensor* getDerivativeTensor(core::Context& context,
-                                       std::vector<inner::Tensor*> args,
-                                       int argNo) const override {
-        return inner::getNullTensor(context);
-    }
-
-    void gen(AbstractGenerator& g,
-             std::vector<inner::Tensor*>& operationArguments) const override {
-        new FatalError(ATH_NOT_IMPLEMENTED, "NOT IMPL");
-    }
-
-    void genDerivative(const int order,
-                       AbstractGenerator& g,
-                       inner::Tensor& operationResult,
-                       inner::Tensor& internalError,
-                       std::vector<inner::Tensor*>& operationArguments,
-                       inner::Tensor& derivativeTensor,
-                       int argNo) const override {
-        new FatalError(ATH_NOT_IMPLEMENTED, "NOT IMPL");
-    }
-
-    size_t getOperandsCount() const override {
-        return 0;
-    }
-
-    std::string serialize() const override {
-        return "";
-    }
-
-    static Operation* deserialize(const std::string&) {
-        return new OperationDummy("dummy");
     };
 };
 }  // namespace athena::core

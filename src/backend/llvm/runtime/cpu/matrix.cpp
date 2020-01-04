@@ -84,6 +84,7 @@ void gemm<float>(Device *,
                  Tensor *a,
                  Tensor *b,
                  Tensor *c) {
+    std::cout << "!!!" << std::endl;
     CBLAS_TRANSPOSE transposeA =
         options->transposeA ? CblasTrans : CblasNoTrans;
     CBLAS_TRANSPOSE transposeB =
@@ -99,7 +100,6 @@ void gemm<float>(Device *,
         static_cast<const int>(b->getShape().dim(options->transposeB ? 0 : 1));
     const int K =
         static_cast<const int>(a->getShape().dim(options->transposeA ? 0 : 1));
-
     cblas_sgemm(CBLAS_ORDER::CblasRowMajor, transposeA, transposeB, M, N, K,
                 options->alpha, aData, options->transposeA ? M : K, bData,
                 options->transposeB ? K : N, options->beta, cData, N);

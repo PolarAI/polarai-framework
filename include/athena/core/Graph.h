@@ -43,6 +43,17 @@ struct ATH_CORE_EXPORT Edge {
         return startNodeIndex < rhs.startNodeIndex;
     }
 };
+template <typename TemplateNodeType>
+std::vector<Tensor*> getOperationArgs(
+    Context& context, const NodeDependencies<TemplateNodeType>& dependencies) {
+    std::vector<Tensor*> operationArgs;
+    operationArgs.reserve(dependencies.input.size());
+    for (auto& inputDependence : dependencies.input) {
+        operationArgs.push_back(getTensorPtrFromNode(
+            *getNodeTable(context)[inputDependence.second]));
+    }
+    return operationArgs;
+}
 }  // namespace inner
 
 using SyncStorage = std::unordered_set<size_t>;

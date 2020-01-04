@@ -13,51 +13,43 @@
 
 #include <athena/core/inner/InnerFunctions.h>
 #include <athena/ops/MSELossFunction.h>
+#include <athena/backend/llvm/runtime/structs.h>
 
 #include <cassert>
 
+using namespace athena::backend;
+using namespace athena::core;
+using namespace athena::core::inner;
+
 namespace athena::ops {
-core::inner::Tensor *ops::MSELossFunction::getResultTensor(
-    core::Context& context, std::vector<core::inner::Tensor *> args) const {
-    core::TensorShape newShape{1};
-    return new core::inner::Tensor(args[0]->getDataType(), newShape, context);
+void MSELossFunction::gen(AbstractGenerator &g, std::vector<Tensor *> &operationArguments) const {
+    g.generate("mse", *operationArguments[0], *operationArguments[1], *operationArguments[2]);
 }
-core::inner::Tensor *MSELossFunction::getDerivativeTensor(
-    core::Context& context, std::vector<core::inner::Tensor *> args, int argNo) const {
-    return new core::inner::Tensor(args[0]->getDataType(), args[0]->getShape(), context);
+
+std::shared_ptr<Tensor> MSELossFunction::createTensor(Context& context, std::vector<Tensor *> args) const {
+    return std::make_shared<Tensor>(Tensor(args[0]->getDataType(), {1}, context));
 }
-void MSELossFunction::gen(
-    core::AbstractGenerator &g,
-    std::vector<core::inner::Tensor *> &operationArguments) const {
-    g.generate("mse", *operationArguments[0], *operationArguments[1],
-               *operationArguments[2]);
-}
-void MSELossFunction::genDerivative(
-    int order,
-    core::AbstractGenerator &g,
-    core::inner::Tensor &operationResult,
-    core::inner::Tensor &internalError,
-    std::vector<core::inner::Tensor *> &operationArguments,
-    core::inner::Tensor &derivativeTensor,
-    int argNo) const {
+
+void MSELossFunction::genIncomingDerivative(AbstractGenerator &g, std::vector<core::inner::Tensor *> &operationArguments,
+    Tensor &derivativeTensorOfIncomingNode, Tensor &derivativeTensorOfCurrentNode,
+    size_t derivativeMark) const {
 #ifdef DEBUG
     assert(operationArguments.size() == 2 && "Operation args != 2");
 #endif
 
-    double scaleDouble = 2.0 / operationResult.getShapeView().getTotalSize();
-    float scaleFloat = 2.0f / operationResult.getShapeView().getTotalSize();
-
     uint64_t scale = 0;
     uint64_t negScale = 0;
 
-    switch (operationResult.getDataType()) {
+    switch (operationArguments[0]->getDataType()) {
         case core::DataType::DOUBLE: {
+            double scaleDouble = 2.0;
             double negScaleDouble = -scaleDouble;
             scale = *reinterpret_cast<uint64_t *>(&scaleDouble);
             negScale = *reinterpret_cast<uint64_t *>(&negScaleDouble);
             break;
         }
         case core::DataType::FLOAT: {
+            float scaleFloat = 2.0f;
             float negScaleFloat = -scaleFloat;
             scale = *reinterpret_cast<uint64_t *>(&scaleFloat);
             negScale = *reinterpret_cast<uint64_t *>(&negScaleFloat);
@@ -67,17 +59,15 @@ void MSELossFunction::genDerivative(
             new core::FatalError(core::ATH_NOT_IMPLEMENTED,
                                  "Data type not supported");
     }
+    size_t otherArg = derivativeMark == 0 ? 1 : 0;
+    g.generate("fma", *operationArguments[derivativeMark], scale, *operationArguments[otherArg],
+               negScale, derivativeTensorOfIncomingNode);
+    static auto *options = new backend::HadamardOptions<float>{1.f, 0.0f};
+    void *opts = static_cast<void *>(options);
+    g.generate("hadamard", opts, derivativeTensorOfIncomingNode, derivativeTensorOfCurrentNode,
+               derivativeTensorOfIncomingNode);
+}
 
-    g.generate("fma", operationResult, scale, *operationArguments[argNo],
-               negScale, derivativeTensor);
-}
-core::inner::Tensor *MSELossFunction::getErrorTensor(core::Context& context,
-                                                     std::vector<core::inner::Tensor *> args, int derivativeOrder) const {
-    // Loss node is always the last node (except for output)
-    // No need for actual implementation
-    // todo refactor me
-    return nullptr;
-}
 std::string MSELossFunction::serialize() const {
     return "";
 }

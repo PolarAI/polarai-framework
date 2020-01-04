@@ -65,25 +65,25 @@ static void processActionNode(
     core::Node& actionNode,
     const inner::NodeDependencies<core::Node>& nodeDeps,
     std::ostream& stream) {
-    stream << "subgraph cluster_" << actionNode.getName() << " {";
-    stream << "label=\"Action\";\n";
-    stream << actionNode.getName() << " [label=\"" << actionNode.getName()
-           << "\"];\n";
-    auto& tensor = inner::getTensorFromNode(actionNode);
-    processTensor(tensor, INNER, stream);
-    for (size_t i = 0; i < actionNode.getOperation().getOperandsCount(); i++) {
-        auto& dTensor = inner::getDerivativeTensor(actionNode, i);
-        processTensor(dTensor, DERIVATIVE, stream);
-    }
-    auto& eTensor = inner::getIncomingGradient(actionNode);
-    processTensor(eTensor, ERR, stream);
-    stream << "}\n";
-
-    for (auto& parent : nodeDeps.input) {
-        auto* pNode = core::inner::getNodeTable(*mContext)[parent.nodeIndex];
-        stream << pNode->getName() << " -> " << actionNode.getName();
-        stream << ";\n";
-    }
+//    stream << "subgraph cluster_" << actionNode.getName() << " {";
+//    stream << "label=\"Action\";\n";
+//    stream << actionNode.getName() << " [label=\"" << actionNode.getName()
+//           << "\"];\n";
+//    auto& tensor = inner::getTensorFromNode(actionNode);
+//    processTensor(tensor, INNER, stream);
+//    for (size_t i = 0; i < actionNode.getOperation().getOperandsCount(); i++) {
+//        auto& dTensor = inner::getOutgoingDerivative(actionNode, i);
+//        processTensor(dTensor, DERIVATIVE, stream);
+//    }
+//    auto& eTensor = inner::getIncomingGradient(actionNode);
+//    processTensor(eTensor, ERR, stream);
+//    stream << "}\n";
+//
+//    for (auto& parent : nodeDeps.input) {
+//        auto* pNode = core::inner::getNodeTable(*mContext)[parent.nodeIndex];
+//        stream << pNode->getName() << " -> " << actionNode.getName();
+//        stream << ";\n";
+//    }
 }
 
 static void processLossNode(
@@ -91,24 +91,24 @@ static void processLossNode(
     core::LossNode& lossNode,
     const inner::NodeDependencies<core::LossNode>& nodeDeps,
     std::ostream& stream) {
-    stream << "subgraph cluster_" << lossNode.getName() << " {";
-    stream << "label=\"Loss\";\n";
-    stream << lossNode.getName() << " [label=\"" << lossNode.getName()
-           << "\"];\n";
-    auto& tensor = inner::getTensorFromNode(lossNode);
-    processTensor(tensor, INNER, stream);
-    for (size_t i = 0; i < lossNode.getOperation().getOperandsCount(); i++) {
-        auto& dTensor = inner::getDerivativeTensor(lossNode, i);
-        processTensor(dTensor, DERIVATIVE, stream);
-    }
-    auto& eTensor = inner::getIncomingGradient(lossNode);
-    stream << "}\n";
-
-    for (auto& parent : nodeDeps.input) {
-        auto* pNode = core::inner::getNodeTable(*mContext)[parent.nodeIndex];
-        stream << pNode->getName() << " -> " << lossNode.getName();
-        stream << ";\n";
-    }
+//    stream << "subgraph cluster_" << lossNode.getName() << " {";
+//    stream << "label=\"Loss\";\n";
+//    stream << lossNode.getName() << " [label=\"" << lossNode.getName()
+//           << "\"];\n";
+//    auto& tensor = inner::getTensorFromNode(lossNode);
+//    processTensor(tensor, INNER, stream);
+//    for (size_t i = 0; i < lossNode.getOperation().getOperandsCount(); i++) {
+//        auto& dTensor = inner::getOutgoingDerivative(lossNode, i);
+//        processTensor(dTensor, DERIVATIVE, stream);
+//    }
+//    auto& eTensor = inner::getIncomingGradient(lossNode);
+//    stream << "}\n";
+//
+//    for (auto& parent : nodeDeps.input) {
+//        auto* pNode = core::inner::getNodeTable(*mContext)[parent.nodeIndex];
+//        stream << pNode->getName() << " -> " << lossNode.getName();
+//        stream << ";\n";
+//    }
 }
 
 static void processOutputNode(
@@ -116,19 +116,19 @@ static void processOutputNode(
     core::OutputNode& outputNode,
     const inner::NodeDependencies<core::OutputNode>& nodeDeps,
     std::ostream& stream) {
-    stream << "subgraph cluster_" << outputNode.getName() << " {";
-    stream << "label=\"Output\";\n";
-    stream << outputNode.getName() << " [label=\"" << outputNode.getName()
-           << "\"];\n";
-    auto& tensor = inner::getTensorFromNode(outputNode);
-    processTensor(tensor, INNER, stream);
-    stream << "}\n";
-
-    for (auto& parent : nodeDeps.input) {
-        auto* pNode = core::inner::getNodeTable(*mContext)[parent.nodeIndex];
-        stream << pNode->getName() << " -> " << outputNode.getName();
-        stream << ";\n";
-    }
+//    stream << "subgraph cluster_" << outputNode.getName() << " {";
+//    stream << "label=\"Output\";\n";
+//    stream << outputNode.getName() << " [label=\"" << outputNode.getName()
+//           << "\"];\n";
+//    auto& tensor = inner::getTensorFromNode(outputNode);
+//    processTensor(tensor, INNER, stream);
+//    stream << "}\n";
+//
+//    for (auto& parent : nodeDeps.input) {
+//        auto* pNode = core::inner::getNodeTable(*mContext)[parent.nodeIndex];
+//        stream << pNode->getName() << " -> " << outputNode.getName();
+//        stream << ";\n";
+//    }
 }
 
 void DotModel::exportGraph(Graph& graph, std::ostream& stream) {

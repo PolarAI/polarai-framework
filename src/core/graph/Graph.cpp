@@ -22,29 +22,31 @@
 #include <algorithm>
 #include <queue>
 
+using namespace athena::core::inner;
+
 namespace athena::core {
-template <typename TemplateNodeType>
-void initVisitsOf(const OwningStorage& storage,
-                  std::unordered_map<size_t, inner::NodeState>& visits) {
-    for (auto& node : std::get<std::vector<TemplateNodeType>>(storage)) {
-        visits[node.getNodeIndex()] = inner::NodeState{0};
-    }
-}
-void initVisitsOf(const SyncStorage& storage,
-                  std::unordered_map<size_t, inner::NodeState>& visits) {
-    for (auto& index : storage) {
-        visits[index] = inner::NodeState{0};
-    }
-}
-void initVisits(std::unordered_map<size_t, inner::NodeState>& visits,
-                const OwningStorage& owningStorage,
-                const SyncStorage& syncStorage) {
-    initVisitsOf(syncStorage, visits);
-    initVisitsOf<InputNode>(owningStorage, visits);
-    initVisitsOf<Node>(owningStorage, visits);
-    initVisitsOf<OutputNode>(owningStorage, visits);
-    initVisitsOf<LossNode>(owningStorage, visits);
-}
+//template <typename TemplateNodeType>
+//void initVisitsOf(const OwningStorage& storage,
+//                  std::unordered_map<size_t, NodeState>& visits) {
+//    for (auto& node : std::get<std::vector<TemplateNodeType>>(storage)) {
+//        visits[node.getNodeIndex()] = NodeState{0};
+//    }
+//}
+//void initVisitsOf(const SyncStorage& storage,
+//                  std::unordered_map<size_t, NodeState>& visits) {
+//    for (auto& index : storage) {
+//        visits[index] = NodeState{0};
+//    }
+//}
+//void initVisits(std::unordered_map<size_t, NodeState>& visits,
+//                const OwningStorage& owningStorage,
+//                const SyncStorage& syncStorage) {
+//    initVisitsOf(syncStorage, visits);
+//    initVisitsOf<InputNode>(owningStorage, visits);
+//    initVisitsOf<Node>(owningStorage, visits);
+//    initVisitsOf<OutputNode>(owningStorage, visits);
+//    initVisitsOf<LossNode>(owningStorage, visits);
+//}
 void initQueue(std::queue<size_t>& queue,
                const OwningStorage& owningStorage,
                const SyncStorage& syncStorage,
@@ -53,15 +55,14 @@ void initQueue(std::queue<size_t>& queue,
         queue.push(inputNode.getNodeIndex());
     }
     for (auto& nodeIndex : syncStorage) {
-        if (inner::getNodeTable(context)[nodeIndex]->getType() ==
-            NodeType::INPUT) {
+        if (getNodeTable(context)[nodeIndex]->getType() == NodeType::INPUT) {
             queue.push(nodeIndex);
         }
     }
 }
 Graph::Graph(Context& context)
     : mContext(&context),
-      mGraphIndex(inner::getGraphTable(*mContext).registerRecord(this)),
+      mGraphIndex(getGraphTable(*mContext).registerRecord(this)),
       mGraphName("MainGraph") {}
 Graph::Graph(Graph&& rhs) noexcept
     : mSyncStorage(std::move(rhs.mSyncStorage)),
@@ -70,14 +71,14 @@ Graph::Graph(Graph&& rhs) noexcept
       mContext(rhs.mContext),
       mGraphIndex(rhs.mGraphIndex),
       mTraversal(std::move(rhs.mTraversal)) {
-    inner::getGraphTable(*mContext)[mGraphIndex] = this;
+    getGraphTable(*mContext)[mGraphIndex] = this;
     rhs.fullClear();
 }
 Graph::~Graph() {
-    inner::getGraphTable(*mContext)[mGraphIndex] = nullptr;
+    getGraphTable(*mContext)[mGraphIndex] = nullptr;
     for (auto indexNode : mSyncStorage) {
-        if (auto* node = inner::getNodeTable(*mContext)[indexNode]; node) {
-            inner::setGraphIndex(*(node), inner::kKUndefinedIndex);
+        if (auto* node = getNodeTable(*mContext)[indexNode]; node) {
+            setGraphIndex(*(node), kKUndefinedIndex);
         }
     }
 }
@@ -88,12 +89,16 @@ void Graph::saveRealNode(TemplateNodeType& node,
     if (isErase) {
         mSyncStorage.erase(node.getNodeIndex());
     }
-    std::get<std::vector<TemplateNodeType>>(mOwningStorage)
-        .emplace_back(std::move(node));
+    std::get<std::vector<TemplateNodeType>>(mOwningStorage).emplace_back(std::move(node));
+//    if (isRepairedNode) {
+//        TemplateNodeType newNode(
+//            std::get<std::vector<TemplateNodeType>>(mOwningStorage).back());
+//        node = std::move(newNode);
+//    }
 }
 void Graph::fullClear() {
     clear();
-    mGraphIndex = inner::kKUndefinedIndex;
+    mGraphIndex = kKUndefinedIndex;
 }
 const SyncStorage& Graph::getSyncStorage() const {
     return mSyncStorage;
@@ -105,16 +110,15 @@ const Topology& Graph::getTopology() const {
     return mTopology;
 }
 void Graph::addNode(AbstractNode& node) {
-    if (Graph* graphPointer =
-            inner::getGraphTable(*mContext)[node.getGraphIndex()];
+    if (Graph* graphPointer = getGraphTable(*mContext)[node.getGraphIndex()];
         graphPointer) {
         FatalError(ATH_FATAL_OTHER, "addNode() in Graph : ", this,
                    ". GraphIndex : ", mGraphIndex,
                    ". Adding Node to the graph to which it does not belong");
     }
     mSyncStorage.insert(node.getNodeIndex());
-    inner::setGraphIndex(node, mGraphIndex);
-    inner::setTraversalValidity(mTraversal, false);
+    setGraphIndex(node, mGraphIndex);
+    setTraversalValidity(mTraversal, false);
 }
 void Graph::saveNode(AbstractNode& node, bool isRepairedNode, bool isErase) {
     if (node.getGraphIndex() != mGraphIndex) {
@@ -145,22 +149,21 @@ void Graph::saveNode(AbstractNode& node, bool isRepairedNode) {
 }
 void Graph::saveAllSyncNodes(bool isRepairedNode) {
     for (auto syncNode : mSyncStorage) {
-        saveNode(*inner::getNodeTable(*mContext)[syncNode], isRepairedNode,
-                 false);
+        saveNode(*getNodeTable(*mContext)[syncNode], isRepairedNode, false);
     }
     mSyncStorage.clear();
 }
 void Graph::removeNode(AbstractNode& node) {
     mSyncStorage.erase(node.getNodeIndex());
     size_t nodeIndex = node.getNodeIndex();
-    auto removePredicate = [nodeIndex](const inner::Edge& edge) -> bool {
+    auto removePredicate = [nodeIndex](const Edge& edge) -> bool {
         return nodeIndex == edge.startNodeIndex ||
                nodeIndex == edge.endNodeIndex;
     };
     mTopology.erase(
         std::remove_if(mTopology.begin(), mTopology.end(), removePredicate),
         mTopology.end());
-    inner::setTraversalValidity(mTraversal, false);
+    setTraversalValidity(mTraversal, false);
 }
 void Graph::link(const AbstractNode& startNode,
                  const AbstractNode& endNode,
@@ -174,9 +177,9 @@ void Graph::link(const AbstractNode& startNode,
         startNode.getGraphIndex() == mGraphIndex) {
         mTopology.emplace_back(startNode.getNodeIndex(), endNode.getNodeIndex(),
                                mark);
-        inner::incrementInputCount(
-            *inner::getNodeTable(*mContext)[endNode.getNodeIndex()]);
-        inner::setTraversalValidity(mTraversal, false);
+        incrementInputCount(
+            *getNodeTable(*mContext)[endNode.getNodeIndex()]);
+        setTraversalValidity(mTraversal, false);
     } else {
         FatalError(ATH_FATAL_OTHER, "link() in Graph : ", this,
                    ". GraphIndex : ", mGraphIndex,
@@ -188,8 +191,8 @@ void Graph::clear() {
     mTopology.clear();
     OwningStorage emptyStorage;
     mOwningStorage.swap(emptyStorage);
-    inner::getClusters(mTraversal).clear();
-    inner::setTraversalValidity(mTraversal, false);
+    getClusters(mTraversal).clear();
+    setTraversalValidity(mTraversal, false);
 }
 size_t Graph::countOwningNodes() const {
     return std::get<std::vector<Node>>(mOwningStorage).size() +
@@ -216,42 +219,39 @@ const Traversal& Graph::traverse() {
     if (mTraversal.isValidTraversal()) {
         return mTraversal;
     }
-    inner::getClusters(mTraversal).clear();
+    getClusters(mTraversal).clear();
     std::sort(mTopology.begin(), mTopology.end());
     std::queue<size_t> currentQueue, newQueue;
-    std::unordered_map<size_t, inner::NodeState> visits;
-    initVisits(visits, mOwningStorage, mSyncStorage);
+    std::unordered_map<size_t, NodeState> visits;
+    //initVisits(visits, mOwningStorage, mSyncStorage);
     initQueue(currentQueue, mOwningStorage, mSyncStorage, *mContext);
     while (true) {
-        inner::Cluster cluster{0};
+        Cluster cluster{0};
         while (!currentQueue.empty()) {
             size_t nodeIndex = currentQueue.front();
             currentQueue.pop();
-            inner::Edge target(nodeIndex, 0, 0);
+            Edge target(nodeIndex, 0, 0);
             auto edgeIterator =
                 std::lower_bound(mTopology.begin(), mTopology.end(), target);
             while (edgeIterator != mTopology.end() &&
                    edgeIterator->startNodeIndex == nodeIndex) {
-                auto& inputCount =
-                    visits[edgeIterator->endNodeIndex].inputCount;
-                ++inputCount;
+                visits[edgeIterator->endNodeIndex].input[edgeIterator->mark] = nodeIndex;
+                visits[edgeIterator->startNodeIndex].output.emplace(nodeIndex);
+                auto inputsCount =
+                    visits[edgeIterator->endNodeIndex].input.size();
                 auto targetInputCount =
-                    inner::getNodeTable(*mContext)[edgeIterator->endNodeIndex]
+                    getNodeTable(*mContext)[edgeIterator->endNodeIndex]
                         ->getInputsCount();
-                if (inputCount == targetInputCount) {
+                if (inputsCount == targetInputCount) {
                     newQueue.push(edgeIterator->endNodeIndex);
-                } else if (inputCount > targetInputCount) {
+                } else if (inputsCount > targetInputCount) {
                     FatalError(ATH_FATAL_OTHER,
                                "traverse() in Graph: ", mGraphIndex,
-                               ". Graph has cycle(s)");
+                               ". Graph is have an cycle(s)");
                 }
-                visits[edgeIterator->endNodeIndex].input.emplace(
-                    nodeIndex, edgeIterator->mark);
-                visits[nodeIndex].output.emplace(edgeIterator->endNodeIndex,
-                                                 edgeIterator->mark);
                 ++edgeIterator;
             }
-            AbstractNode* node = inner::getNodeTable(*mContext)[nodeIndex];
+            AbstractNode* node = getNodeTable(*mContext)[nodeIndex];
             switch (node->getType()) {
                 TRAVERSE_ADD_NODES_TO_CLUSTER(NodeType::DEFAULT)
                 TRAVERSE_ADD_NODES_TO_CLUSTER(NodeType::INPUT)
@@ -264,7 +264,7 @@ const Traversal& Graph::traverse() {
             ++cluster.nodeCount;
         }
         if (cluster.nodeCount > 0) {
-            inner::getClusters(mTraversal).emplace_back(std::move(cluster));
+            getClusters(mTraversal).emplace_back(std::move(cluster));
         }
         std::swap(currentQueue, newQueue);
         if (currentQueue.empty()) {
@@ -276,80 +276,39 @@ const Traversal& Graph::traverse() {
     // shapes
     setUpTensors();
 
-    inner::setTraversalValidity(mTraversal, true);
+    setTraversalValidity(mTraversal, true);
     return mTraversal;
 }
 
 #undef TRAVERSE_ADD_NODES_TO_CLUSTER
 
+template <typename TemplateNodeType>
+void createTensorsForNodeType(Context* context, const std::vector<NodeDependencies<TemplateNodeType>>& nodes) {
+    for (auto& nodeDep : nodes) {
+        auto operationArgs = getOperationArgs(*context, nodeDep);
+        auto& node =
+            node_cast<TemplateNodeType&>(*getNodeTable(*context)[nodeDep.nodeIndex]);
+        setResultTensor(node, node.getOperation().createTensor(*context, operationArgs));
+        for (auto& output : nodeDep.output) {
+            addOutgoingDerivative(node, node.getOperation().createTensor(
+                                            *context, operationArgs), output);
+        }
+    }
+}
+
 void Graph::setUpTensors() const {
     for (auto& cluster : mTraversal.getClusters()) {
         auto& actionNodes = cluster.get<Node>();
-        for (auto& nodeDep : actionNodes) {
-            std::vector<inner::Tensor*> opArgs;
-
-            auto& node = node_cast<Node&>(
-                *inner::getNodeTable(*mContext)[nodeDep.nodeIndex]);
-            std::for_each(
-                nodeDep.input.begin(), nodeDep.input.end(),
-                [&](const auto& inp) {
-                    opArgs.push_back(&inner::getTensorFromNode(
-                        *inner::getNodeTable(*mContext)[inp.nodeIndex]));
-                });
-
-            inner::setResultTensor(
-                node,
-                std::shared_ptr<inner::Tensor>(
-                    node.getOperation().getResultTensor(*mContext, opArgs)));
-            inner::setErrorTensor(
-                node, node.getOperation().getErrorTensor(
-                          *mContext, opArgs, mOptimizer->getRequiredOrder()));
-
-            for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
-                 idx++) {
-                auto& derivativeTensor =
-                    *node.getOperation().getDerivativeTensor(*mContext, opArgs,
-                                                             idx);
-                inner::addDerivativeTensor(node, derivativeTensor);
-            }
-        }
-
+        createTensorsForNodeType(mContext, actionNodes);
         auto& lossNodes = cluster.get<LossNode>();
-        for (auto& nodeDep : lossNodes) {
-            std::vector<inner::Tensor*> opArgs;
-
-            auto& node = node_cast<LossNode&>(
-                *inner::getNodeTable(*mContext)[nodeDep.nodeIndex]);
-            std::for_each(
-                nodeDep.input.begin(), nodeDep.input.end(),
-                [&](const auto& inp) {
-                    opArgs.push_back(&inner::getTensorFromNode(
-                        *inner::getNodeTable(*mContext)[inp.nodeIndex]));
-                });
-
-            inner::setResultTensor(
-                node,
-                std::shared_ptr<inner::Tensor>(
-                    node.getOperation().getResultTensor(*mContext, opArgs)));
-
-            for (size_t idx = 0; idx < node.getOperation().getOperandsCount();
-                 idx++) {
-                auto& derivativeTensor =
-                    *node.getOperation().getDerivativeTensor(*mContext, opArgs,
-                                                             idx);
-                // For loss node error and derivative means the same
-                inner::addDerivativeTensor(node, derivativeTensor);
-            }
-        }
-
+        createTensorsForNodeType(mContext, lossNodes);
         auto& outputNodes = cluster.get<OutputNode>();
         for (auto& nodeDep : outputNodes) {
             auto& node = node_cast<OutputNode&>(
-                *inner::getNodeTable(*mContext)[nodeDep.nodeIndex]);
+                *getNodeTable(*mContext)[nodeDep.nodeIndex]);
             auto& parentNode = *inner::getNodeTable(
-                *mContext)[nodeDep.input.begin()->nodeIndex];
-            inner::setResultTensor(node,
-                                   inner::getTensorPtrFromNode(parentNode));
+                *mContext)[nodeDep.input.begin()->second];
+            setResultTensor(node, inner::getTensorSmartPtrFromNode(parentNode));
         }
     }
 }
@@ -359,4 +318,4 @@ namespace athena::core::inner {
 Context& getContext(athena::core::Graph& graph) {
     return *(graph.mContext);
 }
-}  // namespace athena::core::inner
+}

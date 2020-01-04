@@ -22,10 +22,13 @@ void incrementInputCount(AbstractNode &node) {
     ++node.mInputsCount;
 }
 Tensor &getTensorFromNode(AbstractNode &node) {
-    return *node.mTensor;
+    return *node.mResultTensor;
 }
-std::shared_ptr<Tensor> getTensorPtrFromNode(AbstractNode &node) {
-    return node.mTensor;
+Tensor* getTensorPtrFromNode(AbstractNode &node) {
+    return node.mResultTensor.get();
+}
+std::shared_ptr<Tensor> getTensorSmartPtrFromNode(AbstractNode &node) {
+    return node.mResultTensor;
 }
 Traversal &getTraversal(Graph &graph) {
     return graph.mTraversal;

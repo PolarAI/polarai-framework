@@ -27,22 +27,17 @@ class ATH_OPS_EXPORT GEMMOperation : public core::Operation {
     GEMMOperation(bool transposeA, bool transposeB)
         : Operation("gemm"),
           mTransposeA(transposeA), mTransposeB(transposeB) {}
-    core::inner::Tensor *getResultTensor(
+    std::shared_ptr<core::inner::Tensor> createTensor(
         core::Context& context, std::vector<core::inner::Tensor *> args) const override;
-    core::inner::Tensor *getErrorTensor(core::Context& context,
-        std::vector<core::inner::Tensor *> args, int derivativeOrder) const override;
-    core::inner::Tensor *getDerivativeTensor(core::Context& context,
-        std::vector<core::inner::Tensor *> args, int argNo) const override;
     void gen(
         core::AbstractGenerator &g,
         std::vector<core::inner::Tensor *> &operationArguments) const override;
-    void genDerivative(int order,
-                       core::AbstractGenerator &g,
-                       core::inner::Tensor &operationResult,
-                       core::inner::Tensor &internalError,
-                       std::vector<core::inner::Tensor *> &operationArguments,
-                       core::inner::Tensor &derivativeTensor,
-                       int argNo) const override;
+    void genIncomingDerivative(
+        core::AbstractGenerator &g,
+        std::vector<core::inner::Tensor *> &operationArguments,
+        core::inner::Tensor &derivativeOfIncomingNode,
+        core::inner::Tensor &ownDerivative,
+        size_t argumentMark) const override;
     size_t getOperandsCount() const override {
         return 2;
     }
@@ -55,6 +50,10 @@ class ATH_OPS_EXPORT GEMMOperation : public core::Operation {
         stream >> transpB;
         return new GEMMOperation(transpA, transpB);
     };
+
+    private:
+    template <typename FPType>
+    void* createOptions(size_t derivativeMark) const;
 };
 }  // namespace athena::ops
 

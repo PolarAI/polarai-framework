@@ -25,6 +25,9 @@ class LossNode;
 class Graph;
 class Traversal;
 class Context;
+using EdgeMark = size_t;
+using MarkType = size_t;
+using NodeIndexType = size_t;
 namespace inner {
 struct Cluster;
 using Clusters = std::vector<Cluster>;

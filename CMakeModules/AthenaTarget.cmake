@@ -10,7 +10,7 @@ function(add_athena_library target_name modifier export_name export_header_name)
     endif ()
 
     if (UNIX)
-        target_compile_options(${target_name} PRIVATE -fPIC -Werror)
+        target_compile_options(${target_name} PRIVATE -fPIC)
     endif ()
 
     configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/export.h.in

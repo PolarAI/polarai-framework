@@ -89,6 +89,8 @@ TEST(JIT, LinReg) {
     executor.setAllocator(trivialAllocator);
     executor.setGraph(graph);
 
+    athena::model::DotModel::exportGraph(graph, std::cerr);
+
     // Act
     executor.evaluate();
     executor.optimizeGraph();
@@ -96,6 +98,7 @@ TEST(JIT, LinReg) {
     // Assert
     auto accessor = outputNode.getAccessor<float>(*executor.getAllocator());
 
+<<<<<<< HEAD
     EXPECT_FLOAT_EQ(*accessor[0][0], 750.0f);
 
     auto accessorWeights =
@@ -110,4 +113,28 @@ TEST(JIT, LinReg) {
     EXPECT_FLOAT_EQ(*accessorWeights[0][6], 0.746996);
     EXPECT_FLOAT_EQ(*accessorWeights[0][7], -4.8855138);
     EXPECT_FLOAT_EQ(*accessorWeights[0][8], -2.63251);
+=======
+    //    EXPECT_FLOAT_EQ(*accessor[0][0], 18.0);
+    //    EXPECT_FLOAT_EQ(*accessor[0][1], 18.0);
+    //    EXPECT_FLOAT_EQ(*accessor[0][2], 18.0);
+//    EXPECT_FLOAT_EQ(*accessor[1][0], 18.0);
+//    EXPECT_FLOAT_EQ(*accessor[1][1], 18.0);
+//    EXPECT_FLOAT_EQ(*accessor[1][2], 18.0);
+//    EXPECT_FLOAT_EQ(*accessor[2][0], 18.0);
+//    EXPECT_FLOAT_EQ(*accessor[2][1], 18.0);
+//    EXPECT_FLOAT_EQ(*accessor[2][2], 18.0);
+
+    std::cout << "Result: " << *accessor[0][0] << std::endl;
+    std::cout << std::endl;
+    auto accessorDbg = outputNodeDbg.getAccessor<float>(*executor.getAllocator());
+    std::cout << "Weights" << std::endl;
+    for (size_t index = 0; index < 9; ++index) {
+        std::cout << *accessorDbg[0][index] << ' ';
+    }
+    std::cout << std::endl;
+    /*std::cout << "\n\n@@@\n" << std::endl;
+    for (size_t index = 0; index < 9; ++index) {
+        std::cout << weights[index] << std::endl;
+    }*/
+>>>>>>> 857da21... more fixes
 }
