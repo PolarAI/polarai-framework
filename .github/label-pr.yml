@@ -1,0 +1,8 @@
+- regExp: "(src\/core|include\/core)"
+  labels: ["sub:core"]
+- regExp: "(src\/ops|include\/ops)"
+  labels: ["sub:ops"]
+- regExp: "(src\/backend\/llvm|include\/backend\/llvm)"
+  labels: ["sub:llvm_backend"]
+- regExp: "(src\/backend\/llvm\/runtime\/cpu|include\/backend\/llvm\/runtime\/cpu)"
+  labels: ["sub:cpu_rt"]
