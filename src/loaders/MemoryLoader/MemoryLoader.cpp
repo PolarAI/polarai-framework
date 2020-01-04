@@ -13,7 +13,6 @@
 
 #include <athena/loaders/MemoryLoader/MemoryLoader.h>
 
-#include <cassert>
 #include <cstring>
 
 namespace athena::loaders {
@@ -42,11 +41,11 @@ MemoryLoader::operator=(athena::loaders::MemoryLoader&& src) noexcept {
 void MemoryLoader::load(core::Allocator* allocator,
                         core::inner::Tensor* tensor) {
   auto pointer = reinterpret_cast<void*>(allocator->getRAMPointer(*tensor));
-#ifdef DEBUG
-  assert(pointer && "MemoryLoader pointer is NULL");
-  assert(mSize <= tensor->getShapeView().getTotalSize() *
-                      core::sizeOfDataType(tensor->getDataType()));
-#endif
+
+  athena_assert(pointer, "MemoryLoader pointer is NULL");
+  athena_assert(mSize <= tensor->getShapeView().getTotalSize() *
+                             core::sizeOfDataType(tensor->getDataType()),
+                "Size is greater than tensor size.");
   std::memmove(pointer, mData, mSize);
 }
 std::string MemoryLoader::serialize() const {
@@ -70,11 +69,10 @@ void MemoryLoaderLoad(void* loader, void* allocator, void* tensor) {
   auto pAllocator = reinterpret_cast<athena::core::Allocator*>(allocator);
   auto pTensor = reinterpret_cast<athena::core::inner::Tensor*>(tensor);
 
-#ifdef DEBUG
-  assert(pLoader != nullptr);
-  assert(pAllocator != nullptr);
-  assert(pTensor != nullptr);
-#endif
+  athena::athena_assert(pLoader != nullptr, "Corrupted arg");
+  athena::athena_assert(pAllocator != nullptr, "Corrupted arg");
+  athena::athena_assert(pTensor != nullptr, "Corrupted arg");
+
   pLoader->load(pAllocator, pTensor);
 }
 

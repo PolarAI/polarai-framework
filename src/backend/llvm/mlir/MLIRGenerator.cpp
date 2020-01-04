@@ -14,6 +14,7 @@
 #include "GraphDialect.h"
 
 #include <athena/backend/llvm/mlir/MLIRGenerator.h>
+#include <athena/core/FatalError.h>
 
 using namespace athena::backend::llvm;
 using namespace athena::core;
@@ -37,8 +38,10 @@ void MLIRGenerator::generateImpl(std::string& string, Tensor& a, Tensor& b) {}
 void MLIRGenerator::generateImpl(std::string& name, Tensor& a, Tensor& b,
                                  Tensor& c) {
   if (name == "add") {
-    assert(mTensorValueMap.count(a.getVirtualAddress()));
-    assert(mTensorValueMap.count(b.getVirtualAddress()));
+    athena_assert(mTensorValueMap.count(a.getVirtualAddress()),
+                  "Missing first argument.");
+    athena_assert(mTensorValueMap.count(b.getVirtualAddress()),
+                  "Missing second argument.");
     auto aVal = mTensorValueMap[a.getVirtualAddress()];
     auto bVal = mTensorValueMap[b.getVirtualAddress()];
 

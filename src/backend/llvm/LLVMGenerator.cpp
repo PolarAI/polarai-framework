@@ -99,9 +99,7 @@ void LLVMGenerator::generateImpl(std::string& name, void* options,
   mFunctorsMap[name](mContext, *mGeneratedModule, mBuilder, options, a, b, c);
 }
 void LLVMGenerator::openNode(std::string_view name) {
-#ifdef DEBUG
-  assert(mCurrentBlock == mCurrentMainBlock && "There is an opened node");
-#endif
+  athena_assert(mCurrentBlock == mCurrentMainBlock, "There is an opened node");
   mCurrentPreferredDevice = mGraphMap[name];
   ::llvm::FunctionType* FT =
       ::llvm::FunctionType::get(::llvm::Type::getVoidTy(mContext), false);

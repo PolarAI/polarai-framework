@@ -15,8 +15,6 @@
 #include <athena/core/inner/InnerFunctions.h>
 #include <athena/ops/AddOperation.h>
 
-#include <cassert>
-
 using namespace athena::backend;
 
 namespace athena::ops {
@@ -42,9 +40,8 @@ core::inner::Tensor*
 AddOperation::getDerivativeTensor(core::Context& context,
                                   std::vector<core::inner::Tensor*> args,
                                   int argNo) const {
-#ifdef DEBUG
-  assert(argNo < 2 && "AddOperation takes 2 arguments!");
-#endif
+  athena_assert(argNo < 2, "AddOperation takes 2 arguments!");
+
   core::ShapeView shapeView(args[argNo]->getShapeView());
   return new core::inner::Tensor(args[argNo]->getDataType(),
                                  shapeView.toShape(), context);
@@ -56,11 +53,9 @@ void AddOperation::genDerivative(
     core::inner::Tensor& derivativeTensor, int argNo) const {
   float f_unit = 1;
   void* unit = reinterpret_cast<void*>(&f_unit);
-#ifdef DEBUG
   // We need to make sure the derivative tensor exists
-  assert(derivativeTensor.getDataType() != core::DataType::UNDEFINED &&
-         "derivativeTensor is broken");
-#endif
+  athena_assert(derivativeTensor.getDataType() != core::DataType::UNDEFINED,
+                "derivativeTensor is broken");
   // todo this is a workaround because I'm too lazy to implement proper copy
   static auto* options = new HadamardOptions<float>{1.f, 0.0f};
   void* opts = static_cast<void*>(options);

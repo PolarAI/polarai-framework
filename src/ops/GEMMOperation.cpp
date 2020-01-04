@@ -14,7 +14,6 @@
 #include <athena/backend/llvm/runtime/structs.h>
 #include <athena/ops/GEMMOperation.h>
 
-#include <cassert>
 #include <iostream>
 
 using namespace athena::core;
@@ -26,12 +25,12 @@ GEMMOperation::getResultTensor(core::Context& context,
                                std::vector<core::inner::Tensor*> args) const {
   size_t m = args[0]->getShapeView().dim(mTransposeA ? 1 : 0);
   size_t n = args[1]->getShapeView().dim(mTransposeB ? 0 : 1);
-#ifdef DEBUG
-  size_t k = args[0]->getShapeView().dim(mTransposeA ? 0 : 1);
-  size_t k2 = args[1]->getShapeView().dim(mTransposeB ? 1 : 0);
-  assert(k == k2 &&
-         "Number of columns of A must be equal to number of rows of B");
-#endif
+  {
+    size_t k = args[0]->getShapeView().dim(mTransposeA ? 0 : 1);
+    size_t k2 = args[1]->getShapeView().dim(mTransposeB ? 1 : 0);
+    athena_assert(
+        k == k2, "Number of columns of A must be equal to number of rows of B");
+  }
 
   TensorShape shape{m, n};
 
@@ -68,9 +67,7 @@ void GEMMOperation::genDerivative(
     core::inner::Tensor& derivativeTensor, int argNo) const {
   void* opts;
 
-#ifdef DEBUG
-  assert(order == 1 && "Higher orders are not supported");
-#endif
+  athena_assert(order == 1, "Higher orders are not supported");
 
   if (operationArguments[0]->getDataType() == DataType::FLOAT) {
     auto* options = new GEMMOptions<float>{false, false, 1.0f, 0.f};

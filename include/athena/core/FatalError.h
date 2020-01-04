@@ -35,7 +35,8 @@ enum FatalErrorType : int32_t {
   ATH_FATAL_OTHER = 1,
   ATH_NOT_IMPLEMENTED = 2,
   ATH_BAD_CAST = 3,
-  ATH_BAD_ACCESS = 4
+  ATH_BAD_ACCESS = 4,
+  ATH_ASSERT = 5
 };
 
 namespace {
@@ -99,5 +100,19 @@ FatalError::FatalError(FatalErrorType errorCode, Args... messages)
 #endif
 }
 } // namespace athena::core
+
+namespace athena {
+template <typename... Args>
+std::unique_ptr<core::FatalError> athena_assert(bool assert,
+                                                Args&&... messages) {
+#if defined(DEBUG) || defined(ATHENA_ASSERT)
+  if (!assert) {
+    return std::make_unique<core::FatalError>(core::FatalErrorType::ATH_ASSERT,
+                                              std::forward<Args>(messages)...);
+  }
+#endif
+  return nullptr;
+}
+} // namespace athena
 
 #endif // ATHENA_FATALERROR_H

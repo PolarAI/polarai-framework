@@ -25,7 +25,6 @@
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 
 #include <algorithm>
-#include <cassert>
 
 namespace athena::backend::llvm {
 
@@ -54,10 +53,8 @@ void LLVMExecutor::setGraph(athena::core::Graph& graph) {
 
 void LLVMExecutor::evaluate() {
   auto sym = mJITCompiler->lookup("evaluateGraph");
-#ifdef DEBUG
-  assert(sym &&
-         "Failed to find evaluateGraph function. Did you forget to set Graph?");
-#endif
+  athena_assert((bool)sym, "Failed to find evaluateGraph function. ",
+                "Did you forget to set Graph?");
 
   auto evaluateFunction = (void (*)())(intptr_t)sym.get().getAddress();
   evaluateFunction();
@@ -65,10 +62,8 @@ void LLVMExecutor::evaluate() {
 
 void LLVMExecutor::optimizeGraph() {
   auto sym = mJITCompiler->lookup("optimizeGraph");
-#ifdef DEBUG
-  assert(sym &&
-         "Failed to find optimizeGraph function. Did you forget to set Graph?");
-#endif
+  athena_assert((bool)sym, "Failed to find optimizeGraph function. ",
+                "Did you forget to set Graph?");
 
   auto optimizeFunction = (void (*)())(intptr_t)sym.get().getAddress();
   optimizeFunction();
@@ -85,9 +80,7 @@ LLVMExecutor::LLVMExecutor() : mJITCompiler(AthenaJIT::create()) {
   // TODO better RT lib handling
   auto libName = std::getenv("ATHENA_RT_LIBRARY");
   mRuntimeDriver->load(libName);
-#ifdef DEBUG
-  assert(mRuntimeDriver->isLoaded());
-#endif
+  athena_assert(mRuntimeDriver->isLoaded(), "Failed to load runtime.");
 }
 
 std::unique_ptr<core::Allocator>& LLVMExecutor::getAllocator() {

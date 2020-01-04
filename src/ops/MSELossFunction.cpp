@@ -14,8 +14,6 @@
 #include <athena/core/inner/InnerFunctions.h>
 #include <athena/ops/MSELossFunction.h>
 
-#include <cassert>
-
 namespace athena::ops {
 core::inner::Tensor* ops::MSELossFunction::getResultTensor(
     core::Context& context, std::vector<core::inner::Tensor*> args) const {
@@ -40,9 +38,7 @@ void MSELossFunction::genDerivative(
     core::inner::Tensor& internalError,
     std::vector<core::inner::Tensor*>& operationArguments,
     core::inner::Tensor& derivativeTensor, int argNo) const {
-#ifdef DEBUG
-  assert(operationArguments.size() == 2 && "Operation args != 2");
-#endif
+  athena_assert(operationArguments.size() == 2, "Operation args != 2");
 
   double scaleDouble = 2.0 / operationResult.getShapeView().getTotalSize();
   float scaleFloat = 2.0f / operationResult.getShapeView().getTotalSize();

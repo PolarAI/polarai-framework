@@ -13,6 +13,8 @@
 
 #include "MergeLayer.h"
 
+#include <athena/core/FatalError.h>
+
 #include <llvm/IR/Verifier.h>
 #include <llvm/Linker/Linker.h>
 #include <llvm/Transforms/Utils/Cloning.h>
@@ -21,7 +23,7 @@ namespace athena::backend::llvm {
 
 void MergeLayer::emit(::llvm::orc::MaterializationResponsibility responsibility,
                       ::llvm::orc::ThreadSafeModule threadSafeModule) {
-  assert(threadSafeModule && "Module must not be null");
+  athena_assert((bool)threadSafeModule, "Module must not be null");
   mMaterializedMap[responsibility.getTargetJITDylib().getName()] = true;
   mBaseLayer.emit(std::move(responsibility), std::move(threadSafeModule));
 }
