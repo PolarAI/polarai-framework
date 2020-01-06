@@ -5,6 +5,7 @@ add_athena_library(
         backend/llvm/mlir/mlir_export.h
         GraphDialect.cpp
         MLIRGenerator.cpp
+        LLVMTranslator.cpp
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tablegen)

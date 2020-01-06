@@ -14,7 +14,7 @@ LLVM Executor will automatically generate gradient for given Graph,
 propagate errors and apply updates to weights. Consider the following
 graph as an example.
 
-![](04_bp_graph.svg)
+![](05_bp_graph.svg)
 
 The blue input node is "frozen". It means its content will not be
 updated during the process of backpropagation. The yellow input

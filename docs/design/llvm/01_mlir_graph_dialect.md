@@ -45,4 +45,16 @@ There's an automatically generated [reference page](02_mlir_graph_reference.md) 
 
 # Lowering to LLVM IR
 
-TBD
+The following builtins have special treatment when lowering to LLVM IR:
+
+* **graph.alloca**
+* **graph.memlock**
+* **graph.memrelease**
+
+The following builtins have no representation in LLVM IR:
+
+* **graph.touch**
+
+Other builtins are lowered as a call to a function (its name is a mangled builtin name) with proper arguments.
+
+There's a [page](03_producing_machine_code.md), dedicated to LLVM IR in Athena.
