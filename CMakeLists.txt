@@ -64,6 +64,7 @@ if (NOT ATHENA_DOCS_ONLY)
         add_definitions(-DDEBUG)
     endif ()
 
+    add_subdirectory(utils/athena-tablegen)
     add_subdirectory(src)
 
     if (NOT ATHENA_DISABLE_TESTS)
