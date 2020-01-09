@@ -184,7 +184,7 @@ def main():
             o.write("#include <runtime-driver.h>\n")
             o.write("#include \"llvm/IR/Constants.h\"\n")
             o.write("#include \"llvm/IR/IRBuilder.h\"\n")
-            o.write("void athena::backend::llvm::RuntimeDriver"
+            o.write("void athena::backend::llvm::LegacyRuntimeDriver"
                     "::generateLLVMIrBindings(::llvm::LLVMContext &ctx, ::llvm::Module &module, "
                     "::llvm::IRBuilder<> &builder) {\n")
 

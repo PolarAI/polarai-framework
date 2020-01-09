@@ -26,7 +26,7 @@ namespace athena::backend::llvm {
 
 // Forward declarations
 class AthenaJIT;
-class RuntimeDriver;
+class LegacyRuntimeDriver;
 
 /**
  * Execute Graph with LLVM-based backend
@@ -35,7 +35,7 @@ class ATH_BACKEND_LLVM_EXPORT LLVMExecutor : public athena::core::Executor {
 private:
   std::shared_ptr<AthenaJIT> mJITCompiler{nullptr};
   std::unique_ptr<core::Allocator> mAllocator;
-  std::shared_ptr<RuntimeDriver> mRuntimeDriver;
+  std::shared_ptr<LegacyRuntimeDriver> mRuntimeDriver;
 
   template <typename T>
   using ClusterContainer = std::vector<core::inner::NodeDependencies<T>>;

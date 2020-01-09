@@ -14,7 +14,7 @@
 #include "GraphPartitionPlanner.h"
 #include "LLVMGenerator.h"
 #include "jit/AthenaJIT.h"
-#include "runtime/driver/runtime-driver.h"
+#include "runtime/legacy_driver/runtime-driver.h"
 
 #include <athena/backend/llvm/LLVMExecutor.h>
 #include <athena/core/FatalError.h>
@@ -75,7 +75,8 @@ LLVMExecutor::LLVMExecutor() : mJITCompiler(AthenaJIT::create()) {
                          "Unable to create JIT compiler");
   }
 
-  mRuntimeDriver = std::make_unique<RuntimeDriver>(mJITCompiler->getContext());
+  mRuntimeDriver =
+      std::make_unique<LegacyRuntimeDriver>(mJITCompiler->getContext());
 
   // TODO better RT lib handling
   auto libName = std::getenv("ATHENA_RT_LIBRARY");

@@ -15,22 +15,22 @@
 
 #include "llvm/IR/Verifier.h"
 
-#include <llvm/Support/Debug.h>
 #include <llvm/Target/TargetMachine.h>
 
 namespace athena::backend::llvm {
 
-RuntimeDriver::RuntimeDriver(::llvm::LLVMContext& ctx)
+LegacyRuntimeDriver::LegacyRuntimeDriver(::llvm::LLVMContext& ctx)
     : mLibraryHandle(nullptr), mContext(ctx) {}
 
-RuntimeDriver::~RuntimeDriver() { unload(); }
-RuntimeDriver& RuntimeDriver::operator=(RuntimeDriver&& rhs) noexcept {
+LegacyRuntimeDriver::~LegacyRuntimeDriver() { unload(); }
+LegacyRuntimeDriver&
+LegacyRuntimeDriver::operator=(LegacyRuntimeDriver&& rhs) noexcept {
   unload();
   mLibraryHandle = rhs.mLibraryHandle;
   rhs.mLibraryHandle = nullptr;
   return *this;
 }
-void* RuntimeDriver::getFunctionPtr(std::string_view funcName) {
+void* LegacyRuntimeDriver::getFunctionPtr(std::string_view funcName) {
   if (void* function = dlsym(mLibraryHandle, funcName.data()); !function) {
     new ::athena::core::FatalError(core::ATH_FATAL_OTHER,
                                    "RuntimeDriver: " + std::string(dlerror()));
@@ -39,27 +39,27 @@ void* RuntimeDriver::getFunctionPtr(std::string_view funcName) {
     return function;
   }
 }
-void RuntimeDriver::load(std::string_view nameLibrary) {
+void LegacyRuntimeDriver::load(std::string_view nameLibrary) {
   if (mLibraryHandle = dlopen(nameLibrary.data(), RTLD_LAZY); !mLibraryHandle) {
     new ::athena::core::FatalError(core::ATH_FATAL_OTHER,
                                    "RuntimeDriver: " + std::string(dlerror()));
   }
   prepareModules();
 }
-void RuntimeDriver::unload() {
+void LegacyRuntimeDriver::unload() {
   if (mLibraryHandle && dlclose(mLibraryHandle)) {
     ::athena::core::FatalError err(core::ATH_FATAL_OTHER,
                                    "RuntimeDriver: " + std::string(dlerror()));
   }
   mLibraryHandle = nullptr;
 }
-void RuntimeDriver::reload(std::string_view nameLibrary) {
+void LegacyRuntimeDriver::reload(std::string_view nameLibrary) {
   unload();
   load(nameLibrary);
 }
-bool RuntimeDriver::isLoaded() const { return mLibraryHandle != nullptr; }
+bool LegacyRuntimeDriver::isLoaded() const { return mLibraryHandle != nullptr; }
 
-void RuntimeDriver::prepareModules() {
+void LegacyRuntimeDriver::prepareModules() {
   auto newModule = std::make_unique<::llvm::Module>("runtime", mContext);
   newModule->setTargetTriple(::llvm::sys::getDefaultTargetTriple());
   ::llvm::IRBuilder<> builder(mContext);
@@ -78,22 +78,22 @@ void RuntimeDriver::prepareModules() {
 #endif
   mModules.push_back(std::move(newModule));
 }
-void RuntimeDriver::setProperAttrs(::llvm::Function* function) {
+void LegacyRuntimeDriver::setProperAttrs(::llvm::Function* function) {
   function->addFnAttr(::llvm::Attribute::NoUnwind);
   function->addFnAttr(::llvm::Attribute::UWTable);
   function->addFnAttr(::llvm::Attribute::AlwaysInline);
 }
-DeviceContainer RuntimeDriver::getAvailableDevices() {
+DeviceContainer LegacyRuntimeDriver::getAvailableDevices() {
   auto devicesFunc =
       (DeviceContainer(*)())getFunctionPtr("getAvailableDevices");
   return devicesFunc();
 }
-void RuntimeDriver::initializeContext(DeviceContainer devices) {
+void LegacyRuntimeDriver::initializeContext(DeviceContainer devices) {
   auto initCtxFunc =
       (void (*)(DeviceContainer))getFunctionPtr("initializeContext");
   initCtxFunc(devices);
 }
-void RuntimeDriver::releaseContext() {
+void LegacyRuntimeDriver::releaseContext() {
   auto releaseCtxFunc = (void (*)())getFunctionPtr("releaseContext");
   releaseCtxFunc();
 }

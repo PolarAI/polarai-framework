@@ -11,44 +11,24 @@
  * the License.
  */
 
-#include "../../../src/backend/llvm/runtime/driver/runtime-driver.h"
+#include "../../../src/backend/llvm/runtime/driver/RuntimeDriver.h"
 
 #include <gtest/gtest.h>
-#include <llvm/Support/TargetSelect.h>
 #include <string>
-
-static const std::string kPathToRuntimeCPUName = "PATH_TO_RUNTIME_CPU";
 
 namespace athena::backend::llvm {
 
-class RuntimeDriverTest : public ::testing::Test {
-protected:
-  std::string mPathToRuntimeCPU;
-  std::unique_ptr<::llvm::LLVMContext> mContext =
-      std::make_unique<::llvm::LLVMContext>();
-  RuntimeDriver mDriver;
-
-  void SetUp() override {
-    ::llvm::InitializeNativeTarget();
-    ::llvm::InitializeNativeTargetAsmParser();
-    ::llvm::InitializeNativeTargetAsmPrinter();
-    mPathToRuntimeCPU = ::getenv(kPathToRuntimeCPUName.data());
-  }
-
-public:
-  RuntimeDriverTest() : mDriver(*mContext) {}
-};
-
-TEST_F(RuntimeDriverTest, TestCreation) {
-  mDriver.reload(mPathToRuntimeCPU);
-  ASSERT_TRUE(mDriver.isLoaded());
+TEST(RuntimeDriverTest, TestCreation) {
+  RuntimeDriver driver;
+  driver.load();
+  ASSERT_TRUE(driver.isLoaded());
 }
 
-TEST_F(RuntimeDriverTest, TestFunctionLoad) {
-  mDriver.load(mPathToRuntimeCPU);
-  auto& modules = mDriver.getModules();
-  ASSERT_GT(modules.size(), 0);
-
-  ASSERT_NE(modules[0]->getFunction("athn_add_f"), nullptr);
+TEST(RuntimeDriverTest, TestFunctionLoad) {
+  RuntimeDriver driver;
+  driver.load();
+  ASSERT_TRUE(driver.hasFeature("float"));
+  ASSERT_TRUE(driver.hasBuiltin("add", "float"));
+  ASSERT_FALSE(driver.hasBuiltin("foo", "float"));
 }
 } // namespace athena::backend::llvm

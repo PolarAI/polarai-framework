@@ -1,5 +1,7 @@
 set(ATH_RT_LLVM_CPU "AthenaLLVMCpuRuntime" CACHE STRING "" FORCE)
 
+set(INFO_CPP ${CMAKE_CURRENT_BINARY_DIR}/rt_info.cpp)
+
 add_athena_library(${ATH_RT_LLVM_CPU} SHARED
         ATH_RT_LLVM # export name
         backend/llvm/runtime/runtime_export.h # export file name
@@ -10,8 +12,15 @@ add_athena_library(${ATH_RT_LLVM_CPU} SHARED
         mse.cpp
         CpuDevice.cpp
         api.cpp
-        ${WRAPPER_CPP})
-add_dependencies(${ATH_RT_LLVM_CPU} wrapper_cpp)
+        ${WRAPPER_CPP} ${INFO_CPP})
+
+file(WRITE ${INFO_CPP} "")
+add_custom_target(${ATH_RT_LLVM_CPU}_info
+        COMMAND ${CMAKE_BINARY_DIR}/utils/athena-tablegen/src/athena-tablegen -I=${CMAKE_CURRENT_SOURCE_DIR}/../
+        -o=${INFO_CPP} -emit-runtime-info ${CMAKE_CURRENT_SOURCE_DIR}/runtime.td)
+add_dependencies(${ATH_RT_LLVM_CPU}_info athena-tablegen)
+
+add_dependencies(${ATH_RT_LLVM_CPU} wrapper_cpp ${ATH_RT_LLVM_CPU}_info)
 target_compile_options(${ATH_RT_LLVM_CPU} PRIVATE -fvisibility=default)
 
 find_package(BLAS)

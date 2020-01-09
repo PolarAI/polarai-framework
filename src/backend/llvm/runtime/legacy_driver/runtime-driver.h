@@ -26,7 +26,7 @@
 #include <string_view>
 
 namespace athena::backend::llvm {
-class ATH_RT_LLVM_DRIVER_EXPORT RuntimeDriver {
+class ATH_RT_LLVM_DRIVER_EXPORT LegacyRuntimeDriver {
 private:
   void* mLibraryHandle;
 
@@ -44,13 +44,13 @@ private:
   ::llvm::LLVMContext& mContext;
 
 public:
-  explicit RuntimeDriver(::llvm::LLVMContext& ctx);
-  RuntimeDriver(const RuntimeDriver& rhs) = delete;
-  RuntimeDriver(RuntimeDriver&& rhs) noexcept = default;
-  ~RuntimeDriver();
+  explicit LegacyRuntimeDriver(::llvm::LLVMContext& ctx);
+  LegacyRuntimeDriver(const LegacyRuntimeDriver& rhs) = delete;
+  LegacyRuntimeDriver(LegacyRuntimeDriver&& rhs) noexcept = default;
+  ~LegacyRuntimeDriver();
 
-  RuntimeDriver& operator=(const RuntimeDriver& rhs) = delete;
-  RuntimeDriver& operator=(RuntimeDriver&& rhs) noexcept;
+  LegacyRuntimeDriver& operator=(const LegacyRuntimeDriver& rhs) = delete;
+  LegacyRuntimeDriver& operator=(LegacyRuntimeDriver&& rhs) noexcept;
 
   void load(std::string_view nameLibrary);
   void unload();
