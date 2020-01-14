@@ -66,6 +66,7 @@ if (NOT ATHENA_DOCS_ONLY)
 
     add_subdirectory(utils/athena-tablegen)
     add_subdirectory(src)
+    add_subdirectory(utils/chaos)
 
     if (NOT ATHENA_DISABLE_TESTS)
         add_subdirectory(tests)

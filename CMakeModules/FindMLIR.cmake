@@ -1,5 +1,7 @@
 set(MLIR_LIBS)
 
+add_library(Athena::MLIR INTERFACE IMPORTED)
+
 foreach (comp ${MLIR_FIND_COMPONENTS})
     find_library(__mlir_lib_${comp}
             NAMES MLIR${comp}
@@ -7,6 +9,7 @@ foreach (comp ${MLIR_FIND_COMPONENTS})
             PATH_SUFFIXES lib)
     if (__mlir_lib_${comp})
         list(APPEND MLIR_LIBS ${__mlir_lib_${comp}})
+        target_link_libraries(Athena::MLIR PUBLIC INTERFACE ${__mlir_lib_${comp}})
     endif ()
 endforeach ()
 
