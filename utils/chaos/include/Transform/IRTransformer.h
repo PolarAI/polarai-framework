@@ -16,6 +16,7 @@
 
 #include <Transform/export.h>
 #include <llvm/IR/Module.h>
+#include <llvm/Passes/PassBuilder.h>
 #include <mlir/IR/Module.h>
 #include <string>
 
@@ -27,6 +28,12 @@ private:
   std::unique_ptr<mlir::OwningModuleRef> mMLIRModule;
   std::unique_ptr<llvm::Module> mLLVMModule;
   llvm::DataLayout mDataLayout;
+
+  llvm::LoopAnalysisManager mLoopAnalysisManager;
+  llvm::FunctionAnalysisManager mFunctionAnalysisManager;
+  llvm::CGSCCAnalysisManager mCGSCCAnalysisManager;
+  llvm::ModuleAnalysisManager mModuleAnalysisManager;
+  llvm::PassBuilder mPassBuilder;
 
 public:
   explicit IRTransformer(std::unique_ptr<llvm::Module> llvmModule,

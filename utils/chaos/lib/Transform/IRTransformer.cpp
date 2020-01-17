@@ -42,6 +42,21 @@ IRTransformer::getFromIrFile(const std::string& filename) {
 IRTransformer::IRTransformer(std::unique_ptr<llvm::Module> llvmModule,
                              std::unique_ptr<llvm::LLVMContext> ctx)
     : mLLVMContext(std::move(ctx)), mDataLayout(llvmModule.get()) {
+  // Set up LLVM optimizer infra
+  mPassBuilder.registerModuleAnalyses(mModuleAnalysisManager);
+  mPassBuilder.registerCGSCCAnalyses(mCGSCCAnalysisManager);
+  mPassBuilder.registerFunctionAnalyses(mFunctionAnalysisManager);
+  mPassBuilder.registerLoopAnalyses(mLoopAnalysisManager);
+  mPassBuilder.crossRegisterProxies(
+      mLoopAnalysisManager, mFunctionAnalysisManager, mCGSCCAnalysisManager,
+      mModuleAnalysisManager);
+
+  // Simplify module beforehand
+  auto moduleSimplifier = mPassBuilder.buildModuleSimplificationPipeline(
+      PassBuilder::O1, PassBuilder::ThinLTOPhase::None);
+  moduleSimplifier.run(*llvmModule, mModuleAnalysisManager);
+
+  // Convert LLVMI IR to MLIR
   mMLIRModule = std::make_unique<mlir::OwningModuleRef>(
       mlir::translateLLVMIRToModule(std::move(llvmModule), &mMLIRContext));
 }
@@ -62,39 +77,22 @@ void IRTransformer::run() {
 
   mLLVMModule = mlir::translateModuleToLLVMIR(mMLIRModule->get());
 
-  ::llvm::FunctionPassManager mFunctionSimplificationPassManager;
-  ::llvm::ModulePassManager mModuleOptimizationPassManager;
-  ::llvm::ModulePassManager mThinLTOPreLinkPassManager;
-
-  LoopAnalysisManager loopAnalysisManager;
-  ::llvm::FunctionAnalysisManager functionAnalysisManager;
-  ::llvm::CGSCCAnalysisManager cGSCCAnalysisManager;
-  ::llvm::ModuleAnalysisManager moduleAnalysisManager;
-
-  ::llvm::PassBuilder passBuilder;
-  passBuilder.registerModuleAnalyses(moduleAnalysisManager);
-  passBuilder.registerCGSCCAnalyses(cGSCCAnalysisManager);
-  passBuilder.registerFunctionAnalyses(functionAnalysisManager);
-  passBuilder.registerLoopAnalyses(loopAnalysisManager);
-  passBuilder.crossRegisterProxies(loopAnalysisManager, functionAnalysisManager,
-                                   cGSCCAnalysisManager, moduleAnalysisManager);
-  mModuleOptimizationPassManager = passBuilder.buildModuleOptimizationPipeline(
-      ::llvm::PassBuilder::O1, false);
-  mFunctionSimplificationPassManager =
-      passBuilder.buildFunctionSimplificationPipeline(
-          ::llvm::PassBuilder::O1, ::llvm::PassBuilder::ThinLTOPhase::PostLink,
+  auto moduleOptimizationPassManager =
+      mPassBuilder.buildModuleOptimizationPipeline(::llvm::PassBuilder::O2,
+                                                   false);
+  auto functionSimplificationPassManager =
+      mPassBuilder.buildFunctionSimplificationPipeline(
+          ::llvm::PassBuilder::O2, ::llvm::PassBuilder::ThinLTOPhase::None,
           false);
-  mThinLTOPreLinkPassManager =
-      passBuilder.buildThinLTOPreLinkDefaultPipeline(::llvm::PassBuilder::O1);
+  auto thinLTOPreLinkPassManager =
+      mPassBuilder.buildThinLTOPreLinkDefaultPipeline(::llvm::PassBuilder::O2);
 
-  mModuleOptimizationPassManager.run(*mLLVMModule, moduleAnalysisManager);
+  moduleOptimizationPassManager.run(*mLLVMModule, mModuleAnalysisManager);
   for (auto& func : *mLLVMModule) {
     if (!func.isDeclaration())
-      mFunctionSimplificationPassManager.run(func, functionAnalysisManager);
+      functionSimplificationPassManager.run(func, mFunctionAnalysisManager);
   }
-  // todo(abatashev) enable more aggressive optimizations once objects are
-  // produced by chaos.
-  // mThinLTOPreLinkPassManager.run(*mLLVMModule, moduleAnalysisManager);
+  thinLTOPreLinkPassManager.run(*mLLVMModule, mModuleAnalysisManager);
 }
 void IRTransformer::dumpLLVMIR(const std::string& filename) {
   std::error_code err;
