@@ -26,6 +26,6 @@ private:
 public:
   ObjectEmitter();
   void addModule(const std::string& filename);
-  void emitObject(const std::string& filename);
+  std::vector<std::string> emitObject(const std::string& filename);
 };
 #endif // ATHENA_OBJECTEMITTER_H

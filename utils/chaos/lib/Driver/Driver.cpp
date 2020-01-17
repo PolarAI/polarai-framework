@@ -84,14 +84,14 @@ void Driver::run(int argc, char** argv) {
   }
 
   std::string tmpObjectFile = "/tmp/chaos" + std::to_string(idx) + ".o";
-  emitter.emitObject(tmpObjectFile);
-  objectFiles.push_back(tmpObjectFile);
+  auto tmpObjects = emitter.emitObject(tmpObjectFile);
+  objectFiles.insert(objectFiles.end(), tmpObjects.begin(), tmpObjects.end());
 
   std::string linkCmd = "clang++ -o " + OutputFilename.getValue() + " ";
   for (auto& o : objectFiles) {
     linkCmd += o + " ";
   }
-  std::cerr << "Link: " << exec(linkCmd);
+  std::cerr << exec(linkCmd);
 }
 std::string Driver::exec(const std::string& cmd) {
   std::array<char, 128> buffer{};
