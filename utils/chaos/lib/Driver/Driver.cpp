@@ -12,7 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <Driver/Driver.h>
-//#include <Target/ObjectEmitter.h>
+#include <Target/ObjectEmitter.h>
 #include <Transform/IRTransformer.h>
 #include <array>
 #include <cstdio>
@@ -43,12 +43,15 @@ void Driver::run(int argc, char** argv) {
   cl::ParseCommandLineOptions(argc, argv);
 
   std::vector<std::string> cppInput;
+  std::vector<std::string> objectFiles;
   std::string outputFile = OutputFilename.getValue();
 
   // todo libclang
   for (auto& inp : InputFilenames) {
     if (hasEnding(inp, ".cpp")) {
       cppInput.push_back(inp);
+    } else if (hasEnding(inp, ".o")) {
+      objectFiles.push_back(inp);
     }
   }
 
@@ -75,18 +78,18 @@ void Driver::run(int argc, char** argv) {
     optimizedBitcode.push_back(tmp);
   }
 
-  // todo(abatashev): investigate ThinLTO crashes
-  //
-  //  ObjectEmitter emitter;
-  //  for (auto& module : optimizedBitcode) {
-  //    emitter.addModule(module);
-  //  }
-  //
-  //  emitter.emitObject(OutputFilename.getValue());
+  ObjectEmitter emitter;
+  for (auto& module : optimizedBitcode) {
+    emitter.addModule(module);
+  }
+
+  std::string tmpObjectFile = "/tmp/chaos" + std::to_string(idx) + ".o";
+  emitter.emitObject(tmpObjectFile);
+  objectFiles.push_back(tmpObjectFile);
 
   std::string linkCmd = "clang++ -o " + OutputFilename.getValue() + " ";
-  for (auto& bc : optimizedBitcode) {
-    linkCmd += bc + " ";
+  for (auto& o : objectFiles) {
+    linkCmd += o + " ";
   }
   std::cerr << "Link: " << exec(linkCmd);
 }

@@ -123,7 +123,7 @@ void ObjectEmitter::emitObject(const std::string& filename) {
 
   auto AddStream =
       [&](size_t Task) -> std::unique_ptr<lto::NativeObjectStream> {
-    std::string Path = filename + "." + utostr(Task);
+    std::string Path = filename;
 
     std::error_code EC;
     auto S = std::make_unique<raw_fd_ostream>(Path, EC, sys::fs::OF_None);
