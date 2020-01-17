@@ -20,6 +20,8 @@
 #include <llvm/Support/CommandLine.h>
 #include <memory>
 
+namespace chaos {
+
 using namespace llvm;
 
 static bool hasEnding(std::string const& fullString,
@@ -33,6 +35,7 @@ static bool hasEnding(std::string const& fullString,
 }
 
 void Driver::run(int argc, char** argv) {
+  cl::ResetCommandLineParser();
   cl::opt<std::string> OutputFilename("o", cl::desc("Specify output filename"),
                                       cl::value_desc("filename"));
   cl::list<std::string> InputFilenames(cl::Positional, cl::desc("<input file>"),
@@ -100,3 +103,4 @@ std::string Driver::exec(const std::string& cmd) {
 
   return result;
 }
+} // namespace chaos

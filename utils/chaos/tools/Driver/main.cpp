@@ -14,7 +14,7 @@
 #include <Driver/Driver.h>
 
 int main(int argc, char** argv) {
-  Driver driver;
+  chaos::Driver driver;
   driver.run(argc, argv);
 
   return 0;

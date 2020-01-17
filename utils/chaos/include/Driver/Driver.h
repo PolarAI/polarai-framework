@@ -14,10 +14,11 @@
 #ifndef ATHENA_DRIVER_H
 #define ATHENA_DRIVER_H
 
-#include <athena/chaos/driver.h>
+#include <Driver/export.h>
 #include <string>
 #include <vector>
 
+namespace chaos {
 class CHAOS_DRIVER_EXPORT Driver {
 private:
   std::string exec(const std::string& cmd);
@@ -25,5 +26,6 @@ private:
 public:
   void run(int argc, char** argv);
 };
+} // namespace chaos
 
 #endif // ATHENA_DRIVER_H

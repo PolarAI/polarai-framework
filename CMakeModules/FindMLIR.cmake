@@ -9,7 +9,7 @@ foreach (comp ${MLIR_FIND_COMPONENTS})
             PATH_SUFFIXES lib)
     if (__mlir_lib_${comp})
         list(APPEND MLIR_LIBS ${__mlir_lib_${comp}})
-        target_link_libraries(Athena::MLIR PUBLIC INTERFACE ${__mlir_lib_${comp}})
+        target_link_libraries(Athena::MLIR PUBLIC INTERFACE -Wl,--no-as-needed ${__mlir_lib_${comp}})
     endif ()
 endforeach ()
 

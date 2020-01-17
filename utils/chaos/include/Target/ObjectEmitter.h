@@ -14,7 +14,7 @@
 #ifndef ATHENA_OBJECTEMITTER_H
 #define ATHENA_OBJECTEMITTER_H
 
-#include <athena/chaos/target.h>
+#include <Target/export.h>
 #include <llvm/IR/Module.h>
 #include <string>
 

@@ -14,11 +14,12 @@
 #ifndef ATHENA_IRTRANSFORMER_H
 #define ATHENA_IRTRANSFORMER_H
 
-#include <athena/chaos/transform.h>
+#include <Transform/export.h>
 #include <llvm/IR/Module.h>
 #include <mlir/IR/Module.h>
 #include <string>
 
+namespace chaos {
 class CHAOS_TRANSFORM_EXPORT IRTransformer {
 private:
   std::unique_ptr<llvm::LLVMContext> mLLVMContext;
@@ -39,5 +40,6 @@ public:
   void dumpLLVMIR(const std::string& filename);
   void writeBitcode(const std::string& filename);
 };
+} // namespace chaos
 
 #endif // ATHENA_IRTRANSFORMER_H

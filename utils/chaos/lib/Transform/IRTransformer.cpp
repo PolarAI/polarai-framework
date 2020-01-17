@@ -26,6 +26,8 @@
 
 using namespace llvm;
 
+namespace chaos {
+
 std::unique_ptr<IRTransformer>
 IRTransformer::getFromIrFile(const std::string& filename) {
   auto ctx = std::make_unique<llvm::LLVMContext>();
@@ -108,3 +110,4 @@ void IRTransformer::writeBitcode(const std::string& filename) {
   llvm::WriteBitcodeToFile(*mLLVMModule, out);
   out.close();
 }
+} // namespace chaos

@@ -1,11 +1,21 @@
 find_package(LLVM CONFIG)
 
-add_athena_library(
+add_library(
         chaosTarget
-        SHARED
-        CHAOS_TARGET
-        chaos/target.h
+        STATIC
         ObjectEmitter.cpp
+)
+
+athena_disable_exceptions(chaosTarget)
+athena_disable_rtti(chaosTarget)
+if (UNIX)
+    target_compile_options(chaosTarget PRIVATE -fPIC)
+endif ()
+
+generate_export_header(
+        chaosTarget
+        EXPORT_MACRO_NAME CHAOS_TARGET_EXPORT
+        EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/chaos/Target/export.h
 )
 
 llvm_map_components_to_libnames(llvm_libs
@@ -20,7 +30,8 @@ llvm_map_components_to_libnames(llvm_libs
         lto
         AllTargetsCodeGens AllTargetsAsmPrinters AllTargetsAsmParsers AllTargetsDescs AllTargetsInfos)
 
-target_include_directories(chaosTarget PRIVATE ${LLVM_INCLUDE_DIRS})
-target_compile_definitions(chaosTarget PRIVATE ${LLVM_DEFINITIONS})
-target_link_libraries(chaosTarget PRIVATE ${llvm_libs})
-target_include_directories(chaosTarget PRIVATE ${CMAKE_SOURCE_DIR}/utils/chaos/include)
+target_include_directories(chaosTarget PUBLIC ${LLVM_INCLUDE_DIRS})
+target_compile_definitions(chaosTarget PUBLIC ${LLVM_DEFINITIONS})
+target_link_libraries(chaosTarget PUBLIC ${llvm_libs})
+target_include_directories(chaosTarget PUBLIC ${CMAKE_SOURCE_DIR}/utils/chaos/include)
+target_include_directories(chaosTarget PUBLIC ${CMAKE_BINARY_DIR}/include/chaos)
