@@ -1,12 +1,45 @@
 find_package(MLIR COMPONENTS
         IR TargetLLVMIR Dialect LLVMIR Support Translation Pass Transforms Analysis AffineOps StandardOps
-        TransformUtils LoopOps TargetLLVMIRModuleTranslation AffineToStandard VectorOps VectorToLLVM)
+        TransformUtils LoopOps TargetLLVMIRModuleTranslation AffineToStandard VectorOps VectorToLLVM
+        StandardToLLVM LoopToStandard)
 
 add_library(
         chaosTransform
         STATIC
         IRTransformer.cpp
+        LoopAffinitizer.cpp
+        LLVMToStandardTypeConverter.cpp
+        LLVMToStandardConversionPattern.cpp
+        LLVMToStdPass.cpp
+        ChaosDialect.cpp
+        ChaosLoweringPass.cpp
+        IRCleanUpPass.cpp
 )
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tablegen)
+
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/tablegen/ChaosDialect.h.inc
+        ${CMAKE_CURRENT_BINARY_DIR}/tablegen/ChaosDialect.h.fake
+        COMMAND ${MLIR_TBLGEN} --gen-op-decls -o=${CMAKE_CURRENT_BINARY_DIR}/tablegen/ChaosDialect.h.inc
+        -I=${MLIR_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/ChaosDialect.td
+        )
+
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/tablegen/ChaosDialect.cpp.inc
+        ${CMAKE_CURRENT_BINARY_DIR}/tablegen/ChaosDialect.cpp.fake
+        COMMAND ${MLIR_TBLGEN} --gen-op-defs -o=${CMAKE_CURRENT_BINARY_DIR}/tablegen/ChaosDialect.cpp.inc
+        -I=${MLIR_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/ChaosDialect.td
+        )
+
+add_custom_target(chaos_dialect_tblgen
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/tablegen/ChaosDialect.h.inc
+        ${CMAKE_CURRENT_BINARY_DIR}/tablegen/ChaosDialect.h.fake
+        ${CMAKE_CURRENT_BINARY_DIR}/tablegen/ChaosDialect.cpp.inc
+        ${CMAKE_CURRENT_BINARY_DIR}/tablegen/ChaosDialect.cpp.fake
+        SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ChaosDialect.td)
+
+add_dependencies(chaosTransform chaos_dialect_tblgen)
+target_include_directories(chaosTransform PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/tablegen/)
+
 
 athena_disable_exceptions(chaosTransform)
 athena_disable_rtti(chaosTransform)

@@ -11,14 +11,18 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
+#include "ChaosLoweringPass.h"
+#include "IRCleanUpPass.h"
+#include "LLVMToStdPass.h"
+#include "LoopAffinitizer.h"
 #include <Transform/IRTransformer.h>
 #include <fstream>
-#include <llvm/Analysis/CGSCCPassManager.h>
 #include <llvm/Bitcode/BitcodeWriter.h>
-#include <llvm/IR/PassManager.h>
 #include <llvm/IRReader/IRReader.h>
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/Support/SourceMgr.h>
+#include <llvm/Transforms/Scalar/LoopSimplifyCFG.h>
+#include <mlir/Conversion/StandardToLLVM/ConvertStandardToLLVMPass.h>
 #include <mlir/Pass/Pass.h>
 #include <mlir/Pass/PassManager.h>
 #include <mlir/Target/LLVMIR.h>
@@ -54,6 +58,9 @@ IRTransformer::IRTransformer(std::unique_ptr<llvm::Module> llvmModule,
   // Simplify module beforehand
   auto moduleSimplifier = mPassBuilder.buildModuleSimplificationPipeline(
       PassBuilder::O1, PassBuilder::ThinLTOPhase::None);
+  moduleSimplifier.addPass(
+      createModuleToFunctionPassAdaptor(LoopSimplifyPass()));
+  moduleSimplifier.addPass(createModuleToFunctionPassAdaptor(LCSSAPass()));
   moduleSimplifier.run(*llvmModule, mModuleAnalysisManager);
 
   // Convert LLVMI IR to MLIR
@@ -63,19 +70,34 @@ IRTransformer::IRTransformer(std::unique_ptr<llvm::Module> llvmModule,
 void IRTransformer::dumpMLIR(const std::string& filename) {
   std::error_code err;
   llvm::raw_fd_ostream out(filename, err);
-  mMLIRModule->get().print(out);
+  mlir::OpPrintingFlags flags;
+  flags.enableDebugInfo(true);
+  mMLIRModule->get().print(out, flags);
   out.close();
 }
 void IRTransformer::run() {
   mlir::PassManager mlirPM(&mMLIRContext);
-  mlir::OpPassManager& optPM = mlirPM.nest<mlir::FuncOp>();
-  optPM.addPass(mlir::createCanonicalizerPass());
-  optPM.addPass(mlir::createLoopFusionPass());
+  mlirPM.disableMultithreading();
+  mlirPM.enableCrashReproducerGeneration("crash");
+  mlirPM.addPass(chaos::createLLVMToStdPass(&mMLIRContext));
+  mlirPM.addPass(mlir::createCanonicalizerPass());
+  mlirPM.addPass(chaos::createLoopAffinitizerPass());
+  //  mlirPM.addPass(mlir::createCanonicalizerPass());
+  mlirPM.addPass(chaos::createIRCleanUpPass());
+  //    funcPM.addPass(chaos::createLoopAffinitizerPass());
+  //  mlir::OpPassManager& optPM = mlirPM.nest<mlir::FuncOp>();
+  //  optPM.addNestedPass<mlir::LLVM::LLVMFuncOp>(chaos::createLoopAffinitizerPass());
+  //  optPM.addPass(mlir::createLoopFusionPass());
+  //    mlirPM.addPass(chaos::createChaosLoweringPass(&mMLIRContext));
+  //  mlirPM.addPass(mlir::createLowerToLLVMPass());
   if (mlir::failed(mlirPM.run(mMLIRModule->get()))) {
+    dumpMLIR("test.mlir");
     llvm_unreachable("Err");
   }
-
+  //  mMLIRModule->get().verify();
+  dumpMLIR("test3.mlir");
   mLLVMModule = mlir::translateModuleToLLVMIR(mMLIRModule->get());
+  dumpLLVMIR("test3.ll");
 
   auto moduleOptimizationPassManager =
       mPassBuilder.buildModuleOptimizationPipeline(::llvm::PassBuilder::O2,

@@ -75,6 +75,7 @@ void Driver::run(int argc, char** argv) {
     auto transformer = IRTransformer::getFromIrFile(llvmIr);
     transformer->run();
     transformer->writeBitcode(tmp);
+    transformer->dumpMLIR("test.mlir");
     optimizedBitcode.push_back(tmp);
   }
 
