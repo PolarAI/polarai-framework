@@ -23,8 +23,7 @@ namespace chaos {
 class CHAOS_FRONTEND_EXPORT Frontend {
 
 public:
-  std::vector<std::string> run(std::string_view filename,
-                               std::vector<std::string> args);
+  std::vector<std::string> run(const std::vector<std::string>& args);
 };
 } // namespace chaos
 

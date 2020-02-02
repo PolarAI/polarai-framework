@@ -67,10 +67,11 @@ void Driver::run(int argc, char** argv) {
   std::vector<std::string> rawLLVMIR;
 
   Frontend frontend;
-  auto cxxFlags = getCXXFlags(argv[0]);
 
   size_t idx = 0;
   for (auto& cpp : cppInput) {
+    SmallVector<const char*, 2> extArgs{"-c", cpp.data()};
+    auto cxxFlags = getCXXFlags(extArgs);
     // todo better random name generator
     std::string tmp = "/tmp/chaos" + std::to_string(idx++) + ".ll";
     std::string cmd = "clang++ -std=c++17 -S -emit-llvm -fno-exceptions "
@@ -78,7 +79,7 @@ void Driver::run(int argc, char** argv) {
     cmd += "-o " + tmp + " " + cpp;
     rawLLVMIR.push_back(tmp);
     std::cerr << exec(cmd);
-    frontend.run(cpp, cxxFlags);
+    frontend.run(cxxFlags);
   }
 
   std::vector<std::string> optimizedBitcode;
@@ -120,52 +121,45 @@ std::string Driver::exec(const std::string& cmd) {
 
   return result;
 }
-std::vector<std::string> Driver::getCXXFlags(const char* thisBin) {
-  void* MainAddr = (void*)(intptr_t)kBinaryAddr;
-  // std::string Path = llvm::sys::fs::getMainExecutable(thisBin, MainAddr);
+std::vector<std::string>
+Driver::getCXXFlags(ArrayRef<const char*> externalArgs) {
+  // fixme get actual clang path
   std::string Path = "/opt/llvm10/bin/clang";
-  IntrusiveRefCntPtr<clang::DiagnosticOptions> DiagOpts =
+  IntrusiveRefCntPtr<clang::DiagnosticOptions> diagOpts =
       new clang::DiagnosticOptions();
-  auto* DiagClient = new clang::TextDiagnosticPrinter(llvm::errs(), &*DiagOpts);
+  auto* diagClient = new clang::TextDiagnosticPrinter(llvm::errs(), &*diagOpts);
 
-  IntrusiveRefCntPtr<clang::DiagnosticIDs> DiagID(new clang::DiagnosticIDs());
-  clang::DiagnosticsEngine Diags(DiagID, &*DiagOpts, DiagClient);
+  IntrusiveRefCntPtr<clang::DiagnosticIDs> diagId(new clang::DiagnosticIDs());
+  clang::DiagnosticsEngine diagnosticsEngine(diagId, &*diagOpts, diagClient);
 
-  const std::string TripleStr = llvm::sys::getProcessTriple();
-  llvm::Triple T(TripleStr);
+  const std::string tripleStr = llvm::sys::getProcessTriple();
+  llvm::Triple triple(tripleStr);
 
-  clang::driver::Driver TheDriver(Path, T.str(), Diags);
-  TheDriver.setTitle("clang interpreter");
-  TheDriver.setCheckInputsExist(false);
+  clang::driver::Driver driver(Path, triple.str(), diagnosticsEngine);
+  driver.setTitle("chaos");
+  driver.setCheckInputsExist(false);
 
-  SmallVector<const char*, 16> Args{"-fsyntax-only", "-c", "test.cpp"};
+  SmallVector<const char*, 16> allArgs{"-fsyntax-only"};
+  allArgs.append(externalArgs.begin(), externalArgs.end());
 
-  Args.push_back("-isysroot");
-  Args.push_back("/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk");
+#ifdef __APPLE__
+  allArgs.push_back("-isysroot");
+  allArgs.push_back("/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk");
+#endif
 
-  std::unique_ptr<clang::driver::Compilation> C(
-      TheDriver.BuildCompilation(Args));
+  std::unique_ptr<clang::driver::Compilation> clang(
+      driver.BuildCompilation(allArgs));
 
-  const clang::driver::JobList& Jobs = C->getJobs();
+  const clang::driver::JobList& jobs = clang->getJobs();
 
-  //  if (Jobs.size() != 1 || !isa<clang::driver::Command>(*Jobs.begin())) {
-  //    SmallString<256> Msg;
-  //    llvm::raw_svector_ostream OS(Msg);
-  //    Jobs.Print(OS, "; ", true);
-  //    Diags.Report(clang::diag::err_fe_expected_compiler_job) << OS.str();
-  //  }
-
-  const clang::driver::Command& Cmd =
-      cast<clang::driver::Command>(*Jobs.begin());
+  const clang::driver::Command& command =
+      cast<clang::driver::Command>(*jobs.begin());
 
   std::vector<std::string> res;
-  auto args = Cmd.getArguments();
+  auto args = command.getArguments();
   for (const auto* arg : args) {
     res.emplace_back(arg);
   }
-
-  Jobs.Print(llvm::errs(), "\n", true);
-  llvm::errs() << "\n";
 
   return res;
 }

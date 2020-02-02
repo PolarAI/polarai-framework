@@ -23,7 +23,8 @@ namespace chaos {
 class CHAOS_DRIVER_EXPORT Driver {
 private:
   std::string exec(const std::string& cmd);
-  std::vector<std::string> getCXXFlags(const char* thisBin);
+  std::vector<std::string>
+  getCXXFlags(llvm::ArrayRef<const char*> externalArgs);
 
 public:
   void run(int argc, char** argv);

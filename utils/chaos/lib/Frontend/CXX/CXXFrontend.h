@@ -24,7 +24,7 @@ private:
 public:
   CXXFrontend();
 
-  void run(std::string_view filename, const std::vector<std::string>& args);
+  void run(const std::vector<std::string>& args);
 };
 } // namespace chaos
 #endif // ATHENA_CXXFRONTEND_H

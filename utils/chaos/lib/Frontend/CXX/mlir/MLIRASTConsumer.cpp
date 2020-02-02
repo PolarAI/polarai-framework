@@ -20,8 +20,6 @@
 #include <mlir/Dialect/StandardOps/Ops.h>
 #include <mlir/IR/Function.h>
 
-#include <iostream>
-
 namespace chaos {
 void MLIRASTConsumer::HandleTranslationUnit(clang::ASTContext& Ctx) {
   auto traversalScope = mContext.getTraversalScope();
@@ -65,8 +63,6 @@ void MLIRASTConsumer::visit(clang::Decl* decl) {
 }
 void MLIRASTConsumer::visit(clang::FunctionDecl* functionDecl) {
   std::string mangledName = mangleName(functionDecl);
-
-  std::cout << mangledName << std::endl;
 
   if (functionDecl->isTemplated()) {
     // todo instantiate templates instead
@@ -194,7 +190,6 @@ void MLIRASTConsumer::visit(clang::VarDecl* decl) {
   }
 }
 void MLIRASTConsumer::visit(clang::CompoundAssignOperator* stmt) {
-
   auto lhs = evaluate(stmt->getLHS());
   auto rhs = evaluate(stmt->getRHS());
 
@@ -229,7 +224,6 @@ void MLIRASTConsumer::visit(clang::CompoundAssignOperator* stmt) {
   }
 }
 mlir::Value MLIRASTConsumer::evaluate(clang::Expr* expr) {
-
 #define dispatch(type, d)                                                      \
   if (auto c = llvm::dyn_cast_or_null<type>(d)) {                              \
     return evaluate(c);                                                        \
@@ -349,7 +343,6 @@ mlir::Value MLIRASTConsumer::evaluate(clang::DeclRefExpr* expr) {
   llvm_unreachable("Var not found");
 }
 mlir::Value MLIRASTConsumer::evaluate(clang::CallExpr* expr) {
-
   if (auto func = expr->getDirectCallee()) {
     auto mangledName = mangleName(func);
     llvm::SmallVector<mlir::Value, 5> args;

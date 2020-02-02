@@ -24,14 +24,10 @@ namespace chaos {
 chaos::CXXFrontend::CXXFrontend()
     : mCompilerInstance(new clang::CompilerInstance()) {
   llvm::InitializeAllTargets();
-  //  llvm::InitializeNativeTarget();
   llvm::InitializeNativeTargetAsmPrinter();
   llvm::InitializeNativeTargetAsmParser();
-  //  llvm::InitializeM();
 }
-void CXXFrontend::run(std::string_view filename,
-                      const std::vector<std::string>& args) {
-
+void CXXFrontend::run(const std::vector<std::string>& args) {
   std::unique_ptr<clang::CompilerInvocation> CI(new clang::CompilerInvocation);
 
   llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> DiagID(

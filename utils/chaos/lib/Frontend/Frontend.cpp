@@ -15,11 +15,10 @@
 #include <Frontend/Frontend.h>
 
 namespace chaos {
-std::vector<std::string> Frontend::run(std::string_view filename,
-                                       std::vector<std::string> args) {
+std::vector<std::string> Frontend::run(const std::vector<std::string>& args) {
   CXXFrontend cxxFrontend;
 
-  cxxFrontend.run(filename, args);
+  cxxFrontend.run(args);
 
   std::vector<std::string> resultFiles;
   return resultFiles;
