@@ -10,24 +10,21 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 //===----------------------------------------------------------------------===//
+#ifndef ATHENA_CXXFRONTEND_H
+#define ATHENA_CXXFRONTEND_H
 
-#ifndef ATHENA_DRIVER_H
-#define ATHENA_DRIVER_H
-
-#include <Driver/export.h>
+#include "clang/Frontend/CompilerInstance.h"
 #include <llvm/Option/Option.h>
-#include <string>
-#include <vector>
 
 namespace chaos {
-class CHAOS_DRIVER_EXPORT Driver {
+class CXXFrontend {
 private:
-  std::string exec(const std::string& cmd);
-  std::vector<std::string> getCXXFlags(const char* thisBin);
+  std::unique_ptr<clang::CompilerInstance> mCompilerInstance;
 
 public:
-  void run(int argc, char** argv);
+  CXXFrontend();
+
+  void run(std::string_view filename, const std::vector<std::string>& args);
 };
 } // namespace chaos
-
-#endif // ATHENA_DRIVER_H
+#endif // ATHENA_CXXFRONTEND_H

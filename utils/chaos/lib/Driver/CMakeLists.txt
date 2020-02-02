@@ -20,6 +20,6 @@ llvm_map_components_to_libnames(llvm_libs
 
 target_include_directories(chaosDriver PUBLIC ${LLVM_INCLUDE_DIRS})
 target_compile_definitions(chaosDriver PUBLIC ${LLVM_DEFINITIONS})
-target_link_libraries(chaosDriver PRIVATE ${llvm_libs} chaosTransform chaosTarget)
+target_link_libraries(chaosDriver PRIVATE ${llvm_libs} chaosTransform chaosTarget chaosFrontend)
 target_include_directories(chaosDriver PUBLIC ${CMAKE_SOURCE_DIR}/utils/chaos/include)
 target_include_directories(chaosDriver PUBLIC ${CMAKE_BINARY_DIR}/include/chaos)

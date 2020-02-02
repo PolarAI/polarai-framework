@@ -11,14 +11,23 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
+#include "clang/Driver/Driver.h"
+#include "clang/Basic/DiagnosticOptions.h"
+#include "clang/Driver/Compilation.h"
+#include "clang/Driver/Job.h"
+#include "clang/Frontend/FrontendDiagnostic.h"
 #include <Driver/Driver.h>
+#include <Frontend/Frontend.h>
 #include <Target/ObjectEmitter.h>
 #include <Transform/IRTransformer.h>
 #include <array>
+#include <clang/Frontend/TextDiagnosticPrinter.h>
 #include <cstdio>
 #include <iostream>
 #include <llvm/Support/CommandLine.h>
 #include <memory>
+
+static int kBinaryAddr;
 
 namespace chaos {
 
@@ -57,6 +66,9 @@ void Driver::run(int argc, char** argv) {
 
   std::vector<std::string> rawLLVMIR;
 
+  Frontend frontend;
+  auto cxxFlags = getCXXFlags(argv[0]);
+
   size_t idx = 0;
   for (auto& cpp : cppInput) {
     // todo better random name generator
@@ -66,6 +78,7 @@ void Driver::run(int argc, char** argv) {
     cmd += "-o " + tmp + " " + cpp;
     rawLLVMIR.push_back(tmp);
     std::cerr << exec(cmd);
+    frontend.run(cpp, cxxFlags);
   }
 
   std::vector<std::string> optimizedBitcode;
@@ -106,5 +119,54 @@ std::string Driver::exec(const std::string& cmd) {
   }
 
   return result;
+}
+std::vector<std::string> Driver::getCXXFlags(const char* thisBin) {
+  void* MainAddr = (void*)(intptr_t)kBinaryAddr;
+  // std::string Path = llvm::sys::fs::getMainExecutable(thisBin, MainAddr);
+  std::string Path = "/opt/llvm10/bin/clang";
+  IntrusiveRefCntPtr<clang::DiagnosticOptions> DiagOpts =
+      new clang::DiagnosticOptions();
+  auto* DiagClient = new clang::TextDiagnosticPrinter(llvm::errs(), &*DiagOpts);
+
+  IntrusiveRefCntPtr<clang::DiagnosticIDs> DiagID(new clang::DiagnosticIDs());
+  clang::DiagnosticsEngine Diags(DiagID, &*DiagOpts, DiagClient);
+
+  const std::string TripleStr = llvm::sys::getProcessTriple();
+  llvm::Triple T(TripleStr);
+
+  clang::driver::Driver TheDriver(Path, T.str(), Diags);
+  TheDriver.setTitle("clang interpreter");
+  TheDriver.setCheckInputsExist(false);
+
+  SmallVector<const char*, 16> Args{"-fsyntax-only", "-c", "test.cpp"};
+
+  Args.push_back("-isysroot");
+  Args.push_back("/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk");
+
+  std::unique_ptr<clang::driver::Compilation> C(
+      TheDriver.BuildCompilation(Args));
+
+  const clang::driver::JobList& Jobs = C->getJobs();
+
+  //  if (Jobs.size() != 1 || !isa<clang::driver::Command>(*Jobs.begin())) {
+  //    SmallString<256> Msg;
+  //    llvm::raw_svector_ostream OS(Msg);
+  //    Jobs.Print(OS, "; ", true);
+  //    Diags.Report(clang::diag::err_fe_expected_compiler_job) << OS.str();
+  //  }
+
+  const clang::driver::Command& Cmd =
+      cast<clang::driver::Command>(*Jobs.begin());
+
+  std::vector<std::string> res;
+  auto args = Cmd.getArguments();
+  for (const auto* arg : args) {
+    res.emplace_back(arg);
+  }
+
+  Jobs.Print(llvm::errs(), "\n", true);
+  llvm::errs() << "\n";
+
+  return res;
 }
 } // namespace chaos

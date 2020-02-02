@@ -11,23 +11,24 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_DRIVER_H
-#define ATHENA_DRIVER_H
+#ifndef ATHENA_TYPECONVERTER_H
+#define ATHENA_TYPECONVERTER_H
 
-#include <Driver/export.h>
-#include <llvm/Option/Option.h>
-#include <string>
-#include <vector>
+#include <clang/AST/Type.h>
+#include <mlir/IR/Builders.h>
+#include <mlir/IR/Types.h>
 
 namespace chaos {
-class CHAOS_DRIVER_EXPORT Driver {
-private:
-  std::string exec(const std::string& cmd);
-  std::vector<std::string> getCXXFlags(const char* thisBin);
+class TypeConverter {
+  mlir::OpBuilder mBuilder;
 
 public:
-  void run(int argc, char** argv);
+  TypeConverter(mlir::MLIRContext* ctx) : mBuilder(ctx) {}
+
+  mlir::FunctionType convert(const clang::FunctionType& type);
+  mlir::Type convert(const clang::QualType& type);
+  mlir::Type convert(const clang::BuiltinType& type);
 };
 } // namespace chaos
 
-#endif // ATHENA_DRIVER_H
+#endif // ATHENA_TYPECONVERTER_H

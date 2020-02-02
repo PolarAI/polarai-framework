@@ -11,23 +11,17 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_DRIVER_H
-#define ATHENA_DRIVER_H
-
-#include <Driver/export.h>
-#include <llvm/Option/Option.h>
-#include <string>
-#include <vector>
+#include "CXX/CXXFrontend.h"
+#include <Frontend/Frontend.h>
 
 namespace chaos {
-class CHAOS_DRIVER_EXPORT Driver {
-private:
-  std::string exec(const std::string& cmd);
-  std::vector<std::string> getCXXFlags(const char* thisBin);
+std::vector<std::string> Frontend::run(std::string_view filename,
+                                       std::vector<std::string> args) {
+  CXXFrontend cxxFrontend;
 
-public:
-  void run(int argc, char** argv);
-};
+  cxxFrontend.run(filename, args);
+
+  std::vector<std::string> resultFiles;
+  return resultFiles;
+}
 } // namespace chaos
-
-#endif // ATHENA_DRIVER_H

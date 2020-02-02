@@ -11,23 +11,25 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_DRIVER_H
-#define ATHENA_DRIVER_H
+#ifndef ATHENA_CLANGDIALECT_H
+#define ATHENA_CLANGDIALECT_H
 
-#include <Driver/export.h>
-#include <llvm/Option/Option.h>
-#include <string>
-#include <vector>
+#include "mlir/IR/Dialect.h"
+#include "mlir/IR/Function.h"
 
-namespace chaos {
-class CHAOS_DRIVER_EXPORT Driver {
-private:
-  std::string exec(const std::string& cmd);
-  std::vector<std::string> getCXXFlags(const char* thisBin);
-
+namespace clang {
+class ClangDialect : public mlir::Dialect {
 public:
-  void run(int argc, char** argv);
-};
-} // namespace chaos
+  explicit ClangDialect(mlir::MLIRContext* ctx);
 
-#endif // ATHENA_DRIVER_H
+  /// Provide a utility accessor to the dialect namespace. This is used by
+  /// several utilities for casting between dialects.
+  static llvm::StringRef getDialectNamespace() { return "clang"; }
+};
+
+using namespace mlir;
+#define GET_OP_CLASSES
+#include <Dialects/ClangDialect.h.inc>
+} // namespace clang
+
+#endif // ATHENA_CLANGDIALECT_H

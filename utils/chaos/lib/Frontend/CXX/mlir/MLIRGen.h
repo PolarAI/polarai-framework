@@ -11,23 +11,27 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_DRIVER_H
-#define ATHENA_DRIVER_H
+#ifndef ATHENA_MLIRGEN_H
+#define ATHENA_MLIRGEN_H
 
-#include <Driver/export.h>
-#include <llvm/Option/Option.h>
-#include <string>
-#include <vector>
+#include <clang/Frontend/FrontendAction.h>
+#include <mlir/IR/Module.h>
 
 namespace chaos {
-class CHAOS_DRIVER_EXPORT Driver {
-private:
-  std::string exec(const std::string& cmd);
-  std::vector<std::string> getCXXFlags(const char* thisBin);
+class MLIRGen : public clang::ASTFrontendAction {
+protected:
+  mlir::MLIRContext mMLIRContext;
+  mlir::OwningModuleRef mMLIRModule;
+
+  std::unique_ptr<clang::ASTConsumer>
+  CreateASTConsumer(clang::CompilerInstance& CI,
+                    llvm::StringRef InFile) override;
 
 public:
-  void run(int argc, char** argv);
+  MLIRGen();
+  mlir::OwningModuleRef& getModule() { return mMLIRModule; }
+  mlir::OwningModuleRef takeModule() { return std::move(mMLIRModule); }
 };
 } // namespace chaos
 
-#endif // ATHENA_DRIVER_H
+#endif // ATHENA_MLIRGEN_H
