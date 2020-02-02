@@ -52,6 +52,7 @@ void Driver::run(int argc, char** argv) {
   cl::ParseCommandLineOptions(argc, argv);
 
   std::vector<std::string> cppInput;
+  std::vector<std::string> pyInput;
   std::vector<std::string> objectFiles;
   std::string outputFile = OutputFilename.getValue();
 
@@ -61,12 +62,15 @@ void Driver::run(int argc, char** argv) {
       cppInput.push_back(inp);
     } else if (hasEnding(inp, ".o")) {
       objectFiles.push_back(inp);
+    } else if (hasEnding(inp, ".py")) {
+      pyInput.push_back(inp);
     }
   }
 
   std::vector<std::string> rawLLVMIR;
 
   Frontend frontend;
+  auto cxxFlags = getCXXFlags(argv[0]);
 
   size_t idx = 0;
   for (auto& cpp : cppInput) {
@@ -80,6 +84,10 @@ void Driver::run(int argc, char** argv) {
     rawLLVMIR.push_back(tmp);
     std::cerr << exec(cmd);
     frontend.run(cxxFlags);
+  }
+
+  for (auto& py : pyInput) {
+    frontend.run({py});
   }
 
   std::vector<std::string> optimizedBitcode;

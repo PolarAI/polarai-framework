@@ -11,6 +11,11 @@ add_library(
         CXX/mlir/MLIRGen.cpp
         CXX/mlir/MLIRASTConsumer.cpp
         CXX/mlir/TypeConverter.cpp
+        Python/Lexer.cpp
+        Python/Parser.cpp
+        Python/AST/AST.cpp
+        Python/AST/Decl.cpp
+        Python/PythonFrontend.h
 )
 
 athena_disable_exceptions(chaosFrontend)
