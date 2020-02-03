@@ -124,7 +124,7 @@ std::string Driver::exec(const std::string& cmd) {
 std::vector<std::string>
 Driver::getCXXFlags(ArrayRef<const char*> externalArgs) {
   // fixme get actual clang path
-  std::string Path = "/opt/llvm10/bin/clang";
+  std::string path = "/opt/llvm10/bin/clang";
   IntrusiveRefCntPtr<clang::DiagnosticOptions> diagOpts =
       new clang::DiagnosticOptions();
   auto* diagClient = new clang::TextDiagnosticPrinter(llvm::errs(), &*diagOpts);
@@ -135,7 +135,7 @@ Driver::getCXXFlags(ArrayRef<const char*> externalArgs) {
   const std::string tripleStr = llvm::sys::getProcessTriple();
   llvm::Triple triple(tripleStr);
 
-  clang::driver::Driver driver(Path, triple.str(), diagnosticsEngine);
+  clang::driver::Driver driver(path, triple.str(), diagnosticsEngine);
   driver.setTitle("chaos");
   driver.setCheckInputsExist(false);
 
@@ -160,6 +160,8 @@ Driver::getCXXFlags(ArrayRef<const char*> externalArgs) {
   for (const auto* arg : args) {
     res.emplace_back(arg);
   }
+
+  delete diagClient;
 
   return res;
 }
