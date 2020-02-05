@@ -65,6 +65,7 @@ if (NOT ATHENA_DOCS_ONLY)
     endif ()
 
     add_subdirectory(utils/athena-tablegen)
+    add_subdirectory(utils/test_runner)
     add_subdirectory(src)
     add_subdirectory(utils/chaos)
 
