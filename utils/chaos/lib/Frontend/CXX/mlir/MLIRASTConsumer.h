@@ -51,17 +51,12 @@ protected:
 
   std::string mangleName(clang::FunctionDecl* type);
 
-  llvm::SmallVector<llvm::StringRef, 1> buildForInit(clang::Stmt* initStmt,
-                                                     mlir::Block* initBlock,
-                                                     mlir::Block* condBlock);
+  bool isCanonicalLoop(clang::ForStmt* stmt);
 
-  void buildForCond(clang::Expr* condExpr, mlir::Block* condBlock,
-                    mlir::Block* bodyBlock,
-                    llvm::ArrayRef<llvm::StringRef> indVars);
+  std::tuple<mlir::Value, llvm::StringRef>
+  extractSingleForInit(clang::DeclStmt* stmt);
 
-  void buildForInc(clang::Expr* incExpr, mlir::Block* incBlock,
-                   mlir::Block* condBlock,
-                   llvm::ArrayRef<llvm::StringRef> indVars);
+  mlir::Value extractForUpperBound(clang::BinaryOperator* expr);
 
   // MARK: Decls
 

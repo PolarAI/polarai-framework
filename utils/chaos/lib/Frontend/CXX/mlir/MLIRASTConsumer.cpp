@@ -17,6 +17,7 @@
 #include <clang/AST/Decl.h>
 #include <iostream>
 #include <mlir/Dialect/AffineOps/AffineOps.h>
+#include <mlir/Dialect/LoopOps/LoopOps.h>
 #include <mlir/Dialect/StandardOps/Ops.h>
 #include <mlir/IR/Function.h>
 
@@ -97,6 +98,8 @@ void MLIRASTConsumer::visit(clang::FunctionDecl* functionDecl) {
   // fixme always add terminator in the end
 
   mBuilder.restoreInsertionPoint(mPrevInsertPoint);
+
+  mMLIRModule->dump();
 }
 void MLIRASTConsumer::visit(clang::Stmt* stmt) {
   if (!stmt) {
@@ -135,34 +138,32 @@ void MLIRASTConsumer::visit(clang::Stmt* stmt) {
 }
 
 void MLIRASTConsumer::visit(clang::ForStmt* loop) {
-  auto clangLoop = mBuilder.create<clang::ForOp>(loc(loop->getForLoc()));
-
-  auto indVars =
-      buildForInit(loop->getInit(), clangLoop.getInit(), clangLoop.getCond());
-  buildForCond(loop->getCond(), clangLoop.getCond(), clangLoop.getBody(),
-               indVars);
-  auto checkPoint = mBuilder.saveInsertionPoint();
-  mLocalVarScope.emplace(mSymbolTable);
-  for (size_t idx = 0; idx < indVars.size(); idx++) {
-    mSymbolTable.insert(indVars[idx], clangLoop.getBody()->getArgument(idx));
+  loop->dump();
+  if (isCanonicalLoop(loop)) {
+    auto [init, name] =
+        extractSingleForInit(llvm::dyn_cast<clang::DeclStmt>(loop->getInit()));
+    auto upperBound = extractForUpperBound(
+        llvm::dyn_cast<clang::BinaryOperator>(loop->getCond()));
+    auto initIdx = mBuilder.create<mlir::IndexCastOp>(
+        loc(loop->getBeginLoc()), init, mBuilder.getIndexType());
+    auto upperIdx = mBuilder.create<mlir::IndexCastOp>(
+        loc(loop->getBeginLoc()), upperBound, mBuilder.getIndexType());
+    // fixme extract step
+    auto unit =
+        mBuilder.create<mlir::ConstantIndexOp>(mBuilder.getUnknownLoc(), 1);
+    auto forLoop = mBuilder.create<mlir::loop::ForOp>(loc(loop->getBeginLoc()),
+                                                      initIdx, upperIdx, unit);
+    mLocalVarScope.emplace(mSymbolTable);
+    auto indVar = forLoop.getInductionVar();
+    mSymbolTable.insert(name, indVar);
+    auto checkPoint = mBuilder.saveInsertionPoint();
+    mBuilder.setInsertionPointToStart(forLoop.getBody());
+    visit(loop->getBody());
+    mBuilder.restoreInsertionPoint(checkPoint);
+    mLocalVarScope.pop();
+  } else {
+    llvm_unreachable("Unsupported for loop");
   }
-  mBuilder.setInsertionPointToStart(clangLoop.getBody());
-  visit(loop->getBody());
-
-  llvm::SmallVector<mlir::Value, 1> indVarValues;
-  for (auto& indVar : indVars) {
-    auto var = mSymbolTable.lookup(indVar);
-    clangLoop.getInc()->addArgument(var.getType());
-    indVarValues.push_back(var);
-  }
-
-  mBuilder.create<mlir::BranchOp>(mBuilder.getUnknownLoc(), clangLoop.getInc());
-
-  mLocalVarScope.pop();
-
-  buildForInc(loop->getInc(), clangLoop.getInc(), clangLoop.getCond(), indVars);
-
-  mBuilder.restoreInsertionPoint(checkPoint);
 }
 void MLIRASTConsumer::visit(clang::DeclStmt* stmt) {
   for (auto* decl : stmt->getDeclGroup()) {
@@ -414,91 +415,6 @@ void MLIRASTConsumer::visit(clang::ReturnStmt* stmt) {
     mBuilder.create<mlir::ReturnOp>(loc(stmt->getReturnLoc()));
   }
 }
-llvm::SmallVector<llvm::StringRef, 1>
-MLIRASTConsumer::buildForInit(clang::Stmt* initStmt, mlir::Block* initBlock,
-                              mlir::Block* condBlock) {
-  llvm::SmallVector<llvm::StringRef, 1> varNames;
-  llvm::SmallVector<mlir::Value, 1> initValues;
-
-  auto checkPoint = mBuilder.saveInsertionPoint();
-  mBuilder.setInsertionPointToStart(initBlock);
-
-  if (auto declStmt = llvm::dyn_cast_or_null<clang::DeclStmt>(initStmt)) {
-    if (auto varDecl =
-            llvm::dyn_cast_or_null<clang::VarDecl>(declStmt->getSingleDecl())) {
-      initValues.push_back(evaluate(varDecl->getInit()));
-      varNames.push_back(varDecl->getName());
-    } else {
-      initStmt->dump();
-      llvm_unreachable("Unsupported For init statement");
-    }
-  } else {
-    initStmt->dump();
-    llvm_unreachable("Unsupported For init statement");
-  }
-
-  for (auto& arg : initValues) {
-    condBlock->addArgument(arg.getType());
-  }
-
-  mBuilder.create<mlir::BranchOp>(loc(initStmt->getEndLoc()), condBlock,
-                                  initValues);
-
-  mBuilder.restoreInsertionPoint(checkPoint);
-
-  return varNames;
-}
-void MLIRASTConsumer::buildForCond(clang::Expr* condExpr,
-                                   mlir::Block* condBlock,
-                                   mlir::Block* bodyBlock,
-                                   llvm::ArrayRef<llvm::StringRef> indVars) {
-  mLocalVarScope.emplace(mSymbolTable);
-  for (size_t idx = 0; idx < indVars.size(); idx++) {
-    mSymbolTable.insert(indVars[idx], condBlock->getArgument(idx));
-  }
-
-  auto checkPoint = mBuilder.saveInsertionPoint();
-  mBuilder.setInsertionPointToStart(condBlock);
-
-  auto condExprVal = evaluate(condExpr);
-
-  llvm::SmallVector<mlir::Value, 1> vars;
-
-  for (auto indVar : indVars) {
-    auto var = mSymbolTable.lookup(indVar);
-    bodyBlock->addArgument(var.getType());
-    vars.push_back(var);
-  }
-
-  // todo special for loop terminator
-  mBuilder.create<mlir::BranchOp>(loc(condExpr->getExprLoc()), bodyBlock, vars);
-
-  mBuilder.restoreInsertionPoint(checkPoint);
-  mLocalVarScope.pop();
-}
-void MLIRASTConsumer::buildForInc(clang::Expr* incExpr, mlir::Block* incBlock,
-                                  mlir::Block* condBlock,
-                                  llvm::ArrayRef<llvm::StringRef> indVars) {
-  auto checkPoint = mBuilder.saveInsertionPoint();
-  mLocalVarScope.emplace(mSymbolTable);
-
-  for (size_t idx = 0; idx < indVars.size(); idx++) {
-    mSymbolTable.insert(indVars[idx], incBlock->getArgument(idx));
-  }
-
-  mBuilder.setInsertionPointToStart(incBlock);
-  visit(incExpr);
-
-  llvm::SmallVector<mlir::Value, 1> args;
-  for (auto& indVar : indVars) {
-    args.push_back(mSymbolTable.lookup(indVar));
-  }
-
-  mBuilder.create<mlir::BranchOp>(mBuilder.getUnknownLoc(), condBlock, args);
-
-  mLocalVarScope.pop();
-  mBuilder.restoreInsertionPoint(checkPoint);
-}
 mlir::Value MLIRASTConsumer::evaluate(clang::UnaryOperator* expr) {
   mlir::Value res;
   switch (expr->getOpcode()) {
@@ -530,5 +446,36 @@ mlir::Value MLIRASTConsumer::evaluate(clang::UnaryOperator* expr) {
     llvm_unreachable("Unsupported unary expression");
   }
   return res;
+}
+bool MLIRASTConsumer::isCanonicalLoop(clang::ForStmt* stmt) {
+  bool res = true;
+  if (auto initDecl =
+          llvm::dyn_cast_or_null<clang::DeclStmt>(stmt->getInit())) {
+    // fixme more than one decl?
+    if (!llvm::isa<clang::VarDecl>(initDecl->getSingleDecl())) {
+      res = false;
+    }
+  }
+
+  if (!llvm::isa<clang::BinaryOperator>(stmt->getCond())) {
+    res = false;
+  }
+  // fixme check inc
+  return res;
+}
+std::tuple<mlir::Value, llvm::StringRef>
+MLIRASTConsumer::extractSingleForInit(clang::DeclStmt* decl) {
+  if (auto varDecl =
+          llvm::dyn_cast_or_null<clang::VarDecl>(decl->getSingleDecl())) {
+    auto val = evaluate(varDecl->getInit());
+    auto name = varDecl->getName();
+    return std::make_tuple(val, name);
+  }
+  // fixme meaningful err msg
+  llvm_unreachable("Err");
+}
+mlir::Value MLIRASTConsumer::extractForUpperBound(clang::BinaryOperator* expr) {
+  // fixme check operator kind
+  return evaluate(expr->getRHS());
 }
 } // namespace chaos
