@@ -390,7 +390,10 @@ mlir::Value MLIRASTConsumer::evaluate(clang::CXXNewExpr* expr) {
           mBuilder.create<mlir::ConstantIntOp>(mBuilder.getUnknownLoc(), 1, 64);
     }
 
-    auto memrefType = mTypeConverter.convert(expr->getAllocatedType());
+    size = mBuilder.create<mlir::IndexCastOp>(loc(expr->getExprLoc()), size,
+                                              mBuilder.getIndexType());
+
+    auto memrefType = mTypeConverter.getAsPointer(expr->getAllocatedType());
     // fixme get proper alignment
     auto alignment = mBuilder.getI64IntegerAttr(4);
     return mBuilder.create<mlir::AllocOp>(loc(expr->getExprLoc()), memrefType,

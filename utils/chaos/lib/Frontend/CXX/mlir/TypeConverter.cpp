@@ -90,4 +90,8 @@ mlir::Type chaos::TypeConverter::convert(const clang::BuiltinType& type) {
 
   return resType;
 }
+mlir::Type TypeConverter::getAsPointer(const clang::QualType& type) {
+  auto mlirType = convert(type);
+  return mlir::MemRefType::get({-1}, mlirType);
+}
 } // namespace chaos

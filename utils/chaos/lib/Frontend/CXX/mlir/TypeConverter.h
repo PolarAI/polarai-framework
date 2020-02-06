@@ -28,6 +28,7 @@ public:
   mlir::FunctionType convert(const clang::FunctionType& type);
   mlir::Type convert(const clang::QualType& type);
   mlir::Type convert(const clang::BuiltinType& type);
+  mlir::Type getAsPointer(const clang::QualType& type);
 };
 } // namespace chaos
 
