@@ -31,6 +31,13 @@ chaos::TypeConverter::convert(const clang::FunctionType& type) {
     params.push_back(convert(param));
   }
 
+  // Workaround for void type. MLIR's None type is actually
+  // nothing like C++ void. So, void functions must return
+  // 0 result values.
+  if (protoType->getReturnType().getAsString() == "void") {
+    return mBuilder.getFunctionType(params, {});
+  }
+
   auto retType = convert(protoType->getReturnType());
 
   return mBuilder.getFunctionType(params, {retType});

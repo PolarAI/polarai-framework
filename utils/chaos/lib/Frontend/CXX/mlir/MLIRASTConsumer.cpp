@@ -95,7 +95,11 @@ void MLIRASTConsumer::visit(clang::FunctionDecl* functionDecl) {
     mLocalVarScope.pop();
   }
 
-  // fixme always add terminator in the end
+  // fixme most of the time functions with void return type do not have
+  //       return statement in the end. However, it is not a rule.
+  if (mlirType.getNumResults() == 0 && functionDecl->hasBody()) {
+    mBuilder.create<mlir::ReturnOp>(mBuilder.getUnknownLoc());
+  }
 
   mBuilder.restoreInsertionPoint(mPrevInsertPoint);
 
@@ -353,7 +357,11 @@ mlir::Value MLIRASTConsumer::evaluate(clang::CallExpr* expr) {
 
     auto call = mBuilder.create<mlir::CallOp>(
         loc(expr->getExprLoc()), mFunctionsTable[mangledName], args);
-    // C++ functions return only one value.
+    // C++ functions return only one value. This is not true for MLIR.
+    // For function with void return time return just empty type.
+    if (mFunctionsTable[mangledName].getNumResults() == 0) {
+      return mlir::Value();
+    }
     return call.getResult(0);
   }
 
