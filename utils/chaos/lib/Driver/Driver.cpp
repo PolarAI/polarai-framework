@@ -80,6 +80,10 @@ void Driver::run(int argc, char** argv) {
     frontend.run(cpp);
   }
 
+  if (opts->FrontendOnly.getValue()) {
+    return;
+  }
+
   std::vector<std::string> optimizedBitcode;
 
   for (auto& llvmIr : rawLLVMIR) {

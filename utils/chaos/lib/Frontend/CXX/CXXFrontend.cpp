@@ -57,15 +57,27 @@ void CXXFrontend::run(const std::string& fileName) {
 
   mCompilerInstance->setInvocation(std::move(compilerInvocation));
 
-  std::unique_ptr<MLIRGen> Act(new MLIRGen());
-  if (!mCompilerInstance->ExecuteAction(*Act)) {
-    llvm::errs() << "Frontend Action failed\n";
-    return;
+  if (mOptions->UseMlir) {
+    std::unique_ptr<MLIRGen> Act(new MLIRGen());
+    if (!mCompilerInstance->ExecuteAction(*Act)) {
+      llvm::errs() << "Frontend Action failed\n";
+      return;
+    }
+    if (mOptions->DumpMlir) {
+      Act->getModule()->print(llvm::outs());
+    }
   }
 }
 std::vector<std::string> CXXFrontend::getCXXFlags(const std::string& fileName) {
-  // fixme get actual clang path
-  std::string path = "/opt/llvm10/bin/clang";
+  std::array<char, 128> buffer{};
+  std::string path;
+
+  std::unique_ptr<FILE, decltype(&pclose)> pipe(
+      popen("llvm-config --prefix", "r"), pclose);
+
+  while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+    path += buffer.data();
+  }
 
   llvm::Triple triple(mOptions->TargetTriple.getValue());
 

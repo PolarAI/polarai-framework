@@ -102,8 +102,6 @@ void MLIRASTConsumer::visit(clang::FunctionDecl* functionDecl) {
   }
 
   mBuilder.restoreInsertionPoint(mPrevInsertPoint);
-
-  mMLIRModule->dump();
 }
 void MLIRASTConsumer::visit(clang::Stmt* stmt) {
   if (!stmt) {
@@ -142,7 +140,6 @@ void MLIRASTConsumer::visit(clang::Stmt* stmt) {
 }
 
 void MLIRASTConsumer::visit(clang::ForStmt* loop) {
-  loop->dump();
   if (isCanonicalLoop(loop)) {
     auto [init, name] =
         extractSingleForInit(llvm::dyn_cast<clang::DeclStmt>(loop->getInit()));

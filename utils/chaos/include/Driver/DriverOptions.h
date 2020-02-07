@@ -30,6 +30,13 @@ struct DriverOptions {
   llvm::cl::opt<std::string> TargetTriple{
       "triple", llvm::cl::desc("Target triple"), llvm::cl::value_desc("triple"),
       llvm::cl::Optional, llvm::cl::init(llvm::sys::getProcessTriple())};
+  llvm::cl::opt<bool> FrontendOnly{"frontend-only",
+                                   llvm::cl::desc("Only run the frontend")};
+  llvm::cl::opt<bool> UseMlir{
+      "use-mlir",
+      llvm::cl::desc("Use MLIR dialect as intermediate representation")};
+  llvm::cl::opt<bool> DumpMlir{"dump-mlir",
+                               llvm::cl::desc("Print MLIR to stdout")};
 };
 } // namespace chaos
 
