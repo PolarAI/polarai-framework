@@ -14,13 +14,16 @@
 #include "CXX/CXXFrontend.h"
 #include <Frontend/Frontend.h>
 
-namespace chaos {
-std::vector<std::string> Frontend::run(const std::vector<std::string>& args) {
-  CXXFrontend cxxFrontend;
+#include <utility>
 
-  cxxFrontend.run(args);
+namespace chaos {
+std::vector<std::string> Frontend::run(const std::string& fileName) {
+  mCXXFrontend->run(fileName);
 
   std::vector<std::string> resultFiles;
   return resultFiles;
 }
+Frontend::Frontend(std::shared_ptr<DriverOptions> opts)
+    : mOptions(std::move(opts)),
+      mCXXFrontend(std::make_unique<CXXFrontend>(mOptions)) {}
 } // namespace chaos

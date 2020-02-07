@@ -12,8 +12,12 @@
 //===----------------------------------------------------------------------===//
 
 #include "CXXFrontend.h"
+
+#include <Driver/DriverOptions.h>
+
+#include <clang/Driver/Compilation.h>
+#include <clang/Driver/Driver.h>
 #include <clang/Frontend/FrontendActions.h>
-#include <clang/Frontend/TextDiagnosticPrinter.h>
 #include <clang/FrontendTool/Utils.h>
 #include <llvm/Option/Option.h>
 #include <llvm/Support/TargetSelect.h>
@@ -21,43 +25,76 @@
 #include "mlir/MLIRGen.h"
 
 namespace chaos {
-chaos::CXXFrontend::CXXFrontend()
-    : mCompilerInstance(new clang::CompilerInstance()) {
+chaos::CXXFrontend::CXXFrontend(std::shared_ptr<DriverOptions> opts)
+    : mOptions(std::move(opts)), mDiagnosticID(new clang::DiagnosticIDs()),
+      mDiagnosticOpts(new clang::DiagnosticOptions()),
+      mDiagnosticPrinter(new clang::TextDiagnosticPrinter(
+          llvm::errs(), mDiagnosticOpts.get())),
+      mDiagnosticsEngine(new clang::DiagnosticsEngine(
+          mDiagnosticID, mDiagnosticOpts.get(), mDiagnosticPrinter)),
+      mCompilerInstance(new clang::CompilerInstance()) {
+  mDiagnosticOpts->ShowPresumedLoc = true;
+
   llvm::InitializeAllTargets();
   llvm::InitializeNativeTargetAsmPrinter();
   llvm::InitializeNativeTargetAsmParser();
 }
-void CXXFrontend::run(const std::vector<std::string>& args) {
-  std::unique_ptr<clang::CompilerInvocation> CI(new clang::CompilerInvocation);
+void CXXFrontend::run(const std::string& fileName) {
+  auto compilerInvocation = std::make_unique<clang::CompilerInvocation>();
 
-  llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> DiagID(
-      new clang::DiagnosticIDs());
-  llvm::IntrusiveRefCntPtr<clang::DiagnosticOptions> DiagOpts(
-      new clang::DiagnosticOptions());
-  DiagOpts->ShowPresumedLoc = true;
-  auto* DiagsPrinter =
-      new clang::TextDiagnosticPrinter(llvm::errs(), &*DiagOpts);
-  llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> Diags(
-      new clang::DiagnosticsEngine(DiagID, &*DiagOpts, DiagsPrinter));
-
+  auto fullOpts = getCXXFlags(fileName);
   llvm::SmallVector<const char*, 16> argsRef;
-  for (auto& arg : args) {
-    argsRef.push_back(arg.c_str());
+  for (auto& opt : fullOpts) {
+    argsRef.push_back(opt.data());
   }
 
-  clang::CompilerInvocation::CreateFromArgs(*CI, argsRef, *Diags);
+  clang::CompilerInvocation::CreateFromArgs(*compilerInvocation, argsRef,
+                                            *mDiagnosticsEngine);
 
   mCompilerInstance->createDiagnostics();
   if (!mCompilerInstance->hasDiagnostics())
     return;
 
-  mCompilerInstance->setInvocation(std::move(CI));
+  mCompilerInstance->setInvocation(std::move(compilerInvocation));
 
   std::unique_ptr<MLIRGen> Act(new MLIRGen());
-  std::unique_ptr<clang::ASTFrontendAction> print(new clang::ASTDumpAction());
   if (!mCompilerInstance->ExecuteAction(*Act)) {
     llvm::errs() << "Frontend Action failed\n";
     return;
   }
+}
+std::vector<std::string> CXXFrontend::getCXXFlags(const std::string& fileName) {
+  // fixme get actual clang path
+  std::string path = "/opt/llvm10/bin/clang";
+
+  llvm::Triple triple(mOptions->TargetTriple.getValue());
+
+  clang::driver::Driver driver(path, triple.str(), *mDiagnosticsEngine);
+  driver.setTitle("chaos");
+  driver.setCheckInputsExist(false);
+
+  // fixme output path
+  llvm::SmallVector<const char*, 4> allArgs{"-fsyntax-only", fileName.data()};
+
+#ifdef __APPLE__
+  allArgs.push_back("-isysroot");
+  allArgs.push_back("/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk");
+#endif
+
+  std::unique_ptr<clang::driver::Compilation> clang(
+      driver.BuildCompilation(allArgs));
+
+  const clang::driver::JobList& jobs = clang->getJobs();
+
+  const clang::driver::Command& command =
+      llvm::cast<clang::driver::Command>(*jobs.begin());
+
+  std::vector<std::string> res;
+  auto args = command.getArguments();
+  for (const auto* arg : args) {
+    res.emplace_back(arg);
+  }
+
+  return res;
 }
 } // namespace chaos

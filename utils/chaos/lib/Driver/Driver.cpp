@@ -11,23 +11,24 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "clang/Driver/Driver.h"
-#include "clang/Basic/DiagnosticOptions.h"
-#include "clang/Driver/Compilation.h"
-#include "clang/Driver/Job.h"
-#include "clang/Frontend/FrontendDiagnostic.h"
 #include <Driver/Driver.h>
+#include <Driver/DriverOptions.h>
 #include <Frontend/Frontend.h>
 #include <Target/ObjectEmitter.h>
 #include <Transform/IRTransformer.h>
-#include <array>
+
+#include <clang/Basic/DiagnosticOptions.h>
+#include <clang/Driver/Compilation.h>
+#include <clang/Driver/Driver.h>
+#include <clang/Driver/Job.h>
+#include <clang/Frontend/FrontendDiagnostic.h>
 #include <clang/Frontend/TextDiagnosticPrinter.h>
+#include <llvm/Support/CommandLine.h>
+
+#include <array>
 #include <cstdio>
 #include <iostream>
-#include <llvm/Support/CommandLine.h>
 #include <memory>
-
-static int kBinaryAddr;
 
 namespace chaos {
 
@@ -45,18 +46,15 @@ static bool hasEnding(std::string const& fullString,
 
 void Driver::run(int argc, char** argv) {
   cl::ResetCommandLineParser();
-  cl::opt<std::string> OutputFilename("o", cl::desc("Specify output filename"),
-                                      cl::value_desc("filename"));
-  cl::list<std::string> InputFilenames(cl::Positional, cl::desc("<input file>"),
-                                       cl::Required, cl::OneOrMore);
+  auto opts = std::make_shared<DriverOptions>();
   cl::ParseCommandLineOptions(argc, argv);
 
   std::vector<std::string> cppInput;
   std::vector<std::string> objectFiles;
-  std::string outputFile = OutputFilename.getValue();
+  std::string outputFile = opts->OutputFilename.getValue();
 
   // todo libclang
-  for (auto& inp : InputFilenames) {
+  for (auto& inp : opts->InputFilenames) {
     if (hasEnding(inp, ".cpp")) {
       cppInput.push_back(inp);
     } else if (hasEnding(inp, ".o")) {
@@ -66,7 +64,7 @@ void Driver::run(int argc, char** argv) {
 
   std::vector<std::string> rawLLVMIR;
 
-  Frontend frontend;
+  Frontend frontend(opts);
 
   size_t idx = 0;
   for (auto& cpp : cppInput) {
@@ -79,7 +77,7 @@ void Driver::run(int argc, char** argv) {
     cmd += "-o " + tmp + " " + cpp;
     rawLLVMIR.push_back(tmp);
     std::cerr << exec(cmd);
-    frontend.run(cxxFlags);
+    frontend.run(cpp);
   }
 
   std::vector<std::string> optimizedBitcode;
@@ -102,7 +100,7 @@ void Driver::run(int argc, char** argv) {
   auto tmpObjects = emitter.emitObject(tmpObjectFile);
   objectFiles.insert(objectFiles.end(), tmpObjects.begin(), tmpObjects.end());
 
-  std::string linkCmd = "clang++ -o " + OutputFilename.getValue() + " ";
+  std::string linkCmd = "clang++ -o " + opts->OutputFilename.getValue() + " ";
   for (auto& o : objectFiles) {
     linkCmd += o + " ";
   }
@@ -161,7 +159,9 @@ Driver::getCXXFlags(ArrayRef<const char*> externalArgs) {
     res.emplace_back(arg);
   }
 
-  delete diagClient;
+  // fixme destructor crash
+
+  //  delete diagClient;
 
   return res;
 }

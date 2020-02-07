@@ -14,15 +14,22 @@
 #ifndef ATHENA_FRONTEND_H
 #define ATHENA_FRONTEND_H
 
+#include <Driver/DriverOptions.h>
 #include <Frontend/export.h>
+
 #include <string>
-#include <string_view>
 #include <vector>
 
 namespace chaos {
+class CXXFrontend;
 class CHAOS_FRONTEND_EXPORT Frontend {
+private:
+  std::shared_ptr<DriverOptions> mOptions;
+  std::shared_ptr<CXXFrontend> mCXXFrontend;
+
 public:
-  std::vector<std::string> run(const std::vector<std::string>& args);
+  Frontend(std::shared_ptr<DriverOptions> opts);
+  std::vector<std::string> run(const std::string& fileName);
 };
 } // namespace chaos
 

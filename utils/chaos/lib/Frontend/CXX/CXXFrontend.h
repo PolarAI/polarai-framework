@@ -13,18 +13,29 @@
 #ifndef ATHENA_CXXFRONTEND_H
 #define ATHENA_CXXFRONTEND_H
 
-#include "clang/Frontend/CompilerInstance.h"
+#include <Driver/DriverOptions.h>
+
+#include <clang/Frontend/CompilerInstance.h>
+#include <clang/Frontend/TextDiagnosticPrinter.h>
 #include <llvm/Option/Option.h>
 
 namespace chaos {
 class CXXFrontend {
 private:
+  std::shared_ptr<DriverOptions> mOptions;
+  llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> mDiagnosticID;
+  llvm::IntrusiveRefCntPtr<clang::DiagnosticOptions> mDiagnosticOpts;
+  // fixme destructor crash
+  clang::TextDiagnosticPrinter* mDiagnosticPrinter;
+  llvm::IntrusiveRefCntPtr<clang::DiagnosticsEngine> mDiagnosticsEngine;
   std::unique_ptr<clang::CompilerInstance> mCompilerInstance;
 
-public:
-  CXXFrontend();
+  std::vector<std::string> getCXXFlags(const std::string& fileName);
 
-  void run(const std::vector<std::string>& args);
+public:
+  CXXFrontend(std::shared_ptr<DriverOptions> opts);
+
+  void run(const std::string& fileName);
 };
 } // namespace chaos
 #endif // ATHENA_CXXFRONTEND_H
