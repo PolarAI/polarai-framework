@@ -55,6 +55,7 @@ void MLIRASTConsumer::visit(clang::Decl* decl) {
 
   dispatch(clang::TypedefDecl, decl);
   dispatch(clang::VarDecl, decl);
+  dispatch(clang::CXXRecordDecl, decl);
 
 #undef dispatch
 
@@ -75,6 +76,26 @@ void MLIRASTConsumer::visit(clang::FunctionDecl* functionDecl) {
 
   auto mlirType = mTypeConverter.convert(*funcType);
 
+  bool isCXXMethod = false;
+  if (functionDecl->isCXXClassMember()) {
+    isCXXMethod = true;
+    auto methodDecl = llvm::dyn_cast<clang::CXXMethodDecl>(functionDecl);
+    // todo factor out
+    llvm::SmallVector<mlir::Type, 3> types;
+    for (auto* field : methodDecl->getParent()->fields()) {
+      types.push_back(mTypeConverter.convert(field->getType()));
+    }
+
+    auto structType = clang::StructType::get(types);
+    auto structPtr = clang::RawPointerType::get(structType);
+
+    llvm::SmallVector<mlir::Type, 3> newArgs;
+    newArgs.push_back(structPtr);
+    newArgs.append(mlirType.getInputs().begin(), mlirType.getInputs().end());
+    mlirType = mlir::FunctionType::get(newArgs, mlirType.getResults(),
+                                       mBuilder.getContext());
+  }
+
   llvm::SmallVector<mlir::NamedAttribute, 3> attrs;
   auto funcOp = mBuilder.create<mlir::FuncOp>(mBuilder.getUnknownLoc(),
                                               mangledName, mlirType, attrs);
@@ -87,13 +108,18 @@ void MLIRASTConsumer::visit(clang::FunctionDecl* functionDecl) {
   if (functionDecl->hasBody()) {
     mBuilder.setInsertionPointToStart(funcOp.addEntryBlock());
     mLocalVarScope.emplace(mSymbolTable);
-    for (size_t idx = 0; idx < funcOp.getNumArguments(); idx++) {
+    for (size_t idx = 0; idx < funcOp.getNumArguments() - isCXXMethod; idx++) {
       mSymbolTable.insert(functionDecl->getParamDecl(idx)->getName(),
-                          funcOp.getArgument(idx));
+                          funcOp.getArgument(idx + isCXXMethod));
+    }
+    if (isCXXMethod) {
+      mSymbolTable.insert("this", funcOp.getArgument(0));
     }
     visit(functionDecl->getBody());
     mLocalVarScope.pop();
   }
+
+  // fixme build default cxx member bodies
 
   // fixme most of the time functions with void return type do not have
   //       return statement in the end. However, it is not a rule.
@@ -183,13 +209,30 @@ mlir::Value MLIRASTConsumer::getConstant(clang::APValue* value) {
 }
 
 void MLIRASTConsumer::visit(clang::VarDecl* decl) {
-  if (auto val = decl->evaluateValue()) {
-    auto mlirVal = getConstant(val);
-    mSymbolTable.insert(decl->getName(), mlirVal);
+  mlir::Value finalValue;
+  if (decl->getType()->isBuiltinType()) {
+    finalValue = mBuilder.create<mlir::AllocOp>(
+        loc(decl->getLocation()),
+        mlir::MemRefType::get({1}, mTypeConverter.convert(decl->getType())));
+    if (auto val = decl->evaluateValue()) {
+      auto mlirVal = getConstant(val);
+      mBuilder.create<clang::StoreOp>(loc(decl->getLocation()), mlirVal,
+                                      finalValue);
+    } else if (auto init = decl->getInit()) {
+      auto mlirInit = evaluate(init);
+      mBuilder.create<clang::StoreOp>(loc(decl->getLocation()), mlirInit,
+                                      finalValue);
+    }
   } else {
-    auto init = evaluate(decl->getInit());
-    mSymbolTable.insert(decl->getName(), init);
+    auto unit =
+        mBuilder.create<mlir::ConstantIndexOp>(mBuilder.getUnknownLoc(), 1);
+    auto pointeeType = mTypeConverter.convert(decl->getType());
+    auto ptrType = clang::RawPointerType::get(pointeeType);
+    finalValue = mBuilder.create<clang::AllocaOp>(loc(decl->getLocation()),
+                                                  unit, ptrType);
+    // todo initialize
   }
+  mSymbolTable.insert(decl->getName(), finalValue);
 }
 void MLIRASTConsumer::visit(clang::CompoundAssignOperator* stmt) {
   auto lhs = evaluate(stmt->getLHS());
@@ -241,6 +284,8 @@ mlir::Value MLIRASTConsumer::evaluate(clang::Expr* expr) {
   dispatch(clang::DeclRefExpr, expr);
   dispatch(clang::CXXNewExpr, expr);
   dispatch(clang::CXXDeleteExpr, expr);
+  dispatch(clang::CXXConstructExpr, expr);
+  dispatch(clang::MemberExpr, expr);
 
 #undef dispatch
 
@@ -252,6 +297,17 @@ mlir::Value MLIRASTConsumer::evaluate(clang::Expr* expr) {
 mlir::Value MLIRASTConsumer::evaluate(clang::BinaryOperator* expr) {
   auto lhs = evaluate(expr->getLHS());
   auto rhs = evaluate(expr->getRHS());
+
+  if (expr->getOpcode() == clang::BinaryOperatorKind::BO_Assign) {
+    if (lhs.getType().isa<mlir::MemRefType>()) {
+      mBuilder.create<mlir::StoreOp>(loc(expr->getOperatorLoc()), rhs, lhs);
+    } else if (lhs.getType().isa<clang::RawPointerType>()) {
+      mBuilder.create<clang::StoreOp>(loc(expr->getOperatorLoc()), lhs, rhs);
+    } else {
+      llvm_unreachable("Unable to store value to non-pointer lhs");
+    }
+    return rhs;
+  }
 
   if (lhs->getType() != rhs.getType()) {
     if (lhs->getType().isa<mlir::IndexType>()) {
@@ -365,7 +421,7 @@ mlir::Value MLIRASTConsumer::evaluate(clang::CallExpr* expr) {
   expr->dump();
   llvm_unreachable("Unsupported call expr");
 }
-std::string MLIRASTConsumer::mangleName(clang::FunctionDecl* type) {
+std::string MLIRASTConsumer::mangleName(clang::NamedDecl* type) {
   std::string mangledName;
   if (mMangleContext->shouldMangleDeclName(type)) {
     llvm::raw_string_ostream mangledStream(mangledName);
@@ -485,5 +541,53 @@ MLIRASTConsumer::extractSingleForInit(clang::DeclStmt* decl) {
 mlir::Value MLIRASTConsumer::extractForUpperBound(clang::BinaryOperator* expr) {
   // fixme check operator kind
   return evaluate(expr->getRHS());
+}
+void MLIRASTConsumer::visit(clang::CXXRecordDecl* decl) {
+  llvm::SmallVector<mlir::Type, 3> types;
+  for (auto* field : decl->fields()) {
+    types.push_back(mTypeConverter.convert(field->getType()));
+  }
+
+  auto structType = clang::StructType::get(types);
+
+  auto mangledName = mTypeConverter.mangleTypeName(
+      *decl->getTypeForDecl()->getAsStructureType());
+  mTypeConverter.registerType(mangledName, structType);
+
+  auto checkPoint = mBuilder.saveInsertionPoint();
+  mBuilder.setInsertionPointToStart(mMLIRModule.get().getBody());
+  mBuilder.create<clang::StructDeclOp>(loc(decl->getLocation()), mangledName,
+                                       structType);
+  mBuilder.restoreInsertionPoint(checkPoint);
+
+  for (auto* method : decl->methods()) {
+    visit(method);
+  }
+}
+mlir::Value MLIRASTConsumer::evaluate(clang::CXXConstructExpr* expr) {
+  auto constructorName = mangleName(expr->getConstructor());
+  if (mFunctionsTable.count(constructorName) > 0) {
+    auto callee = mFunctionsTable[constructorName];
+    llvm::SmallVector<mlir::Value, 3> args;
+    for (size_t idx = 0; idx < expr->getNumArgs(); idx++) {
+      args.push_back(evaluate(expr->getArg(idx)));
+    }
+    auto call =
+        mBuilder.create<mlir::CallOp>(loc(expr->getLocation()), callee, args);
+    if (call.getNumResults() == 1) {
+      return call.getResult(0);
+    } else {
+      return mlir::Value();
+    }
+  }
+  llvm::errs() << constructorName << "\n";
+  llvm_unreachable("Constructor not found");
+}
+mlir::Value MLIRASTConsumer::evaluate(clang::MemberExpr* expr) {
+  mlir::Value target = evaluate(expr->getBase());
+  auto field = llvm::dyn_cast_or_null<clang::FieldDecl>(expr->getMemberDecl());
+  auto gep = mBuilder.create<clang::GepOp>(mBuilder.getUnknownLoc(), target,
+                                           field->getFieldIndex());
+  return gep;
 }
 } // namespace chaos

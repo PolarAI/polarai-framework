@@ -15,12 +15,14 @@
 
 #include <Driver/DriverOptions.h>
 
+#include <Dialects/ClangDialect.h>
 #include <clang/Driver/Compilation.h>
 #include <clang/Driver/Driver.h>
 #include <clang/Frontend/FrontendActions.h>
 #include <clang/FrontendTool/Utils.h>
 #include <llvm/Option/Option.h>
 #include <llvm/Support/TargetSelect.h>
+#include <mlir/IR/Dialect.h>
 
 #include "mlir/MLIRGen.h"
 
@@ -38,6 +40,7 @@ chaos::CXXFrontend::CXXFrontend(std::shared_ptr<DriverOptions> opts)
   llvm::InitializeAllTargets();
   llvm::InitializeNativeTargetAsmPrinter();
   llvm::InitializeNativeTargetAsmParser();
+  mlir::registerDialect<clang::ClangDialect>();
 }
 void CXXFrontend::run(const std::string& fileName) {
   auto compilerInvocation = std::make_unique<clang::CompilerInvocation>();

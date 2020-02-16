@@ -15,6 +15,8 @@
 #define ATHENA_MLIRASTCONSUMER_H
 
 #include "TypeConverter.h"
+#include <Dialects/ClangDialect.h>
+
 #include <clang/AST/ASTConsumer.h>
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Mangle.h>
@@ -22,8 +24,10 @@
 #include <llvm/ADT/ScopedHashTable.h>
 #include <llvm/ADT/StringRef.h>
 #include <mlir/IR/Builders.h>
+#include <mlir/IR/Dialect.h>
 #include <mlir/IR/Function.h>
 #include <mlir/IR/Module.h>
+
 #include <unordered_map>
 
 namespace chaos {
@@ -49,7 +53,7 @@ protected:
 
   mlir::Location loc(clang::SourceLocation location);
 
-  std::string mangleName(clang::FunctionDecl* type);
+  std::string mangleName(clang::NamedDecl* type);
 
   bool isCanonicalLoop(clang::ForStmt* stmt);
 
@@ -67,6 +71,7 @@ protected:
   void visit(clang::FunctionDecl* functionDecl);
   void visit(clang::TypedefDecl* decl);
   void visit(clang::VarDecl* decl);
+  void visit(clang::CXXRecordDecl* decl);
   // TODO support for (https://clang.llvm.org/doxygen/classclang_1_1Decl.html):
   //   1. AccessSpecDecl
   //   2. BlockDecl
@@ -155,15 +160,17 @@ protected:
   mlir::Value evaluate(clang::CallExpr* expr);
   mlir::Value evaluate(clang::CXXNewExpr* expr);
   mlir::Value evaluate(clang::CXXDeleteExpr* expr);
+  mlir::Value evaluate(clang::CXXConstructExpr* expr);
+  mlir::Value evaluate(clang::MemberExpr* expr);
   // TODO support for https://clang.llvm.org/doxygen/classclang_1_1Expr.html
 
 public:
   MLIRASTConsumer(clang::ASTContext& ctx, mlir::OwningModuleRef& module)
       : mContext(ctx), mMLIRModule(module), mBuilder(mMLIRModule.get()),
-        mTypeConverter(mMLIRModule->getContext()) {
-    mMangleContext = std::unique_ptr<clang::MangleContext>(
-        clang::ItaniumMangleContext::create(mContext,
-                                            mContext.getDiagnostics()));
+        mMangleContext(std::unique_ptr<clang::MangleContext>(
+            clang::ItaniumMangleContext::create(mContext,
+                                                mContext.getDiagnostics()))),
+        mTypeConverter(mMLIRModule->getContext(), *mMangleContext) {
     mBuilder.setInsertionPointToStart(mMLIRModule->getBody());
   }
   void HandleTranslationUnit(clang::ASTContext& Ctx) override;

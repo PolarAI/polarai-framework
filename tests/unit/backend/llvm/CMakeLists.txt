@@ -1,7 +1,16 @@
 file(GLOB CORE_TEST_SRC "*.cpp")
 
 find_package(LLVM CONFIG)
-llvm_map_components_to_libnames(llvm_libs core irreader support transformutils passes codegen orcjit x86asmparser x86codegen lto)
+llvm_map_components_to_libnames(llvm_libs
+        core
+        irreader
+        support
+        transformutils
+        passes
+        codegen
+        orcjit
+        AllTargetsCodeGens AllTargetsAsmPrinters AllTargetsAsmParsers AllTargetsDescs AllTargetsInfos
+        lto)
 
 add_athena_executable(TestUnitBackendLLVMRunnable ${CORE_TEST_SRC})
 target_link_libraries(TestUnitBackendLLVMRunnable PRIVATE

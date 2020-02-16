@@ -12,8 +12,10 @@
 //===----------------------------------------------------------------------===//
 
 #include "TypeConverter.h"
-#include "clang/AST/PrettyPrinter.h"
-#include "clang/Basic/LangOptions.h"
+#include <Dialects/ClangDialect.h>
+
+#include <clang/AST/PrettyPrinter.h>
+#include <clang/Basic/LangOptions.h>
 #include <mlir/Dialect/StandardOps/Ops.h>
 
 namespace chaos {
@@ -46,13 +48,29 @@ chaos::TypeConverter::convert(const clang::FunctionType& type) {
 mlir::Type chaos::TypeConverter::convert(const clang::QualType& type) {
   mlir::Type resType;
 
-  if (type->isAnyPointerType()) {
+  if (type->isRecordType()) {
+    auto name = mangleTypeName(*type->getAsStructureType());
+    if (mRegisteredTypes.count(name)) {
+      return mRegisteredTypes[name];
+    }
+    llvm::errs() << name << "\n";
+    llvm_unreachable("Typename not found");
+  } else if (type->isAnyPointerType()) {
     auto pointerTy = type->getAs<clang::PointerType>();
     auto pointee = convert(pointerTy->getPointeeType());
     if (pointee.isa<mlir::NoneType>()) { // workaround for "void*"
-      pointee = mBuilder.getIntegerType(64);
+      resType = clang::RawPointerType::get(pointee);
+    } else {
+      resType = mlir::MemRefType::get({-1}, pointee);
     }
-    resType = mlir::MemRefType::get({-1}, pointee);
+  } else if (type->isLValueReferenceType()) {
+    auto refType = type->getAs<clang::LValueReferenceType>();
+    auto pointee = convert(refType->getPointeeType());
+    resType = clang::RawPointerType::get(pointee);
+  } else if (type->isRValueReferenceType()) {
+    auto refType = type->getAs<clang::RValueReferenceType>();
+    auto pointee = convert(refType->getPointeeType());
+    resType = clang::RawPointerType::get(pointee);
   } else if (type->isBuiltinType()) {
     return convert(*type->getAs<clang::BuiltinType>());
   } else {
@@ -61,7 +79,7 @@ mlir::Type chaos::TypeConverter::convert(const clang::QualType& type) {
   }
 
   return resType;
-}
+} // namespace chaos
 mlir::Type chaos::TypeConverter::convert(const clang::BuiltinType& type) {
   mlir::Type resType;
 
@@ -93,5 +111,22 @@ mlir::Type chaos::TypeConverter::convert(const clang::BuiltinType& type) {
 mlir::Type TypeConverter::getAsPointer(const clang::QualType& type) {
   auto mlirType = convert(type);
   return mlir::MemRefType::get({-1}, mlirType);
+}
+void TypeConverter::registerType(llvm::StringRef name, mlir::Type type) {
+  mRegisteredTypes.insert({name.str(), type});
+}
+std::string TypeConverter::mangleTypeName(const clang::RecordType& type) {
+  std::string name;
+  llvm::raw_string_ostream outStream(name);
+  mMangleContext.mangleCXXName(type.getDecl(), outStream);
+  outStream.flush();
+  return name;
+}
+std::string TypeConverter::mangleTypeName(const clang::QualType& type) {
+  std::string name;
+  llvm::raw_string_ostream outStream(name);
+  mMangleContext.mangleTypeName(type, outStream);
+  outStream.flush();
+  return name;
 }
 } // namespace chaos
