@@ -35,7 +35,6 @@ add_athena_library(${ATH_BACKEND_LLVM} STATIC
         LLVMExecutor.cpp
         LLVMGenerator.cpp
         jit/AthenaJIT.cpp
-        jit/MergeLayer.cpp
         LLVMTrivialAllocator.cpp
         GraphPartitionPlanner.cpp
         utils.cpp
@@ -52,7 +51,11 @@ llvm_map_components_to_libnames(llvm_libs
         passes
         codegen
         orcjit
-        AllTargetsCodeGens AllTargetsAsmPrinters AllTargetsAsmParsers AllTargetsDescs AllTargetsInfos
+        AsmPrinter
+        AllTargetsCodeGens
+        AllTargetsAsmParsers
+        AllTargetsDescs
+        AllTargetsInfos
         lto)
 
 add_dependencies(${ATH_BACKEND_LLVM} ${ATH_RT_LLVM_CPU})
