@@ -11,7 +11,6 @@ function(add_athena_integration_test)
             Threads::Threads
             athena
             AthenaDep::googletest-gtest
-            AthenaDep::Boost
             AthenaDep::yaml-cpp
             )
 

@@ -10,13 +10,6 @@ AthenaAddDependency(
         GIT_TAG yaml-cpp-0.6.2
 )
 
-# Boost filesystem is used to process paths in integration tests
-AthenaAddDependency(
-        TARGET_NAME Boost
-        PACKAGE Boost
-        COMPONENTS filesystem
-)
-
 # Google test is the primary testing framework for the project
 AthenaAddDependency(
         TARGET_NAME googletest

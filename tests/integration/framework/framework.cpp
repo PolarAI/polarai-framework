@@ -11,14 +11,12 @@
  * the License.
  */
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <cstdlib>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <options.h>
 #include <yaml-cpp/yaml.h>
-
-using path = boost::filesystem::path;
 
 bool isCi() {
   return std::getenv("ATHENA_TEST_ENVIRONMENT") &&
@@ -109,7 +107,7 @@ void parseConfig(std::string configFile) {
 }
 
 int main(int argc, char** argv) {
-  std::string exeName = path(argv[0]).filename().string();
+  std::string exeName = std::path(argv[0]).filename().string();
   parseConfig(exeName + ".yml");
 
   ::testing::InitGoogleTest(&argc, argv);
