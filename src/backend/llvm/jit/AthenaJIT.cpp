@@ -38,7 +38,11 @@ namespace athena::backend::llvm {
 AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
                      ::llvm::DataLayout&& DL)
     : mDataLayout(DL), mMangle(mExecutionSession, mDataLayout),
+#if (LLVM_VERSION_MAJOR == 11)
+      mMainJD(mExecutionSession.createBareJITDylib("<main>")),
+#else
       mMainJD(mExecutionSession.createJITDylib("<main>")),
+#endif
       mContext(std::make_unique<::llvm::LLVMContext>()) {
   ::llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
 
@@ -88,7 +92,9 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
 std::unique_ptr<AthenaJIT> AthenaJIT::create() {
   LLVMInitializeNativeTarget();
   LLVMInitializeNativeAsmPrinter();
+#if (LLVM_VERSION_MAJOR < 11)
   LLVMInitializeNativeAsmParser();
+#endif
 
   auto JTMB = ::llvm::orc::JITTargetMachineBuilder::detectHost();
 
@@ -165,7 +171,9 @@ AthenaJIT::optimizeModule(::llvm::orc::ThreadSafeModule TSM,
   mDefaultIPOPassManager.addPass(::llvm::PartialInlinerPass());
 
   TSM.withModuleDo([&](::llvm::Module& module) {
+#if (LLVM_VERSION_MAJOR < 11)
     mModuleOptimizationPassManager.run(module, moduleAnalysisManager);
+#endif
     mDefaultIPOPassManager.run(module, moduleAnalysisManager);
 
     for (auto& func : module) {

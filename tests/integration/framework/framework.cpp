@@ -11,7 +11,14 @@
  * the License.
  */
 
+#if __cplusplus >= 201703L && defined(__has_include) && __has_include(<filesystem>)
 #include <filesystem>
+namespace filesystem = std::filesystem;
+#else
+#include <experimental/filesystem>
+namespace filesystem = std::experimental::filesystem;
+#endif
+
 #include <cstdlib>
 #include <gtest/gtest.h>
 #include <iostream>
@@ -83,7 +90,7 @@ void parseCommandQueue(YAML::Node& commands) {
   }
 }
 
-void parseConfig(std::string configFile) {
+void parseConfig(const std::string& configFile) {
   YAML::Node config = YAML::LoadFile(configFile);
 
   if (config["commands"]["common"]) {
@@ -107,7 +114,7 @@ void parseConfig(std::string configFile) {
 }
 
 int main(int argc, char** argv) {
-  std::string exeName = std::path(argv[0]).filename().string();
+  std::string exeName = filesystem::path(argv[0]).filename().string();
   parseConfig(exeName + ".yml");
 
   ::testing::InitGoogleTest(&argc, argv);

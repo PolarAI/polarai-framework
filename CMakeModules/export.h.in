@@ -25,7 +25,7 @@
         #ifdef WIN32
         #define @export_name@_EXPORT __declspec(dllimport)
         #else
-        #define @export_name@_EXPORT __attribute__ ((visibility("default"), weak))
+        #define @export_name@_EXPORT __attribute__ ((visibility("default")))
         #endif
     #else
         #ifdef WIN32

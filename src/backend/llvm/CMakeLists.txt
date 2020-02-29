@@ -53,7 +53,7 @@ llvm_map_components_to_libnames(llvm_libs
         orcjit
         AsmPrinter
         AllTargetsCodeGens
-        AllTargetsAsmParsers
+        AsmParser
         AllTargetsDescs
         AllTargetsInfos
         lto)
