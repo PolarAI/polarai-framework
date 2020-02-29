@@ -42,7 +42,6 @@ protected:
   void SetUp() override {
     ::llvm::InitializeNativeTarget();
     LLVMInitializeNativeAsmPrinter();
-    LLVMInitializeNativeAsmParser();
     jitCompiler = AthenaJIT::create();
   }
 };
