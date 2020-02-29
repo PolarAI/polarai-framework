@@ -6,3 +6,5 @@ target_include_directories(IntegrationTestFramework PUBLIC ${CMAKE_CURRENT_BINAR
 target_link_libraries(IntegrationTestFramework PUBLIC
         AthenaDep::yaml-cpp
         AthenaDep::googletest-gtest)
+target_link_libraries(IntegrationTestFramework PUBLIC
+        $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:stdc++fs>)
