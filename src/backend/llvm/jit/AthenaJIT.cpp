@@ -92,9 +92,6 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
 std::unique_ptr<AthenaJIT> AthenaJIT::create() {
   LLVMInitializeNativeTarget();
   LLVMInitializeNativeAsmPrinter();
-#if (LLVM_VERSION_MAJOR < 11)
-  LLVMInitializeNativeAsmParser();
-#endif
 
   auto JTMB = ::llvm::orc::JITTargetMachineBuilder::detectHost();
 
