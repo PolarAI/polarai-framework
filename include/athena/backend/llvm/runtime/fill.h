@@ -15,10 +15,11 @@
 #define ATHENA_FILL_H
 
 #include <athena/backend/llvm/runtime/Device.h>
-#include <athena/core/Allocator.h>
+#include <athena/backend/llvm/BackendAllocator.h>
 #include <athena/core/inner/Tensor.h>
 
 template <typename T>
-extern void fill(athena::backend::llvm::Device*, athena::core::Allocator*,
+extern void fill(athena::backend::llvm::Device*,
+                 athena::backend::llvm::BackendAllocator*,
                  athena::core::inner::Tensor* a, T value);
 #endif // ATHENA_FILL_H

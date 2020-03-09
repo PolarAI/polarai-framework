@@ -54,7 +54,7 @@ public:
     }
     offset += mAccessIdx.back();
 
-    auto elPtr = reinterpret_cast<T*>(mAllocator.getRAMPointer(mAccessTensor));
+    auto elPtr = reinterpret_cast<T*>(mAllocator.get(mAccessTensor));
 
     return *(elPtr + offset);
   }

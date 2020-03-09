@@ -12,7 +12,6 @@
  */
 
 #include <athena/backend/llvm/LLVMExecutor.h>
-#include <athena/backend/llvm/LLVMTrivialAllocator.h>
 #include <athena/core/GradientDescent.h>
 #include <athena/core/Graph.h>
 #include <athena/core/InputNode.h>
@@ -71,16 +70,13 @@ TEST(JIT, GEMM) {
   lossNode.after(cInp, 2);
 
   LLVMExecutor executor;
-  std::unique_ptr<Allocator> trivialAllocator =
-      std::make_unique<LLVMTrivialAllocator>();
-  executor.setAllocator(trivialAllocator);
   executor.setGraph(graph);
 
   // Act
   executor.evaluate();
 
   // Assert
-  auto accessor = outputNode.getAccessor<float>(*executor.getAllocator());
+  auto accessor = outputNode.getAccessor<float>(executor.getAllocator());
 
   EXPECT_FLOAT_EQ(*accessor[0][0], 18.0);
   EXPECT_FLOAT_EQ(*accessor[0][1], 18.0);

@@ -14,7 +14,6 @@
 #include <athena/backend/llvm/runtime/Device.h>
 #include <athena/backend/llvm/runtime/add.h>
 #include <athena/backend/llvm/runtime/fill.h>
-#include <athena/core/Allocator.h>
 #include <athena/core/inner/Tensor.h>
 
 using namespace athena::backend::llvm;
@@ -22,8 +21,8 @@ using namespace athena::core::inner;
 using namespace athena::core;
 
 template <typename T>
-void fill(Device*, Allocator* allocator, Tensor* a, T value) {
-  auto* memory = reinterpret_cast<T*>(allocator->getRAMPointer(*a));
+void fill(Device* device, BackendAllocator* allocator, Tensor* a, T value) {
+  auto* memory = allocator->get<T>(*a, *device);
 
   for (size_t i = 0; i < a->getShape().getTotalSize(); i++) {
     memory[i] = value;
@@ -31,9 +30,9 @@ void fill(Device*, Allocator* allocator, Tensor* a, T value) {
 }
 
 template void fill<float>(athena::backend::llvm::Device*,
-                          athena::core::Allocator*,
+                          BackendAllocator*,
                           athena::core::inner::Tensor* a, float value);
 
 template void fill<double>(athena::backend::llvm::Device*,
-                           athena::core::Allocator*,
+                           BackendAllocator*,
                            athena::core::inner::Tensor* a, double value);

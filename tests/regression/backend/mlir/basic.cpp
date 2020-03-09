@@ -12,7 +12,6 @@
  */
 
 #include <athena/backend/llvm/LLVMExecutor.h>
-#include <athena/backend/llvm/LLVMTrivialAllocator.h>
 #include <athena/backend/llvm/mlir/MLIRGenerator.h>
 #include <athena/core/GradientDescent.h>
 #include <athena/core/Graph.h>

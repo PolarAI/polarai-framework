@@ -14,6 +14,7 @@
 #define ATHENA_LLVMEXECUTOR_H
 
 #include <athena/backend/llvm/llvm_export.h>
+#include <athena/backend/llvm/BackendAllocator.h>
 #include <athena/core/Allocator.h>
 #include <athena/core/Executor.h>
 #include <athena/core/Traversal.h>
@@ -34,7 +35,7 @@ class LegacyRuntimeDriver;
 class ATH_BACKEND_LLVM_EXPORT LLVMExecutor : public athena::core::Executor {
 private:
   std::shared_ptr<AthenaJIT> mJITCompiler{nullptr};
-  std::unique_ptr<core::Allocator> mAllocator;
+  std::unique_ptr<BackendAllocator> mAllocator;
   std::shared_ptr<LegacyRuntimeDriver> mRuntimeDriver;
 
   template <typename T>
@@ -70,12 +71,12 @@ public:
    *
    * @return Associated Allocator
    */
-  std::unique_ptr<core::Allocator>& getAllocator();
+  core::Allocator& getAllocator();
   /**
    * Set Allocator to be used
    * @param allocator User Allocator
    */
-  void setAllocator(std::unique_ptr<core::Allocator>& allocator);
+  void setAllocator(std::unique_ptr<BackendAllocator>& allocator);
 };
 } // namespace athena::backend::llvm
 

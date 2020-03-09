@@ -12,7 +12,7 @@
  */
 
 #include <athena/backend/llvm/runtime/Device.h>
-#include <athena/core/Allocator.h>
+#include <athena/backend/llvm/BackendAllocator.h>
 #include <athena/core/inner/Tensor.h>
 
 using namespace athena::backend::llvm;
@@ -20,10 +20,10 @@ using namespace athena::core::inner;
 using namespace athena::core;
 
 template <typename T>
-void mse(Device*, Allocator* allocator, Tensor* a, Tensor* b, Tensor* c) {
-  auto* af = reinterpret_cast<T*>(allocator->getRAMPointer(*a));
-  auto* bf = reinterpret_cast<T*>(allocator->getRAMPointer(*b));
-  auto* cf = reinterpret_cast<T*>(allocator->getRAMPointer(*c));
+void mse(Device* device, BackendAllocator* allocator, Tensor* a, Tensor* b, Tensor* c) {
+  auto* af = allocator->get<T>(*a, *device);
+  auto* bf = allocator->get<T>(*b, *device);
+  auto* cf = allocator->get<T>(*c, *device);
 
   for (size_t i = 0; i < a->getShape().getTotalSize(); i++) {
     T part = af[i] + bf[i];
@@ -33,13 +33,13 @@ void mse(Device*, Allocator* allocator, Tensor* a, Tensor* b, Tensor* c) {
 }
 
 template void mse<float>(athena::backend::llvm::Device*,
-                         athena::core::Allocator*,
+                         BackendAllocator*,
                          athena::core::inner::Tensor* a,
                          athena::core::inner::Tensor* b,
                          athena::core::inner::Tensor* c);
 
 template void mse<double>(athena::backend::llvm::Device*,
-                          athena::core::Allocator*,
+                          BackendAllocator*,
                           athena::core::inner::Tensor* a,
                           athena::core::inner::Tensor* b,
                           athena::core::inner::Tensor* c);

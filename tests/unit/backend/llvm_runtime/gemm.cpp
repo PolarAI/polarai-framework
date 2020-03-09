@@ -11,9 +11,9 @@
  * the License.
  */
 
+#include "../../../testutils/TestAllocator.h"
 #include "common.h"
 
-#include <athena/backend/llvm/LLVMTrivialAllocator.h>
 #include <athena/backend/llvm/runtime/builtin.h>
 #include <athena/backend/llvm/runtime/structs.h>
 #include <athena/core/Context.h>
@@ -29,6 +29,7 @@ using namespace athena::core;
 // todo move to core
 template <typename T> DataType data_type_cast() {
   new FatalError(ATH_NOT_IMPLEMENTED, "Not implemented");
+  return DataType::UNDEFINED; // suppress GCC warning
 }
 
 template <> DataType data_type_cast<float>() { return DataType::FLOAT; }
@@ -45,21 +46,21 @@ TYPED_TEST(RuntimeTest, GEMMSimple) {
   Tensor b(data_type_cast<TypeParam>(), {2, 4}, ctx);
   Tensor c(data_type_cast<TypeParam>(), {4, 4}, ctx);
 
-  LLVMTrivialAllocator allocator;
+  TestAllocator allocator;
   allocator.allocate(a);
   allocator.allocate(b);
   allocator.allocate(c);
 
-  std::memcpy(reinterpret_cast<void*>(allocator.getRAMPointer(a)), matrix1,
+  std::memcpy(reinterpret_cast<void*>(allocator.get(a)), matrix1,
               8 * sizeof(TypeParam));
-  std::memcpy(reinterpret_cast<void*>(allocator.getRAMPointer(b)), matrix2,
+  std::memcpy(reinterpret_cast<void*>(allocator.get(b)), matrix2,
               8 * sizeof(TypeParam));
 
   GEMMOptions<TypeParam> opts{false, false, 1, 0};
 
   gemm<TypeParam>(nullptr, &allocator, &opts, &a, &b, &c);
 
-  auto* cRes = reinterpret_cast<TypeParam*>(allocator.getRAMPointer(c));
+  auto* cRes = reinterpret_cast<TypeParam*>(allocator.get(c));
 
   EXPECT_FLOAT_EQ(cRes[0], 2);
   EXPECT_FLOAT_EQ(cRes[1], 4);
@@ -88,21 +89,21 @@ TYPED_TEST(RuntimeTest, GEMMTransposeA) {
   Tensor b(data_type_cast<TypeParam>(), {2, 4}, ctx);
   Tensor c(data_type_cast<TypeParam>(), {4, 4}, ctx);
 
-  LLVMTrivialAllocator allocator;
+  TestAllocator allocator;
   allocator.allocate(a);
   allocator.allocate(b);
   allocator.allocate(c);
 
-  std::memcpy(reinterpret_cast<void*>(allocator.getRAMPointer(a)), matrix,
+  std::memcpy(reinterpret_cast<void*>(allocator.get(a)), matrix,
               8 * sizeof(TypeParam));
-  std::memcpy(reinterpret_cast<void*>(allocator.getRAMPointer(b)), matrix,
+  std::memcpy(reinterpret_cast<void*>(allocator.get(b)), matrix,
               8 * sizeof(TypeParam));
 
   GEMMOptions<TypeParam> opts{true, false, 1, 0};
 
   gemm<TypeParam>(nullptr, &allocator, &opts, &a, &b, &c);
 
-  auto* cRes = reinterpret_cast<TypeParam*>(allocator.getRAMPointer(c));
+  auto* cRes = reinterpret_cast<TypeParam*>(allocator.get(c));
 
   EXPECT_FLOAT_EQ(cRes[0], 2);
   EXPECT_FLOAT_EQ(cRes[1], 4);
@@ -131,21 +132,21 @@ TYPED_TEST(RuntimeTest, GEMMTransposeB) {
   Tensor b(data_type_cast<TypeParam>(), {4, 2}, ctx);
   Tensor c(data_type_cast<TypeParam>(), {4, 4}, ctx);
 
-  LLVMTrivialAllocator allocator;
+  TestAllocator allocator;
   allocator.allocate(a);
   allocator.allocate(b);
   allocator.allocate(c);
 
-  std::memcpy(reinterpret_cast<void*>(allocator.getRAMPointer(a)), matrix,
+  std::memcpy(reinterpret_cast<void*>(allocator.get(a)), matrix,
               8 * sizeof(TypeParam));
-  std::memcpy(reinterpret_cast<void*>(allocator.getRAMPointer(b)), matrix,
+  std::memcpy(reinterpret_cast<void*>(allocator.get(b)), matrix,
               8 * sizeof(TypeParam));
 
   GEMMOptions<TypeParam> opts{false, true, 1, 0};
 
   gemm<TypeParam>(nullptr, &allocator, &opts, &a, &b, &c);
 
-  auto* cRes = reinterpret_cast<TypeParam*>(allocator.getRAMPointer(c));
+  auto* cRes = reinterpret_cast<TypeParam*>(allocator.get(c));
 
   EXPECT_FLOAT_EQ(cRes[0], 2);
   EXPECT_FLOAT_EQ(cRes[1], 4);
@@ -175,21 +176,21 @@ TYPED_TEST(RuntimeTest, GEMMTransposeBoth) {
   Tensor b(data_type_cast<TypeParam>(), {4, 2}, ctx);
   Tensor c(data_type_cast<TypeParam>(), {4, 4}, ctx);
 
-  LLVMTrivialAllocator allocator;
+  TestAllocator allocator;
   allocator.allocate(a);
   allocator.allocate(b);
   allocator.allocate(c);
 
-  std::memcpy(reinterpret_cast<void*>(allocator.getRAMPointer(a)), matrix2,
+  std::memcpy(reinterpret_cast<void*>(allocator.get(a)), matrix2,
               8 * sizeof(TypeParam));
-  std::memcpy(reinterpret_cast<void*>(allocator.getRAMPointer(b)), matrix1,
+  std::memcpy(reinterpret_cast<void*>(allocator.get(b)), matrix1,
               8 * sizeof(TypeParam));
 
   GEMMOptions<TypeParam> opts{true, true, 1, 0};
 
   gemm<TypeParam>(nullptr, &allocator, &opts, &a, &b, &c);
 
-  auto* cRes = reinterpret_cast<TypeParam*>(allocator.getRAMPointer(c));
+  auto* cRes = reinterpret_cast<TypeParam*>(allocator.get(c));
 
   EXPECT_FLOAT_EQ(cRes[0], 2);
   EXPECT_FLOAT_EQ(cRes[1], 4);

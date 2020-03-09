@@ -12,7 +12,6 @@
  */
 
 #include <athena/backend/llvm/LLVMExecutor.h>
-#include <athena/backend/llvm/LLVMTrivialAllocator.h>
 #include <athena/core/GradientDescent.h>
 #include <athena/core/Graph.h>
 #include <athena/core/InputNode.h>
@@ -84,9 +83,6 @@ TEST(LLVMRegression, BasicIR) {
   lossNode.after(cInp, 2);
 
   LLVMExecutor executor;
-  std::unique_ptr<Allocator> trivialAllocator =
-      std::make_unique<LLVMTrivialAllocator>();
-  executor.setAllocator(trivialAllocator);
 
   // Act
   executor.setGraph(graph);

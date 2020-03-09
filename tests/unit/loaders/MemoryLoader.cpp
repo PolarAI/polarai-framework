@@ -11,7 +11,8 @@
  * the License.
  */
 
-#include <athena/backend/llvm/LLVMTrivialAllocator.h>
+#include "../../testutils/TestAllocator.h"
+
 #include <athena/core/Context.h>
 #include <athena/core/TensorShape.h>
 #include <athena/core/inner/Tensor.h>
@@ -26,7 +27,7 @@ TEST(LoadersTest, MemoryLoaderSingleLoad) {
   athena::core::inner::Tensor tensor(athena::core::DataType::FLOAT, shape,
                                      context);
 
-  athena::backend::llvm::LLVMTrivialAllocator allocator;
+  TestAllocator allocator;
   allocator.allocate(tensor);
 
   float data[1];
@@ -38,7 +39,7 @@ TEST(LoadersTest, MemoryLoaderSingleLoad) {
   loader.load(&allocator, &tensor);
 
   // Assert
-  float* res = reinterpret_cast<float*>(allocator.getRAMPointer(tensor));
+  float* res = reinterpret_cast<float*>(allocator.get(tensor));
   ASSERT_NE(res, nullptr);
   EXPECT_FLOAT_EQ(res[0], 1.0);
 }
@@ -50,7 +51,7 @@ TEST(LoadersTest, MemoryLoaderComplexLoad) {
   athena::core::inner::Tensor tensor(athena::core::DataType::FLOAT, shape,
                                      context);
 
-  athena::backend::llvm::LLVMTrivialAllocator allocator;
+  TestAllocator allocator;
   allocator.allocate(tensor);
 
   float data[6];
@@ -67,7 +68,7 @@ TEST(LoadersTest, MemoryLoaderComplexLoad) {
   loader.load(&allocator, &tensor);
 
   // Assert
-  float* res = reinterpret_cast<float*>(allocator.getRAMPointer(tensor));
+  float* res = reinterpret_cast<float*>(allocator.get(tensor));
   ASSERT_NE(res, nullptr);
   for (int i = 0; i < 6; i++) {
     EXPECT_FLOAT_EQ(res[i], (float)(i + 1));
@@ -112,7 +113,7 @@ TEST(LoadersTest, MemoryLoaderCLoadBind) {
   athena::core::inner::Tensor tensor(athena::core::DataType::FLOAT, shape,
                                      context);
 
-  athena::backend::llvm::LLVMTrivialAllocator allocator;
+  TestAllocator allocator;
   allocator.allocate(tensor);
 
   float data[1];
@@ -125,7 +126,7 @@ TEST(LoadersTest, MemoryLoaderCLoadBind) {
   MemoryLoaderLoad(pLoader, &allocator, &tensor);
 
   // Assert
-  float* res = reinterpret_cast<float*>(allocator.getRAMPointer(tensor));
+  float* res = reinterpret_cast<float*>(allocator.get(tensor));
   ASSERT_NE(res, nullptr);
   EXPECT_FLOAT_EQ(res[0], 1.0);
 }

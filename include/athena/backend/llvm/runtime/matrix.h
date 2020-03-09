@@ -16,7 +16,7 @@
 
 #include <athena/backend/llvm/runtime/Device.h>
 #include <athena/backend/llvm/runtime/structs.h>
-#include <athena/core/Allocator.h>
+#include <athena/backend/llvm/BackendAllocator.h>
 #include <athena/core/inner/Tensor.h>
 
 /**
@@ -33,7 +33,8 @@
  */
 template <typename T>
 extern void
-hadamard(athena::backend::llvm::Device*, athena::core::Allocator* allocator,
+hadamard(athena::backend::llvm::Device*,
+         athena::backend::llvm::BackendAllocator*,
          athena::backend::HadamardOptions<T>* options,
          athena::core::inner::Tensor* a, athena::core::inner::Tensor* b,
          athena::core::inner::Tensor* c);
@@ -52,7 +53,8 @@ hadamard(athena::backend::llvm::Device*, athena::core::Allocator* allocator,
  */
 template <typename T>
 extern void
-gemm(athena::backend::llvm::Device*, athena::core::Allocator* allocator,
+gemm(athena::backend::llvm::Device*,
+     athena::backend::llvm::BackendAllocator*,
      athena::backend::GEMMOptions<T>* options, athena::core::inner::Tensor* a,
      athena::core::inner::Tensor* b, athena::core::inner::Tensor* c);
 

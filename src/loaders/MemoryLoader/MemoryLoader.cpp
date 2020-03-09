@@ -40,13 +40,15 @@ MemoryLoader::operator=(athena::loaders::MemoryLoader&& src) noexcept {
 
 void MemoryLoader::load(core::Allocator* allocator,
                         core::inner::Tensor* tensor) {
-  auto pointer = reinterpret_cast<void*>(allocator->getRAMPointer(*tensor));
+  allocator->lock(*tensor);
+  auto pointer = allocator->get(*tensor);
 
   athena_assert(pointer, "MemoryLoader pointer is NULL");
   athena_assert(mSize <= tensor->getShapeView().getTotalSize() *
                              core::sizeOfDataType(tensor->getDataType()),
                 "Size is greater than tensor size.");
   std::memmove(pointer, mData, mSize);
+  allocator->release(*tensor);
 }
 std::string MemoryLoader::serialize() const {
   new core::FatalError(core::ATH_NOT_IMPLEMENTED, "Not serializable");

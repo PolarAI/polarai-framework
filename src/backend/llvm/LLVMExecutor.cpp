@@ -13,6 +13,7 @@
 
 #include "GraphPartitionPlanner.h"
 #include "LLVMGenerator.h"
+#include "allocators/LayerAllocator.h"
 #include "jit/AthenaJIT.h"
 #include "runtime/legacy_driver/runtime-driver.h"
 
@@ -82,12 +83,12 @@ LLVMExecutor::LLVMExecutor() : mJITCompiler(AthenaJIT::create()) {
   auto libName = std::getenv("ATHENA_RT_LIBRARY");
   mRuntimeDriver->load(libName);
   athena_assert(mRuntimeDriver->isLoaded(), "Failed to load runtime.");
+
+  mAllocator = std::make_unique<LayerAllocator>();
 }
 
-std::unique_ptr<core::Allocator>& LLVMExecutor::getAllocator() {
-  return mAllocator;
-}
-void LLVMExecutor::setAllocator(std::unique_ptr<core::Allocator>& allocator) {
+core::Allocator& LLVMExecutor::getAllocator() { return *mAllocator; }
+void LLVMExecutor::setAllocator(std::unique_ptr<BackendAllocator>& allocator) {
   mAllocator = std::move(allocator);
 }
 
@@ -102,9 +103,13 @@ LLVMExecutor::compileGraph(athena::core::Graph& graph) {
 
   GraphPartitionPlanner planner(graph);
   // todo do actual partitioning
-  auto devices =
+  DeviceContainer devices =
       planner.getPartitionedDevices(mRuntimeDriver->getAvailableDevices());
   auto partitioning = planner.getGraphPartitioning();
+
+  for (size_t idx = 0; idx < devices.count; idx++) {
+    mAllocator->registerDevice(devices.devices[idx]);
+  }
 
   mRuntimeDriver->initializeContext(devices);
 

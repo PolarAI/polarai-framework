@@ -16,11 +16,20 @@
 
 #include <athena/backend/llvm/runtime/Device.h>
 
+#include <athena/core/inner/Tensor.h>
+#include <memory>
+
 namespace athena::backend::llvm {
 class CPUDevice : public Device {
 public:
   bool isPartitionSupported(PartitionDomain domain) override;
   DeviceContainer partition(PartitionDomain domain) override;
+
+  std::string getDeviceName() const override { return "CPU"; }
+
+  bool operator==(const Device& device) const override {
+    return getDeviceName() == device.getDeviceName();
+  }
 };
 } // namespace athena::backend::llvm
 

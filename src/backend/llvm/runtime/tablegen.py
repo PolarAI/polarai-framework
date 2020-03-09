@@ -40,7 +40,7 @@ def generate_wrapper(name, signature, gentypes):
         defs += ") {\n"
 
         defs += "auto device = reinterpret_cast<Device*>(devicePtr);\n"
-        defs += "auto allocator = reinterpret_cast<Allocator*>(allocatorPtr);\n"
+        defs += "auto allocator = reinterpret_cast<BackendAllocator*>(allocatorPtr);\n"
 
         arg_no = 0
         for arg in signature:
@@ -173,8 +173,8 @@ def main():
         if args.mode == "wrapper":
             o.write("#include <athena/backend/llvm/runtime/Device.h>\n")
             o.write("#include <athena/backend/llvm/runtime/builtin.h>\n")
+            o.write("#include <athena/backend/llvm/BackendAllocator.h>\n")
             o.write("#include <athena/core/inner/Tensor.h>\n")
-            o.write("#include <athena/core/Allocator.h>\n")
             o.write("using namespace athena::backend::llvm;\n")
             o.write("using namespace athena::backend;\n")
             o.write("using namespace athena::core::inner;\n\n")

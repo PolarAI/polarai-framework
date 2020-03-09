@@ -23,8 +23,8 @@ void WrapperBackend::run(llvm::raw_ostream& o) {
   emitSourceFileHeader("Runtime wrappers", o);
   o << "#include <athena/backend/llvm/runtime/Device.h>\n";
   o << "#include <athena/backend/llvm/runtime/builtin.h>\n";
+  o << "#include <athena/backend/llvm/BackendAllocator.h>\n";
   o << "#include <athena/core/inner/Tensor.h>\n";
-  o << "#include <athena/core/Allocator.h>\n";
   o << "using namespace athena::backend::llvm;\n";
   o << "using namespace athena::backend;\n";
   o << "using namespace athena::core::inner;\n";
@@ -53,7 +53,8 @@ void WrapperBackend::run(llvm::raw_ostream& o) {
     for (const auto& overload : overloads) {
       o << "void " << getCStyleDeclaration(d.second.get(), overload) << " {\n";
       o << "auto* device = reinterpret_cast<Device*>(devicePtr);\n";
-      o << "auto* allocator = reinterpret_cast<Allocator*>(allocatorPtr);\n";
+      o << "auto* allocator = "
+           "reinterpret_cast<BackendAllocator*>(allocatorPtr);\n";
       std::string callArgs = "device, allocator";
       auto args = d.second->getValueAsDag("arguments");
       for (auto arg : args->getArgNames()) {
