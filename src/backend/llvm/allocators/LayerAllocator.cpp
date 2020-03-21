@@ -40,7 +40,6 @@ void LayerAllocator::lock(const core::inner::Tensor& tensor, Device& device) {
   MemoryRecord record{tensor.getVirtualAddress(),
                       tensor.getSize() *
                           core::sizeOfDataType(tensor.getDataType())};
-  auto vAddr = tensor.getVirtualAddress();
 
   if (mLockDomainMap.count(record) > 0) {
     new FatalError(ATH_BAD_ACCESS,
