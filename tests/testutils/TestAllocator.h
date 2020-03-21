@@ -48,6 +48,7 @@ public:
 
   void lock(const athena::core::inner::Tensor& tensor) override {}
   void release(const athena::core::inner::Tensor& tensor) override {}
+
 protected:
   void* getImpl(const athena::core::inner::Tensor& tensor,
                 athena::backend::llvm::Device& device) override {
