@@ -15,25 +15,25 @@
 
 namespace athena::core {
 void Generator::registerFunctor(const std::string& name, FunctorType functor) {
-    mRegisteredFunctors[name] = std::move(functor);
+  mRegisteredFunctors[name] = std::move(functor);
 }
 void Generator::unregisterFunctor(const std::string& name) {
-    if (hasFunctor(name)) {
-        mRegisteredFunctors.erase(name);
-    }
+  if (hasFunctor(name)) {
+    mRegisteredFunctors.erase(name);
+  }
 }
 void Generator::generate(const std::string& functorName,
                          const std::vector<inner::Tensor>& args,
                          const std::any& options) {
-    if (!hasFunctor(functorName))
-        new FatalError(FatalErrorType::ATH_NOT_IMPLEMENTED,
-                       "No functor with name ", functorName);
+  if (!hasFunctor(functorName))
+    new FatalError(FatalErrorType::ATH_NOT_IMPLEMENTED, "No functor with name ",
+                   functorName);
 
-    mRegisteredFunctors[functorName](mContext, mGraphName, mNodeId, mClusterId,
-                                     args, options);
+  mRegisteredFunctors[functorName](mContext, mGraphName, mNodeId, mClusterId,
+                                   args, options);
 }
 void Generator::generateLoad(inner::Tensor& target, AbstractLoader* loader) {
   mRegisteredLoadGenerator(mContext, mGraphName, mNodeId, mClusterId, target,
                            loader);
 }
-}  // namespace athena::core
+} // namespace athena::core
