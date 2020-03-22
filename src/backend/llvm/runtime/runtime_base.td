@@ -18,7 +18,7 @@ class Runtime<list<Type> types = []> {
     list<string> extraFeatures = [];
 }
 
-class RT_Builtin<string mnemonic, list<Type> overloads = []> {
+class RT_Builtin<string mnemonic, list<Type> overloads = [], bit ext = 0> {
     string summary = "";
     string description = "";
     dag arguments = (ins);

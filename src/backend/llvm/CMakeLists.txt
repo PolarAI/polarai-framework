@@ -14,13 +14,13 @@ file(WRITE ${GENERATOR_CPP} "")
 
 add_custom_target(wrapper_cpp
         COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/runtime/tablegen.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/runtime/builtins.td ${WRAPPER_CPP} wrapper
+        ${CMAKE_CURRENT_SOURCE_DIR}/runtime/builtins_legacy.td ${WRAPPER_CPP} wrapper
         )
 
 add_custom_target(generator_cpp
         COMMAND ${PYTHON_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/runtime/tablegen.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/runtime/builtins.td ${GENERATOR_CPP} driver
+        ${CMAKE_CURRENT_SOURCE_DIR}/runtime/builtins_legacy.td ${GENERATOR_CPP} driver
         )
 
 add_subdirectory(runtime/cpu)
