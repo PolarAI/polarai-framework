@@ -31,7 +31,7 @@ using namespace athena::ops;
 using namespace athena::backend::llvm;
 using namespace athena::loaders;
 
-TEST(JIT, LinReg) {
+TEST(JIT, DISABLED_LinReg) {
   // Arrange
   TensorShape shape({1, 9});
   TensorShape shape2({9, 1});
