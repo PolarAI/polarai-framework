@@ -21,7 +21,7 @@ jobs:
         build_type: ["Release", "Debug"]
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Prepare Env
         run: docker pull athenaml/build:llvm10
       - name: Test
