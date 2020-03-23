@@ -21,7 +21,6 @@ void gemm(cl::sycl::queue& queue, transpose transa, transpose transb, int64_t m,
           int64_t n, int64_t k, T alpha, cl::sycl::buffer<T, 1>& a, int64_t lda,
           cl::sycl::buffer<T, 1>& b, int64_t ldb, T beta,
           cl::sycl::buffer<T, 1>& c, int64_t ldc) {
-
   auto bufInpA = a.template reinterpret<T, 2>({lda, k});
   auto bufInpB = b.template reinterpret<T, 2>({ldb, n});
   auto bufOutC = c.template reinterpret<T, 2>({ldc, n});

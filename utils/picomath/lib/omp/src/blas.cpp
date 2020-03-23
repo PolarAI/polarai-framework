@@ -34,8 +34,6 @@ void cblas_sgemm(const CBLAS_ORDER order, const CBLAS_TRANSPOSE transposeA,
   global_accessor<float, 2, access_mode::write> bufC(
       outC, {static_cast<size_t>(ldc), static_cast<size_t>(N)});
 
-  Index<2> range{static_cast<size_t>(M), static_cast<size_t>(N)};
-
   GemmKernel kernel(bufA, transposeA == CblasTrans, bufB,
                            transposeB == CblasTrans, bufC, M, N, K);
   runKernel<decltype(kernel), 2>(

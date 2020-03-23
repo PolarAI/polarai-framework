@@ -62,7 +62,7 @@ private:
 public:
   using value_type = DataT;
 
-  constexpr Accessor(std::array<size_t, Dims> sizes)
+  explicit constexpr Accessor(std::array<size_t, Dims> sizes)
       : mData(mAllocator.allocate(totalSize(sizes))), mSizes(sizes) {}
 
   constexpr Accessor(DataT* data, std::array<size_t, Dims> sizes)
