@@ -11,17 +11,11 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
+#include <kernels/blas/gemm.h>
+
 #include <picomath/blas/gemm.h>
-#include <picomath/omp/Accessor.h>
-#include <picomath/omp/Index.h>
-#include <picomath/omp/kernel.h>
-
-#include "kernels/blas/gemm.h"
-
-template <typename AccessorAT, typename AccessorBT, typename AccessorCT>
-GemmKernel(AccessorAT, bool, AccessorBT, bool, AccessorCT, size_t, size_t,
-           size_t)
-    ->GemmKernel<AccessorAT, AccessorBT, AccessorCT, Index<2>>;
+#include <support/Index.hpp>
+#include <support/kernel.hpp>
 
 using namespace picomath;
 
@@ -31,17 +25,19 @@ void cblas_sgemm(const CBLAS_ORDER order, const CBLAS_TRANSPOSE transposeA,
                  const int K, const float alpha, const float* inpA,
                  const int lda, const float* inpB, const int ldb,
                  const float beta, float* outC, const int ldc) {
-  Accessor<const float, 2> bufA(
-      inpA, {static_cast<size_t>(lda), static_cast<size_t>(K)});
-  Accessor<const float, 2> bufB(
-      inpB, {static_cast<size_t>(ldb), static_cast<size_t>(N)});
-  Accessor<float, 2> bufC(outC,
-                          {static_cast<size_t>(ldc), static_cast<size_t>(N)});
+  global_accessor<float, 2, access_mode::read> bufA(
+      const_cast<float*>(inpA),
+      {static_cast<size_t>(lda), static_cast<size_t>(K)});
+  global_accessor<float, 2, access_mode::read> bufB(
+      const_cast<float*>(inpB),
+      {static_cast<size_t>(ldb), static_cast<size_t>(N)});
+  global_accessor<float, 2, access_mode::write> bufC(
+      outC, {static_cast<size_t>(ldc), static_cast<size_t>(N)});
 
   Index<2> range{static_cast<size_t>(M), static_cast<size_t>(N)};
 
   GemmKernel kernel(bufA, transposeA == CblasTrans, bufB,
-                    transposeB == CblasTrans, bufC, M, N, K);
+                           transposeB == CblasTrans, bufC, M, N, K);
   runKernel<decltype(kernel), 2>(
       kernel, {static_cast<size_t>(M), static_cast<size_t>(N)});
 }

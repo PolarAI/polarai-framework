@@ -7,6 +7,7 @@ athena_disable_exceptions(picomath_omp)
 athena_disable_rtti(picomath_omp)
 target_include_directories(picomath_omp PUBLIC ${PICOMATH_DIR}/include)
 target_include_directories(picomath_omp PRIVATE ${PICOMATH_SRC_DIR}/omp/src)
+target_include_directories(picomath_omp PRIVATE ${PICOMATH_SRC_DIR}/omp/include)
 target_include_directories(picomath_omp PRIVATE ${PICOMATH_SRC_DIR}/)
 
 find_package(OpenMP)

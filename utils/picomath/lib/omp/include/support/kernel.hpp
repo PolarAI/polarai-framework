@@ -10,10 +10,10 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 //===----------------------------------------------------------------------===//
-#ifndef ATHENA_KERNEL_H
-#define ATHENA_KERNEL_H
 
-#include <picomath/omp/Index.h>
+#pragma once
+
+#include "Index.hpp"
 
 namespace picomath {
 
@@ -36,5 +36,3 @@ void runKernel(KernelT kernel, Index<Dims> indexSpaceSize) {
 }
 
 } // namespace picomath
-
-#endif // ATHENA_KERNEL_H

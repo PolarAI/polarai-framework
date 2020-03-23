@@ -13,10 +13,12 @@
 
 #pragma once
 
-#include <iostream>
+#include <support/types.hpp>
 
 // fixme support CblasConjTrans, AtlasConj
 // fixme support CblasColMajor
+
+namespace picomath {
 
 /// A generic kernel to implement matrix-matrix multiplication.
 ///
@@ -24,45 +26,49 @@
 /// applied. Data structures are templates to allow kernel re-usage in
 /// different programming models.
 ///
-/// \tparam AccessorAT is an accessor type for matrix A.
-/// \tparam AccessorBT is an accessor type for matrix B.
-/// \tparam AccessorCT is an accessor type for matrix C.
-/// \tparam IdT is index type.
-template <typename AccessorAT, typename AccessorBT, typename AccessorCT,
-          typename IdT>
-class GemmKernel {
+/// \tparam DataT is the data type of matrix elements.
+template <typename DataT> class GemmKernel {
 private:
-  AccessorAT mBufA;
-  AccessorBT mBufB;
-  AccessorCT mResBuf;
+  using InAccT = global_accessor<DataT, 2, access_mode::read>;
+  using OutAccT = global_accessor<DataT, 2, access_mode::write>;
+  InAccT mBufA;
+  InAccT mBufB;
+  OutAccT mResBuf;
   const size_t M, N, K;
   bool mTransposeA, mTransposeB;
 
 public:
-  GemmKernel(AccessorAT bufA, bool transposeA, AccessorBT bufB, bool transposeB,
-             AccessorCT resBuf, size_t M, size_t N, size_t K)
+  GemmKernel(InAccT bufA, bool transposeA, InAccT bufB, bool transposeB,
+             OutAccT resBuf, size_t M, size_t N, size_t K)
       : mBufA(bufA), mTransposeA(transposeA), mBufB(bufB),
         mTransposeB(transposeB), mResBuf(resBuf), M(M), N(N), K(K) {}
-  void operator()(IdT id) {
-    typename AccessorCT::value_type acc = 0;
+  void operator()(id<2> idx) {
+    typename OutAccT::value_type acc = 0;
 
     for (size_t k = 0; k < K; k++) {
-      IdT aId, bId; // todo replace with constexpr
+      id<2> aId, bId; // todo replace with constexpr
 
       if (mTransposeA) {
-        aId = {k, id[0]};
+        aId = {k, idx[0]};
       } else {
-        aId = {id[0], k};
+        aId = {idx[0], k};
       }
 
       if (mTransposeB) {
-        bId = {id[1], k};
+        bId = {idx[1], k};
       } else {
-        bId = {k, id[1]};
+        bId = {k, idx[1]};
       }
 
       acc += mBufA[aId] * mBufB[bId];
     }
-    mResBuf[id] = acc;
+    mResBuf[idx] = acc;
   }
 };
+
+template <typename DataT>
+GemmKernel(global_accessor<const DataT, 2, access_mode::read>, bool,
+           global_accessor<const DataT, 2, access_mode::read>, bool,
+           global_accessor<DataT, 2, access_mode::write>, size_t, size_t,
+           size_t) -> GemmKernel<DataT>;
+} // namespace picomath

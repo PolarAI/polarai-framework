@@ -11,11 +11,16 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_INDEX_H
-#define ATHENA_INDEX_H
+#pragma once
 
-#include <array>
+#include <CL/sycl.hpp>
 
-template <int Dims> using Index = std::array<size_t, Dims>;
+namespace picomath {
+  using access_mode = cl::sycl::access::mode;
 
-#endif // ATHENA_INDEX_H
+  template <typename T, int Dims, access_mode Mode>
+  using global_accessor = cl::sycl::accessor<T, Dims, Mode>;
+
+  template <int Dims>
+  using id = cl::sycl::id<Dims>;
+}
