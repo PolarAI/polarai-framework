@@ -34,8 +34,15 @@ static std::string getCStyleDeclaration(llvm::Record* record,
   std::string decl =
       "void " + mangled + "(void* devicePtr, void* allocatorPtr, ";
   auto args = record->getValueAsDag("arguments");
-  for (auto arg : args->getArgNames()) {
-    decl += "void* " + arg->getAsUnquotedString() + ", ";
+  for (size_t i = 0; i < args->arg_size(); i++) {
+    auto argName = args->getArgName(i)->getAsUnquotedString();
+    auto argType = args->getArg(i)->getAsUnquotedString();
+    if (argType == "gentype") {
+      decl += gentype.str() + " " + argName;
+    } else if (argType == "tensor") {
+      decl += "void* " + argName;
+    }
+    decl += ", ";
   }
   decl += "void* res)";
   return decl;

@@ -66,5 +66,6 @@ void MarkdownBackend::run(raw_ostream& o) {
 
     o << "### Detailed description\n\n";
     o << d.second->getValue("description")->getValue()->getAsUnquotedString();
+    o << "\n\n";
   }
 }

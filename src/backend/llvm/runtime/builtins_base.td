@@ -1,40 +1,82 @@
 include "runtime_base.td"
 
-def Allocate_Base : RT_Builtin<"allocate", [void]> {
+// MARK: Utility operations
+def Allocate : RT_Builtin<"allocate", [void]> {
     let summary = "memory allocation";
     let description = [{
 Allocate memory for tensor.
     }];
 }
 
-class Add_Base<list<Type> gentype = []> : RT_Builtin<"add", gentype> {
+def Fill : RT_Builtin<"fill", RTAllTypes.type> {
+    let summary = "pattern fill";
+    let description = [{
+Fills tensor A with the value provided.
+    }];
+    let arguments = (ins tensor:$a, gentype:$pattern);
+}
+
+// MARK: Arithmetic operations
+
+def Add : RT_Builtin<"add", RTAllTypes.type> {
     let summary = "element-wise addition";
     let description = [{
-Add corresponding elements of one tensor to another. Tenors are expected to match.
+Performs element-wise addition and stores result in tensor C. The following formula describes the
+operation:
+```
+C = alpha * A + beta * B + gamma * C
+```
+where `alpha`, `beta`, and `gamma` are scaling factors, `A`, `B`, and `C` are tensors of the same
+size and data type.
     }];
-    let arguments = (ins tensor:$a, tensor:$b);
+    let arguments = (ins gentype:$alpha,
+                         tensor:$a,
+                         gentype:$beta,
+                         tensor:$b,
+                         gentype:$beta,
+                         tensor:$c);
 }
 
-class Hadamard_Base<list<Type> gentype = []> : RT_Builtin<"hadamard", gentype> {
+def EWMul : RT_Builtin<"mul", RTAllTypes.type> {
     let summary = "element-wise multiplication";
     let description = [{
-Multiply corresponding elements of one tensor to another. Tenors are expected to match.
+Performs element-wise multiplication and stores result in tensor C. The following formula describes
+the operation:
+```
+C = alpha * A * B + beta * C
+```
+where `alpha` and `beta` are scaling factors, `A`, `B`, and `C` are tensors of the same size and
+data type.
     }];
-    let arguments = (ins tensor:$a, tensor:$b);
+    let arguments = (ins gentype:$alpha,
+                         tensor:$a,
+                         tensor:$b,
+                         gentype:$beta,
+                         tensor:$c);
 }
 
-class Gemm_Base<list<Type> gentype = []> : RT_Builtin<"hadamard", gentype> {
-    let summary = "generic matrix-matrix multiplication";
+// MARK: Linear algebra
+
+def MatMul : RT_Builtin<"matmul", RTAllTypes.type> {
+    let summary = "matrix-matrix multiplication";
     let description = [{
-Perform matrix-matrix multiplication.
+Performs matrix-matrix multiplication on rank 2 tensors and stores the result to tensor C. Formula:
+```
+C = alpha * A . B + beta * C;
+```
+where `alpha` and `beta` are scaling factors; `A`, `B`, and `C` are rank 2 tensors, tensor `A` has
+shape `M x K`, tensor `B` has shape `K x N`, tensor `C` has shape `M x N`, and all tensors have the
+same data type.
     }];
-    let arguments = (ins tensor:$a, tensor:$b);
+    let arguments = (ins gentype:$alpha,
+                         tensor:$a,
+                         tensor:$b,
+                         gentype:$beta,
+                         tensor:$c);
 }
 
-class Fill_Base<list<Type> gentype = []> : RT_Builtin<"hadamard", gentype> {
-   let summary = "pattern fill";
-   let description = [{
-Fill tensor memory with pattern.
-   }];
-   let arguments = (ins tensor:$a);
+def Conv : RT_Builtin<"conv", RTAllTypes.type> {
+    let summary = "tensor convolution operation";
+    let description = [{TBD}];
+    let arguments = (ins tensor:$inp, tensor:$kernel, tensor:$out);
 }

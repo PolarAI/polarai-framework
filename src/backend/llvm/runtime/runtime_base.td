@@ -1,3 +1,6 @@
+#ifndef RT_BASE
+#define RT_BASE
+
 class Type;
 
 def half : Type;
@@ -5,6 +8,7 @@ def float : Type;
 def double : Type;
 def void : Type;
 def tensor : Type;
+def gentype : Type;
 
 def ins;
 
@@ -25,3 +29,5 @@ class RT_Builtin<string mnemonic, list<Type> overloads = [], bit ext = 0> {
     string builtinName = mnemonic;
     list<Type> overloadTypes = overloads;
 }
+
+#endif

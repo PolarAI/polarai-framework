@@ -17,7 +17,7 @@ add_athena_library(${ATH_RT_LLVM_CPU} SHARED
 file(WRITE ${INFO_CPP} "")
 add_custom_target(${ATH_RT_LLVM_CPU}_info
         COMMAND ${CMAKE_BINARY_DIR}/utils/athena-tablegen/src/athena-tablegen -I=${CMAKE_CURRENT_SOURCE_DIR}/../
-        -o=${INFO_CPP} -emit-runtime-info ${CMAKE_CURRENT_SOURCE_DIR}/runtime.td)
+        -o=${INFO_CPP} -emit-runtime-info ${CMAKE_CURRENT_SOURCE_DIR}/runtime.td -DRT_TYPES="float,double")
 add_dependencies(${ATH_RT_LLVM_CPU}_info athena-tablegen)
 
 add_dependencies(${ATH_RT_LLVM_CPU} wrapper_cpp ${ATH_RT_LLVM_CPU}_info)
