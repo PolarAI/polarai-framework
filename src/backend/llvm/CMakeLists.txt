@@ -27,6 +27,11 @@ add_subdirectory(runtime/cpu)
 add_subdirectory(runtime/driver)
 add_subdirectory(runtime/legacy_driver)
 
+find_package(OpenCL)
+if (${OpenCL_FOUND})
+    add_subdirectory(runtime/opencl)
+endif ()
+
 file(GLOB codegen_src "codegen/*.cpp")
 
 add_athena_library(${ATH_BACKEND_LLVM} STATIC

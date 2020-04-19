@@ -16,11 +16,15 @@
 
 #include <athena/backend/llvm/runtime/Device.h>
 
+#include "CpuQueue.h"
 #include <athena/core/inner/Tensor.h>
 #include <memory>
 
 namespace athena::backend::llvm {
 class CPUDevice : public Device {
+private:
+  CpuQueue mQueue;
+
 public:
   bool isPartitionSupported(PartitionDomain domain) override;
   DeviceContainer partition(PartitionDomain domain) override;
@@ -30,6 +34,8 @@ public:
   bool operator==(const Device& device) const override {
     return getDeviceName() == device.getDeviceName();
   }
+
+  Queue& getQueue() override { return mQueue; }
 };
 } // namespace athena::backend::llvm
 

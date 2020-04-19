@@ -1,0 +1,13 @@
+commands:
+  macos:
+    - set:
+        name: RUNTIME_LIB
+        value:
+          ci: "$ENV{ATHENA_BINARY_DIR}/lib/lib@ATH_RT_LLVM_OCL@.dylib"
+          dev: "@CMAKE_BINARY_DIR@/src/backend/llvm/runtime/opencl/lib@ATH_RT_LLVM_OCL@.dylib"
+  linux:
+    - set:
+        name: RUNTIME_LIB
+        value:
+          ci: "$ENV{ATHENA_BINARY_DIR}/lib/lib@ATH_RT_LLVM_OCL@.so"
+          dev: "@CMAKE_BINARY_DIR@/src/backend/llvm/runtime/opencl/lib@ATH_RT_LLVM_OCL@.so"

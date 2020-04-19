@@ -18,6 +18,7 @@
 #include <athena/backend/llvm/MemoryRecord.h>
 #include <athena/backend/llvm/llvm_export.h>
 #include <athena/core/inner/Tensor.h>
+#include <athena/backend/llvm/runtime/Queue.h>
 
 #include <cstddef>
 #include <memory>
@@ -55,6 +56,8 @@ public:
   virtual void copyToDevice(const core::inner::Tensor& tensor,
                             void* src) const {};
   virtual void copyToDevice(MemoryRecord record, void* src) const {};
+
+  virtual Queue& getQueue() = 0;
 };
 } // namespace athena::backend::llvm
 

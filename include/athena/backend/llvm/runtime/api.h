@@ -14,12 +14,20 @@
 #ifndef ATHENA_API_H
 #define ATHENA_API_H
 
+#include <athena/backend/llvm/BackendAllocator.h>
 #include <athena/backend/llvm/runtime/Device.h>
+#include <athena/backend/llvm/runtime/LaunchCommand.h>
+#include <athena/backend/llvm/runtime/ProgramDesc.h>
 
 extern "C" {
 athena::backend::llvm::DeviceContainer getAvailableDevices();
 void initializeContext(athena::backend::llvm::DeviceContainer);
 void releaseContext();
+
+void addProgram(athena::backend::llvm::Device*, ProgramDesc);
+void linkPrograms(athena::backend::llvm::Device*);
+void launch(athena::backend::llvm::Device*,
+            athena::backend::llvm::BackendAllocator*, LaunchCommand);
 };
 
 #endif // ATHENA_API_H

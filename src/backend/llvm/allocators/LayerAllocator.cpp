@@ -88,7 +88,7 @@ void LayerAllocator::allocate(const core::inner::Tensor& tensor) {
   allocate(record);
 }
 void LayerAllocator::allocate(MemoryRecord record) {
-  if (isAllocated(record))
+  if (isAllocated(record) && getAllocationDomain(record) == MemoryDomain::RAM)
     return;
 
   mRAMAllocator->allocate(record);

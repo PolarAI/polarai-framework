@@ -11,28 +11,14 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#pragma once
-
-#include <functional>
+#ifndef ATHENA_QUEUE_H
+#define ATHENA_QUEUE_H
 
 namespace athena::backend::llvm {
-
-// Forward declaration
-struct MemoryRecord;
-
-class AllocatorLayerBase {
+class Queue {
 public:
-  using MemoryOffloadCallbackT = std::function<void(MemoryRecord)>;
-
-  virtual ~AllocatorLayerBase() = default;
-
-  /// Registers routine that is called when allocator is out of memory.
-  virtual void registerMemoryOffloadCallback(MemoryOffloadCallbackT) = 0;
-
-  virtual void allocate(MemoryRecord record) = 0;
-  virtual void deallocate(MemoryRecord record) = 0;
-  virtual void lock(MemoryRecord record) = 0;
-  virtual void release(MemoryRecord record) = 0;
-  virtual void* getPtr(MemoryRecord record) = 0;
+  virtual void wait() = 0;
 };
 }
+
+#endif // ATHENA_QUEUE_H

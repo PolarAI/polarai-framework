@@ -24,7 +24,7 @@
 namespace athena::backend::llvm {
 class TrivialAllocator : public AllocatorLayerBase {
 private:
-  memoryOffloadCallbackT mOffloadCallback;
+  MemoryOffloadCallbackT mOffloadCallback;
   std::unordered_map<MemoryRecord, void*> mMemMap;
   std::unordered_set<MemoryRecord> mLockedAllocations;
   std::unordered_set<MemoryRecord> mReleasedAllocations;
