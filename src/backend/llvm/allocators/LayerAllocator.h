@@ -93,6 +93,7 @@ public:
 
   void* get(const core::inner::Tensor& tensor) override;
   using BackendAllocator::get;
+
 protected:
   void* getImpl(const core::inner::Tensor& tensor, Device& device) override;
 };
