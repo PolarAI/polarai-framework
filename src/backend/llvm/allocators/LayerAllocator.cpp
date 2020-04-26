@@ -24,62 +24,58 @@ void LayerAllocator::allocate(const core::inner::Tensor& tensor,
   MemoryRecord record{tensor.getVirtualAddress(),
                       tensor.getSize() *
                           core::sizeOfDataType(tensor.getDataType())};
-  if (isAllocated(record))
+  // Double allocation is noop.
+  if (mDeviceAllocators[device.getDeviceName()]->isAllocated(record))
     return;
 
   mDeviceAllocators[device.getDeviceName()]->allocate(record);
-  mDeviceMap.insert({record, &device});
-
-  if (!device.hasAllocator()) {
-    mRAMSet.insert(record);
-  }
+  mLocks.insert({record, std::list<LockDescriptor>()});
+  mMemTags[record] = 1;
 }
-void LayerAllocator::lock(const core::inner::Tensor& tensor, Device& device) {
+void LayerAllocator::lock(const core::inner::Tensor& tensor, Device& device,
+                          core::LockType lockType) {
   std::scoped_lock curLock{mMutex};
 
   MemoryRecord record{tensor.getVirtualAddress(),
                       tensor.getSize() *
                           core::sizeOfDataType(tensor.getDataType())};
 
-  if (mLockDomainMap.count(record) > 0) {
-    new FatalError(ATH_BAD_ACCESS,
-                   "Tensor is already locked. vaddr:", record.virtualAddress);
+  if (lockType == core::LockType::READ_WRITE && !mLocks[record].empty()) {
+    new FatalError(
+        ATH_BAD_ACCESS,
+        "Attempt get READ_WRITE lock for tensor that is already locked: ",
+        record.virtualAddress);
   }
 
-  if (!isAllocated(record)) {
-    new FatalError(ATH_BAD_ACCESS,
-                   "Tensor is not allocated. vaddr: ", record.virtualAddress);
+  // fixme ensure device does not have another READ lock for this record.
+
+  if (!mDeviceAllocators[device.getDeviceName()]->isAllocated(record)) {
+    mDeviceAllocators[device.getDeviceName()]->allocate(record);
   }
 
-  auto allocatedDomain = getAllocationDomain(record);
-  void* ramPtr = nullptr;
+  // This means that the device does not have the up to date data.
+  if (mDeviceAllocators[device.getDeviceName()]->getTag(record) !=
+      mMemTags[record]) {
+    // fixme some devices may allow transfer without involving host.
 
-  if (allocatedDomain == MemoryDomain::Device &&
-      *mDeviceMap[record] != device) {
-    auto* from = mDeviceMap[record];
-    if (mRAMSet.count(record)) {
-      ramPtr = mRAMAllocator->getPtr(record);
-    } else {
-      mRAMAllocator->allocate(record);
-      ramPtr = mRAMAllocator->getPtr(record);
+    // Neither host has the up to date state
+    if (mMemTags[record] != mRAMAllocator->getTag(record)) {
+      updateHost(record);
     }
 
-    from->copyToHost(tensor, ramPtr);
-    from->getAllocator()->deallocate(record);
+    device.copyToDevice(record, mRAMAllocator->getPtr(record));
   }
 
-  // todo handle swap memory
-
-  if (allocatedDomain == MemoryDomain::RAM) {
-    ramPtr = mRAMAllocator->getPtr(record);
+  if (lockType == core::LockType::READ_WRITE) {
+    mMemTags[record]++;
   }
 
-  if (ramPtr != nullptr) {
-    device.copyToDevice(tensor, ramPtr);
-  }
+  // Device is guaranteed to have up-to-date record now.
+  mDeviceAllocators[device.getDeviceName()]->setTag(record, mMemTags[record]);
 
+  mLocks[record].emplace_back(
+      LockDescriptor{lockType, MemoryDomain::Device, &device});
   mDeviceAllocators[device.getDeviceName()]->lock(record);
-  mLockDomainMap[record] = MemoryDomain::RAM;
 }
 void LayerAllocator::allocate(const core::inner::Tensor& tensor) {
   MemoryRecord record{tensor.getVirtualAddress(),
@@ -88,28 +84,43 @@ void LayerAllocator::allocate(const core::inner::Tensor& tensor) {
   allocate(record);
 }
 void LayerAllocator::allocate(MemoryRecord record) {
-  if (isAllocated(record) && getAllocationDomain(record) == MemoryDomain::RAM)
+  if (mRAMAllocator->isAllocated(record))
     return;
 
   mRAMAllocator->allocate(record);
-  mRAMSet.insert(record);
+  mLocks.insert({record, std::list<LockDescriptor>()});
+  mMemTags[record] = 1;
 }
 void LayerAllocator::deallocate(const core::inner::Tensor& tensor) {
   MemoryRecord record{tensor.getVirtualAddress(),
                       tensor.getSize() *
                           core::sizeOfDataType(tensor.getDataType())};
 
-  if (isAllocated(record)) {
-    if (mDeviceMap.count(record) > 0) {
-      mDeviceAllocators[mDeviceMap[record]->getDeviceName()]->deallocate(
-          record);
-      mDeviceMap.erase(record);
+  std::scoped_lock curLock{mMutex};
+
+  if (!mLocks[record].empty()) {
+    new FatalError(ATH_BAD_ACCESS, "Attempt to deallocate memory in use: ",
+                   record.virtualAddress);
+  }
+
+  for (auto allocator : mDeviceAllocators) {
+    if (allocator.second->isAllocated(record)) {
+      allocator.second->deallocate(record);
     }
-    if (mRAMSet.count(record)) {
-      mRAMAllocator->deallocate(record);
-      mRAMSet.erase(record);
-    }
-    // todo deallocate for swap memory
+  }
+
+  if (mRAMAllocator->isAllocated(record)) {
+    mRAMAllocator->deallocate(record);
+  }
+
+  // todo release swap memory
+
+  if (mMemTags.count(record) > 0) {
+    mMemTags.erase(record);
+  }
+
+  if (mLocks.count(record)) {
+    mLocks.erase(record);
   }
 }
 void* LayerAllocator::get(const core::inner::Tensor& tensor) {
@@ -117,73 +128,80 @@ void* LayerAllocator::get(const core::inner::Tensor& tensor) {
                       tensor.getSize() *
                           core::sizeOfDataType(tensor.getDataType())};
 
-  if (mRAMSet.count(record)) {
+  if (mRAMAllocator->isAllocated(record)) {
     return mRAMAllocator->getPtr(record);
   }
+
   new FatalError(ATH_BAD_ACCESS, "No host pointer for vaddr ",
                  record.virtualAddress);
   return nullptr; // suppress GCC warning
 }
 
-void LayerAllocator::lock(const core::inner::Tensor& tensor) {
+void LayerAllocator::lock(const core::inner::Tensor& tensor, LockType type) {
   std::scoped_lock lock{mMutex};
 
   MemoryRecord record{tensor.getVirtualAddress(),
                       tensor.getSize() *
                           core::sizeOfDataType(tensor.getDataType())};
 
-  if (mLockDomainMap.count(record) > 0) {
-    new FatalError(ATH_BAD_ACCESS,
-                   "Tensor is already locked. vaddr: ", record.virtualAddress);
+  if (type == core::LockType::READ_WRITE && !mLocks[record].empty()) {
+    new FatalError(
+        ATH_BAD_ACCESS,
+        "Attempt get READ_WRITE lock for tensor that is already locked: ",
+        record.virtualAddress);
   }
 
-  if (!isAllocated(record)) {
-    new FatalError(ATH_BAD_ACCESS,
-                   "Tensor is not allocated. vaddr: ", record.virtualAddress);
+  if (!mRAMAllocator->isAllocated(record)) {
+    mRAMAllocator->allocate(record);
   }
 
-  auto allocatedDomain = getAllocationDomain(record);
-
-  if (allocatedDomain == MemoryDomain::Device) {
-    auto* from = mDeviceMap[record];
-    void* ramPtr = nullptr;
-    if (mRAMSet.count(record)) {
-      ramPtr = mRAMAllocator->getPtr(record);
-    } else {
-      mRAMAllocator->allocate(record);
-      ramPtr = mRAMAllocator->getPtr(record);
-    }
-
-    from->copyToHost(tensor, ramPtr);
+  if (mMemTags[record] != mRAMAllocator->getTag(record)) {
+    updateHost(record);
   }
 
-  // todo handle swap memory
+  if (type == core::LockType::READ_WRITE) {
+    mMemTags[record]++;
+  }
 
-  mLockDomainMap[record] = MemoryDomain::RAM;
+  mRAMAllocator->setTag(record, mMemTags[record]);
+
+  mLocks[record].push_back(LockDescriptor{type, MemoryDomain::RAM, nullptr});
+  mRAMAllocator->lock(record);
 }
 void LayerAllocator::release(const core::inner::Tensor& tensor) {
+  std::scoped_lock lock{mMutex};
+
   MemoryRecord record{tensor.getVirtualAddress(),
                       tensor.getSize() *
                           core::sizeOfDataType(tensor.getDataType())};
 
-  auto domain = mLockDomainMap[record];
-  if (domain == MemoryDomain::Device) {
-    mDeviceAllocators[mDeviceMap[record]->getDeviceName()]->release(record);
-  }
+  auto it = std::find_if(mLocks[record].begin(), mLocks[record].end(),
+                         [&](const LockDescriptor& desc) {
+                           return desc.domain == MemoryDomain::RAM;
+                         });
 
-  mLockDomainMap.erase(record);
+  if (it != mLocks[record].end()) {
+    mRAMAllocator->release(record);
+    mLocks[record].erase(it);
+  }
 }
 void* LayerAllocator::getImpl(const core::inner::Tensor& tensor,
                               Device& device) {
+  std::scoped_lock lock{mMutex};
   MemoryRecord record{tensor.getVirtualAddress(),
                       tensor.getSize() *
                           core::sizeOfDataType(tensor.getDataType())};
-  if (mDeviceMap.count(record) && *mDeviceMap[record] == device) {
+
+  if (mDeviceAllocators[device.getDeviceName()]->isAllocated(record)) {
     return mDeviceAllocators[device.getDeviceName()]->getPtr(record);
   }
-  std::terminate();
+
+  new FatalError(ATH_BAD_ACCESS, "Tensor ", record.virtualAddress,
+                 " has no allocation on device ", device.getDeviceName());
+  return nullptr; // suppress warnings.
 }
 void LayerAllocator::registerDevice(Device& device) {
+  std::scoped_lock lock{mMutex};
   if (mDeviceAllocators.count(device.getDeviceName()) == 0) {
     if (device.hasAllocator()) {
       mDeviceAllocators[device.getDeviceName()] = device.getAllocator();
@@ -192,31 +210,53 @@ void LayerAllocator::registerDevice(Device& device) {
           std::move(std::shared_ptr<AllocatorLayerBase>(
               mRAMAllocator.get(), [](AllocatorLayerBase*) {}));
     }
+    mDevices[device.getDeviceName()] = &device;
     auto& allocator = mDeviceAllocators[device.getDeviceName()];
     allocator->registerMemoryOffloadCallback(
-        [this, &device](MemoryRecord record) {
-          if (this->mRAMSet.count(record) == 0) {
-            this->allocate(record);
+        [this, &device](MemoryRecord record, AllocatorLayerBase& layer) {
+          // Allocators have the same state of data. No need to copy.
+          if (mRAMAllocator->getTag(record) == layer.getTag(record))
+            return;
+          if (!mRAMAllocator->isAllocated(record)) {
+            mRAMAllocator->allocate(record);
           }
           void* hostPtr = mRAMAllocator->getPtr(record);
 
           device.copyToHost(record, hostPtr);
+          mRAMAllocator->setTag(record, layer.getTag(record));
         });
   }
 }
-bool LayerAllocator::isAllocated(const MemoryRecord& record) {
-  return mDeviceMap.count(record) || mRAMSet.count(record) ||
-         mSwapMap.count(record);
+void LayerAllocator::updateHost(MemoryRecord record) {
+  for (const auto& alloc : mDeviceAllocators) {
+    if (alloc.second->getTag(record) == mMemTags[record] &&
+        alloc.second->getTag(record) > 0) {
+      if (!mRAMAllocator->isAllocated(record)) {
+        mRAMAllocator->allocate(record);
+      }
+
+      mDevices[alloc.first]->copyToHost(record, mRAMAllocator->getPtr(record));
+      break;
+    }
+  }
 }
-MemoryDomain LayerAllocator::getAllocationDomain(const MemoryRecord& record) {
-  if (mDeviceMap.count(record))
-    return MemoryDomain::Device;
-  if (mRAMSet.count(record))
-    return MemoryDomain::RAM;
-  if (mSwapMap.count(record))
-    return MemoryDomain::Swap;
-  new FatalError(ATH_FATAL_OTHER, "Unknown allocation domain for vaddr ",
-                 record.virtualAddress);
-  return MemoryDomain::Swap; // suppress GCC warning
+void LayerAllocator::release(const inner::Tensor& tensor, Device& device) {
+  std::scoped_lock lock{mMutex};
+
+  MemoryRecord record{tensor.getVirtualAddress(),
+                      tensor.getSize() *
+                          core::sizeOfDataType(tensor.getDataType())};
+
+  auto it = std::find_if(mLocks[record].begin(), mLocks[record].end(),
+                         [&](const LockDescriptor& desc) {
+                           return desc.domain == MemoryDomain::Device &&
+                                  desc.device->getDeviceName() ==
+                                      device.getDeviceName();
+                         });
+
+  if (it != mLocks[record].end()) {
+    mDeviceAllocators[device.getDeviceName()]->release(record);
+    mLocks[record].erase(it);
+  }
 }
 } // namespace athena::backend::llvm

@@ -25,11 +25,14 @@ protected:
 public:
   virtual ~BackendAllocator() = default;
 
-  virtual void registerDevice(Device &device) = 0;
+  virtual void registerDevice(Device& device) = 0;
 
+  /// Allocates memory on a particular device.
   virtual void allocate(const core::inner::Tensor& tensor, Device& device) = 0;
 
-  virtual void lock(const core::inner::Tensor& tensor, Device& device) = 0;
+  /// Locks tensor raw memory on a particular device.
+  virtual void lock(const core::inner::Tensor& tensor, Device& device,
+                    core::LockType type) = 0;
 
   template <typename BufferT>
   BufferT* get(const core::inner::Tensor& tensor, Device& device) {

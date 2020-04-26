@@ -116,7 +116,7 @@ TEST_F(OpenCLRuntimeTest, FindsAllDevices) {
   ASSERT_EQ(devCount, rtDevices.count);
 }
 
-TEST_F(OpenCLRuntimeTest, DISABLED_ExecutesSimpleKernel) {
+TEST_F(OpenCLRuntimeTest, ExecutesSimpleKernel) {
   using namespace athena::core;
   using namespace athena::backend::llvm;
 
@@ -132,10 +132,8 @@ TEST_F(OpenCLRuntimeTest, DISABLED_ExecutesSimpleKernel) {
     Context ctx;
     inner::Tensor tensor(DataType::FLOAT, {3}, ctx);
 
-    // fixme allocation must be performed only once.
-    allocator.allocate(tensor, deviceContainer.devices[i]);
     allocator.allocate(tensor);
-    allocator.lock(tensor);
+    allocator.lock(tensor, LockType::READ_WRITE);
     auto data = static_cast<float*>(allocator.get(tensor));
     data[0] = 1;
     data[1] = 2;
@@ -171,13 +169,14 @@ TEST_F(OpenCLRuntimeTest, DISABLED_ExecutesSimpleKernel) {
     command.globalSize = &count;
     command.localSize = &count;
 
-    allocator.lock(tensor, deviceContainer.devices[i]);
+    allocator.lock(tensor, deviceContainer.devices[i], LockType::READ_WRITE);
     launchFunc(&deviceContainer.devices[i], &allocator, command);
     deviceContainer.devices[i].getQueue().wait();
-    allocator.release(tensor);
+    allocator.release(tensor, deviceContainer.devices[i]);
 
-    allocator.lock(tensor);
+    allocator.lock(tensor, LockType::READ);
     auto result = static_cast<float*>(allocator.get(tensor));
+    allocator.release(tensor);
     EXPECT_FLOAT_EQ(result[0], 11);
     EXPECT_FLOAT_EQ(result[1], 12);
     EXPECT_FLOAT_EQ(result[2], 13);
