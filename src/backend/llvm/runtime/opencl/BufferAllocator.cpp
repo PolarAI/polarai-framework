@@ -62,6 +62,7 @@ void BufferAllocator::deallocate(MemoryRecord record) {
 
   clReleaseMemObject(mBuffers[record]);
   mBuffers.erase(record);
+  mTags[record] = 0;
 }
 void athena::backend::llvm::BufferAllocator::lock(MemoryRecord record) {
   mLockedAllocations.insert(record);

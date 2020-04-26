@@ -75,6 +75,7 @@ public:
     if (mReleasedAllocations.count(record)) {
       mReleasedAllocations.erase(record);
     }
+    mTags[record] = 0;
   }
   void lock(MemoryRecord record) override { mLockedAllocations.insert(record); }
   void release(MemoryRecord record) override {
