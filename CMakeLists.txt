@@ -67,6 +67,7 @@ if (NOT ATHENA_DOCS_ONLY)
     add_subdirectory(utils/athena-tablegen)
     add_subdirectory(utils/test_runner)
     add_subdirectory(utils/picomath)
+    add_subdirectory(utils/dialects)
     add_subdirectory(src)
     add_subdirectory(utils/chaos)
 

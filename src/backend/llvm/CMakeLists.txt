@@ -1,7 +1,28 @@
 set(ATH_BACKEND_LLVM "AthenaBackendLLVM" CACHE STRING "" FORCE)
 
-find_package(LLVM CONFIG)
+if(POLICY CMP0068)
+    cmake_policy(SET CMP0068 NEW)
+    set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
+endif()
+
+if(POLICY CMP0075)
+    cmake_policy(SET CMP0075 NEW)
+endif()
+
+if(POLICY CMP0077)
+    cmake_policy(SET CMP0077 NEW)
+endif()
+
+find_package(LLVM REQUIRED CONFIG)
+find_package(MLIR REQUIRED CONFIG)
 find_package(PythonInterp REQUIRED)
+
+list(APPEND CMAKE_MODULE_PATH "${MLIR_CMAKE_DIR}")
+list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
+include(TableGen)
+include(AddLLVM)
+include(AddMLIR)
+include(HandleLLVMOptions)
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
