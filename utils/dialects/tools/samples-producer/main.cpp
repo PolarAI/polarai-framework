@@ -39,23 +39,20 @@ int main() {
 
   builder.setInsertionPointToStart(module->getBody());
 
-  auto athMod =
-      builder.create<mlir::ath_graph::ModuleOp>(builder.getUnknownLoc());
-
-  builder.setInsertionPointToStart(&athMod.body().front());
-
   auto tensorType = mlir::RankedTensorType::get({8}, builder.getF32Type());
   auto inputNodeType = builder.getFunctionType({}, {tensorType});
-  auto inpA = builder.create<mlir::ath_graph::NodeOp>(builder.getUnknownLoc(),
-                                                      "InputA", inputNodeType);
+  auto inpA = builder.create<mlir::ath_graph::NodeOp>(
+      builder.getUnknownLoc(), "InputA", inputNodeType, 0, 0);
   {
     mlir::OpBuilder::InsertionGuard guard{builder};
     builder.setInsertionPointToStart(&inpA.getBody().front());
 
-    auto context = inpA.getArgument(inpA.getNumFuncArguments() - 2);
-    auto tensor = builder.create<mlir::ath_graph::GetTensor>(
+    auto context = inpA.getContext();
+    auto bigTensor = builder.create<mlir::ath_graph::GetTensor>(
         builder.getUnknownLoc(), context, 1,
-        mlir::RankedTensorType::get({8}, builder.getF32Type()));
+        mlir::RankedTensorType::get({1, 8}, builder.getF32Type()));
+    auto tensor = builder.create<mlir::ath_graph::SliceOp>(
+        builder.getUnknownLoc(), inpA.getBatchIndex(), bigTensor);
 
     builder.create<mlir::ath_graph::AllocOp>(builder.getUnknownLoc(),
                                              tensor.getResult());
@@ -72,16 +69,18 @@ int main() {
                                               tensor.getResult());
   }
 
-  auto inpB = builder.create<mlir::ath_graph::NodeOp>(builder.getUnknownLoc(),
-                                                      "InputB", inputNodeType);
+  auto inpB = builder.create<mlir::ath_graph::NodeOp>(
+      builder.getUnknownLoc(), "InputB", inputNodeType, 1, 0);
   {
     mlir::OpBuilder::InsertionGuard guard{builder};
     builder.setInsertionPointToStart(&inpB.getBody().front());
 
     auto context = inpB.getArgument(inpB.getNumFuncArguments() - 2);
-    auto tensor = builder.create<mlir::ath_graph::GetTensor>(
+    auto bigTensor = builder.create<mlir::ath_graph::GetTensor>(
         builder.getUnknownLoc(), context, 9,
         mlir::RankedTensorType::get({8}, builder.getF32Type()));
+    auto tensor = builder.create<mlir::ath_graph::SliceOp>(
+        builder.getUnknownLoc(), inpA.getBatchIndex(), bigTensor);
 
     builder.create<mlir::ath_graph::AllocOp>(builder.getUnknownLoc(),
                                              tensor.getResult());
@@ -101,40 +100,48 @@ int main() {
   auto sumNodeType =
       builder.getFunctionType({tensorType, tensorType}, {tensorType});
   auto sumNode = builder.create<mlir::ath_graph::NodeOp>(
-      builder.getUnknownLoc(), "SumNode", sumNodeType);
+      builder.getUnknownLoc(), "SumNode", sumNodeType, 2, 1);
 
   {
     mlir::OpBuilder::InsertionGuard guard{builder};
     builder.setInsertionPointToStart(&sumNode.getBody().front());
 
     auto context = sumNode.getArgument(sumNode.getNumFuncArguments() - 2);
-    auto tensor = builder.create<mlir::ath_graph::GetTensor>(
+    auto bigTensor = builder.create<mlir::ath_graph::GetTensor>(
         builder.getUnknownLoc(), context, 17, tensorType);
+    auto tensor = builder.create<mlir::ath_graph::SliceOp>(
+        builder.getUnknownLoc(), sumNode.getBatchIndex(), bigTensor);
 
+    auto inpATensor = builder.create<mlir::ath_graph::SliceOp>(
+        builder.getUnknownLoc(), sumNode.getBatchIndex(),
+        sumNode.getArgument(0));
+    auto inpBTensor = builder.create<mlir::ath_graph::SliceOp>(
+        builder.getUnknownLoc(), sumNode.getBatchIndex(),
+        sumNode.getArgument(1));
     builder.create<mlir::ath_graph::AllocOp>(builder.getUnknownLoc(),
                                              tensor.getResult());
     builder.create<mlir::ath_graph::LockOp>(builder.getUnknownLoc(),
                                             builder.getStringAttr("read"),
-                                            sumNode.getArgument(0));
+                                            inpATensor);
     builder.create<mlir::ath_graph::LockOp>(builder.getUnknownLoc(),
                                             builder.getStringAttr("read"),
-                                            sumNode.getArgument(1));
+                                            inpBTensor);
     builder.create<mlir::ath_graph::LockOp>(builder.getUnknownLoc(),
                                             builder.getStringAttr("read_write"),
-                                            tensor.getResult());
+                                            tensor);
 
     auto unit = builder.create<mlir::ConstantFloatOp>(
         builder.getUnknownLoc(), llvm::APFloat(1.0f), builder.getF32Type());
     builder.create<mlir::ath_graph::AddOp>(
-        builder.getUnknownLoc(), tensorType, sumNode.getArgument(0), unit,
-        sumNode.getArgument(1), unit, tensor.getResult());
+        builder.getUnknownLoc(), tensorType, inpATensor, unit,
+        inpBTensor, unit, tensor);
 
     builder.create<mlir::ath_graph::ReleaseOp>(builder.getUnknownLoc(),
-                                               tensor.getResult());
+                                               tensor);
     builder.create<mlir::ath_graph::ReleaseOp>(builder.getUnknownLoc(),
-                                               sumNode.getArgument(0));
+                                               inpATensor);
     builder.create<mlir::ath_graph::ReleaseOp>(builder.getUnknownLoc(),
-                                               sumNode.getArgument(1));
+                                               inpBTensor);
 
     builder.create<mlir::ath_graph::ReturnOp>(builder.getUnknownLoc(),
                                               tensor.getResult());

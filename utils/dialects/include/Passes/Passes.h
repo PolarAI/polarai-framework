@@ -11,13 +11,17 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_ATHENAGRAPHDIALECT_H
-#define ATHENA_ATHENAGRAPHDIALECT_H
+#ifndef ATHENA_PASSES_H
+#define ATHENA_PASSES_H
 
-#include "mlir/IR/Dialect.h"
+#include <memory>
 
-namespace mlir::ath_graph {
-#include "AthenaGraph/AthenaGraphOpsDialect.h.inc"
-} // namespace mlir::ath_graph
+namespace mlir {
 
-#endif // ATHENA_ATHENAGRAPHDIALECT_H
+class ModuleOp;
+template <typename OpT> class OperationPass;
+
+std::unique_ptr<OperationPass<ModuleOp>> createDeployDefaultFunctionsPass();
+}
+
+#endif // ATHENA_PASSES_H

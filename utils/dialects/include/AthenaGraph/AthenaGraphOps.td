@@ -7,35 +7,7 @@ include "mlir/Interfaces/CallInterfaces.td"
 include "mlir/Interfaces/ControlFlowInterfaces.td"
 include "mlir/Interfaces/SideEffects.td"
 
-def AthenaGraph_ModuleOp : AthenaGraph_Op<"module", [IsolatedFromAbove, SymbolTable,
-                                            SingleBlockImplicitTerminator<"ModuleEndOp">]> {
-  let summary = "A top level compilation unit containing host part of Athena Graph";
-  let description = [{
-    Athena Graph module contains code that describes data flow through execution graph.
-
-    The module's top-level scope is modeled by a single region with a single block.
-  }];
-
-  // todo custom printer and parser
-
-  let builders = [OpBuilder<"Builder *builder, OperationState &result">];
-
-  let regions = (region SizedRegion<1>:$body);
-
-  let skipDefaultBuilders = 1;
-}
-
-def AthenaGraph_ModuleEndOp : AthenaGraph_Op<"module_end", [Terminator, HasParent<"ModuleOp">]> {
-  let summary = "A pseudo op that marks end of module";
-  let description = [{
-    This op terminates the only block of region in `ath_graph.module`.
-  }];
-
-  let parser = [{return success();}];
-  let printer = [{ p << getOperationName(); }];
-}
-
-def AthenaGraph_NodeOp : AthenaGraph_Op<"node", [HasParent<"ModuleOp">, AutomaticAllocationScope,
+def AthenaGraph_NodeOp : AthenaGraph_Op<"node", [AutomaticAllocationScope,
                                                  FunctionLike, IsolatedFromAbove, Symbol]> {
   let summary = "Athena Graph Node";
   // todo extend description with samples when dialect is formed.
@@ -52,6 +24,7 @@ def AthenaGraph_NodeOp : AthenaGraph_Op<"node", [HasParent<"ModuleOp">, Automati
 
   let builders = [
     OpBuilder<"Builder *builder, OperationState &result, StringRef name, FunctionType type, "
+              "size_t nodeId, size_t clusterId, "
               "ArrayRef<NamedAttribute> attrs = {}">
   ];
 
@@ -59,10 +32,22 @@ def AthenaGraph_NodeOp : AthenaGraph_Op<"node", [HasParent<"ModuleOp">, Automati
     friend class OpTrait::FunctionLike<NodeOp>;
     unsigned getNumFuncArguments() { return getType().getNumInputs(); }
     unsigned getNumFuncResults() { return getType().getNumResults(); }
+    Value getContext() {
+      return getArgument(getNumFuncArguments() - 2);
+    }
+    Value getBatchIndex() {
+      return getArgument(getNumFuncArguments() - 1);
+    }
+    static StringRef getNodeIdAttrName() {
+      return "node_id";
+    }
+    static StringRef getClusterIdAttrName() {
+      return "cluster_id";
+    }
   }];
 }
 
-def AthenaGraph_GraphOp : AthenaGraph_Op<"graph", [HasParent<"ModuleOp">, AutomaticAllocationScope,
+def AthenaGraph_GraphOp : AthenaGraph_Op<"graph", [AutomaticAllocationScope,
                                                    FunctionLike, IsolatedFromAbove, Symbol,
                                                    SingleBlockImplicitTerminator<"GraphTerminatorOp">]> {
   let summary = "Athena Graph operation";
@@ -84,6 +69,12 @@ def AthenaGraph_GraphOp : AthenaGraph_Op<"graph", [HasParent<"ModuleOp">, Automa
     friend class OpTrait::FunctionLike<GraphOp>;
     unsigned getNumFuncArguments() { return getType().getNumInputs(); }
     unsigned getNumFuncResults() { return getType().getNumResults(); }
+    Value getContext() {
+      return getArgument(getNumFuncArguments() - 2);
+    }
+    Value getBatchSize() {
+      return getArgument(getNumFuncArguments() - 1);
+    }
   }];
 }
 
@@ -231,7 +222,7 @@ def AthenaGraph_LockOp : AthenaGraph_Op<"lock"> {
   }];
 
   // todo change to enum.
-  let arguments = (ins StrAttr:$lockType, AnyTensor:$lockedTensor);
+  let arguments = (ins StrAttr:$lock_type, AnyTensor:$locked_tensor);
 }
 
 def AthenaGraph_ReleaseOp : AthenaGraph_Op<"release"> {

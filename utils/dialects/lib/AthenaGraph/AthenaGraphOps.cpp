@@ -19,24 +19,28 @@
 
 namespace mlir::ath_graph {
 
-void ModuleOp::build(Builder* builder, OperationState& result) {
-  ensureTerminator(*result.addRegion(), *builder, result.location);
-}
-
 void NodeOp::build(Builder* builder, OperationState& result, StringRef name,
-                   FunctionType type, ArrayRef<NamedAttribute> attrs) {
+                   FunctionType type, size_t nodeId, size_t clusterId,
+                   ArrayRef<NamedAttribute> attrs) {
 
-  SmallVector<Type, 5> realArgTypes;
+  SmallVector<Type, 7> realArgTypes;
   std::copy(type.getInputs().begin(), type.getInputs().end(),
             std::back_inserter(realArgTypes));
+  // Context pointer
   realArgTypes.push_back(builder->getIndexType());
+  // Batch index
   realArgTypes.push_back(builder->getIndexType());
+
   auto realFuncType = builder->getFunctionType(realArgTypes, type.getResults());
 
   result.addAttribute(SymbolTable::getSymbolAttrName(),
                       builder->getStringAttr(name));
   result.addAttribute(getTypeAttrName(), TypeAttr::get(realFuncType));
   result.addAttributes(attrs);
+  result.addAttribute(getNodeIdAttrName(),
+                      IntegerAttr::get(builder->getIndexType(), nodeId));
+  result.addAttribute(getClusterIdAttrName(),
+                      IntegerAttr::get(builder->getIndexType(), clusterId));
   Region* body = result.addRegion();
   auto* entryBlock = new Block;
   entryBlock->addArguments(realFuncType.getInputs());
@@ -47,9 +51,11 @@ void NodeOp::build(Builder* builder, OperationState& result, StringRef name,
 void GraphOp::build(Builder* builder, OperationState& result, StringRef name,
                     ArrayRef<NamedAttribute> attrs) {
   llvm::SmallVector<mlir::Type, 2> graphArgs;
-  // fixme this can be wrong on platforms where byte != 8 bits.
-  graphArgs.push_back(builder->getIntegerType(sizeof(void*) * 8));
+  // Context pointer
   graphArgs.push_back(builder->getIndexType());
+  // Batch size
+  graphArgs.push_back(builder->getIndexType());
+
   auto funcType = builder->getFunctionType(graphArgs, {});
 
   result.addAttribute(SymbolTable::getSymbolAttrName(),

@@ -11,13 +11,21 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_ATHENAGRAPHDIALECT_H
-#define ATHENA_ATHENAGRAPHDIALECT_H
+#ifndef ATHENA_LOADERFUNCTIONANALYSIS_H
+#define ATHENA_LOADERFUNCTIONANALYSIS_H
 
-#include "mlir/IR/Dialect.h"
+#include "mlir/IR/Module.h"
+#include <bits/unordered_set.h>
 
-namespace mlir::ath_graph {
-#include "AthenaGraph/AthenaGraphOpsDialect.h.inc"
-} // namespace mlir::ath_graph
+/// Gathers loader function names to deploy function definitions later.
+class LoaderFunctionAnalysis {
+  std::unordered_set<std::string> mLoaders;
 
-#endif // ATHENA_ATHENAGRAPHDIALECT_H
+public:
+  LoaderFunctionAnalysis(mlir::Operation* op);
+  const std::unordered_set<std::string>& getLoaderFunctionNames() const {
+    return mLoaders;
+  }
+};
+
+#endif // ATHENA_LOADERFUNCTIONANALYSIS_H

@@ -11,13 +11,13 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_ATHENAGRAPHDIALECT_H
-#define ATHENA_ATHENAGRAPHDIALECT_H
+#include "LoaderFunctionAnalysis.h"
+#include "AthenaGraph/AthenaGraphOps.h"
 
-#include "mlir/IR/Dialect.h"
+using namespace mlir;
 
-namespace mlir::ath_graph {
-#include "AthenaGraph/AthenaGraphOpsDialect.h.inc"
-} // namespace mlir::ath_graph
-
-#endif // ATHENA_ATHENAGRAPHDIALECT_H
+LoaderFunctionAnalysis::LoaderFunctionAnalysis(mlir::Operation* op) {
+  op->walk([&](ath_graph::InvokeLoaderOp op) {
+    mLoaders.emplace(op.loader_routine().data());
+  });
+}

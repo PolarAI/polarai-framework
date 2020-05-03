@@ -11,13 +11,14 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_ATHENAGRAPHDIALECT_H
-#define ATHENA_ATHENAGRAPHDIALECT_H
+#include "AthenaRuntime/AthenaRuntimeOps.h"
+#include "AthenaRuntime/AthenaRuntimeDialect.h"
+#include "mlir/IR/Builders.h"
+#include "mlir/IR/OpImplementation.h"
+#include "mlir/IR/StandardTypes.h"
 
-#include "mlir/IR/Dialect.h"
+namespace mlir::ath_rt {
 
-namespace mlir::ath_graph {
-#include "AthenaGraph/AthenaGraphOpsDialect.h.inc"
-} // namespace mlir::ath_graph
-
-#endif // ATHENA_ATHENAGRAPHDIALECT_H
+#define GET_OP_CLASSES
+#include "AthenaRuntime/AthenaRuntimeOps.cpp.inc"
+}
