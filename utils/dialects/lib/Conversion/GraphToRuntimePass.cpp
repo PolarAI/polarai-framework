@@ -35,7 +35,6 @@ struct BuiltinToFuncCallLoweringPattern : public OpRewritePattern<OpT> {
     auto device = parentFunc.getArgument(parentFunc.getNumArguments() - 1);
     auto allocator = parentFunc.getArgument(parentFunc.getNumArguments() - 2);
 
-    op.dump();
     auto devVoidPtr = rewriter.create<ath_rt::AnyCastOp>(
         op.getLoc(), LLVM::LLVMType::getVoidTy(llvmDialect).getPointerTo(),
         device);
