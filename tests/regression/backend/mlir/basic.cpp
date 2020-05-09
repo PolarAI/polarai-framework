@@ -52,7 +52,7 @@ std::string matches =
     "(tensor<3xf32>, tensor<3xf32>) -> tensor<3xf32>\n"
     "CHECK-NEXT: \"graph.return\"() : () -> ()\n";
 
-TEST(MLIRRegression, BasicIR) {
+TEST(MLIRRegression, DISABLED_BasicIR) {
 #ifndef DEBUG
   SUCCEED() << "Dumping IR is not supported in Release mode\n";
 #else

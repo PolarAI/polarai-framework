@@ -39,7 +39,7 @@ std::string matches = "CHECK: define void @evaluateGraph()\n"
                       "CHECK: declare void @MemoryLoaderLoad(i64, i64, i64)\n"
                       "CHECK: define void @optimizeGraph()\n";
 
-TEST(LLVMRegression, BasicIR) {
+TEST(LLVMRegression, DISABLED_BasicIR) {
 #ifndef DEBUG
   SUCCEED() << "Dumping IR is not supported in Release mode\n";
 #else

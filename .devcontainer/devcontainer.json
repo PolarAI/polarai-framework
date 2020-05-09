@@ -1,0 +1,9 @@
+{
+    "name": "Athena Dev Env",
+	"image": "docker.pkg.github.com/athenaml/devenv/ubuntu:5db",
+	"extensions": [
+		"ms-vscode.cmake-tools",
+		"jakob-erzar.llvm-tablegen"
+	],
+	"postCreateCommand": "apt update && apt -yqq install gdb"
+}

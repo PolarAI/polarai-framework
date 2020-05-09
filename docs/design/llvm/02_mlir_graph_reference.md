@@ -23,10 +23,10 @@ The shapes of the tensor operands are expected to match.
 
 | Attribute | MLIR Type | Description |
 | :-------: | :-------: | ----------- |
-| `tensor_addr` | `IntegerAttr` | 64-bit integer attribute attribute |
-| `node_id` | `IntegerAttr` | 64-bit integer attribute attribute |
+| `tensor_addr` | `IntegerAttr` | 64-bit signless integer attribute attribute |
+| `node_id` | `IntegerAttr` | 64-bit signless integer attribute attribute |
 | `node_name` | `StringAttr` | string attribute attribute |
-| `cluster_id` | `IntegerAttr` | 64-bit integer attribute attribute |
+| `cluster_id` | `IntegerAttr` | 64-bit signless integer attribute attribute |
 
 #### Results:
 
@@ -47,10 +47,10 @@ The `graph.alloca` operation performs memory allocation for tensor.
 
 | Attribute | MLIR Type | Description |
 | :-------: | :-------: | ----------- |
-| `tensor_addr` | `IntegerAttr` | 64-bit integer attribute attribute |
-| `node_id` | `IntegerAttr` | 64-bit integer attribute attribute |
+| `tensor_addr` | `IntegerAttr` | 64-bit signless integer attribute attribute |
+| `node_id` | `IntegerAttr` | 64-bit signless integer attribute attribute |
 | `node_name` | `StringAttr` | string attribute attribute |
-| `cluster_id` | `IntegerAttr` | 64-bit integer attribute attribute |
+| `cluster_id` | `IntegerAttr` | 64-bit signless integer attribute attribute |
 
 #### Results:
 
@@ -74,10 +74,10 @@ This is useful for loader invocation and user-defined operations.
 | Attribute | MLIR Type | Description |
 | :-------: | :-------: | ----------- |
 | `callee` | `FlatSymbolRefAttr` | flat symbol reference attribute attribute |
-| `tensor_addr` | `IntegerAttr` | 64-bit integer attribute attribute |
-| `node_id` | `IntegerAttr` | 64-bit integer attribute attribute |
+| `tensor_addr` | `IntegerAttr` | 64-bit signless integer attribute attribute |
+| `node_id` | `IntegerAttr` | 64-bit signless integer attribute attribute |
 | `node_name` | `StringAttr` | string attribute attribute |
-| `cluster_id` | `IntegerAttr` | 64-bit integer attribute attribute |
+| `cluster_id` | `IntegerAttr` | 64-bit signless integer attribute attribute |
 
 #### Results:
 
@@ -109,10 +109,10 @@ C = alpha * A * B + beta * C
 | :-------: | :-------: | ----------- |
 | `transposeA` | `BoolAttr` | bool attribute attribute |
 | `transposeB` | `BoolAttr` | bool attribute attribute |
-| `tensor_addr` | `IntegerAttr` | 64-bit integer attribute attribute |
-| `node_id` | `IntegerAttr` | 64-bit integer attribute attribute |
+| `tensor_addr` | `IntegerAttr` | 64-bit signless integer attribute attribute |
+| `node_id` | `IntegerAttr` | 64-bit signless integer attribute attribute |
 | `node_name` | `StringAttr` | string attribute attribute |
-| `cluster_id` | `IntegerAttr` | 64-bit integer attribute attribute |
+| `cluster_id` | `IntegerAttr` | 64-bit signless integer attribute attribute |
 
 #### Results:
 
@@ -134,10 +134,10 @@ preventing it from being forced out by other memory operations.
 
 | Attribute | MLIR Type | Description |
 | :-------: | :-------: | ----------- |
-| `tensor_addr` | `IntegerAttr` | 64-bit integer attribute attribute |
-| `node_id` | `IntegerAttr` | 64-bit integer attribute attribute |
+| `tensor_addr` | `IntegerAttr` | 64-bit signless integer attribute attribute |
+| `node_id` | `IntegerAttr` | 64-bit signless integer attribute attribute |
 | `node_name` | `StringAttr` | string attribute attribute |
-| `cluster_id` | `IntegerAttr` | 64-bit integer attribute attribute |
+| `cluster_id` | `IntegerAttr` | 64-bit signless integer attribute attribute |
 
 #### Results:
 
@@ -157,10 +157,10 @@ The `graph.memrelease` operation marks memory region as free.
 
 | Attribute | MLIR Type | Description |
 | :-------: | :-------: | ----------- |
-| `tensor_addr` | `IntegerAttr` | 64-bit integer attribute attribute |
-| `node_id` | `IntegerAttr` | 64-bit integer attribute attribute |
+| `tensor_addr` | `IntegerAttr` | 64-bit signless integer attribute attribute |
+| `node_id` | `IntegerAttr` | 64-bit signless integer attribute attribute |
 | `node_name` | `StringAttr` | string attribute attribute |
-| `cluster_id` | `IntegerAttr` | 64-bit integer attribute attribute |
+| `cluster_id` | `IntegerAttr` | 64-bit signless integer attribute attribute |
 
 #### Results:
 
@@ -183,10 +183,10 @@ The shapes of the tensor operands are expected to match.
 
 | Attribute | MLIR Type | Description |
 | :-------: | :-------: | ----------- |
-| `tensor_addr` | `IntegerAttr` | 64-bit integer attribute attribute |
-| `node_id` | `IntegerAttr` | 64-bit integer attribute attribute |
+| `tensor_addr` | `IntegerAttr` | 64-bit signless integer attribute attribute |
+| `node_id` | `IntegerAttr` | 64-bit signless integer attribute attribute |
 | `node_name` | `StringAttr` | string attribute attribute |
-| `cluster_id` | `IntegerAttr` | 64-bit integer attribute attribute |
+| `cluster_id` | `IntegerAttr` | 64-bit signless integer attribute attribute |
 
 #### Results:
 
@@ -224,9 +224,9 @@ Mark tensor as non-removable
 
 | Attribute | MLIR Type | Description |
 | :-------: | :-------: | ----------- |
-| `node_id` | `IntegerAttr` | 64-bit integer attribute attribute |
+| `node_id` | `IntegerAttr` | 64-bit signless integer attribute attribute |
 | `node_name` | `StringAttr` | string attribute attribute |
-| `cluster_id` | `IntegerAttr` | 64-bit integer attribute attribute |
+| `cluster_id` | `IntegerAttr` | 64-bit signless integer attribute attribute |
 
 #### Results:
 

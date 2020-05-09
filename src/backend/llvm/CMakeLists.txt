@@ -56,7 +56,6 @@ llvm_map_components_to_libnames(llvm_libs
         passes
         codegen
         orcjit
-        AsmPrinter
         AllTargetsCodeGens
         AllTargetsAsmParsers
         AllTargetsDescs

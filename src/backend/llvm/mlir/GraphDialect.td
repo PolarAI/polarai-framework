@@ -2,6 +2,7 @@
 #define GRAPH_OPS
 
 include "mlir/IR/OpBase.td"
+include "mlir/Interfaces/SideEffects.td"
 
 def Graph_Dialect : Dialect {
   let name = "graph";

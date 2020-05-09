@@ -13,7 +13,7 @@ llvm_map_components_to_libnames(llvm_libs
         passes
         codegen
         orcjit
-        AllTargetsCodeGens AllTargetsAsmPrinters AllTargetsAsmParsers AllTargetsDescs AllTargetsInfos
+        AllTargetsCodeGens AllTargetsAsmParsers AllTargetsDescs AllTargetsInfos
         lto)
 
 add_athena_integration_test(
