@@ -16,7 +16,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: 
-      image: docker.pkg.github.com/athenaml/devenv/ubuntu:678
+      image: athenaml/ubuntu:2020051008164015a1da
       volumes:
         - ${{ github.workspace }}:${{ github.workspace }}
     strategy:
