@@ -24,6 +24,7 @@
 #include <athena/core/Optimizer.h>
 
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
+#include "llvm/Support/Host.h"
 
 #include <algorithm>
 

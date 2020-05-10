@@ -29,6 +29,7 @@ public:
 class MockDevice : public Device {
 private:
   MockQueue mQueue;
+
 public:
   std::string getDeviceName() const override { return "Mock"; }
   bool isPartitionSupported(PartitionDomain domain) override { return false; }
@@ -82,6 +83,7 @@ TEST(LLVMBackend, LayerAllocatorDeviceDoubleLock) {
   inner::Tensor tensor(DataType::FLOAT, {30}, ctx);
 
   allocator.allocate(tensor, device);
-  allocator.lock(tensor, device);
-  ASSERT_DEATH(allocator.lock(tensor, device), "Tensor is already locked");
+  allocator.lock(tensor, device, LockType::READ);
+  ASSERT_DEATH(allocator.lock(tensor, device, LockType::READ_WRITE),
+               "Attempt get READ_WRITE lock for tensor that is already locked");
 }

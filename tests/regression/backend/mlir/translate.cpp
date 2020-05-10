@@ -61,7 +61,7 @@ const std::string matches =
     "CHECK: call void @athn_add_f(i64* %3, i64* %4, i64* %5, i64* %6)\n"
     "CHECK: ret void";
 
-TEST(MLIRRegression, TranslatesCorrectlyToLLVM) {
+TEST(MLIRRegression, DISABLED_TranslatesCorrectlyToLLVM) {
   llvm::LLVMContext llvmContext;
   llvm::Module llvmModule("test", llvmContext);
 

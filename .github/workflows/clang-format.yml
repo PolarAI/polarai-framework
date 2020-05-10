@@ -1,0 +1,25 @@
+name: clang-format
+
+on:
+  pull_request:
+
+jobs:
+  clang-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Get clang-format
+        run: sudo apt-get install -yqq clang-format-9
+      - name: Run clang-format
+        run: |
+          git clang-format-9 origin/${{ github.base_ref }}
+          git diff > clang-fromat.diff
+          touch clang-format.diff
+      - uses: actions/upload-artifact@v1
+        with:
+          name: clang-format
+          path: ./clang-format.diff
+      - name: Check if clang-format is empty
+        run: bash -c "if [ -s ./clang-format.diff ]; then cat ./clang-format.diff; exit 1; fi"
+
+  

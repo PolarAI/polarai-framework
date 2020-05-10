@@ -16,6 +16,7 @@
 #include "llvm/IR/Verifier.h"
 
 #include <llvm/Target/TargetMachine.h>
+#include <llvm/Support/Host.h>
 
 namespace athena::backend::llvm {
 

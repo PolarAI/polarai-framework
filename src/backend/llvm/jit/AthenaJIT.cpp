@@ -38,7 +38,7 @@ namespace athena::backend::llvm {
 AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
                      ::llvm::DataLayout&& DL)
     : mDataLayout(DL), mMangle(mExecutionSession, mDataLayout),
-      mMainJD(mExecutionSession.createJITDylib("<main>")),
+      mMainJD(mExecutionSession.createBareJITDylib("<main>")),
       mContext(std::make_unique<::llvm::LLVMContext>()) {
   ::llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
 

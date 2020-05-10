@@ -1,0 +1,11 @@
+{
+    "cmake.configureOnOpen": true,
+    "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools",
+    "clangd.semanticHighlighting": true,
+    "C_Cpp.autocomplete": "Disabled",
+    "C_Cpp.clang_format_sortIncludes": true,
+    "C_Cpp.codeFolding": "Disabled",
+    "C_Cpp.errorSquiggles": "Disabled",
+    "C_Cpp.intelliSenseEngine": "Disabled",
+    "clangd.arguments": ["-log=verbose", "-pretty", "--background-index", "--compile-commands-dir=${workspaceFolder}/build/"]
+}

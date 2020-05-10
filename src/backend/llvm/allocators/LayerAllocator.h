@@ -26,10 +26,17 @@
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
+#include <list>
 
 namespace athena::backend::llvm {
 
 enum class MemoryDomain { Swap, RAM, Device };
+
+struct LockDescriptor {
+  core::LockType lockType;
+  MemoryDomain domain;
+  Device* device;
+};
 
 /// LayerAllocator implements layered allocation strategy for LLVM backend.
 ///
@@ -51,30 +58,40 @@ private:
 
   std::unordered_map<std::string, std::shared_ptr<AllocatorLayerBase>>
       mDeviceAllocators;
-  std::unordered_map<MemoryRecord, MemoryDomain> mLockDomainMap;
-  // todo replace map with another structure to allow memory on multiple devices
-  std::unordered_map<MemoryRecord, Device*> mDeviceMap;
-  std::unordered_set<MemoryRecord> mRAMSet;
-  std::unordered_map<MemoryRecord, std::string> mSwapMap;
-
+  std::unordered_map<std::string, Device*> mDevices;
   std::unique_ptr<AllocatorLayerBase> mRAMAllocator;
 
-  bool isAllocated(const MemoryRecord& record);
+  // fixme unordered_map and list are probably bad performers for this job.
+  std::unordered_map<MemoryRecord, std::list<LockDescriptor>> mLocks;
 
-  MemoryDomain getAllocationDomain(const MemoryRecord& record);
+  std::unordered_map<MemoryRecord, int> mMemTags;
+
+//  std::unordered_map<MemoryRecord, MemoryDomain> mLockDomainMap;
+//  // todo replace map with another structure to allow memory on multiple devices
+//  std::unordered_map<MemoryRecord, Device*> mDeviceMap;
+//  std::unordered_set<MemoryRecord> mRAMSet;
+//  std::unordered_map<MemoryRecord, std::string> mSwapMap;
+
+  void updateHost(MemoryRecord record);
 
 public:
   LayerAllocator() : mRAMAllocator(std::make_unique<TrivialAllocator>()) {}
   ~LayerAllocator() override = default;
   void registerDevice(Device& device) override;
+
   void allocate(const core::inner::Tensor& tensor, Device& device) override;
-  void lock(const core::inner::Tensor& tensor, Device& device) override;
   void allocate(const core::inner::Tensor& tensor) override;
   void allocate(MemoryRecord record);
+
   void deallocate(const core::inner::Tensor& tensor) override;
-  void* get(const core::inner::Tensor& tensor) override;
-  void lock(const core::inner::Tensor& tensor) override;
+
+  void lock(const core::inner::Tensor& tensor, core::LockType type) override;
+  void lock(const core::inner::Tensor& tensor, Device& device, core::LockType type) override;
+
   void release(const core::inner::Tensor& tensor) override;
+  void release(const core::inner::Tensor& tensor, Device& device);
+
+  void* get(const core::inner::Tensor& tensor) override;
   using BackendAllocator::get;
 
 protected:

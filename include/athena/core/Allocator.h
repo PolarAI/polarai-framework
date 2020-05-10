@@ -21,6 +21,11 @@
 
 namespace athena::core {
 
+enum class LockType {
+  READ,
+  READ_WRITE
+};
+
 /// Basic Allocator interface for backends.
 class ATH_CORE_EXPORT Allocator {
 public:
@@ -38,7 +43,7 @@ public:
   /// Locks tensor in RAM.
   ///
   /// Locked tensors can not be moved to other memory domain or deallocated.
-  virtual void lock(const inner::Tensor& tensor) = 0;
+  virtual void lock(const inner::Tensor& tensor, LockType type) = 0;
 
   /// Releases tensor memory object.
   virtual void release(const inner::Tensor& tensor) = 0;

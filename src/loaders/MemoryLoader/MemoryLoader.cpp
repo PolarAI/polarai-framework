@@ -40,7 +40,7 @@ MemoryLoader::operator=(athena::loaders::MemoryLoader&& src) noexcept {
 
 void MemoryLoader::load(core::Allocator* allocator,
                         core::inner::Tensor* tensor) {
-  allocator->lock(*tensor);
+  allocator->lock(*tensor, core::LockType::READ_WRITE);
   auto pointer = allocator->get(*tensor);
 
   athena_assert(pointer, "MemoryLoader pointer is NULL");

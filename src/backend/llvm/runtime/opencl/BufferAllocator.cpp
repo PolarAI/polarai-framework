@@ -41,6 +41,7 @@ void BufferAllocator::allocate(MemoryRecord record) {
   }
 
   mBuffers[record] = buffer;
+  mTags[record] = 1;
 }
 void BufferAllocator::deallocate(MemoryRecord record) {
   if (mLockedAllocations.count(record)) {
@@ -61,6 +62,7 @@ void BufferAllocator::deallocate(MemoryRecord record) {
 
   clReleaseMemObject(mBuffers[record]);
   mBuffers.erase(record);
+  mTags[record] = 0;
 }
 void athena::backend::llvm::BufferAllocator::lock(MemoryRecord record) {
   mLockedAllocations.insert(record);
@@ -83,10 +85,17 @@ void BufferAllocator::freeMemory(MemoryRecord record) {
       new core::FatalError(core::ATH_FATAL_OTHER, "Out of memory!");
     MemoryRecord alloc = *mReleasedAllocations.begin();
     freedMem += alloc.allocationSize;
-    mCallback(alloc);
+    mCallback(alloc, *this);
     clReleaseMemObject(mBuffers[alloc]);
     mBuffers.erase(alloc);
     mReleasedAllocations.erase(alloc);
   }
+}
+bool BufferAllocator::isAllocated(const MemoryRecord& record) const {
+  return mBuffers.count(record) > 0;
+}
+size_t BufferAllocator::getTag(MemoryRecord record) { return mTags[record]; }
+void BufferAllocator::setTag(MemoryRecord record, size_t tag) {
+  mTags[record] = tag;
 }
 } // namespace athena::backend::llvm

@@ -28,6 +28,7 @@ private:
   std::unordered_map<MemoryRecord, void*> mMemMap;
   std::unordered_set<MemoryRecord> mLockedAllocations;
   std::unordered_set<MemoryRecord> mReleasedAllocations;
+  std::unordered_map<MemoryRecord, int> mTags;
 
   void freeMemory(MemoryRecord record) {
     size_t freedMem = 0;
@@ -36,7 +37,7 @@ private:
         new core::FatalError(core::ATH_FATAL_OTHER, "Out of memory!");
       MemoryRecord alloc = *mReleasedAllocations.begin();
       freedMem += alloc.allocationSize;
-      mOffloadCallback(alloc);
+      mOffloadCallback(alloc, *this);
       delete[] static_cast<unsigned char*>(mMemMap[alloc]);
       mMemMap.erase(alloc);
       mReleasedAllocations.erase(alloc);
@@ -44,8 +45,10 @@ private:
   }
 
 public:
+  ~TrivialAllocator() override = default;
+
   void registerMemoryOffloadCallback(
-      std::function<void(MemoryRecord)> function) override {}
+      MemoryOffloadCallbackT function) override {}
   void allocate(MemoryRecord record) override {
     if (mMemMap.count(record))
       return; // no double allocations are allowed
@@ -59,6 +62,7 @@ public:
       new core::FatalError(core::ATH_FATAL_OTHER,
                            "Failed to allocate RAM memory!");
     mMemMap[record] = mem;
+    mTags[record] = 1;
   }
   void deallocate(MemoryRecord record) override {
     if (mLockedAllocations.count(record)) {
@@ -71,6 +75,7 @@ public:
     if (mReleasedAllocations.count(record)) {
       mReleasedAllocations.erase(record);
     }
+    mTags[record] = 0;
   }
   void lock(MemoryRecord record) override { mLockedAllocations.insert(record); }
   void release(MemoryRecord record) override {
@@ -79,6 +84,18 @@ public:
   }
 
   void* getPtr(MemoryRecord record) override { return mMemMap[record]; }
+
+  bool isAllocated(const MemoryRecord& record) const override {
+    return mMemMap.count(record) > 0;
+  }
+
+  size_t getTag(MemoryRecord record) override {
+    return mTags[record];
+  }
+
+  void setTag(MemoryRecord record, size_t tag) override {
+    mTags[record] = tag;
+  }
 };
 } // namespace athena::backend::llvm
 

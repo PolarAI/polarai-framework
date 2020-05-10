@@ -2,6 +2,7 @@
 #define GRAPH_OPS
 
 include "mlir/IR/OpBase.td"
+include "mlir/Interfaces/SideEffects.td"
 
 def Graph_Dialect : Dialect {
   let name = "graph";
@@ -32,7 +33,7 @@ def CallOp : Graph_Op<"call"> {
 
   // Add custom build methods for the generic call operation.
   let builders = [
-    OpBuilder<"Builder *builder, OperationState &state, "
+    OpBuilder<"OpBuilder &builder, OperationState &state, "
               "StringRef callee, ArrayRef<Value> arguments">
   ];
 }
@@ -63,7 +64,7 @@ def AddOp : Graph_Op<"add", [NoSideEffect]> {
                    I64Attr:$cluster_id);
   let results = (outs AnyTensor);
 
-  let builders = [OpBuilder<"Builder *builder, OperationState &result, "
+  let builders = [OpBuilder<"OpBuilder &builder, OperationState &result, "
                                 "const Value &a, "
                                 "const Value &b, "
                                 "const core::inner::Tensor &c, "
@@ -82,7 +83,7 @@ def MulOp : Graph_Op<"mul", [NoSideEffect]> {
                    I64Attr:$cluster_id);
   let results = (outs AnyTensor);
 
-  let builders = [OpBuilder<"Builder *builder, OperationState &result, "
+  let builders = [OpBuilder<"OpBuilder &builder, OperationState &result, "
                                   "const Value &a, "
                                   "const Value &b, "
                                   "const core::inner::Tensor &c, "
@@ -107,7 +108,7 @@ def MatmulOp : Graph_Op<"matmul", [NoSideEffect]> {
                    I64Attr:$cluster_id);
   let results = (outs 2DTensorOf<[AnyType]>);
 
-  let builders = [OpBuilder<"Builder *builder, OperationState &result, "
+  let builders = [OpBuilder<"OpBuilder &builder, OperationState &result, "
                                   "const Value &a, "
                                   "const Value &b, "
                                   "bool transposeA, bool transposeB, "
@@ -132,7 +133,7 @@ def AllocaOp : Graph_Op<"alloca", [NoSideEffect]> {
                      StrAttr:$node_name,
                      I64Attr:$cluster_id);
     let results = (outs AnyTensor);
-    let builders = [OpBuilder<"Builder *builder, OperationState &result, "
+    let builders = [OpBuilder<"OpBuilder &builder, OperationState &result, "
                               "const core::inner::Tensor &tensor, "
                               "int64_t node_id, StringRef node_name, int64_t cluster_id">];
 }

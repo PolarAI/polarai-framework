@@ -22,7 +22,7 @@ struct MemoryRecord;
 
 class AllocatorLayerBase {
 public:
-  using MemoryOffloadCallbackT = std::function<void(MemoryRecord)>;
+  using MemoryOffloadCallbackT = std::function<void(MemoryRecord, AllocatorLayerBase& layer)>;
 
   virtual ~AllocatorLayerBase() = default;
 
@@ -34,5 +34,8 @@ public:
   virtual void lock(MemoryRecord record) = 0;
   virtual void release(MemoryRecord record) = 0;
   virtual void* getPtr(MemoryRecord record) = 0;
+  virtual bool isAllocated(const MemoryRecord& record) const = 0;
+  virtual size_t getTag(MemoryRecord record) = 0;
+  virtual void setTag(MemoryRecord record, size_t tag) = 0;
 };
-}
+} // namespace athena::backend::llvm

@@ -1,0 +1,11 @@
+{
+    "name": "Athena Dev Env",
+	"image": "athenaml/ubuntu:20200510090552f69f93",
+	"extensions": [
+		"ms-vscode.cmake-tools",
+		"jakob-erzar.llvm-tablegen",
+		"llvm-vs-code-extensions.vscode-clangd",
+		"ms-vscode.cpptools"
+	],
+	"postCreateCommand": "apt update && apt -yqq install gdb"
+}

@@ -38,6 +38,9 @@ public:
   void lock(MemoryRecord record) override;
   void release(MemoryRecord record) override;
   void* getPtr(MemoryRecord record) override;
+  bool isAllocated(const MemoryRecord& record) const override;
+  size_t getTag(MemoryRecord record) override;
+  void setTag(MemoryRecord record, size_t tag) override;
 
 private:
   void freeMemory(MemoryRecord record);
@@ -47,6 +50,7 @@ private:
   std::unordered_map<MemoryRecord, cl_mem> mBuffers;
   std::unordered_set<MemoryRecord> mLockedAllocations;
   std::unordered_set<MemoryRecord> mReleasedAllocations;
+  std::unordered_map<MemoryRecord, int> mTags;
 };
 }
 

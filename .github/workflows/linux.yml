@@ -1,0 +1,51 @@
+name: Linux Checks
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+      - develop
+  schedule:
+    - cron: "0 3 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: 
+      image: athenaml/ubuntu:20200510090552f69f93
+      volumes:
+        - ${{ github.workspace }}:${{ github.workspace }}
+    strategy:
+      matrix:
+        build_type: ["Release", "Debug"]
+        compiler: [ ["clang", "clang++"] ]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        env:
+          CC: ${{ matrix.compiler[0] }}
+          CXX: ${{ matrix.compiler[1] }}
+          ATHENA_BINARY_DIR: ${{ github.workspace }}/install_${{ matrix.build_type }}
+        run: |
+          mkdir -p build_${{ matrix.build_type }}
+          mkdir -p install_${{ matrix.build_type }}
+          python3 ./scripts/build.py \
+          --install-dir="${{ github.workspace }}/install_${{ matrix.build_type }}" \
+          --build-type="${{ matrix.build_type }}" --ninja \
+          ${{ github.workspace }}/build_${{ matrix.build_type }} \
+          ${{ github.workspace }}
+      - name: Install
+        run: |
+          cmake --build build_${{ matrix.build_type }} --target install
+      - name: Test
+        env:
+          ATHENA_TEST_ENVIRONMENT: "ci"
+          ATHENA_BINARY_DIR: ${{ github.workspace }}/install_${{ matrix.build_type }}
+        run: |
+          cd build_${{ matrix.build_type }}
+          ctest -VV -T Test

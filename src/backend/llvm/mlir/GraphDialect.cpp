@@ -29,14 +29,14 @@ athena::backend::llvm::GraphDialect::GraphDialect(mlir::MLIRContext* ctx)
       >();
 }
 
-void athena::backend::llvm::CallOp::build(mlir::Builder* builder,
+void athena::backend::llvm::CallOp::build(mlir::OpBuilder& builder,
                                           mlir::OperationState& state,
                                           llvm::StringRef callee,
                                           ArrayRef<mlir::Value> arguments) {
   // Generic call always returns an unranked Tensor initially.
-  state.addTypes(UnrankedTensorType::get(builder->getF64Type()));
+  state.addTypes(UnrankedTensorType::get(builder.getF64Type()));
   state.addOperands(arguments);
-  state.addAttribute("callee", builder->getSymbolRefAttr(callee));
+  state.addAttribute("callee", builder.getSymbolRefAttr(callee));
 }
 
 static mlir::Type athenaToMlirType(athena::core::DataType dataType,
@@ -54,7 +54,7 @@ static mlir::Type athenaToMlirType(athena::core::DataType dataType,
 }
 
 void athena::backend::llvm::AllocaOp::build(
-    mlir::Builder* builder, OperationState& result,
+    mlir::OpBuilder& builder, OperationState& result,
     const athena::core::inner::Tensor& tensor, int64_t node_id,
     StringRef node_name, int64_t cluster_id) {
   std::vector<int64_t> shape;
@@ -62,13 +62,13 @@ void athena::backend::llvm::AllocaOp::build(
                  std::back_inserter(shape),
                  [&](const size_t item) { return static_cast<int64_t>(item); });
 
-  Type type = athenaToMlirType(tensor.getDataType(), builder->getContext());
+  Type type = athenaToMlirType(tensor.getDataType(), builder.getContext());
   auto resType = RankedTensorType::get(shape, type);
   result.addTypes(resType);
-  auto tensorAddrAttr = builder->getI64IntegerAttr(tensor.getVirtualAddress());
-  auto nodeIdAttr = builder->getI64IntegerAttr(node_id);
-  auto clusterIdAttr = builder->getI64IntegerAttr(cluster_id);
-  auto nodeNameAttr = builder->getStringAttr(node_name);
+  auto tensorAddrAttr = builder.getI64IntegerAttr(tensor.getVirtualAddress());
+  auto nodeIdAttr = builder.getI64IntegerAttr(node_id);
+  auto clusterIdAttr = builder.getI64IntegerAttr(cluster_id);
+  auto nodeNameAttr = builder.getStringAttr(node_name);
 
   result.addAttribute("tensor_addr", tensorAddrAttr);
   result.addAttribute("node_id", nodeIdAttr);
@@ -77,7 +77,7 @@ void athena::backend::llvm::AllocaOp::build(
 }
 
 void athena::backend::llvm::AddOp::build(
-    mlir::Builder* builder, OperationState& result, const mlir::Value& a,
+    mlir::OpBuilder& builder, OperationState& result, const mlir::Value& a,
     const mlir::Value& b, const athena::core::inner::Tensor& c, int64_t node_id,
     StringRef node_name, int64_t cluster_id) {
   result.addOperands({a, b});
@@ -87,13 +87,13 @@ void athena::backend::llvm::AddOp::build(
                  std::back_inserter(shape),
                  [&](const size_t item) { return static_cast<int64_t>(item); });
 
-  Type type = athenaToMlirType(c.getDataType(), builder->getContext());
+  Type type = athenaToMlirType(c.getDataType(), builder.getContext());
   auto resType = RankedTensorType::get(shape, type);
   result.addTypes(resType);
-  auto tensorAddrAttr = builder->getI64IntegerAttr(c.getVirtualAddress());
-  auto nodeIdAttr = builder->getI64IntegerAttr(node_id);
-  auto clusterIdAttr = builder->getI64IntegerAttr(cluster_id);
-  auto nodeNameAttr = builder->getStringAttr(node_name);
+  auto tensorAddrAttr = builder.getI64IntegerAttr(c.getVirtualAddress());
+  auto nodeIdAttr = builder.getI64IntegerAttr(node_id);
+  auto clusterIdAttr = builder.getI64IntegerAttr(cluster_id);
+  auto nodeNameAttr = builder.getStringAttr(node_name);
 
   result.addAttribute("tensor_addr", tensorAddrAttr);
   result.addAttribute("node_id", nodeIdAttr);
@@ -102,7 +102,7 @@ void athena::backend::llvm::AddOp::build(
 }
 
 void athena::backend::llvm::MulOp::build(
-    mlir::Builder* builder, OperationState& result, const mlir::Value& a,
+    mlir::OpBuilder& builder, OperationState& result, const mlir::Value& a,
     const mlir::Value& b, const athena::core::inner::Tensor& c, int64_t node_id,
     StringRef node_name, int64_t cluster_id) {
   result.addOperands({a, b});
@@ -112,13 +112,13 @@ void athena::backend::llvm::MulOp::build(
                  std::back_inserter(shape),
                  [&](const size_t item) { return static_cast<int64_t>(item); });
 
-  Type type = athenaToMlirType(c.getDataType(), builder->getContext());
+  Type type = athenaToMlirType(c.getDataType(), builder.getContext());
   auto resType = RankedTensorType::get(shape, type);
   result.addTypes(resType);
-  auto tensorAddrAttr = builder->getI64IntegerAttr(c.getVirtualAddress());
-  auto nodeIdAttr = builder->getI64IntegerAttr(node_id);
-  auto clusterIdAttr = builder->getI64IntegerAttr(cluster_id);
-  auto nodeNameAttr = builder->getStringAttr(node_name);
+  auto tensorAddrAttr = builder.getI64IntegerAttr(c.getVirtualAddress());
+  auto nodeIdAttr = builder.getI64IntegerAttr(node_id);
+  auto clusterIdAttr = builder.getI64IntegerAttr(cluster_id);
+  auto nodeNameAttr = builder.getStringAttr(node_name);
 
   result.addAttribute("tensor_addr", tensorAddrAttr);
   result.addAttribute("node_id", nodeIdAttr);
@@ -127,7 +127,7 @@ void athena::backend::llvm::MulOp::build(
 }
 
 void athena::backend::llvm::MatmulOp::build(
-    mlir::Builder* builder, OperationState& result, const mlir::Value& a,
+    mlir::OpBuilder& builder, OperationState& result, const mlir::Value& a,
     const mlir::Value& b, bool transposeA, bool transposeB, uint64_t alpha,
     uint64_t beta, const athena::core::inner::Tensor& c, int64_t node_id,
     StringRef node_name, int64_t cluster_id) {
@@ -138,25 +138,25 @@ void athena::backend::llvm::MatmulOp::build(
                  std::back_inserter(shape),
                  [&](const size_t item) { return static_cast<int64_t>(item); });
 
-  Type type = athenaToMlirType(c.getDataType(), builder->getContext());
+  Type type = athenaToMlirType(c.getDataType(), builder.getContext());
   auto resType = RankedTensorType::get(shape, type);
   result.addTypes(resType);
-  auto tensorAddrAttr = builder->getI64IntegerAttr(c.getVirtualAddress());
-  auto nodeIdAttr = builder->getI64IntegerAttr(node_id);
-  auto clusterIdAttr = builder->getI64IntegerAttr(cluster_id);
-  auto nodeNameAttr = builder->getStringAttr(node_name);
-  auto trasnpAAttr = builder->getBoolAttr(transposeA);
-  auto trasnpBAttr = builder->getBoolAttr(transposeB);
+  auto tensorAddrAttr = builder.getI64IntegerAttr(c.getVirtualAddress());
+  auto nodeIdAttr = builder.getI64IntegerAttr(node_id);
+  auto clusterIdAttr = builder.getI64IntegerAttr(cluster_id);
+  auto nodeNameAttr = builder.getStringAttr(node_name);
+  auto trasnpAAttr = builder.getBoolAttr(transposeA);
+  auto trasnpBAttr = builder.getBoolAttr(transposeB);
   mlir::Attribute alphaAttr, betaAttr;
 
   switch (c.getDataType()) {
   case core::DataType::FLOAT:
-    alphaAttr = builder->getF32FloatAttr(*reinterpret_cast<float*>(&alpha));
-    betaAttr = builder->getF32FloatAttr(*reinterpret_cast<float*>(&beta));
+    alphaAttr = builder.getF32FloatAttr(*reinterpret_cast<float*>(&alpha));
+    betaAttr = builder.getF32FloatAttr(*reinterpret_cast<float*>(&beta));
     break;
   case core::DataType::DOUBLE:
-    alphaAttr = builder->getF64FloatAttr(*reinterpret_cast<double*>(&alpha));
-    betaAttr = builder->getF64FloatAttr(*reinterpret_cast<double*>(&beta));
+    alphaAttr = builder.getF64FloatAttr(*reinterpret_cast<double*>(&alpha));
+    betaAttr = builder.getF64FloatAttr(*reinterpret_cast<double*>(&beta));
     break;
   default:
     llvm_unreachable("Unsupported type");
