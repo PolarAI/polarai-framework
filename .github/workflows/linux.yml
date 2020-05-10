@@ -34,7 +34,7 @@ jobs:
         run: |
           mkdir -p build_${{ matrix.build_type }}
           mkdir -p install_${{ matrix.build_type }}
-          ./scripts/build.py \
+          python3 ./scripts/build.py \
           --install-dir="${{ github.workspace }}/install_${{ matrix.build_type }}" \
           --build-type="${{ matrix.build_type }}" --ninja \
           ${{ github.workspace }}/build_${{ matrix.build_type }} \
