@@ -3,6 +3,7 @@
 
 include "AthenaGraphDialect.td"
 include "mlir/IR/OpAsmInterface.td"
+include "mlir/IR/SymbolInterfaces.td"
 include "mlir/Interfaces/CallInterfaces.td"
 include "mlir/Interfaces/ControlFlowInterfaces.td"
 include "mlir/Interfaces/SideEffects.td"
@@ -23,7 +24,7 @@ def AthenaGraph_NodeOp : AthenaGraph_Op<"node", [AutomaticAllocationScope,
   let skipDefaultBuilders = 1;
 
   let builders = [
-    OpBuilder<"Builder *builder, OperationState &result, StringRef name, FunctionType type, "
+    OpBuilder<"OpBuilder& builder, OperationState &result, StringRef name, FunctionType type, "
               "size_t nodeId, size_t clusterId, "
               "ArrayRef<NamedAttribute> attrs = {}">
   ];
@@ -61,7 +62,7 @@ def AthenaGraph_GraphOp : AthenaGraph_Op<"graph", [AutomaticAllocationScope,
   let skipDefaultBuilders = 1;
 
   let builders = [
-    OpBuilder<"Builder *builder, OperationState &result, StringRef name, "
+    OpBuilder<"OpBuilder& builder, OperationState &result, StringRef name, "
               "ArrayRef<NamedAttribute> attrs = {}">
   ];
 
@@ -88,7 +89,7 @@ def AthenaGraph_ReturnOp : AthenaGraph_Op<"return", [NoSideEffect, HasParent<"No
   // fixme should this be AnyTensor?
   let arguments = (ins Variadic<AnyType>:$operands);
   let builders = [OpBuilder<
-    "Builder *b, OperationState &result", [{ build(b, result, llvm::None); }]
+    "OpBuilder& b, OperationState &result", [{ build(b, result, llvm::None); }]
   >];
   let assemblyFormat = "attr-dict ($operands^ `:` type($operands))?";
 }
@@ -109,10 +110,10 @@ def AthenaGraph_EvalOp : AthenaGraph_Op<"eval", [CallOpInterface]> {
   let results = (outs Variadic<AnyType>);
 
   let builders = [OpBuilder<
-      "Builder *builder, OperationState &result, NodeOp node,"
+      "OpBuilder& builder, OperationState &result, NodeOp node,"
       "ValueRange operands = {}", [{
         result.addOperands(operands);
-        result.addAttribute("node", builder->getSymbolRefAttr(node));
+        result.addAttribute("node", builder.getSymbolRefAttr(node));
         result.addTypes(node.getType().getResults());
   }]>];
 
@@ -143,7 +144,7 @@ def AthenaGraph_SliceOp : AthenaGraph_Op<"slice", [NoSideEffect]> {
   let arguments = (ins AnyType:$id, AnyTensor:$tensor);
   let results = (outs AnyTensor);
 
-  let builders = [OpBuilder<"Builder *builder, OperationState &result, Value slice, Value tensor">];
+  let builders = [OpBuilder<"OpBuilder& builder, OperationState &result, Value slice, Value tensor">];
   let skipDefaultBuilders = 1;
 }
 
@@ -154,7 +155,7 @@ def AthenaGraph_GetTensor : AthenaGraph_Op<"get_tensor", [NoSideEffect]> {
   let arguments = (ins AnyType:$context, IndexAttr:$virtual_address);
   let results = (outs AnyTensor);
 
-  let builders = [OpBuilder<"Builder *builder, OperationState &result, Value context, "
+  let builders = [OpBuilder<"OpBuilder& builder, OperationState &result, Value context, "
                             "size_t virtualAddress, RankedTensorType type">];
   let skipDefaultBuilders = 1;
 }

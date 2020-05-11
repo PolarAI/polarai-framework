@@ -21,12 +21,13 @@ namespace mlir {
 class ModuleOp;
 class MLIRContext;
 class OwningRewritePatternList;
+class AthenaTypeConverter;
 
 template <typename OpT> class OperationPass;
 
 void populateGraphToRuntimeConversionPatterns(
-    OwningRewritePatternList& structureLoweringPatterns,
-    OwningRewritePatternList& nodeOpsLoweringPatterns, MLIRContext* ctx);
+    AthenaTypeConverter& typeConverter,
+    OwningRewritePatternList& loweringPatterns, MLIRContext* ctx);
 
 std::unique_ptr<OperationPass<ModuleOp>> createLowerGraphToRuntimePass();
 

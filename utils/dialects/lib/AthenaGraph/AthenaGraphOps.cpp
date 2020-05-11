@@ -19,7 +19,7 @@
 
 namespace mlir::ath_graph {
 
-void NodeOp::build(Builder* builder, OperationState& result, StringRef name,
+void NodeOp::build(OpBuilder& builder, OperationState& result, StringRef name,
                    FunctionType type, size_t nodeId, size_t clusterId,
                    ArrayRef<NamedAttribute> attrs) {
 
@@ -27,20 +27,20 @@ void NodeOp::build(Builder* builder, OperationState& result, StringRef name,
   std::copy(type.getInputs().begin(), type.getInputs().end(),
             std::back_inserter(realArgTypes));
   // Context pointer
-  realArgTypes.push_back(builder->getIndexType());
+  realArgTypes.push_back(builder.getIndexType());
   // Batch index
-  realArgTypes.push_back(builder->getIndexType());
+  realArgTypes.push_back(builder.getIndexType());
 
-  auto realFuncType = builder->getFunctionType(realArgTypes, type.getResults());
+  auto realFuncType = builder.getFunctionType(realArgTypes, type.getResults());
 
   result.addAttribute(SymbolTable::getSymbolAttrName(),
-                      builder->getStringAttr(name));
+                      builder.getStringAttr(name));
   result.addAttribute(getTypeAttrName(), TypeAttr::get(realFuncType));
   result.addAttributes(attrs);
   result.addAttribute(getNodeIdAttrName(),
-                      IntegerAttr::get(builder->getIndexType(), nodeId));
+                      IntegerAttr::get(builder.getIndexType(), nodeId));
   result.addAttribute(getClusterIdAttrName(),
-                      IntegerAttr::get(builder->getIndexType(), clusterId));
+                      IntegerAttr::get(builder.getIndexType(), clusterId));
   Region* body = result.addRegion();
   auto* entryBlock = new Block;
   entryBlock->addArguments(realFuncType.getInputs());
@@ -48,18 +48,18 @@ void NodeOp::build(Builder* builder, OperationState& result, StringRef name,
   body->getBlocks().push_back(entryBlock);
 }
 
-void GraphOp::build(Builder* builder, OperationState& result, StringRef name,
+void GraphOp::build(OpBuilder& builder, OperationState& result, StringRef name,
                     ArrayRef<NamedAttribute> attrs) {
   llvm::SmallVector<mlir::Type, 2> graphArgs;
   // Context pointer
-  graphArgs.push_back(builder->getIndexType());
+  graphArgs.push_back(builder.getIndexType());
   // Batch size
-  graphArgs.push_back(builder->getIndexType());
+  graphArgs.push_back(builder.getIndexType());
 
-  auto funcType = builder->getFunctionType(graphArgs, {});
+  auto funcType = builder.getFunctionType(graphArgs, {});
 
   result.addAttribute(SymbolTable::getSymbolAttrName(),
-                      builder->getStringAttr(name));
+                      builder.getStringAttr(name));
   result.addAttribute(getTypeAttrName(), TypeAttr::get(funcType));
   result.addAttributes(attrs);
   Region* body = result.addRegion();
@@ -67,10 +67,10 @@ void GraphOp::build(Builder* builder, OperationState& result, StringRef name,
   entryBlock->addArguments(funcType.getInputs());
 
   body->getBlocks().push_back(entryBlock);
-  ensureTerminator(*body, *builder, result.location);
+  ensureTerminator(*body, builder, result.location);
 }
 
-void SliceOp::build(Builder* builder, OperationState& result, Value slice,
+void SliceOp::build(OpBuilder& builder, OperationState& result, Value slice,
                     Value tensor) {
   result.addOperands(slice);
   result.addOperands(tensor);
@@ -85,11 +85,11 @@ void SliceOp::build(Builder* builder, OperationState& result, Value slice,
   result.addTypes(RankedTensorType::get(dims, tensorType.getElementType()));
 }
 
-void GetTensor::build(Builder* builder, OperationState& result, Value context,
+void GetTensor::build(OpBuilder& builder, OperationState& result, Value context,
                       size_t virtualAddress, RankedTensorType type) {
   result.addOperands(context);
   // todo move attribute name.
-  result.addAttribute("virtual_address", builder->getIndexAttr(virtualAddress));
+  result.addAttribute("virtual_address", builder.getIndexAttr(virtualAddress));
   result.addTypes(type);
 }
 
