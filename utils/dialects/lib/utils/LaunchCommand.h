@@ -16,26 +16,29 @@
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 
 inline mlir::LLVM::LLVMType
-getLaunchCommandType(mlir::LLVM::LLVMDialect* llvmDialect) {
+getArgDescType(mlir::LLVM::LLVMDialect* llvmDialect) {
   using namespace mlir;
   // ArgDesc structure
-  LLVM::LLVMType argDescTy;
-  {
-    // fixme byte is not always 8 bits
-    auto sizeTy = LLVM::LLVMType::getIntNTy(llvmDialect, sizeof(size_t) * 8);
-    auto argTy = LLVM::LLVMType::getInt8Ty(llvmDialect).getPointerTo();
-    // fixme is it guaranteed for enum to have i32 type?
-    auto argTypeTy = LLVM::LLVMType::getInt32Ty(llvmDialect);
+  // fixme byte is not always 8 bits
+  auto sizeTy = LLVM::LLVMType::getIntNTy(llvmDialect, sizeof(size_t) * 8);
+  auto argTy = LLVM::LLVMType::getInt8Ty(llvmDialect).getPointerTo();
+  // fixme is it guaranteed for enum to have i32 type?
+  auto argTypeTy = LLVM::LLVMType::getInt32Ty(llvmDialect);
 
-    argDescTy = LLVM::LLVMType::getStructTy(sizeTy, argTy, argTypeTy);
-  }
+  return LLVM::LLVMType::getStructTy(sizeTy, argTy, argTypeTy);
+}
 
+inline mlir::LLVM::LLVMType
+getLaunchCommandType(mlir::LLVM::LLVMDialect* llvmDialect) {
+  using namespace mlir;
+
+  LLVM::LLVMType argDescTy = getArgDescType(llvmDialect);
   auto kernelNameTy = LLVM::LLVMType::getInt8Ty(llvmDialect).getPointerTo();
   auto argsCountTy = LLVM::LLVMType::getInt32Ty(llvmDialect);
   auto argsTy = argDescTy.getPointerTo();
   auto workDimTy = LLVM::LLVMType::getIntNTy(llvmDialect, sizeof(size_t) * 8);
   auto dimSizeTy =
       LLVM::LLVMType::getIntNTy(llvmDialect, sizeof(size_t) * 8).getPointerTo();
-  return LLVM::LLVMType::getStructTy(
-      kernelNameTy, argsCountTy, argsTy, workDimTy, dimSizeTy, dimSizeTy);
+  return LLVM::LLVMType::getStructTy(kernelNameTy, argsCountTy, argsTy,
+                                     workDimTy, dimSizeTy, dimSizeTy);
 }

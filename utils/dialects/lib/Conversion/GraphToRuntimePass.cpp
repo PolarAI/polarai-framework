@@ -12,16 +12,15 @@
 //===----------------------------------------------------------------------===//
 
 #include "Conversion/GraphToRuntimePass.h"
+#include "../utils/LaunchCommand.h"
+#include "ArgInfo.h"
 #include "AthenaGraph/AthenaGraphDialect.h"
 #include "AthenaGraph/AthenaGraphOps.h"
-#include "AthenaRuntime/AthenaRuntimeOps.h"
-#include "../utils/LaunchCommand.h"
 
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "mlir/IR/Attributes.h"
 #include "mlir/IR/BlockAndValueMapping.h"
-#include "mlir/IR/TypeUtilities.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Transforms/DialectConversion.h"
 #include "mlir/Transforms/Passes.h"
@@ -135,8 +134,7 @@ struct BuiltinToFuncCallLoweringPattern : public AthenaConversionPattern<OpT> {
 
       auto typeConst = rewriter.create<LLVM::ConstantOp>(
           op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
-          rewriter.getIntegerAttr(LLVM::LLVMType::getInt32Ty(llvmDialect),
-                                  lockTypeInt));
+          rewriter.getIntegerAttr(rewriter.getIntegerType(32), lockTypeInt));
       builtinOperands.push_back(typeConst);
     }
 
@@ -204,14 +202,180 @@ class BuiltinConversionPattern : public AthenaConversionPattern<OpT> {
 public:
   using AthenaConversionPattern<OpT>::AthenaConversionPattern;
 
-  LogicalResult matchAndRewrite(Operation* op, ArrayRef<Value> operands,
-                                PatternRewriter& rewriter) const override {
+  LogicalResult
+  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter& rewriter) const override {
     auto llvmDialect =
         op->getContext()->getRegisteredDialect<LLVM::LLVMDialect>();
 
     auto launchCommandType = getLaunchCommandType(llvmDialect);
 
+    llvm::errs() << OpT::getOperationName() << "\n";
+    Operation* globalString =
+        op->getParentOfType<ModuleOp>().lookupSymbol(OpT::getOperationName());
 
+    // fixme fetch real kernel name
+    StringRef kernelNameStr = OpT::getOperationName();
+
+    LLVM::GlobalOp kernelNameVal;
+    if (globalString) {
+      kernelNameVal = llvm::cast<LLVM::GlobalOp>(globalString);
+    } else {
+      auto module = op->getParentOfType<ModuleOp>();
+      OpBuilder builder(module);
+      builder.setInsertionPointToStart(module.getBody());
+      // todo string must be null-terminated.
+      auto stringType = LLVM::LLVMType::getArrayTy(
+          LLVM::LLVMType::getInt8Ty(llvmDialect), kernelNameStr.size());
+      auto kernelNameAttr = builder.getStringAttr(kernelNameStr.data());
+      kernelNameVal = builder.create<LLVM::GlobalOp>(
+          builder.getUnknownLoc(), stringType, /*isConstant*/ false,
+          LLVM::Linkage::Private, kernelNameStr, kernelNameAttr);
+    }
+
+    // 1. Allocate LaunchCommand structure
+    auto unit = rewriter.create<LLVM::ConstantOp>(
+        op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
+        rewriter.getIntegerAttr(rewriter.getIntegerType(32), 1));
+    auto launchCommandMem = rewriter.create<LLVM::AllocaOp>(
+        op->getLoc(), launchCommandType, unit, 8);
+    // 2. Set kernel name
+    auto zeroArg = rewriter.create<LLVM::ConstantOp>(
+        op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
+        rewriter.getIntegerAttr(rewriter.getIntegerType(32), 0));
+    auto kerNameMember = rewriter.create<LLVM::GEPOp>(
+        op->getLoc(), launchCommandType.getStructElementType(0).getPointerTo(),
+        launchCommandMem, ValueRange{zeroArg, zeroArg});
+    auto kerNameGlobalAddr =
+        rewriter.create<LLVM::AddressOfOp>(op->getLoc(), kernelNameVal);
+    auto kerNameAddr = rewriter.create<LLVM::GEPOp>(
+        op->getLoc(), LLVM::LLVMType::getInt8Ty(llvmDialect).getPointerTo(),
+        kerNameGlobalAddr, ValueRange{zeroArg, zeroArg});
+    rewriter.create<LLVM::StoreOp>(op->getLoc(), kerNameAddr, kerNameMember);
+
+    // 3. Set kernel args count
+    auto firstArg = unit; // for consistency
+    auto argCountMember = rewriter.create<LLVM::GEPOp>(
+        op->getLoc(), launchCommandType.getStructElementType(1).getPointerTo(),
+        launchCommandMem, ValueRange{zeroArg, firstArg});
+    auto argCountConst = rewriter.create<LLVM::ConstantOp>(
+        op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
+        rewriter.getIntegerAttr(rewriter.getIntegerType(32), getArgsCount(op)));
+    rewriter.create<LLVM::StoreOp>(op->getLoc(), argCountConst, argCountMember);
+
+    // 4. Allocate args structure
+    auto argDescTy = getArgDescType(llvmDialect);
+    auto argsArray = rewriter.create<LLVM::AllocaOp>(op->getLoc(), argDescTy,
+                                                     argCountConst, 16);
+
+    // 5. For each arg:
+    //    i.   Set size of arg
+    //    ii.  Set pointer to arg
+    //    iii. Set argument type
+    fillArgDesc(argsArray, op, operands, rewriter);
+
+    auto two = rewriter.create<LLVM::ConstantOp>(
+        op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
+        rewriter.getIntegerAttr(rewriter.getIntegerType(32), 2));
+    auto argPtr = rewriter.create<LLVM::GEPOp>(
+        op->getLoc(), getArgDescType(llvmDialect).getPointerTo(), argsArray,
+        ValueRange{zeroArg, zeroArg});
+    auto argMember = rewriter.create<LLVM::GEPOp>(
+        op->getLoc(), launchCommandType.getStructElementType(2).getPointerTo(),
+        launchCommandMem, ValueRange{zeroArg, two});
+    rewriter.create<LLVM::StoreOp>(op->getLoc(), argPtr, argMember);
+
+    // 6. Set ND-range dimension
+    auto outType = op->getOperand(op->getNumOperands() - 1).getType();
+    if (!outType.isa<RankedTensorType>()) {
+      llvm_unreachable("The last type must be a ranked tensor output");
+    }
+
+    auto sizetType = LLVM::LLVMType::getIntNTy(llvmDialect, sizeof(size_t) * 8);
+    auto rankedTensorOut = outType.cast<RankedTensorType>();
+    auto dimSize = rewriter.create<LLVM::ConstantOp>(
+        op->getLoc(), sizetType,
+        rewriter.getIntegerAttr(rewriter.getIntegerType(sizeof(size_t) * 8),
+                                rankedTensorOut.getRank()));
+
+    auto three = rewriter.create<LLVM::ConstantOp>(
+        op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
+        rewriter.getIntegerAttr(rewriter.getIntegerType(32), 3));
+    auto workDimMember = rewriter.create<LLVM::GEPOp>(
+        op->getLoc(), launchCommandType.getStructElementType(3).getPointerTo(),
+        launchCommandMem, ValueRange{zeroArg, three});
+    rewriter.create<LLVM::StoreOp>(op->getLoc(), dimSize, workDimMember);
+
+    // 7. Allocate mem for global size
+    auto dimArrayTy =
+        LLVM::LLVMType::getArrayTy(sizetType, rankedTensorOut.getRank());
+    // fixme FWIW alignment must be 4 on 32-bit systems.
+    auto globalSizeArray =
+        rewriter.create<LLVM::AllocaOp>(op->getLoc(), dimArrayTy, dimSize, 16);
+
+    // 8. Fill global sizes
+    for (int i = 0; i < rankedTensorOut.getRank(); i++) {
+      auto curIdx = rewriter.create<LLVM::ConstantOp>(
+          op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
+          rewriter.getIntegerAttr(rewriter.getIntegerType(32), i));
+
+      auto curArrayElt = rewriter.create<LLVM::GEPOp>(
+          op->getLoc(), sizetType.getPointerTo(), launchCommandMem,
+          ValueRange{zeroArg, curIdx});
+
+      auto curDim = rewriter.create<LLVM::ConstantOp>(
+          op->getLoc(), sizetType,
+          rewriter.getIntegerAttr(rewriter.getIntegerType(sizeof(size_t) * 8),
+                                  rankedTensorOut.getShape()[i]));
+      rewriter.create<LLVM::StoreOp>(op->getLoc(), curDim, curArrayElt);
+    }
+    auto four = rewriter.create<LLVM::ConstantOp>(
+        op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
+        rewriter.getIntegerAttr(rewriter.getIntegerType(32), 4));
+    auto globalSizePtr = rewriter.create<LLVM::GEPOp>(
+        op->getLoc(), sizetType.getPointerTo(), globalSizeArray,
+        ValueRange{zeroArg, zeroArg});
+    auto globalSizeMember = rewriter.create<LLVM::GEPOp>(
+        op->getLoc(), launchCommandType.getStructElementType(4).getPointerTo(),
+        launchCommandMem, ValueRange{zeroArg, four});
+    llvm::errs() << globalSizePtr.getType() << " " << globalSizeMember.getType()
+                 << "\n";
+    rewriter.create<LLVM::StoreOp>(op->getLoc(), globalSizePtr,
+                                   globalSizeMember);
+
+    // 9. Allocate memory for local size
+    auto localSizeArray =
+        rewriter.create<LLVM::AllocaOp>(op->getLoc(), dimArrayTy, dimSize, 16);
+
+    // 10. Set local size to 0 (for now).
+    for (int i = 0; i < rankedTensorOut.getRank(); i++) {
+      auto curIdx = rewriter.create<LLVM::ConstantOp>(
+          op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
+          rewriter.getIntegerAttr(rewriter.getIntegerType(32), i));
+
+      auto curArrayElt = rewriter.create<LLVM::GEPOp>(
+          op->getLoc(), sizetType.getPointerTo(), launchCommandMem,
+          ValueRange{zeroArg, curIdx});
+
+      auto zeroSize = rewriter.create<LLVM::ConstantOp>(
+          op->getLoc(), sizetType,
+          rewriter.getIntegerAttr(rewriter.getIntegerType(sizeof(size_t) * 8),
+                                  0));
+      rewriter.create<LLVM::StoreOp>(op->getLoc(), zeroSize, curArrayElt);
+    }
+
+    auto five = rewriter.create<LLVM::ConstantOp>(
+        op->getLoc(), LLVM::LLVMType::getInt32Ty(llvmDialect),
+        rewriter.getIntegerAttr(rewriter.getIntegerType(32), 5));
+    auto localSizePtr = rewriter.create<LLVM::GEPOp>(
+        op->getLoc(), sizetType.getPointerTo(), localSizeArray,
+        ValueRange{zeroArg, zeroArg});
+    auto localSizeMember = rewriter.create<LLVM::GEPOp>(
+        op->getLoc(), launchCommandType.getStructElementType(5).getPointerTo(),
+        launchCommandMem, ValueRange{zeroArg, five});
+    rewriter.create<LLVM::StoreOp>(op->getLoc(), localSizePtr, localSizeMember);
+
+    rewriter.eraseOp(op);
     return success();
   }
 };
@@ -265,9 +429,24 @@ public:
     auto llvmFuncTy =
         LLVM::LLVMType::getFunctionTy(functionReturnType, newArgs, false);
 
-    auto newFunc = rewriter.create<LLVM::LLVMFuncOp>(
-        funcOp.getLoc(), funcOp.getName(), llvmFuncTy, LLVM::Linkage::External,
-        funcOp.getAttrs());
+    LLVM::LLVMFuncOp newFunc;
+    if constexpr (std::is_same_v<FuncT, ath_graph::NodeOp>) {
+      auto nodeIdAttr = rewriter.getNamedAttr(
+          ath_graph::NodeOp::getNodeIdAttrName(),
+          op->getAttr(ath_graph::NodeOp::getNodeIdAttrName()));
+      auto clusterIdAttr = rewriter.getNamedAttr(
+          ath_graph::NodeOp::getClusterIdAttrName(),
+          op->getAttr(ath_graph::NodeOp::getClusterIdAttrName()));
+      SmallVector<NamedAttribute, 2> attrs;
+      attrs.push_back(nodeIdAttr);
+      attrs.push_back(clusterIdAttr);
+      newFunc = rewriter.create<LLVM::LLVMFuncOp>(
+          funcOp.getLoc(), funcOp.getName(), llvmFuncTy,
+          LLVM::Linkage::External, attrs);
+    } else {
+      newFunc = rewriter.create<LLVM::LLVMFuncOp>(funcOp.getLoc(),
+                                                  funcOp.getName(), llvmFuncTy);
+    }
 
     rewriter.inlineRegionBefore(funcOp.body(), newFunc.getBody(),
                                 newFunc.getBody().end());
@@ -322,15 +501,12 @@ public:
 
     auto nodeId = rewriter.create<LLVM::ConstantOp>(
         op->getLoc(), LLVM::LLVMType::getInt64Ty(llvmDialect),
-        rewriter.getIntegerAttr(LLVM::LLVMType::getInt64Ty(llvmDialect),
+        rewriter.getIntegerAttr(rewriter.getIntegerType(64),
                                 nodeIdAttr.getValue()));
-    auto ctxPtr = rewriter.create<ath_rt::AnyCastOp>(
-        op->getLoc(), LLVM::LLVMType::getVoidTy(llvmDialect).getPointerTo(),
-        context);
 
     SmallVector<Value, 2> getDevArgs;
     getDevArgs.push_back(nodeId);
-    getDevArgs.push_back(ctxPtr);
+    getDevArgs.push_back(context);
 
     auto devPtr =
         rewriter.create<LLVM::CallOp>(op->getLoc(), getDevFunc, getDevArgs);
@@ -371,7 +547,7 @@ public:
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
-    rewriter.replaceOpWithNewOp<ReturnOp>(op);
+    rewriter.replaceOpWithNewOp<LLVM::ReturnOp>(op, ValueRange{});
     return success();
   }
 };
@@ -403,11 +579,11 @@ protected:
     OwningRewritePatternList structureLoweringPatterns;
     AthenaTypeConverter typeConverter(&getContext());
     populateGraphToRuntimeConversionPatterns(
-        typeConverter, structureLoweringPatterns,
-        &getContext());
+        typeConverter, structureLoweringPatterns, &getContext());
     ConversionTarget target(getContext());
     target.addLegalDialect<LLVM::LLVMDialect>();
     target.addLegalOp<ModuleOp>();
+    target.addLegalOp<ModuleTerminatorOp>();
     target.addIllegalDialect<ath_graph::AthenaGraphDialect>();
     if (failed(applyFullConversion(getOperation(), target,
                                    structureLoweringPatterns))) {
@@ -433,22 +609,15 @@ void populateGraphToRuntimeConversionPatterns(
           BuiltinToFuncCallLoweringPattern<ath_graph::ReleaseOp>,
           BuiltinToFuncCallLoweringPattern<ath_graph::GetTensor>,
           BuiltinToFuncCallLoweringPattern<ath_graph::LockOp>,
+          BuiltinConversionPattern<ath_graph::AddOp>,
+          BuiltinConversionPattern<ath_graph::MulOp>,
+          BuiltinConversionPattern<ath_graph::MatmulOp>,
+          BuiltinConversionPattern<ath_graph::TransposeOp>,
+          BuiltinConversionPattern<ath_graph::FillOp>,
           FunctionConversionPattern<ath_graph::NodeOp>,
           FunctionConversionPattern<ath_graph::GraphOp>
       // clang-format on
       >(typeConverter);
-  /*nodeOpsLoweringPatterns.insert<
-      // clang-format off
-       - InvokeLoaderLowering,
-       - SliceLoweringPattern,
-      - EvalLoweringPattern,
-      BuiltinConversionPattern<ath_graph::AddOp>,
-      BuiltinConversionPattern<ath_graph::MulOp>,
-      BuiltinConversionPattern<ath_graph::MatmulOp>,
-      BuiltinConversionPattern<ath_graph::TransposeOp>,
-      BuiltinConversionPattern<ath_graph::FillOp>
-      // clang-format on
-      >(ctx);*/
 }
 std::unique_ptr<OperationPass<ModuleOp>> createLowerGraphToRuntimePass() {
   return std::make_unique<LowerGraphPass>();

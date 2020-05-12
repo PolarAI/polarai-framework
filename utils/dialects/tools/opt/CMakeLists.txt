@@ -6,7 +6,6 @@ set(LIBS
         MLIROptLib
         MLIRAthenaConversion
         MLIRAthenaGraph
-        MLIRAthenaRuntime
         MLIRAthenaPasses
         )
 add_llvm_executable(athena-opt main.cpp)

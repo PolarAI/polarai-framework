@@ -12,7 +12,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "AthenaGraph/AthenaGraphDialect.h"
-#include "AthenaRuntime/AthenaRuntimeDialect.h"
 #include "Conversion/GraphToRuntimePass.h"
 #include "Passes/Passes.h"
 
@@ -69,7 +68,6 @@ int main(int argc, char** argv) {
   mlir::registerAllPasses();
 
   mlir::registerDialect<mlir::ath_graph::AthenaGraphDialect>();
-  mlir::registerDialect<mlir::ath_rt::AthenaRuntimeDialect>();
   mlir::registerPass("convert-graph-to-runtime",
                      "Converts Athena Graph to Runtime calls",
                      mlir::createLowerGraphToRuntimePass);
