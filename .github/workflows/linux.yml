@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         build_type: ["Release", "Debug"]
-        compiler: [ ["gcc", "g++"], ["clang", "clang++"] ]
+        compiler: [ ["clang", "clang++"] ]
 
     steps:
       - uses: actions/checkout@v2

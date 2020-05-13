@@ -41,9 +41,13 @@ def build(args):
     options.append("-H" + args.source)
     options.append("-B" + args.destination)
 
-    subprocess.call(options, env=my_env)
+    err_code = subprocess.call(options, env=my_env)
+    if not err_code == 0:
+        os.exit(err_code)
     if not args.no_build:
-        subprocess.call(["cmake", "--build", args.destination], env=my_env)
+        err_code = subprocess.call(["cmake", "--build", args.destination], env=my_env)
+        if not err_code == 0:
+            os.exit(err_code)
 
 
 def main():
