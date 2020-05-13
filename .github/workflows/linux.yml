@@ -16,13 +16,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: 
-      image: athenaml/ubuntu:20200510090552f69f93
+      image: athenaml/ubuntu:20200512165941f69f93
       volumes:
         - ${{ github.workspace }}:${{ github.workspace }}
     strategy:
       matrix:
         build_type: ["Release", "Debug"]
-        compiler: [ ["clang", "clang++"] ]
+        compiler: [ ["gcc", "g++"], ["clang", "clang++"] ]
 
     steps:
       - uses: actions/checkout@v2
