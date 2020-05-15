@@ -16,7 +16,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: 
-      image: athenaml/ubuntu:20200512165941f69f93
+      image: athenaml/ubuntu:20200515075554a1dd96
       volumes:
         - ${{ github.workspace }}:${{ github.workspace }}
     strategy:
