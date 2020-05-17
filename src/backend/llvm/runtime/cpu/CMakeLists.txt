@@ -58,11 +58,6 @@ else ()
 endif ()
 
 set(CORE_LIB ${ATH_CORE})
-if (UNIX AND NOT APPLE)
-    set(CORE_LIB -Wl,--as-needed ${ATH_CORE} -Wl,--no-as-needed)
-elseif (APPLE)
-    athena_add_linker_options(${ATH_RT_LLVM_CPU} "-undefined dynamic_lookup")
-endif ()
 
 target_link_libraries(${ATH_RT_LLVM_CPU} PRIVATE ${CORE_LIB})
 target_compile_definitions(${ATH_RT_LLVM_CPU} PRIVATE -D${ATH_CORE}_WEAK)
