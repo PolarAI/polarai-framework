@@ -1,2 +1,2 @@
 add_subdirectory(llvm)
-add_subdirectory(llvm_runtime)
+#add_subdirectory(llvm_runtime)

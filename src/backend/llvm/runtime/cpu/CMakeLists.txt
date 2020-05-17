@@ -2,7 +2,7 @@ set(ATH_RT_LLVM_CPU "AthenaLLVMCpuRuntime" CACHE STRING "" FORCE)
 
 set(INFO_CPP ${CMAKE_CURRENT_BINARY_DIR}/rt_info.cpp)
 
-add_athena_library(${ATH_RT_LLVM_CPU} SHARED
+add_athena_library(${ATH_RT_LLVM_CPU} MODULE
         ATH_RT_LLVM # export name
         backend/llvm/runtime/runtime_export.h # export file name
         add.cpp
@@ -57,10 +57,7 @@ else ()
     add_dependencies(${ATH_RT_LLVM_CPU} OpenBlasDownload)
 endif ()
 
-set(CORE_LIB ${ATH_CORE})
-
-target_link_libraries(${ATH_RT_LLVM_CPU} PRIVATE ${CORE_LIB})
-target_compile_definitions(${ATH_RT_LLVM_CPU} PRIVATE -D${ATH_CORE}_WEAK)
+#target_link_libraries(${ATH_RT_LLVM_CPU} PUBLIC ${ATH_CORE})
 
 install(TARGETS ${ATH_RT_LLVM_CPU} EXPORT AthenaConfig
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
