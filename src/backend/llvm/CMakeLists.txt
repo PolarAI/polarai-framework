@@ -64,6 +64,7 @@ add_athena_library(${ATH_BACKEND_LLVM} STATIC
         GraphPartitionPlanner.cpp
         allocators/LayerAllocator.cpp
         utils.cpp
+        CodeGen.cpp
         ${codegen_src})
 
 target_include_directories(${ATH_BACKEND_LLVM} PRIVATE ${LLVM_INCLUDE_DIRS})
@@ -84,12 +85,12 @@ llvm_map_components_to_libnames(llvm_libs
         lto)
 
 add_dependencies(${ATH_BACKEND_LLVM} ${ATH_RT_LLVM_CPU})
-target_link_libraries(${ATH_BACKEND_LLVM}
-        PRIVATE ${llvm_libs}
-        PRIVATE ${ATH_RT_LLVM_DRIVER})
-
-find_package(MLIR COMPONENTS IR)
-
-if (MLIR_LIBS AND MLIR_TBLGEN AND MLIR_OPT)
-    add_subdirectory(mlir)
-endif ()
+target_link_libraries(${ATH_BACKEND_LLVM} PRIVATE
+        ${llvm_libs}
+        ${ATH_RT_LLVM_DRIVER}
+        MLIRIR
+        MLIRStandardOps
+        MLIRAthenaGraph)
+target_include_directories(${ATH_BACKEND_LLVM} PRIVATE
+        ${PROJECT_SOURCE_DIR}/utils/dialects/include
+        ${PROJECT_BINARY_DIR}/utils/dialects/include)

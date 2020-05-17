@@ -11,16 +11,14 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include <athena/core/Context.h>
 #include <athena/core/Generator.h>
-#include <athena/core/inner/Tensor.h>
 
-#include <any>
-#include <gtest/gtest.h>
-#include <vector>
+namespace mlir {
+class OpBuilder;
+}
 
-using namespace athena::core;
-
-struct DummyState {
-  bool flag = false;
-};
+namespace athena::backend::llvm {
+/// Feeds Generator with functors to generate correct MLIR.
+void populateCodeGenPatterns(athena::core::Generator& generator,
+                             mlir::OpBuilder& builder);
+}

@@ -164,47 +164,42 @@ def AthenaGraph_GetTensor : AthenaGraph_Op<"get_tensor", [NoSideEffect]> {
 // Athena Graph builtins
 //===------------------------------------------------------------------------------------------===//
 
-def AthenaGraph_AddOp : AthenaGraph_Op<"add", [NoSideEffect]> {
+def AthenaGraph_AddOp : AthenaGraph_Op<"add"> {
   let summary = "Element-wise addition operation";
   let description = [{ TBD }];
 
   let arguments = (ins AnyTensor:$a, AnyType:$scaleA, AnyTensor:$b, AnyType:$scaleB, AnyTensor:$out);
-  let results = (outs AnyTensor);
 }
 
-def AthenaGraph_MulOp : AthenaGraph_Op<"mul", [NoSideEffect]> {
+def AthenaGraph_MulOp : AthenaGraph_Op<"mul"> {
   let summary = "Element-wise multiplication operation";
   let description = [{ TBD }];
 
-  let arguments = (ins AnyTensor:$a, AnyType:$scaleA, AnyTensor:$b, AnyType:$scaleB, AnyTensor:$out);
-  let results = (outs AnyTensor);
+  let arguments = (ins AnyTensor:$a, AnyTensor:$b, AnyType:$scale, AnyTensor:$out);
 }
 
-def AthenaGraph_MatmulOp : AthenaGraph_Op<"matmul", [NoSideEffect]> {
+def AthenaGraph_MatmulOp : AthenaGraph_Op<"matmul"> {
   let summary = "Matrix-matrix multiplication operation";
   let description = [{ TBD }];
 
   let arguments = (ins AnyTensor:$a, AnyType:$scaleA, AnyTensor:$b, AnyType:$scaleB, AnyTensor:$out);
-  let results = (outs AnyTensor);
 }
 
-def AthenaGraph_TransposeOp : AthenaGraph_Op<"transpose", [NoSideEffect]> {
+def AthenaGraph_TransposeOp : AthenaGraph_Op<"transpose"> {
   let summary = "Matrix transposition operation";
   let description = [{ TBD }];
 
   let arguments = (ins AnyTensor:$a, AnyTensor:$res);
-  let results = (outs AnyTensor);
 }
 
-def AthenaGraph_FillOp : AthenaGraph_Op<"fill", [NoSideEffect]> {
+def AthenaGraph_FillOp : AthenaGraph_Op<"fill"> {
   let summary = "Fills tensor with value";
   let description = [{ TBD }];
 
   let arguments = (ins AnyType:$pattern, AnyTensor:$out);
-  let results = (outs AnyTensor);
 }
 
-def AthenaGraph_AllocOp : AthenaGraph_Op<"alloc", [NoSideEffect]> {
+def AthenaGraph_AllocOp : AthenaGraph_Op<"alloc"> {
   let summary = "Allocates memory for tensor";
   let description = [{}];
 

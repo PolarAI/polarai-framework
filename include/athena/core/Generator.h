@@ -19,99 +19,183 @@
 #include <athena/core/inner/Tensor.h>
 
 #include <any>
+#include <cstddef>
 #include <functional>
 #include <string_view>
 #include <unordered_map>
 #include <utility>
+#include <variant>
 
 namespace athena::core {
+
+struct GenValue {
+  std::any value;
+};
+struct GenNode {
+  std::any node;
+};
+struct GenInsertionPoint {
+  std::any point;
+};
+struct GenGraph {
+  std::any graph;
+};
+
+namespace builtin {
+// Utility builtins.
+constexpr static auto Alloc = "alloc";     ///< Allocates memory for tensor.
+constexpr static auto Lock = "lock";       ///< Locks tensor in memory.
+constexpr static auto Release = "release"; ///< Releases tensor memory.
+constexpr static auto Barrier =
+    "barrier"; ///< Explicitly waits for all operations to complete.
+constexpr static auto NodeEval = "eval"; ///< Evaluates node of a graph.
+constexpr static auto InvokeLoader =
+    "invoke_loader"; ///< Invokes loader routine.
+
+// Operation builtins.
+constexpr static auto Add = "add";       ///< Element-wise addition.
+constexpr static auto Mul = "mul";       ///< Element-wise multiplication.
+constexpr static auto MatMul = "matmul"; ///< Matrix-matrix multiplication.
+constexpr static auto Fill = "fill";     ///< Fill tensor with constant.
+constexpr static auto Slice = "slice";   ///< Get subtensor.
+constexpr static auto Transpose = "transpose"; ///< Transpose 2D tensor.
+} // namespace builtin
 
 /// A bridge between \c GraphCompiler and a backend.
 class ATH_CORE_EXPORT Generator {
 public:
-  using FunctorType = std::function<void(
-      Context&,                          // Athena Context
-      std::string_view,                  // Graph name
-      size_t,                            // Id of node to generate for
-      size_t,                            // Id of cluster where node belongs to
-      const std::vector<inner::Tensor>&, // Arguments to the builtin
-      const std::any&                    // Builtin-specific options
-      )>;
-  using LoadGenType =
-      std::function<void(Context&,         // Athena Context
-                         std::string_view, // Graph name
-                         size_t,           // Id of node to generate for
-                         size_t,         // Id of cluster where node belongs to
-                         inner::Tensor&, // Target tensor
-                         AbstractLoader* // Loader
-                         )>;
+  using SupportedConstantT =
+      std::variant<int32_t, int64_t, uint32_t, uint64_t, float, double>;
+
+  Generator() = default;
+
+  /// Notifies generator to insert builtins at a particular point.
+  void setInsertionPoint(const GenInsertionPoint& insertionPoint) {
+    mSetInsertionPointFunc(insertionPoint);
+  }
+
+  void setInsertionPoint(const GenGraph& graph) {
+    mSetGraphInsertionPointFunc(graph);
+  }
+
+  void setInsertionPoint(const GenNode& node) {
+    mSetNodeInsertionPointFunc(node);
+  }
+
+  auto getInsertionPoint() const -> GenInsertionPoint {
+    return mGetInsertionPointFunc();
+  }
+
+  /// Generates call to one of the predefined builtins.
+  ///
+  /// \tparam Args
+  /// \param opcode is a name of builtin to generate call to.
+  /// \param args are arguments, specific to the builtin.
+  /// \return a backend-specific handle to builtin call result.
+  template <typename... Args>
+  auto callBuiltin(const std::string& opcode, Args&&... args) -> GenValue {
+    if (mGeneratorFunctors.count(opcode) == 0) {
+      new FatalError(ATH_FATAL_OTHER, "Call to undefined functor ", opcode);
+    }
+    auto functor =
+        std::any_cast<std::function<GenValue(Args...)>>(
+            mGeneratorFunctors[opcode]);
+    return functor(std::forward<Args>(args)...);
+  }
+
+  /// Creates a node stub in IR.
+  ///
+  /// This can actually be noop for some backends.
+  /// This member function does not update the insertion point.
+  /// Calls from graph to node are not automatically generated.
+  ///
+  /// \param nodeName is a name of Node. Will be used for function name.
+  /// \return a backend-specific handle to node.
+  auto createNode(std::string_view nodeName, size_t nodeId, size_t clusterId,
+                  std::vector<inner::Tensor>& args, inner::Tensor& outValue)
+      -> GenNode {
+    return mCreateNodeFunc(nodeName, nodeId, clusterId, args, outValue);
+  }
+
+  /// Creates a graph stub in IR.
+  ///
+  /// This can actually be noop for some backends.
+  /// This member function does not update the insertion point.
+  ///
+  /// \param graphName is the name of graph to be generated. It may
+  ///        be used for symbol name in IR.
+  /// \param graphId is the ID of graph that is generated.
+  auto createGraph(std::string_view graphName, size_t graphId) -> GenGraph {
+    return mCreateGraphFunc(graphName, graphId);
+  }
+
+  auto createConstant(SupportedConstantT constant) -> GenValue {
+    return mCreateConstantFunc(constant);
+  }
+
+  /// Registers a functor that generates a specific builtin.
+  ///
+  /// \param opcode is a name of builtin being generated.
+  /// \param functor is a function object that generates specified builtin.
+  template <typename... Args>
+  void registerFunctor(const std::string& opcode,
+                       std::function<GenValue(Args...)> functor) {
+    if (mGeneratorFunctors.count(opcode)) {
+      new FatalError(ATH_FATAL_OTHER, "Attempt to re-register functor ",
+                     opcode);
+    }
+
+    mGeneratorFunctors.insert({opcode, functor});
+  }
+
+  void
+  registerConstantFunctor(std::function<GenValue(SupportedConstantT)> functor) {
+    mCreateConstantFunc = std::move(functor);
+  }
+
+  void registerNodeFunctor(
+      std::function<GenNode(std::string_view, size_t, size_t,
+                            const std::vector<inner::Tensor>&, inner::Tensor&)>
+          functor) {
+    mCreateNodeFunc = std::move(functor);
+  }
+
+  void registerGraphFunctor(std::function<GenGraph(std::string_view, size_t)> functor) {
+    mCreateGraphFunc = std::move(functor);
+  }
+
+  void registerSetInsertionPointFunctor(
+      std::function<void(GenInsertionPoint)> functor) {
+    mSetInsertionPointFunc = std::move(functor);
+  }
+
+  void registerSetInsertionPointFunctor(
+      std::function<void(GenNode)> functor) {
+    mSetNodeInsertionPointFunc = std::move(functor);
+  }
+
+  void registerSetInsertionPointFunctor(
+      std::function<void(GenGraph)> functor) {
+    mSetGraphInsertionPointFunc = std::move(functor);
+  }
+
+  void
+  registerGetInsertionPointFunctor(std::function<GenInsertionPoint()> functor) {
+    mGetInsertionPointFunc = std::move(functor);
+  }
 
 private:
-  std::unordered_map<std::string, FunctorType> mRegisteredFunctors;
-  LoadGenType mRegisteredLoadGenerator;
-  Context& mContext;
-  std::string mGraphName{}; // Name of the graph to generate code for
-  size_t mNodeId{};         // Id of the node to generate code for
-  size_t mClusterId{};      // Id of the cluster where node belongs to
-
-public:
-  /// Constructs a Generator.
-  ///
-  /// \param ctx is an Athena context.
-  /// \param state is used by functors to emit IR/code/etc. Its real type
-  /// is defined by the backend.
-  Generator(Context& ctx, std::any state) : mContext(ctx){};
-
-  /// Registers functor for specific name.
-  ///
-  /// \param name is a name to associate functor to.
-  /// \param functor is a functor type object (lambda, functor type, function
-  /// pointer) that provides routines to generate code for builtin.
-  void registerFunctor(const std::string& name, FunctorType functor);
-
-  /// @return true if a functor with name is registered.
-  [[nodiscard]] bool hasFunctor(const std::string& name) const {
-    return mRegisteredFunctors.count(name);
-  }
-
-  /// Removes any functor associated with the specified name.
-  ///
-  /// \param name is a functor name.
-  void unregisterFunctor(const std::string& name);
-
-  void setLoadGenerator(LoadGenType generator) {
-    mRegisteredLoadGenerator = std::move(generator);
-  }
-
-  /// Sets coordinates for code generation.
-  ///
-  /// \param graphName is a name of a Graph, that all the following calls
-  ///        are generated for.
-  /// \param nodeId is an ID of a node, that all the following calls are
-  ///        generated for.
-  /// \param clusterId is an ID of a cluster, that node belongs to.
-  void setGenerationPoint(const std::string& graphName, size_t nodeId,
-                          size_t clusterId) {
-    mGraphName = graphName;
-    mNodeId = nodeId;
-    mClusterId = clusterId;
-  }
-
-  /// Calls functor corresponding to provided builtin name.
-  ///
-  /// \param functorName is a name of builtin to generate code for.
-  /// \param args is a vector of tensors that contains both arguments and
-  ///        resulting tensor.
-  /// \param options is an optional builtin options object.
-  void generate(const std::string& functorName,
-                const std::vector<inner::Tensor>& args,
-                const std::any& options = nullptr);
-
-  /// Calls routine to generate an invokation of loader.
-  ///
-  /// \param target is a Tensor, that stores load results.
-  /// \param loader is a loader, that performs actual job.
-  void generateLoad(inner::Tensor& target, AbstractLoader* loader);
+  std::function<void(GenInsertionPoint)> mSetInsertionPointFunc;
+  std::function<void(GenNode)> mSetNodeInsertionPointFunc;
+  std::function<void(GenGraph)> mSetGraphInsertionPointFunc;
+  std::function<GenInsertionPoint()> mGetInsertionPointFunc;
+  std::unordered_map<std::string, std::any> mGeneratorFunctors;
+  std::function<GenNode(std::string_view, size_t, size_t,
+                        const std::vector<inner::Tensor>&, inner::Tensor&)>
+      mCreateNodeFunc;
+  std::function<GenGraph(std::string_view, size_t)> mCreateGraphFunc;
+  // todo support half constants
+  std::function<GenValue(SupportedConstantT)> mCreateConstantFunc;
 };
 } // namespace athena::core
 
