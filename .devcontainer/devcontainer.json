@@ -1,6 +1,6 @@
 {
     "name": "Athena Dev Env",
-	"image": "athenaml/ubuntu:20200510090552f69f93",
+	"image": "athenaml/ubuntu:20200515075554a1dd96",
 	"extensions": [
 		"ms-vscode.cmake-tools",
 		"jakob-erzar.llvm-tablegen",
