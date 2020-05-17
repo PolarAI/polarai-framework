@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <functional>
 #include <string_view>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <variant>
@@ -33,6 +34,17 @@ struct GenValue {
 };
 struct GenNode {
   std::any node;
+
+  explicit GenNode(std::any node) : node(std::move(node)) {}
+  GenNode(const GenNode& src) = default;
+  GenNode(GenNode&& src) = default;
+  GenNode& operator=(const GenNode&) = default;
+  GenNode& operator=(GenNode&&) = default;
+  virtual ~GenNode() = default;
+
+  virtual auto getOperand(size_t) -> GenValue { return GenValue{}; }
+  virtual auto getResult() -> GenValue { return GenValue{}; }
+  virtual auto getBatchIndex() -> GenValue { return GenValue{}; }
 };
 struct GenInsertionPoint {
   std::any point;
@@ -60,6 +72,29 @@ constexpr static auto Fill = "fill";     ///< Fill tensor with constant.
 constexpr static auto Slice = "slice";   ///< Get subtensor.
 constexpr static auto Transpose = "transpose"; ///< Transpose 2D tensor.
 } // namespace builtin
+
+// fixme move to utils directory.
+template <typename Ret> struct AnyCallable {
+  AnyCallable() {}
+  template <typename... Args>
+  AnyCallable(std::function<Ret(Args...)> fun) : mAny(fun) {}
+  template <typename... Args> Ret operator()(Args&&... args) {
+    return std::invoke(std::any_cast<std::function<Ret(Args...)>>(mAny),
+                       std::forward<Args>(args)...);
+  }
+  std::any mAny;
+};
+
+template <> struct AnyCallable<void> {
+  AnyCallable() {}
+  template <typename... Args>
+  AnyCallable(std::function<void(Args...)> fun) : mAny(fun) {}
+  template <typename... Args> void operator()(Args&&... args) {
+    std::invoke(std::any_cast<std::function<void(Args...)>>(mAny),
+                std::forward<Args>(args)...);
+  }
+  std::any mAny;
+};
 
 /// A bridge between \c GraphCompiler and a backend.
 class ATH_CORE_EXPORT Generator {
@@ -97,10 +132,8 @@ public:
     if (mGeneratorFunctors.count(opcode) == 0) {
       new FatalError(ATH_FATAL_OTHER, "Call to undefined functor ", opcode);
     }
-    auto functor =
-        std::any_cast<std::function<GenValue(Args...)>>(
-            mGeneratorFunctors[opcode]);
-    return functor(std::forward<Args>(args)...);
+    auto functor = mGeneratorFunctors[opcode];
+    return functor(args...);
   }
 
   /// Creates a node stub in IR.
@@ -145,7 +178,8 @@ public:
                      opcode);
     }
 
-    mGeneratorFunctors.insert({opcode, functor});
+    mGeneratorFunctors.insert(
+        {opcode, AnyCallable<GenValue>(std::move(functor))});
   }
 
   void
@@ -160,7 +194,8 @@ public:
     mCreateNodeFunc = std::move(functor);
   }
 
-  void registerGraphFunctor(std::function<GenGraph(std::string_view, size_t)> functor) {
+  void registerGraphFunctor(
+      std::function<GenGraph(std::string_view, size_t)> functor) {
     mCreateGraphFunc = std::move(functor);
   }
 
@@ -169,13 +204,11 @@ public:
     mSetInsertionPointFunc = std::move(functor);
   }
 
-  void registerSetInsertionPointFunctor(
-      std::function<void(GenNode)> functor) {
+  void registerSetInsertionPointFunctor(std::function<void(GenNode)> functor) {
     mSetNodeInsertionPointFunc = std::move(functor);
   }
 
-  void registerSetInsertionPointFunctor(
-      std::function<void(GenGraph)> functor) {
+  void registerSetInsertionPointFunctor(std::function<void(GenGraph)> functor) {
     mSetGraphInsertionPointFunc = std::move(functor);
   }
 
@@ -189,7 +222,7 @@ private:
   std::function<void(GenNode)> mSetNodeInsertionPointFunc;
   std::function<void(GenGraph)> mSetGraphInsertionPointFunc;
   std::function<GenInsertionPoint()> mGetInsertionPointFunc;
-  std::unordered_map<std::string, std::any> mGeneratorFunctors;
+  std::unordered_map<std::string, AnyCallable<GenValue>> mGeneratorFunctors;
   std::function<GenNode(std::string_view, size_t, size_t,
                         const std::vector<inner::Tensor>&, inner::Tensor&)>
       mCreateNodeFunc;

@@ -19,6 +19,7 @@
 #include <athena/core/inner/Tensor.h>
 
 #include <bits/stdint-intn.h>
+#include <cstddef>
 #include <llvm/ADT/APFloat.h>
 #include <llvm/ADT/SmallVector.h>
 #include <llvm/ADT/StringRef.h>
@@ -38,7 +39,30 @@
 
 using namespace athena::core;
 
-struct MlirNode : public GenNode {};
+struct MlirNode : public GenNode {
+  using GenNode::GenNode;
+
+  MlirNode(const MlirNode&) = default;
+  MlirNode(MlirNode&&) = default;
+  MlirNode& operator=(const MlirNode&) = default;
+  MlirNode& operator=(MlirNode&&) = default;
+
+  auto getOperand(size_t idx) -> GenValue override {
+    auto mlirNode = std::any_cast<mlir::ath_graph::NodeOp>(node);
+    return GenValue{mlirNode.getArgument(idx)};
+  }
+
+  auto getResult() -> GenValue override {
+    auto mlirNode = std::any_cast<mlir::ath_graph::NodeOp>(node);
+    mlir::Value res = mlirNode.getBody().front().getTerminator()->getOperand(0);
+    return GenValue{res};
+  }
+
+  auto getBatchIndex() -> GenValue override {
+    auto mlirNode = std::any_cast<mlir::ath_graph::NodeOp>(node);
+    return GenValue{mlirNode.getBatchIndex()};
+  }
+};
 
 static auto getTensorType(mlir::OpBuilder& builder, const inner::Tensor& tensor)
     -> mlir::Type {
@@ -242,8 +266,8 @@ void populateCodeGenPatterns(athena::core::Generator& generator,
 
   // todo barrier
 
-  std::function<GenValue(GenValue, std::string_view)> invokeLoaderFunctor =
-      [&](GenValue destTensor, std::string_view loaderRoutine) {
+  std::function<GenValue(std::string_view, GenValue)> invokeLoaderFunctor =
+      [&](std::string_view loaderRoutine, GenValue destTensor) {
         auto tensorVal = std::any_cast<mlir::Value>(destTensor.value);
 
         builder.create<mlir::ath_graph::InvokeLoaderOp>(
