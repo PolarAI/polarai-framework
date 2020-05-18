@@ -1,0 +1,29 @@
+buildType:
+  default: debug
+  description: Build type
+  choices:
+    debug:
+      short: Debug
+      long: Built with debugging information
+      buildType: Debug
+    release:
+      short: Release
+      long: Build with optimizations enabled
+      buildType: Release
+
+enableSanitizers:
+  default: off
+  choices:
+    seq:
+      short: seq
+      long: Sequential sanitizers (i.e. ASan, UBSan, Leak)
+      settings:
+        ATHENA_USE_SANITIZERS: seq
+    par:
+      short: par
+      long: Parallel sanitizers (i.e. Thread)
+      settings:
+        ATHENA_USE_SANITIZERS: par
+    off:
+      short: off
+      long: No sanitizers

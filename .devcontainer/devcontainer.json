@@ -1,11 +1,15 @@
 {
-    "name": "Athena Dev Env",
+  "name": "Athena Dev Env",
 	"image": "athenaml/ubuntu:20200515075554a1dd96",
 	"extensions": [
 		"ms-vscode.cmake-tools",
 		"jakob-erzar.llvm-tablegen",
 		"llvm-vs-code-extensions.vscode-clangd",
-		"ms-vscode.cpptools"
+		"ms-vscode.cpptools",
+		"vsls-contrib.codetour",
+		"ms-vscode-remote.remote-containers",
+		"zxh404.vscode-proto3",
+		"momenabdelkarim-wyattcalandro-luisprieto.mlir"
 	],
-	"postCreateCommand": "apt update && apt -yqq install gdb"
+	"postCreateCommand": "apt update && apt -yqq install gdb valgrind"
 }

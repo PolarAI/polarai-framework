@@ -1,0 +1,70 @@
+{
+  "title": "Athena Graph Dialect",
+  "steps": [
+    {
+      "file": "utils/dialects/include/AthenaGraph/AthenaGraphDialect.td",
+      "line": 6,
+      "description": "One of the possible execution flows in Athena is through MLIR Code Generation. MLIR is an extensible Intermediate Representation. You can find out more at https://mlir.llvm.org/.\n\nAthena defines a custom MLIR Dialect to represent Graph in SSA form. The dialect represents the information about graphs, nodes, and their relations. It also contains information about what kind of lower-level operations must be performed by the runtime to fulfil node needs. It is expressed throug operations inside Node regions."
+    },
+    {
+      "file": "utils/dialects/include/AthenaGraph/AthenaGraphDialect.td",
+      "line": 10,
+      "description": "All Athena Graph bits reside in mlir::ath_graph C++ namespace."
+    },
+    {
+      "file": "utils/dialects/include/AthenaGraph/AthenaGraphDialect.td",
+      "line": 13,
+      "description": "`AthenaGraph_Op` is a base operation for all Athena Graph Dialect operations."
+    },
+    {
+      "file": "utils/dialects/include/AthenaGraph/AthenaGraphOps.td",
+      "line": 11,
+      "description": "`NodeOp` is a structured operation that contains all the operations that must be performed to compute this node. The operation also has its id and cluster id to fulfil needs of different analysis passes."
+    },
+    {
+      "file": "utils/dialects/include/AthenaGraph/AthenaGraphOps.td",
+      "line": 51,
+      "description": "A `GraphOp` contains calls to nodes that belong to this graph."
+    },
+    {
+      "file": "utils/dialects/lib/AthenaGraph/AthenaGraphOps.cpp",
+      "line": 1,
+      "description": "Some operations may have custom logic. It is defined in this file."
+    },
+    {
+      "file": "utils/dialects/include/Passes/Passes.h",
+      "line": 1,
+      "description": "Once the Graph is constructed, a set of transformations can be applied to the IR. Some of the transformations are optional, and some are required to correctly lower Graph to LLVM IR."
+    },
+    {
+      "file": "utils/dialects/include/Passes/Passes.h",
+      "line": 24,
+      "description": "One of the required transformations is Deploy Default Functions that adds declarations of runtime functions that IR may call."
+    },
+    {
+      "file": "utils/dialects/include/Conversion/GraphToRuntimePass.h",
+      "line": 32,
+      "description": "Once all transformations are done, it is time to lower Graph Dialect to LLVM IR."
+    },
+    {
+      "file": "utils/dialects/lib/Conversion/GraphToRuntimePass.cpp",
+      "line": 1,
+      "description": "Conversion Patterns for Athena -> LLVM IR translation are defined in this file."
+    },
+    {
+      "file": "utils/dialects/tools/opt/main.cpp",
+      "line": 1,
+      "description": "It is possible to perform different optimizations and transformations on MLIR without running the whole Athena stack. That's what `athena-op` tool is for. The tool accepts a textual represenation of MLIR and produces another MLIR after all optimizations.\nIt can also profile different passes, produce a graphical representation of MLIR nodes, or print IR after each optimization. Use `athena-opt --help` to see the full set of options."
+    },
+    {
+      "file": "utils/dialects/tools/opt/main.cpp",
+      "line": 71,
+      "description": "All custom passes must be registred here to be available in `athena-opt` tool."
+    },
+    {
+      "file": "utils/dialects/test/ir/graph.mlir",
+      "line": 1,
+      "description": "It is generally a good idea to cover code with tests. Since it is very hard to test compilers, a novel approach has been suggested by LLVM. A special tool runs `athena-opt` on each `*.mlir` file in test directory and then checks the output with the help of `FileCheck` tool. You can find out more in the LLVM documentation:\n1. LIT https://llvm.org/docs/CommandGuide/lit.html\n2. FileCheck https://llvm.org/docs/CommandGuide/FileCheck.html"
+    }
+  ]
+}
