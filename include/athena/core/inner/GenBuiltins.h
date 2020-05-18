@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <string_view>
+#include <tuple>
 #include <vector>
 
 namespace athena::core {
@@ -46,10 +47,10 @@ enum class builtin {
 
 namespace inner {
 
-template <builtin B> struct builtin_functor {};
-
-template <builtin B>
-using builtin_functor_t = typename builtin_functor<B>::type;
+template <builtin B> struct builtin_functor {
+  // fixme change to void when we have a barrier.
+  using type = int;
+};
 
 template <> struct builtin_functor<builtin::Alloc> {
   using type = std::function<GenValue(GenValue)>;
@@ -78,8 +79,7 @@ template <> struct builtin_functor<builtin::Add> {
 };
 
 template <> struct builtin_functor<builtin::Mul> {
-  using type =
-      std::function<GenValue(GenValue, GenValue, GenValue, GenValue)>;
+  using type = std::function<GenValue(GenValue, GenValue, GenValue, GenValue)>;
 };
 
 template <> struct builtin_functor<builtin::MatMul> {
@@ -88,18 +88,34 @@ template <> struct builtin_functor<builtin::MatMul> {
 };
 
 template <> struct builtin_functor<builtin::Fill> {
-  using type =
-      std::function<GenValue(GenValue, GenValue)>;
+  using type = std::function<GenValue(GenValue, GenValue)>;
 };
 
 template <> struct builtin_functor<builtin::Slice> {
-  using type =
-      std::function<GenValue(GenValue, GenValue)>;
+  using type = std::function<GenValue(GenValue, GenValue)>;
 };
 
 template <> struct builtin_functor<builtin::Transpose> {
-  using type =
-      std::function<GenValue(GenValue, GenValue)>;
+  using type = std::function<GenValue(GenValue, GenValue)>;
 };
+
+template <builtin B>
+using builtin_functor_t = typename builtin_functor<B>::type;
+
+using BuiltinMap = std::tuple <
+                   // clang-format off
+    builtin_functor_t<builtin::Alloc>,
+    builtin_functor_t<builtin::Lock>,
+    builtin_functor_t<builtin::Release>,
+    builtin_functor_t<builtin::Barrier>,
+    builtin_functor_t<builtin::NodeEval>,
+    builtin_functor_t<builtin::InvokeLoader>,
+    builtin_functor_t<builtin::Add>,
+    builtin_functor_t<builtin::Mul>,
+    builtin_functor_t<builtin::MatMul>,
+    builtin_functor_t<builtin::Fill>,
+    builtin_functor_t<builtin::Slice>,
+    builtin_functor_t<builtin::Transpose>>;
+    // clang-format on
 } // namespace inner
 } // namespace athena::core

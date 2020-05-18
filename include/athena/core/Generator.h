@@ -16,9 +16,9 @@
 
 #include <athena/core/AbstractLoader.h>
 #include <athena/core/Context.h>
-#include <athena/core/inner/Tensor.h>
-#include <athena/core/inner/GenValues.h>
 #include <athena/core/inner/GenBuiltins.h>
+#include <athena/core/inner/GenValues.h>
+#include <athena/core/inner/Tensor.h>
 
 #include <any>
 #include <cstddef>
@@ -31,49 +31,6 @@
 #include <variant>
 
 namespace athena::core {
-
-// namespace builtin {
-// // Utility builtins.
-// constexpr static auto Alloc = "alloc";     ///< Allocates memory for tensor.
-// constexpr static auto Lock = "lock";       ///< Locks tensor in memory.
-// constexpr static auto Release = "release"; ///< Releases tensor memory.
-// constexpr static auto Barrier =
-//     "barrier"; ///< Explicitly waits for all operations to complete.
-// constexpr static auto NodeEval = "eval"; ///< Evaluates node of a graph.
-// constexpr static auto InvokeLoader =
-//     "invoke_loader"; ///< Invokes loader routine.
-
-// // Operation builtins.
-// constexpr static auto Add = "add";       ///< Element-wise addition.
-// constexpr static auto Mul = "mul";       ///< Element-wise multiplication.
-// constexpr static auto MatMul = "matmul"; ///< Matrix-matrix multiplication.
-// constexpr static auto Fill = "fill";     ///< Fill tensor with constant.
-// constexpr static auto Slice = "slice";   ///< Get subtensor.
-// constexpr static auto Transpose = "transpose"; ///< Transpose 2D tensor.
-// } // namespace builtin
-
-// fixme move to utils directory.
-template <typename Ret> struct AnyCallable {
-  AnyCallable() {}
-  template <typename... Args>
-  AnyCallable(std::function<Ret(Args...)> fun) : mAny(fun) {}
-  template <typename... Args> Ret operator()(Args&&... args) {
-    return std::invoke(std::any_cast<std::function<Ret(Args...)>>(mAny),
-                       std::forward<Args>(args)...);
-  }
-  std::any mAny;
-};
-
-template <> struct AnyCallable<void> {
-  AnyCallable() {}
-  template <typename... Args>
-  AnyCallable(std::function<void(Args...)> fun) : mAny(fun) {}
-  template <typename... Args> void operator()(Args&&... args) {
-    std::invoke(std::any_cast<std::function<void(Args...)>>(mAny),
-                std::forward<Args>(args)...);
-  }
-  std::any mAny;
-};
 
 /// A bridge between \c GraphCompiler and a backend.
 class ATH_CORE_EXPORT Generator {
@@ -108,10 +65,8 @@ public:
   /// \return a backend-specific handle to builtin call result.
   template <builtin B, typename... Args>
   auto callBuiltin(Args&&... args) -> GenValue {
-    if (mGeneratorFunctors.count(B) == 0) {
-      new FatalError(ATH_FATAL_OTHER, "Call to undefined functor ");
-    }
-    auto functor = std::any_cast<inner::builtin_functor_t<B>>(mGeneratorFunctors[B]);
+    inner::builtin_functor_t<B>& functor =
+        std::get<static_cast<int>(B)>(mGeneratorFunctors);
     return functor(std::forward<Args>(args)...);
   }
 
@@ -150,13 +105,8 @@ public:
   /// \tparam B is a builtin being generated.
   /// \param functor is a function object that generates specified builtin.
   template <builtin B>
-  void registerFunctor(inner::builtin_functor_t<B> functor) {
-    if (mGeneratorFunctors.count(B)) {
-      // fixme use static map
-      new FatalError(ATH_FATAL_OTHER, "Attempt to re-register functor ");
-    }
-
-    mGeneratorFunctors[B] = functor;
+  void registerFunctor(inner::builtin_functor_t<B>& functor) {
+    std::get<static_cast<int>(B)>(mGeneratorFunctors) = std::move(functor);
   }
 
   void
@@ -199,7 +149,7 @@ private:
   std::function<void(GenNode)> mSetNodeInsertionPointFunc;
   std::function<void(GenGraph)> mSetGraphInsertionPointFunc;
   std::function<GenInsertionPoint()> mGetInsertionPointFunc;
-  std::unordered_map<builtin, std::any> mGeneratorFunctors;
+  inner::BuiltinMap mGeneratorFunctors;
   std::function<GenNode(std::string_view, size_t, size_t,
                         const std::vector<inner::Tensor>&, inner::Tensor&)>
       mCreateNodeFunc;
