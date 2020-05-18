@@ -7,5 +7,8 @@
     "C_Cpp.codeFolding": "Disabled",
     "C_Cpp.errorSquiggles": "Disabled",
     "C_Cpp.intelliSenseEngine": "Disabled",
-    "clangd.arguments": ["-log=verbose", "-pretty", "--background-index", "--compile-commands-dir=${workspaceFolder}/build/"]
+    "clangd.arguments": [
+        "-log=verbose", "-pretty", "--background-index", 
+        "--compile-commands-dir=${workspaceFolder}/build/",
+         "--header-insertion=never"]
 }

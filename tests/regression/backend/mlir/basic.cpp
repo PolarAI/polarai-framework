@@ -44,10 +44,10 @@ static GenNode createInputNode(Context& ctx, std::string_view name,
 
   auto save = generator.getInsertionPoint();
   generator.setInsertionPoint(node);
-  generator.callBuiltin<GenValue>(builtin::Alloc, node.getResult());
-  generator.callBuiltin(builtin::Lock, node.getResult(), LockType::READ_WRITE);
-  generator.callBuiltin(builtin::InvokeLoader, node.getResult(), name);
-  generator.callBuiltin(builtin::Release, node.getResult());
+  generator.callBuiltin<builtin::Alloc>(node.getResult());
+  // generator.callBuiltin(builtin::Lock, node.getResult(), LockType::READ_WRITE);
+  // generator.callBuiltin(builtin::InvokeLoader, node.getResult(), name);
+  // generator.callBuiltin(builtin::Release, node.getResult());
   generator.setInsertionPoint(save);
 
   return node;
@@ -67,39 +67,39 @@ TEST(MLIRRegression, BasicIR) {
   inner::Tensor tensorA(DataType::FLOAT, {tensorSize}, ctx);
   inner::Tensor tensorB(DataType::FLOAT, {tensorSize}, ctx);
   auto nodeA = createInputNode(ctx, "inputA", 0, tensorA, generator);
-  auto nodeB = createInputNode(ctx, "inputB", 1,tensorB, generator);
+  // auto nodeB = createInputNode(ctx, "inputB", 1,tensorB, generator);
 
-  std::vector<inner::Tensor> args{tensorA, tensorB};
-  inner::Tensor tensorC(DataType::FLOAT, {tensorSize}, ctx);
-  auto nodeC = generator.createNode("sum", 2, 1, args, tensorC);
+  // std::vector<inner::Tensor> args{tensorA, tensorB};
+  // inner::Tensor tensorC(DataType::FLOAT, {tensorSize}, ctx);
+  // auto nodeC = generator.createNode("sum", 2, 1, args, tensorC);
 
-  auto save = generator.getInsertionPoint();
-  generator.setInsertionPoint(nodeC);
-  generator.callBuiltin(builtin::Lock, nodeC.getOperand(0), LockType::READ);
-  generator.callBuiltin(builtin::Lock, nodeC.getOperand(1), LockType::READ);
+  // auto save = generator.getInsertionPoint();
+  // generator.setInsertionPoint(nodeC);
+  // generator.callBuiltin(builtin::Lock, nodeC.getOperand(0), LockType::READ);
+  // generator.callBuiltin(builtin::Lock, nodeC.getOperand(1), LockType::READ);
 
-  generator.callBuiltin(builtin::Alloc, nodeC.getResult());
-  generator.callBuiltin(builtin::Lock, nodeC.getResult(), LockType::READ_WRITE);
+  // generator.callBuiltin(builtin::Alloc, nodeC.getResult());
+  // generator.callBuiltin(builtin::Lock, nodeC.getResult(), LockType::READ_WRITE);
 
-  auto one = generator.createConstant(1.0f);
-  generator.callBuiltin(builtin::Add, nodeC.getOperand(0), one,
-                        nodeC.getOperand(1), one, nodeC.getResult());
+  // auto one = generator.createConstant(1.0f);
+  // generator.callBuiltin(builtin::Add, nodeC.getOperand(0), one,
+  //                       nodeC.getOperand(1), one, nodeC.getResult());
 
-  generator.callBuiltin(builtin::Release, nodeC.getOperand(0));
-  generator.callBuiltin(builtin::Release, nodeC.getOperand(1));
-  generator.callBuiltin(builtin::Release, nodeC.getResult());
+  // generator.callBuiltin(builtin::Release, nodeC.getOperand(0));
+  // generator.callBuiltin(builtin::Release, nodeC.getOperand(1));
+  // generator.callBuiltin(builtin::Release, nodeC.getResult());
 
-  generator.setInsertionPoint(save);
+  // generator.setInsertionPoint(save);
 
-  auto graph = generator.createGraph("mainGraph", 0);
-  generator.setInsertionPoint(graph);
+  // auto graph = generator.createGraph("mainGraph", 0);
+  // generator.setInsertionPoint(graph);
 
-  std::vector<GenValue> empty;
-  auto resA = generator.callBuiltin(builtin::NodeEval, graph, nodeA, empty);
-  auto resB = generator.callBuiltin(builtin::NodeEval, graph, nodeB, empty);
+  // std::vector<GenValue> empty;
+  // auto resA = generator.callBuiltin(builtin::NodeEval, graph, nodeA, empty);
+  // auto resB = generator.callBuiltin(builtin::NodeEval, graph, nodeB, empty);
 
-  std::vector<GenValue> cArgs{resA, resB};
-  generator.callBuiltin(builtin::NodeEval, graph, nodeC, cArgs);
+  // std::vector<GenValue> cArgs{resA, resB};
+  // generator.callBuiltin(builtin::NodeEval, graph, nodeC, cArgs);
 
   /*auto result =
       effcee::Match(str, matches,

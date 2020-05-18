@@ -17,10 +17,13 @@
 #include <athena/core/AbstractLoader.h>
 #include <athena/core/Context.h>
 #include <athena/core/inner/Tensor.h>
+#include <athena/core/inner/GenValues.h>
+#include <athena/core/inner/GenBuiltins.h>
 
 #include <any>
 #include <cstddef>
 #include <functional>
+#include <memory>
 #include <string_view>
 #include <type_traits>
 #include <unordered_map>
@@ -29,49 +32,25 @@
 
 namespace athena::core {
 
-struct GenValue {
-  std::any value;
-};
-struct GenNode {
-  std::any node;
+// namespace builtin {
+// // Utility builtins.
+// constexpr static auto Alloc = "alloc";     ///< Allocates memory for tensor.
+// constexpr static auto Lock = "lock";       ///< Locks tensor in memory.
+// constexpr static auto Release = "release"; ///< Releases tensor memory.
+// constexpr static auto Barrier =
+//     "barrier"; ///< Explicitly waits for all operations to complete.
+// constexpr static auto NodeEval = "eval"; ///< Evaluates node of a graph.
+// constexpr static auto InvokeLoader =
+//     "invoke_loader"; ///< Invokes loader routine.
 
-  explicit GenNode(std::any node) : node(std::move(node)) {}
-  GenNode(const GenNode& src) = default;
-  GenNode(GenNode&& src) = default;
-  GenNode& operator=(const GenNode&) = default;
-  GenNode& operator=(GenNode&&) = default;
-  virtual ~GenNode() = default;
-
-  virtual auto getOperand(size_t) -> GenValue { return GenValue{}; }
-  virtual auto getResult() -> GenValue { return GenValue{}; }
-  virtual auto getBatchIndex() -> GenValue { return GenValue{}; }
-};
-struct GenInsertionPoint {
-  std::any point;
-};
-struct GenGraph {
-  std::any graph;
-};
-
-namespace builtin {
-// Utility builtins.
-constexpr static auto Alloc = "alloc";     ///< Allocates memory for tensor.
-constexpr static auto Lock = "lock";       ///< Locks tensor in memory.
-constexpr static auto Release = "release"; ///< Releases tensor memory.
-constexpr static auto Barrier =
-    "barrier"; ///< Explicitly waits for all operations to complete.
-constexpr static auto NodeEval = "eval"; ///< Evaluates node of a graph.
-constexpr static auto InvokeLoader =
-    "invoke_loader"; ///< Invokes loader routine.
-
-// Operation builtins.
-constexpr static auto Add = "add";       ///< Element-wise addition.
-constexpr static auto Mul = "mul";       ///< Element-wise multiplication.
-constexpr static auto MatMul = "matmul"; ///< Matrix-matrix multiplication.
-constexpr static auto Fill = "fill";     ///< Fill tensor with constant.
-constexpr static auto Slice = "slice";   ///< Get subtensor.
-constexpr static auto Transpose = "transpose"; ///< Transpose 2D tensor.
-} // namespace builtin
+// // Operation builtins.
+// constexpr static auto Add = "add";       ///< Element-wise addition.
+// constexpr static auto Mul = "mul";       ///< Element-wise multiplication.
+// constexpr static auto MatMul = "matmul"; ///< Matrix-matrix multiplication.
+// constexpr static auto Fill = "fill";     ///< Fill tensor with constant.
+// constexpr static auto Slice = "slice";   ///< Get subtensor.
+// constexpr static auto Transpose = "transpose"; ///< Transpose 2D tensor.
+// } // namespace builtin
 
 // fixme move to utils directory.
 template <typename Ret> struct AnyCallable {
@@ -127,13 +106,13 @@ public:
   /// \param opcode is a name of builtin to generate call to.
   /// \param args are arguments, specific to the builtin.
   /// \return a backend-specific handle to builtin call result.
-  template <typename... Args>
-  auto callBuiltin(const std::string& opcode, Args&&... args) -> GenValue {
-    if (mGeneratorFunctors.count(opcode) == 0) {
-      new FatalError(ATH_FATAL_OTHER, "Call to undefined functor ", opcode);
+  template <builtin B, typename... Args>
+  auto callBuiltin(Args&&... args) -> GenValue {
+    if (mGeneratorFunctors.count(B) == 0) {
+      new FatalError(ATH_FATAL_OTHER, "Call to undefined functor ");
     }
-    auto functor = mGeneratorFunctors[opcode];
-    return functor(args...);
+    auto functor = std::any_cast<inner::builtin_functor_t<B>>(mGeneratorFunctors[B]);
+    return functor(std::forward<Args>(args)...);
   }
 
   /// Creates a node stub in IR.
@@ -168,18 +147,16 @@ public:
 
   /// Registers a functor that generates a specific builtin.
   ///
-  /// \param opcode is a name of builtin being generated.
+  /// \tparam B is a builtin being generated.
   /// \param functor is a function object that generates specified builtin.
-  template <typename... Args>
-  void registerFunctor(const std::string& opcode,
-                       std::function<GenValue(Args...)> functor) {
-    if (mGeneratorFunctors.count(opcode)) {
-      new FatalError(ATH_FATAL_OTHER, "Attempt to re-register functor ",
-                     opcode);
+  template <builtin B>
+  void registerFunctor(inner::builtin_functor_t<B> functor) {
+    if (mGeneratorFunctors.count(B)) {
+      // fixme use static map
+      new FatalError(ATH_FATAL_OTHER, "Attempt to re-register functor ");
     }
 
-    mGeneratorFunctors.insert(
-        {opcode, AnyCallable<GenValue>(std::move(functor))});
+    mGeneratorFunctors[B] = functor;
   }
 
   void
@@ -222,7 +199,7 @@ private:
   std::function<void(GenNode)> mSetNodeInsertionPointFunc;
   std::function<void(GenGraph)> mSetGraphInsertionPointFunc;
   std::function<GenInsertionPoint()> mGetInsertionPointFunc;
-  std::unordered_map<std::string, AnyCallable<GenValue>> mGeneratorFunctors;
+  std::unordered_map<builtin, std::any> mGeneratorFunctors;
   std::function<GenNode(std::string_view, size_t, size_t,
                         const std::vector<inner::Tensor>&, inner::Tensor&)>
       mCreateNodeFunc;
