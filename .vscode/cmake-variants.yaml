@@ -27,3 +27,5 @@ enableSanitizers:
     off:
       short: off
       long: No sanitizers
+      settings:
+        ATHENA_USE_SANITIZERS: OFF
