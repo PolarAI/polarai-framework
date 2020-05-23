@@ -27,10 +27,10 @@ ATH_RT_SUPPORT_EXPORT void ath_lock_tensor(Device& device,
   allocator.lock(record, device, type);
 }
 
-ATH_RT_SUPPORT_EXPORT void ath_launch(Device& device,
-                                      BackendAllocator& allocator,
-                                      LaunchCommand& command, Event* event) {
-  device.launch(allocator, command, event);
+ATH_RT_SUPPORT_EXPORT Event* ath_launch(Device& device,
+                                        BackendAllocator& allocator,
+                                        LaunchCommand& command, Event* event) {
+  return device.launch(allocator, command, event);
 }
 
 ATH_RT_SUPPORT_EXPORT uint64_t ath_get_subrecord_addr(MemoryRecord& record,

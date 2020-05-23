@@ -23,16 +23,20 @@ protected:
   virtual void* getImpl(const core::inner::Tensor& tensor, Device& device) = 0;
 
 public:
-  virtual ~BackendAllocator() = default;
-
   virtual void registerDevice(Device& device) = 0;
 
   /// Allocates memory on a particular device.
   virtual void allocate(const core::inner::Tensor& tensor, Device& device) = 0;
+  // fixme implement
+  virtual void allocate(const MemoryRecord& record, Device& device){};
 
   /// Locks tensor raw memory on a particular device.
   virtual void lock(const core::inner::Tensor& tensor, Device& device,
                     core::LockType type) = 0;
+  // fixme implement
+  virtual void lock(const MemoryRecord& record, Device& device,
+                    core::LockType type){};
+  virtual void release(const MemoryRecord& record, Device& device) {};
 
   template <typename BufferT>
   BufferT* get(const core::inner::Tensor& tensor, Device& device) {

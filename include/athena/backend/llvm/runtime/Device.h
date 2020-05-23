@@ -17,15 +17,19 @@
 #include <athena/backend/llvm/AllocatorLayerBase.h>
 #include <athena/backend/llvm/MemoryRecord.h>
 #include <athena/backend/llvm/llvm_export.h>
-#include <athena/core/inner/Tensor.h>
 #include <athena/backend/llvm/runtime/Queue.h>
+#include <athena/core/inner/Tensor.h>
 
 #include <cstddef>
 #include <memory>
 
+struct LaunchCommand;
+
 namespace athena::backend::llvm {
 
 class Device;
+class Event;
+class BackendAllocator;
 
 extern "C" struct ATH_BACKEND_LLVM_EXPORT DeviceContainer {
   Device* devices;
@@ -58,6 +62,10 @@ public:
   virtual void copyToDevice(MemoryRecord record, void* src) const {};
 
   virtual Queue& getQueue() = 0;
+
+  virtual Event* launch(BackendAllocator&, LaunchCommand&, Event*) {
+    return nullptr;
+  }
 };
 } // namespace athena::backend::llvm
 
