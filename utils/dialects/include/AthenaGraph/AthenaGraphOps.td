@@ -160,13 +160,17 @@ def AthenaGraph_CreateTensorOp : AthenaGraph_Op<"create_tensor",
   let summary = "Get tensor by virtual address";
   let description = [{ TBD }];
 
-  let arguments = (ins AnyType:$context, IndexAttr:$virtual_address);
+  let arguments = (ins IndexAttr:$virtual_address);
   let results = (outs AnyTensor);
 
   let builders = [OpBuilder<"OpBuilder& builder, OperationState &result, "
-                            "Value context, size_t virtualAddress, "
-                            "RankedTensorType type">];
+                            "uint64_t virtualAddress, RankedTensorType type">];
   let skipDefaultBuilders = 1;
+  let extraClassDeclaration = [{
+    static llvm::StringRef getVirtualAddressAttrName() {
+      return "virtual_address";
+    }
+  }];
 }
 
 def AthenaGraph_AllocOp : AthenaGraph_Op<"alloc"> {

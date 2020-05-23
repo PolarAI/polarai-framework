@@ -120,7 +120,7 @@ struct BuiltinToFuncCallLoweringPattern : public AthenaConversionPattern<OpT> {
     SmallVector<Value, 3> builtinOperands;
     builtinOperands.push_back(device);
     builtinOperands.push_back(allocator);
-    builtinOperands.push_back(castOp.getOperand());
+    // builtinOperands.push_back(castOp.getOperand());
 
     if constexpr (std::is_same_v<OpT, ath_graph::LockOp>) {
       auto lockType =

@@ -92,6 +92,7 @@ static GenNode createInputNode(Context& ctx, std::string_view name,
   generator.callBuiltin<builtin::Lock>(node.getResult(), LockType::READ_WRITE);
   generator.callBuiltin<builtin::InvokeLoader>(name, node.getResult());
   generator.callBuiltin<builtin::Release>(node.getResult());
+  generator.callBuiltin<builtin::Return>(node.getResult());
   generator.setInsertionPoint(save);
 
   return node;
@@ -126,12 +127,14 @@ TEST(MLIRRegression, BasicIR) {
   generator.callBuiltin<builtin::Lock>(nodeC.getResult(), LockType::READ_WRITE);
 
   auto one = generator.createConstant(1.0f);
-  generator.callBuiltin<builtin::Add>(
+  auto res = generator.callBuiltin<builtin::Add>(
       nodeC.getOperand(0), one, nodeC.getOperand(1), one, nodeC.getResult());
 
   generator.callBuiltin<builtin::Release>(nodeC.getOperand(0));
   generator.callBuiltin<builtin::Release>(nodeC.getOperand(1));
   generator.callBuiltin<builtin::Release>(nodeC.getResult());
+
+  generator.callBuiltin<builtin::Return>(res);
 
   generator.setInsertionPoint(save);
 
@@ -142,7 +145,7 @@ TEST(MLIRRegression, BasicIR) {
   auto resA = generator.callBuiltin<builtin::NodeEval>(graph, nodeA, empty);
   auto resB = generator.callBuiltin<builtin::NodeEval>(graph, nodeB, empty);
 
-  // fixme there must be barrier, but it is not here.
+  generator.callBuiltin<builtin::Barrier>(0);
 
   std::vector<GenValue> cArgs{resA, resB};
   generator.callBuiltin<builtin::NodeEval>(graph, nodeC, cArgs);
@@ -150,6 +153,7 @@ TEST(MLIRRegression, BasicIR) {
   std::string str;
   ::llvm::raw_string_ostream stream(str);
   module.print(stream);
+  ::llvm::dbgs() << str << "\n";
   auto result =
       effcee::Match(str, checks,
   effcee::Options().SetChecksName("checks"));

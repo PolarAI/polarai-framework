@@ -86,11 +86,10 @@ void SliceOp::build(OpBuilder& builder, OperationState& result, Value slice,
 }
 
 void CreateTensorOp::build(OpBuilder& builder, OperationState& result,
-                           Value context, size_t virtualAddress,
-                           RankedTensorType type) {
-  result.addOperands(context);
+                           uint64_t virtualAddress, RankedTensorType type) {
   // todo move attribute name.
-  result.addAttribute("virtual_address", builder.getIndexAttr(virtualAddress));
+  result.addAttribute(getVirtualAddressAttrName(),
+                      builder.getIndexAttr(virtualAddress));
   result.addTypes(type);
 }
 

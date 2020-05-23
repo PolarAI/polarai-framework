@@ -29,7 +29,10 @@ list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 include(TableGen)
 include(AddLLVM)
 include(AddMLIR)
-include(HandleLLVMOptions)
+
+# fixme Ninja doesn't work with this
+#include(HandleLLVMOptions)
+add_compile_options(-fPIC)
 
 include_directories(${LLVM_INCLUDE_DIRS})
 include_directories(${MLIR_INCLUDE_DIRS})

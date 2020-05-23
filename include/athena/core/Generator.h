@@ -64,7 +64,7 @@ public:
   /// \param args are arguments, specific to the builtin.
   /// \return a backend-specific handle to builtin call result.
   template <builtin B, typename... Args>
-  auto callBuiltin(Args&&... args) -> GenValue {
+  auto callBuiltin(Args&&... args) {
     inner::builtin_functor_t<B>& functor =
         std::get<static_cast<int>(B)>(mGeneratorFunctors);
     return functor(std::forward<Args>(args)...);

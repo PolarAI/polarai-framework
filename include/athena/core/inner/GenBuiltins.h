@@ -29,6 +29,7 @@ enum class builtin {
   Barrier,      ///< Explicitly waits for all operations to complete.
   NodeEval,     ///< Evaluates node of a Graph.
   InvokeLoader, ///< Invokes loader routine.
+  Return,       ///< Returns a value from a node.
 
   ///@{
   /// \name Operation builtins
@@ -64,6 +65,10 @@ template <> struct builtin_functor<builtin::Release> {
   using type = std::function<GenValue(GenValue)>;
 };
 
+template <> struct builtin_functor<builtin::Barrier> {
+  using type = std::function<void(uint64_t)>;
+};
+
 template <> struct builtin_functor<builtin::InvokeLoader> {
   using type = std::function<GenValue(std::string_view, GenValue)>;
 };
@@ -71,6 +76,11 @@ template <> struct builtin_functor<builtin::InvokeLoader> {
 template <> struct builtin_functor<builtin::NodeEval> {
   using type =
       std::function<GenValue(GenGraph, GenNode, const std::vector<GenValue>&)>;
+};
+
+template <> struct builtin_functor<builtin::Return> {
+  using type =
+      std::function<void(std::optional<GenValue>)>;
 };
 
 template <> struct builtin_functor<builtin::Add> {
@@ -110,6 +120,7 @@ using BuiltinMap = std::tuple <
     builtin_functor_t<builtin::Barrier>,
     builtin_functor_t<builtin::NodeEval>,
     builtin_functor_t<builtin::InvokeLoader>,
+    builtin_functor_t<builtin::Return>,
     builtin_functor_t<builtin::Add>,
     builtin_functor_t<builtin::Mul>,
     builtin_functor_t<builtin::MatMul>,
