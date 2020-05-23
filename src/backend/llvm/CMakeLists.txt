@@ -47,6 +47,7 @@ add_custom_target(generator_cpp
 add_subdirectory(runtime/cpu)
 add_subdirectory(runtime/driver)
 add_subdirectory(runtime/legacy_driver)
+add_subdirectory(runtime/support)
 
 find_package(OpenCL)
 if (${OpenCL_FOUND})
