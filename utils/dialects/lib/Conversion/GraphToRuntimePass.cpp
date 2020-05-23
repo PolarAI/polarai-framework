@@ -143,7 +143,7 @@ struct BuiltinToFuncCallLoweringPattern : public AthenaConversionPattern<OpT> {
       symbolName = "ath_allocate";
     } else if constexpr (std::is_same_v<OpT, ath_graph::ReleaseOp>) {
       symbolName = "ath_release_tensor";
-    } else if constexpr (std::is_same_v<OpT, ath_graph::GetTensor>) {
+    } else if constexpr (std::is_same_v<OpT, ath_graph::CreateTensorOp>) {
       symbolName = "ath_get_tensor_ptr";
     } else if constexpr (std::is_same_v<OpT, ath_graph::LockOp>) {
       symbolName = "ath_lock_tensor";
@@ -607,7 +607,7 @@ void populateGraphToRuntimeConversionPatterns(
           ConstantLoweringPattern,
           BuiltinToFuncCallLoweringPattern<ath_graph::AllocOp>,
           BuiltinToFuncCallLoweringPattern<ath_graph::ReleaseOp>,
-          BuiltinToFuncCallLoweringPattern<ath_graph::GetTensor>,
+          BuiltinToFuncCallLoweringPattern<ath_graph::CreateTensorOp>,
           BuiltinToFuncCallLoweringPattern<ath_graph::LockOp>,
           BuiltinConversionPattern<ath_graph::AddOp>,
           BuiltinConversionPattern<ath_graph::MulOp>,

@@ -2,6 +2,7 @@
 #define ATHENA_GRAPH_DIALECT
 
 include "mlir/IR/OpBase.td"
+include "ComputationalOpInterface.td"
 
 def AthenaGraph_Dialect : Dialect {
   let name = "ath_graph";

@@ -14,6 +14,8 @@
 #ifndef ATHENA_ATHENAGRAPHOPS_H
 #define ATHENA_ATHENAGRAPHOPS_H
 
+#include "AthenaGraph/ComputationalOpInterface.h"
+
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/FunctionSupport.h"
 #include "mlir/IR/OpDefinition.h"

@@ -179,7 +179,7 @@ void populateCodeGenPatterns(athena::core::Generator& generator,
             builder.create<mlir::ath_graph::ReturnOp>(builder.getUnknownLoc());
           } else {
             auto context = node.getContext();
-            auto res = builder.create<mlir::ath_graph::GetTensor>(
+            auto res = builder.create<mlir::ath_graph::CreateTensorOp>(
                 builder.getUnknownLoc(), context, out.getVirtualAddress(),
                 getTensorType(builder, out).cast<mlir::RankedTensorType>());
             builder.create<mlir::ath_graph::ReturnOp>(builder.getUnknownLoc(),

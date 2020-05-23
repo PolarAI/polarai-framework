@@ -9,12 +9,14 @@ include "mlir/Interfaces/ControlFlowInterfaces.td"
 include "mlir/Interfaces/SideEffects.td"
 
 def AthenaGraph_NodeOp : AthenaGraph_Op<"node", [AutomaticAllocationScope,
-                                                 FunctionLike, IsolatedFromAbove, Symbol]> {
+                                                 FunctionLike, 
+                                                 IsolatedFromAbove, Symbol]> {
   let summary = "Athena Graph Node";
   // todo extend description with samples when dialect is formed.
   let description = [{
-    Defines a sequence of operations required to complete node execution. This includes allocation
-    of tensors, locking tensors for particular access mode, performing operations on tensors.
+    Defines a sequence of operations required to complete node execution. 
+    This includes allocation of tensors, locking tensors for particular access 
+    mode, performing operations on tensors.
 
     The operation has one region that corresponds to the body of node function.
   }];
@@ -24,8 +26,8 @@ def AthenaGraph_NodeOp : AthenaGraph_Op<"node", [AutomaticAllocationScope,
   let skipDefaultBuilders = 1;
 
   let builders = [
-    OpBuilder<"OpBuilder& builder, OperationState &result, StringRef name, FunctionType type, "
-              "size_t nodeId, size_t clusterId, "
+    OpBuilder<"OpBuilder& builder, OperationState &result, StringRef name, "
+              "FunctionType type, size_t nodeId, size_t clusterId, "
               "ArrayRef<NamedAttribute> attrs = {}">
   ];
 
@@ -48,9 +50,10 @@ def AthenaGraph_NodeOp : AthenaGraph_Op<"node", [AutomaticAllocationScope,
   }];
 }
 
-def AthenaGraph_GraphOp : AthenaGraph_Op<"graph", [AutomaticAllocationScope,
-                                                   FunctionLike, IsolatedFromAbove, Symbol,
-                                                   SingleBlockImplicitTerminator<"GraphTerminatorOp">]> {
+def AthenaGraph_GraphOp : AthenaGraph_Op<"graph", 
+                          [AutomaticAllocationScope, FunctionLike, 
+                          IsolatedFromAbove, Symbol,
+                          SingleBlockImplicitTerminator<"GraphTerminatorOp">]> {
   let summary = "Athena Graph operation";
   // todo extend description with samples when dialect is formed.
   let description = [{
@@ -79,7 +82,9 @@ def AthenaGraph_GraphOp : AthenaGraph_Op<"graph", [AutomaticAllocationScope,
   }];
 }
 
-def AthenaGraph_ReturnOp : AthenaGraph_Op<"return", [NoSideEffect, HasParent<"NodeOp">, Terminator
+def AthenaGraph_ReturnOp : AthenaGraph_Op<"return", [NoSideEffect, 
+                                                     HasParent<"NodeOp">,
+                                                     Terminator
                                                      /*ReturnLike*/]> {
   let summary = "return operation";
   let description = [{
@@ -94,8 +99,9 @@ def AthenaGraph_ReturnOp : AthenaGraph_Op<"return", [NoSideEffect, HasParent<"No
   let assemblyFormat = "attr-dict ($operands^ `:` type($operands))?";
 }
 
-def AthenaGraph_GraphTerminatorOp : AthenaGraph_Op<"graph_terminator", [Terminator,
-      HasParent<"GraphOp">, NoSideEffect]> {
+def AthenaGraph_GraphTerminatorOp : AthenaGraph_Op<"graph_terminator", 
+                                    [Terminator, HasParent<"GraphOp">, 
+                                    NoSideEffect]> {
   let summary = "graph terminator operation";
   let description = [{
     Indicates end of graph computation.
@@ -144,59 +150,23 @@ def AthenaGraph_SliceOp : AthenaGraph_Op<"slice", [NoSideEffect]> {
   let arguments = (ins AnyType:$id, AnyTensor:$tensor);
   let results = (outs AnyTensor);
 
-  let builders = [OpBuilder<"OpBuilder& builder, OperationState &result, Value slice, Value tensor">];
+  let builders = [OpBuilder<"OpBuilder& builder, OperationState &result, "
+                            "Value slice, Value tensor">];
   let skipDefaultBuilders = 1;
 }
 
-def AthenaGraph_GetTensor : AthenaGraph_Op<"get_tensor", [NoSideEffect]> {
+def AthenaGraph_CreateTensorOp : AthenaGraph_Op<"create_tensor", 
+                                                [NoSideEffect]> {
   let summary = "Get tensor by virtual address";
   let description = [{ TBD }];
 
   let arguments = (ins AnyType:$context, IndexAttr:$virtual_address);
   let results = (outs AnyTensor);
 
-  let builders = [OpBuilder<"OpBuilder& builder, OperationState &result, Value context, "
-                            "size_t virtualAddress, RankedTensorType type">];
+  let builders = [OpBuilder<"OpBuilder& builder, OperationState &result, "
+                            "Value context, size_t virtualAddress, "
+                            "RankedTensorType type">];
   let skipDefaultBuilders = 1;
-}
-
-//===------------------------------------------------------------------------------------------===//
-// Athena Graph builtins
-//===------------------------------------------------------------------------------------------===//
-
-def AthenaGraph_AddOp : AthenaGraph_Op<"add"> {
-  let summary = "Element-wise addition operation";
-  let description = [{ TBD }];
-
-  let arguments = (ins AnyTensor:$a, AnyType:$scaleA, AnyTensor:$b, AnyType:$scaleB, AnyTensor:$out);
-}
-
-def AthenaGraph_MulOp : AthenaGraph_Op<"mul"> {
-  let summary = "Element-wise multiplication operation";
-  let description = [{ TBD }];
-
-  let arguments = (ins AnyTensor:$a, AnyTensor:$b, AnyType:$scale, AnyTensor:$out);
-}
-
-def AthenaGraph_MatmulOp : AthenaGraph_Op<"matmul"> {
-  let summary = "Matrix-matrix multiplication operation";
-  let description = [{ TBD }];
-
-  let arguments = (ins AnyTensor:$a, AnyType:$scaleA, AnyTensor:$b, AnyType:$scaleB, AnyTensor:$out);
-}
-
-def AthenaGraph_TransposeOp : AthenaGraph_Op<"transpose"> {
-  let summary = "Matrix transposition operation";
-  let description = [{ TBD }];
-
-  let arguments = (ins AnyTensor:$a, AnyTensor:$res);
-}
-
-def AthenaGraph_FillOp : AthenaGraph_Op<"fill"> {
-  let summary = "Fills tensor with value";
-  let description = [{ TBD }];
-
-  let arguments = (ins AnyType:$pattern, AnyTensor:$out);
 }
 
 def AthenaGraph_AllocOp : AthenaGraph_Op<"alloc"> {
@@ -209,12 +179,13 @@ def AthenaGraph_AllocOp : AthenaGraph_Op<"alloc"> {
 def AthenaGraph_LockOp : AthenaGraph_Op<"lock"> {
   let summary = "Locks data on device";
   let description = [{
-    Athena LLVM backend Allocators explicitly manage memory both on host and devices. Memory can be
-    moved from one domain to another. To prevent this, tensors that are about to be accessed must be
-    "locked" on a certain device.
+    Athena LLVM backend Allocators explicitly manage memory both on host and 
+    devices. Memory can be moved from one domain to another. To prevent this, 
+    tensors that are about to be accessed must be "locked" on a certain device.
 
-    Nodes can lock tensors for read and read_write access. Multiple devices are allowed to lock
-    tensor for read, and only one device is allowed to lock tensor for read_write.
+    Nodes can lock tensors for read and read_write access. Multiple devices are
+    allowed to lock tensor for read, and only one device is allowed to lock
+    tensor for read_write.
   }];
 
   // todo change to enum.
@@ -224,8 +195,8 @@ def AthenaGraph_LockOp : AthenaGraph_Op<"lock"> {
 def AthenaGraph_ReleaseOp : AthenaGraph_Op<"release"> {
   let summary = "Releases data";
   let description = [{
-    Notifies Athena LLVM backend Allocator, that tensor is no longer in use and its memory can be
-    freed.
+    Notifies Athena LLVM backend Allocator, that tensor is no longer in use and
+    its memory can be freed.
   }];
 
   let arguments = (ins AnyTensor:$tensor);
@@ -234,11 +205,108 @@ def AthenaGraph_ReleaseOp : AthenaGraph_Op<"release"> {
 def AthenaGraph_InvokeLoaderOp : AthenaGraph_Op<"invoke_loader"> {
   let summary = "Invokes loader";
   let description = [{
-    One way of getting data into tensor is invoking a loader routine. Users are allowed to write
-    their own loaders. Loader must provide a C-like function that can be invoked on host.
+    One way of getting data into tensor is invoking a loader routine. Users are
+    allowed to write their own loaders. Loader must provide a C-like function
+    that can be invoked on host.
   }];
 
   let arguments = (ins StrAttr:$loader_routine, AnyTensor:$dest);
 
 }
+
+def AthenaGraph_BarrierOp : AthenaGraph_Op<"Barrier", [IsolatedFromAbove]> {
+  let summary = "Blocks execution of the subsequent nodes";
+  let description = [{ TBD }];
+
+  let arguments = (ins IndexAttr:$clusterId);
+}
+
+//===----------------------------------------------------------------------===//
+// Athena Graph builtins
+//===----------------------------------------------------------------------===//
+
+def AthenaGraph_AddOp : AthenaGraph_Op<"add", [Computational]> {
+  let summary = "Element-wise addition operation";
+  let description = [{ TBD }];
+
+  let arguments = (ins AnyTensor:$a, AnyType:$scaleA, AnyTensor:$b,
+                       AnyType:$scaleB, AnyTensor:$out);
+  let results = (outs AnyTensor);
+  let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
+                            "Value a, Value scaleA, Value b, Value scaleB, "
+                            "Value out", [{
+    result.addOperands(a);
+    result.addOperands(scaleA);
+    result.addOperands(b);
+    result.addOperands(scaleB);
+    result.addOperands(out);
+    result.types.push_back(out.getType());
+  }]>];
+}
+
+def AthenaGraph_MulOp : AthenaGraph_Op<"mul", [Computational]> {
+  let summary = "Element-wise multiplication operation";
+  let description = [{ TBD }];
+
+  let arguments = (ins AnyTensor:$a, AnyTensor:$b, AnyType:$scale,
+                       AnyTensor:$out);
+  let results = (outs AnyTensor);
+  let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
+                            "Value a, Value b, Value scale, "
+                            "Value out", [{
+    result.addOperands(a);
+    result.addOperands(b);
+    result.addOperands(scale);
+    result.addOperands(out);
+    result.types.push_back(out.getType());
+  }]>];
+}
+
+def AthenaGraph_MatmulOp : AthenaGraph_Op<"matmul", [Computational]> {
+  let summary = "Matrix-matrix multiplication operation";
+  let description = [{ TBD }];
+
+  let arguments = (ins AnyTensor:$a, AnyType:$scaleA, AnyTensor:$b,
+                       AnyType:$scaleB, AnyTensor:$out);
+  let results = (outs AnyTensor);
+  let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
+                            "Value a, Value scaleA, Value b, Value scaleB, "
+                            "Value out", [{
+    result.addOperands(a);
+    result.addOperands(scaleA);
+    result.addOperands(b);
+    result.addOperands(scaleB);
+    result.addOperands(out);
+    result.types.push_back(out.getType());
+  }]>];
+}
+
+def AthenaGraph_TransposeOp : AthenaGraph_Op<"transpose", [Computational]> {
+  let summary = "Matrix transposition operation";
+  let description = [{ TBD }];
+
+  let arguments = (ins AnyTensor:$a, AnyTensor:$res);
+  let results = (outs AnyTensor);
+  let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
+                            "Value a, Value out", [{
+    result.addOperands(a);
+    result.addOperands(out);
+    result.types.push_back(out.getType());
+  }]>];
+}
+
+def AthenaGraph_FillOp : AthenaGraph_Op<"fill", [Computational]> {
+  let summary = "Fills tensor with value";
+  let description = [{ TBD }];
+
+  let arguments = (ins AnyType:$pattern, AnyTensor:$out);
+  let results = (outs AnyTensor);
+  let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
+                            "Value pattern, Value out", [{
+    result.addOperands(pattern);
+    result.addOperands(out);
+    result.types.push_back(out.getType());
+  }]>];
+}
+
 #endif // ATHENA_GRAPH_OPS

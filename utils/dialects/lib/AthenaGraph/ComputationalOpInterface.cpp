@@ -11,14 +11,9 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_ATHENAGRAPHDIALECT_H
-#define ATHENA_ATHENAGRAPHDIALECT_H
+#include "AthenaGraph/ComputationalOpInterface.h"
 
-#include <mlir/IR/Dialect.h>
+using namespace mlir;
+using namespace mlir::ath_graph;
 
-namespace mlir::ath_graph {
-
-#include "AthenaGraph/AthenaGraphOpsDialect.h.inc"
-} // namespace mlir::ath_graph
-
-#endif // ATHENA_ATHENAGRAPHDIALECT_H
+#include "AthenaGraph/ComputationalOpInterface.cpp.inc"
