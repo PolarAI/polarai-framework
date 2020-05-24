@@ -33,7 +33,7 @@ module {
   "ath_graph.graph"() ( {
     %0 = "ath_graph.eval"() {node = @inputA} : () -> tensor<8xf32>
     %1 = "ath_graph.eval"() {node = @inputB} : () -> tensor<8xf32>
-    "ath_graph.Barrier"() {clusterId = 0 : index} : () -> ()
+    "ath_graph.barrier"() {clusterId = 0 : index} : () -> ()
     %2 = "ath_graph.eval"(%0, %1) {node = @sum} : (tensor<8xf32>, tensor<8xf32>) -> tensor<8xf32>
     "ath_graph.graph_terminator"() : () -> ()
   }) {sym_name = "mainGraph", type = () -> ()} : () -> ()
@@ -74,7 +74,7 @@ module {
 // CHECK-NEXT: "ath_graph.graph"() ( {
 // CHECK-NEXT: %0 = ath_graph.eval @inputA() : () -> tensor<8xf32>
 // CHECK-NEXT: %1 = ath_graph.eval @inputB() : () -> tensor<8xf32>
-// CHECK-NEXT: "ath_graph.Barrier"() {clusterId = 0 : index} : () -> ()
+// CHECK-NEXT: "ath_graph.barrier"() {clusterId = 0 : index} : () -> ()
 // CHECK-NEXT: %2 = ath_graph.eval @sum() : () -> tensor<8xf32>
 // CHECK-NEXT: "ath_graph.graph_terminator"() : () -> ()
 // CHECK-NEXT: }) {sym_name = "mainGraph", type = () -> ()} : () -> ()

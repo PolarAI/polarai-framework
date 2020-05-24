@@ -14,13 +14,40 @@
 #include "AthenaRuntime/AthenaRuntimeDialect.h"
 #include "AthenaRuntime/AthenaRuntimeOps.h"
 
+#include "mlir/IR/StandardTypes.h"
+#include "mlir/IR/DialectImplementation.h"
+
 using namespace mlir;
 using namespace mlir::ath_rt;
 
 AthenaRuntimeDialect::AthenaRuntimeDialect(mlir::MLIRContext* context)
     : Dialect(getDialectNamespace(), context) {
+  addTypes<DeviceType, EventType, GraphHandleType>();
   addOperations<
 #define GET_OP_LIST
 #include "AthenaRuntime/AthenaRuntimeOps.cpp.inc"
       >();
+}
+
+mlir::Type AthenaRuntimeDialect::parseType(mlir::DialectAsmParser& parser) const {
+  if (!parser.parseKeyword("device")) {
+    return DeviceType::get(getContext());
+  } else if (!parser.parseKeyword("event")) {
+    return EventType::get(getContext());
+  } else if (!parser.parseKeyword("graph_handle")) {
+    return GraphHandleType::get(getContext());
+  } else {
+    return mlir::Type{};
+  }
+}
+
+void AthenaRuntimeDialect::printType(mlir::Type type,
+                                     mlir::DialectAsmPrinter& printer) const {
+  if (type.isa<DeviceType>()) {
+    printer << "device";
+  } else if (type.isa<EventType>()) {
+    printer << "event";
+  } else if (type.isa<GraphHandleType>()) {
+    printer << "graph_handle";
+  }
 }

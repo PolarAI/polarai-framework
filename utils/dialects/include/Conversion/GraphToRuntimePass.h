@@ -26,10 +26,10 @@ class AthenaTypeConverter;
 template <typename OpT> class OperationPass;
 
 void populateGraphToRuntimeConversionPatterns(
-    AthenaTypeConverter& typeConverter,
     OwningRewritePatternList& loweringPatterns, MLIRContext* ctx);
 
-std::unique_ptr<OperationPass<ModuleOp>> createLowerGraphToRuntimePass();
+auto createLowerGraphToRuntimePass()
+    -> std::unique_ptr<OperationPass<ModuleOp>>;
 
 } // namespace mlir
 

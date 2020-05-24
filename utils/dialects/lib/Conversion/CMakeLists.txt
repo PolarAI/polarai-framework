@@ -7,12 +7,11 @@ add_mlir_conversion_library(MLIRAthenaConversion
 
         DEPENDS
         MLIRAthenaGraph
-)
 
-target_link_libraries(MLIRAthenaConversion
-        PUBLIC
+        LINK_LIBS PUBLIC
         MLIRIR
         MLIRPass
         MLIRAthenaGraph
+        MLIRAthenaRuntime
         MLIRTransforms
 )

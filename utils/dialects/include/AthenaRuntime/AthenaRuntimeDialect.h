@@ -41,24 +41,24 @@ public:
   }
 };
 
-class EventType : public Type::TypeBase<DeviceType, Type> {
+class EventType : public Type::TypeBase<EventType, Type> {
 public:
   using Base::Base;
 
   static bool kindof(unsigned kind) { return kind == RuntimeTypes::Event; }
 
-  static DeviceType get(MLIRContext* context) {
+  static EventType get(MLIRContext* context) {
     return Base::get(context, RuntimeTypes::Event);
   }
 };
 
-class GraphHandleType : public Type::TypeBase<DeviceType, Type> {
+class GraphHandleType : public Type::TypeBase<GraphHandleType, Type> {
 public:
   using Base::Base;
 
   static bool kindof(unsigned kind) { return kind == RuntimeTypes::GraphHandle; }
 
-  static DeviceType get(MLIRContext* context) {
+  static GraphHandleType get(MLIRContext* context) {
     return Base::get(context, RuntimeTypes::GraphHandle);
   }
 };

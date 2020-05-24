@@ -17,12 +17,13 @@ def AthenaRuntime_LaunchOp : AthenaRuntime_Op<"launch"> {
   let results = (outs AthenaRuntime_EventType);
 }
 
-def AthenaRuntime_DeviceSelectOp : AthenaRuntime_Op<"select_device"> {
+def AthenaRuntime_DeviceSelectOp : AthenaRuntime_Op<"select_device", 
+                                                               [NoSideEffect]> {
   let summary = "Selects device for specified node";
   let description = [{ TBD }];
 
   let arguments = (ins IndexAttr:$nodeId);
-  let results = (outs AthenaRuntime_EventType);
+  let results = (outs AthenaRuntime_DeviceType);
 }
 
 def AthenaRuntime_BarrierOp : AthenaRuntime_Op<"barrier"> {
@@ -54,4 +55,9 @@ def AthenaRuntime_ScopeYieldOp : AthenaRuntime_Op<"yield", [NoSideEffect,
   let description = [{ TBD }];
 }
 
+def AthenaRuntime_NullEventOp : AthenaRuntime_Op<"null_event", [NoSideEffect]> {
+  let summary = "Returns null event";
+
+  let results = (outs AthenaRuntime_EventType);
+}
 #endif // ATHENA_RUNTIME_OPS

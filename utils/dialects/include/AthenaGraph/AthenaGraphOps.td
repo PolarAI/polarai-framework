@@ -208,7 +208,7 @@ def AthenaGraph_InvokeLoaderOp : AthenaGraph_Op<"invoke_loader"> {
 
 }
 
-def AthenaGraph_BarrierOp : AthenaGraph_Op<"Barrier", [IsolatedFromAbove]> {
+def AthenaGraph_BarrierOp : AthenaGraph_Op<"barrier", [IsolatedFromAbove]> {
   let summary = "Blocks execution of the subsequent nodes";
   let description = [{ TBD }];
 
