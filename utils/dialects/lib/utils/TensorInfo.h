@@ -11,28 +11,18 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_RUNTIMETOLLVM_H
-#define ATHENA_RUNTIMETOLLVM_H
+#pragma once
 
-#include <memory>
+#include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 
-namespace mlir {
+inline mlir::LLVM::LLVMType
+getTensorInfoType(mlir::LLVM::LLVMDialect* llvmDialect) {
+  using namespace mlir;
 
-class ModuleOp;
-class MLIRContext;
-class OwningRewritePatternList;
-class LLVMTypeConverter;
+  auto uint64Ty = LLVM::LLVMType::getInt64Ty(llvmDialect);
+  auto int32Ty = LLVM::LLVMType::getInt32Ty(llvmDialect);
 
-template <typename OpT> class OperationPass;
-
-void populateRuntimeToLLVMConversionPatterns(
-    LLVMTypeConverter& typeConverter,
-    OwningRewritePatternList& loweringPatterns);
-
-auto createLowerRuntimeToLLVMPass()
-    -> std::unique_ptr<OperationPass<ModuleOp>>;
-
-} // namespace mlir
-
-#endif // ATHENA_RUNTIMETOLLVM_H
-
+  // fixme is it guaranteed for enum to have i32 type?
+  return LLVM::LLVMType::getStructTy(uint64Ty, int32Ty, uint64Ty,
+                                     uint64Ty.getPointerTo());
+}
