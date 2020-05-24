@@ -35,12 +35,6 @@ def AthenaGraph_NodeOp : AthenaGraph_Op<"node", [AutomaticAllocationScope,
     friend class OpTrait::FunctionLike<NodeOp>;
     unsigned getNumFuncArguments() { return getType().getNumInputs(); }
     unsigned getNumFuncResults() { return getType().getNumResults(); }
-    Value getContext() {
-      return getArgument(getNumFuncArguments() - 2);
-    }
-    Value getBatchIndex() {
-      return getArgument(getNumFuncArguments() - 1);
-    }
     static StringRef getNodeIdAttrName() {
       return "node_id";
     }
@@ -48,6 +42,8 @@ def AthenaGraph_NodeOp : AthenaGraph_Op<"node", [AutomaticAllocationScope,
       return "cluster_id";
     }
   }];
+  // let printer = [{ printNodeOp(p, *this); }];
+  // let parser = [{ return parseNodeOp(parser, result); }];
 }
 
 def AthenaGraph_GraphOp : AthenaGraph_Op<"graph", 
@@ -73,12 +69,6 @@ def AthenaGraph_GraphOp : AthenaGraph_Op<"graph",
     friend class OpTrait::FunctionLike<GraphOp>;
     unsigned getNumFuncArguments() { return getType().getNumInputs(); }
     unsigned getNumFuncResults() { return getType().getNumResults(); }
-    Value getContext() {
-      return getArgument(getNumFuncArguments() - 2);
-    }
-    Value getBatchSize() {
-      return getArgument(getNumFuncArguments() - 1);
-    }
   }];
 }
 
@@ -214,7 +204,7 @@ def AthenaGraph_InvokeLoaderOp : AthenaGraph_Op<"invoke_loader"> {
     that can be invoked on host.
   }];
 
-  let arguments = (ins StrAttr:$loader_routine, AnyTensor:$dest);
+  let arguments = (ins AnyTensor:$dest);
 
 }
 

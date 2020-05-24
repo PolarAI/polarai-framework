@@ -273,12 +273,11 @@ void populateCodeGenPatterns(athena::core::Generator& generator,
   generator.registerFunctor<builtin::Barrier>(barrierBuiltin);
 
   builtin_functor_t<builtin::InvokeLoader> invokeLoaderFunctor =
-      [&](std::string_view loaderRoutine, GenValue destTensor) {
+      [&](GenValue destTensor) {
         auto tensorVal = destTensor.value<MlirValueImpl>().value;
 
         builder.create<mlir::ath_graph::InvokeLoaderOp>(
-            builder.getUnknownLoc(), builder.getStringAttr(loaderRoutine),
-            tensorVal);
+            builder.getUnknownLoc(), tensorVal);
 
         return GenValue{nullptr};
       };
@@ -294,8 +293,6 @@ void populateCodeGenPatterns(athena::core::Generator& generator,
           auto val = op.value<MlirValueImpl>().value;
           nodeOperands.push_back(val);
         }
-        nodeOperands.push_back(mlirGraph.getContext());
-        nodeOperands.push_back(mlirGraph.getBatchSize());
 
         auto evalRes = builder.create<mlir::ath_graph::EvalOp>(
             builder.getUnknownLoc(), mlirNode, nodeOperands);

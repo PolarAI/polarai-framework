@@ -13,7 +13,9 @@
 
 #include "AthenaGraph/AthenaGraphOps.h"
 #include "AthenaGraph/AthenaGraphDialect.h"
+
 #include "mlir/IR/Builders.h"
+#include "mlir/IR/FunctionImplementation.h"
 #include "mlir/IR/OpImplementation.h"
 #include "mlir/IR/StandardTypes.h"
 
@@ -23,19 +25,9 @@ void NodeOp::build(OpBuilder& builder, OperationState& result, StringRef name,
                    FunctionType type, size_t nodeId, size_t clusterId,
                    ArrayRef<NamedAttribute> attrs) {
 
-  SmallVector<Type, 7> realArgTypes;
-  std::copy(type.getInputs().begin(), type.getInputs().end(),
-            std::back_inserter(realArgTypes));
-  // Context pointer
-  realArgTypes.push_back(builder.getIndexType());
-  // Batch index
-  realArgTypes.push_back(builder.getIndexType());
-
-  auto realFuncType = builder.getFunctionType(realArgTypes, type.getResults());
-
   result.addAttribute(SymbolTable::getSymbolAttrName(),
                       builder.getStringAttr(name));
-  result.addAttribute(getTypeAttrName(), TypeAttr::get(realFuncType));
+  result.addAttribute(getTypeAttrName(), TypeAttr::get(type));
   result.addAttributes(attrs);
   result.addAttribute(getNodeIdAttrName(),
                       IntegerAttr::get(builder.getIndexType(), nodeId));
@@ -43,20 +35,113 @@ void NodeOp::build(OpBuilder& builder, OperationState& result, StringRef name,
                       IntegerAttr::get(builder.getIndexType(), clusterId));
   Region* body = result.addRegion();
   auto* entryBlock = new Block;
-  entryBlock->addArguments(realFuncType.getInputs());
+  entryBlock->addArguments(type.getInputs());
 
   body->getBlocks().push_back(entryBlock);
 }
 
+static ParseResult
+parseAttributions(OpAsmParser& parser, StringRef keyword,
+                  SmallVectorImpl<OpAsmParser::OperandType>& args,
+                  SmallVectorImpl<Type>& argTypes) {
+  if (failed(parser.parseOptionalKeyword(keyword)))
+    return success();
+
+  if (failed(parser.parseLParen()))
+    return failure();
+
+  // Early exit for an empty list.
+  if (succeeded(parser.parseOptionalRParen()))
+    return success();
+
+  do {
+    OpAsmParser::OperandType arg;
+    Type type;
+
+    if (parser.parseRegionArgument(arg) || parser.parseColonType(type))
+      return failure();
+
+    args.push_back(arg);
+    argTypes.push_back(type);
+  } while (succeeded(parser.parseOptionalComma()));
+
+  return parser.parseRParen();
+}
+
+static void printAttributions(OpAsmPrinter& p, StringRef keyword,
+                              ArrayRef<BlockArgument> values) {
+  if (values.empty())
+    return;
+
+  p << ' ' << keyword << '(';
+  llvm::interleaveComma(
+      values, p, [&p](BlockArgument v) { p << v << " : " << v.getType(); });
+  p << ')';
+}
+
+static ParseResult parseNodeOp(OpAsmParser& parser, OperationState& result) {
+  SmallVector<OpAsmParser::OperandType, 4> entryArgs;
+  SmallVector<NamedAttrList, 1> argAttrs;
+  SmallVector<NamedAttrList, 1> resultAttrs;
+  SmallVector<Type, 4> argTypes;
+  SmallVector<Type, 1> resultTypes;
+  bool isVariadic;
+
+  StringAttr nameAttr;
+  // Parse node name.
+  if (parser.parseSymbolName(nameAttr, ::mlir::SymbolTable::getSymbolAttrName(),
+                             result.attributes))
+    return failure();
+
+  auto signatureLocation = parser.getCurrentLocation();
+  if (failed(impl::parseFunctionSignature(
+          parser, /*allowVariadic=*/false, entryArgs, argTypes, argAttrs,
+          isVariadic, resultTypes, resultAttrs)))
+    return failure();
+
+  Builder& builder = parser.getBuilder();
+  auto type = builder.getFunctionType(argTypes, resultTypes);
+  result.addAttribute(NodeOp::getTypeAttrName(), TypeAttr::get(type));
+
+  if (failed(parseAttributions(parser, NodeOp::getNodeIdAttrName(), entryArgs,
+                               argTypes)))
+    return failure();
+  if (failed(parseAttributions(parser, NodeOp::getClusterIdAttrName(),
+                               entryArgs, argTypes)))
+    return failure();
+
+  // Parse attributes.
+  if (failed(parser.parseOptionalAttrDictWithKeyword(result.attributes)))
+    return failure();
+  mlir::impl::addArgAndResultAttrs(builder, result, argAttrs, resultAttrs);
+
+  // Parse the region. If no argument names were provided, take all names
+  // (including those of attributions) from the entry block.
+  auto* body = result.addRegion();
+  return parser.parseRegion(*body, entryArgs, argTypes);
+}
+
+static void printNodeOp(OpAsmPrinter& p, NodeOp op) {
+  p << NodeOp::getOperationName() << ' ';
+  p.printSymbolName(op.getName());
+
+  FunctionType type = op.getType();
+  impl::printFunctionSignature(p, op.getOperation(), type.getInputs(), false,
+                               type.getResults());
+  // printAttributions(p, op.getNodeIdAttrName(),
+  // op.getAttr(op.getNodeIdAttrName()));
+  p << ' ' << op.getNodeIdAttrName() << " = "
+    << op.getAttrOfType<mlir::IntegerAttr>(op.getNodeIdAttrName());
+  p << ' ' << op.getClusterIdAttrName() << " = "
+    << op.getAttrOfType<mlir::IntegerAttr>(op.getClusterIdAttrName());
+  impl::printFunctionAttributes(p, op.getOperation(), type.getNumInputs(),
+                                type.getNumResults(), {});
+  p.printRegion(op.getBody(), /*printEntryBlockArgs=*/false);
+}
+
 void GraphOp::build(OpBuilder& builder, OperationState& result, StringRef name,
                     ArrayRef<NamedAttribute> attrs) {
-  llvm::SmallVector<mlir::Type, 2> graphArgs;
-  // Context pointer
-  graphArgs.push_back(builder.getIndexType());
-  // Batch size
-  graphArgs.push_back(builder.getIndexType());
-
-  auto funcType = builder.getFunctionType(graphArgs, {});
+  auto funcType = builder.getFunctionType({}, {});
 
   result.addAttribute(SymbolTable::getSymbolAttrName(),
                       builder.getStringAttr(name));
@@ -87,7 +172,6 @@ void SliceOp::build(OpBuilder& builder, OperationState& result, Value slice,
 
 void CreateTensorOp::build(OpBuilder& builder, OperationState& result,
                            uint64_t virtualAddress, RankedTensorType type) {
-  // todo move attribute name.
   result.addAttribute(getVirtualAddressAttrName(),
                       builder.getIndexAttr(virtualAddress));
   result.addTypes(type);

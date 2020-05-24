@@ -25,7 +25,8 @@ namespace mlir::ath_rt {
 namespace RuntimeTypes {
 enum Types {
   Device = mlir::Type::FIRST_PRIVATE_EXPERIMENTAL_9_TYPE,
-  Event
+  Event,
+  GraphHandle
 };
 }
 
@@ -44,10 +45,21 @@ class EventType : public Type::TypeBase<DeviceType, Type> {
 public:
   using Base::Base;
 
-  static bool kindof(unsigned kind) { return kind == RuntimeTypes::Device; }
+  static bool kindof(unsigned kind) { return kind == RuntimeTypes::Event; }
 
   static DeviceType get(MLIRContext* context) {
-    return Base::get(context, RuntimeTypes::Device);
+    return Base::get(context, RuntimeTypes::Event);
+  }
+};
+
+class GraphHandleType : public Type::TypeBase<DeviceType, Type> {
+public:
+  using Base::Base;
+
+  static bool kindof(unsigned kind) { return kind == RuntimeTypes::GraphHandle; }
+
+  static DeviceType get(MLIRContext* context) {
+    return Base::get(context, RuntimeTypes::GraphHandle);
   }
 };
 

@@ -17,11 +17,12 @@
 #include <memory>
 
 namespace mlir {
-
 class ModuleOp;
 template <typename OpT> class OperationPass;
 
 std::unique_ptr<OperationPass<ModuleOp>> createDeployDefaultFunctionsPass();
-}
+std::unique_ptr<OperationPass<ModuleOp>>
+createGraphRelationDestructorPass();
+} // namespace mlir
 
 #endif // ATHENA_PASSES_H

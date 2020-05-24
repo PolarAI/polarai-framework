@@ -1,5 +1,5 @@
 add_mlir_conversion_library(MLIRAthenaPasses
-        LoaderFunctionAnalysis.cpp
+        RelationDestructorPass.cpp
         DeployDefaultFunctions.cpp
 
         ADDITIONAL_HEADER_DIRS

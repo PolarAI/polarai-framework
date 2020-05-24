@@ -70,7 +70,7 @@ template <> struct builtin_functor<builtin::Barrier> {
 };
 
 template <> struct builtin_functor<builtin::InvokeLoader> {
-  using type = std::function<GenValue(std::string_view, GenValue)>;
+  using type = std::function<GenValue(GenValue)>;
 };
 
 template <> struct builtin_functor<builtin::NodeEval> {

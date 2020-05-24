@@ -11,7 +11,6 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "LoaderFunctionAnalysis.h"
 #include "Passes/Passes.h"
 #include "../utils/LaunchCommand.h"
 
@@ -82,24 +81,6 @@ protected:
                                                "ath_get_sub_tensor", funcTy);
         builder.create<mlir::LLVM::LLVMFuncOp>(
             builder.getUnknownLoc(), "ath_get_device_for_node", funcTy);
-      }
-    }
-
-    {
-      SmallVector<LLVM::LLVMType, 3> args;
-      args.push_back(voidPtrTy);
-      args.push_back(voidPtrTy);
-      args.push_back(voidPtrTy);
-
-      auto funcTy = LLVM::LLVMType::getFunctionTy(
-          LLVM::LLVMType::getVoidTy(llvmDialect), args, false);
-
-      auto loaderFuncAnalysis = getAnalysis<LoaderFunctionAnalysis>();
-      auto funcNames = loaderFuncAnalysis.getLoaderFunctionNames();
-
-      for (const auto& funcName : funcNames) {
-        builder.create<mlir::LLVM::LLVMFuncOp>(builder.getUnknownLoc(),
-                                               funcName, funcTy);
       }
     }
 

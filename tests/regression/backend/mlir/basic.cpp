@@ -90,7 +90,7 @@ static GenNode createInputNode(Context& ctx, std::string_view name,
   generator.setInsertionPoint(node);
   generator.callBuiltin<builtin::Alloc>(node.getResult());
   generator.callBuiltin<builtin::Lock>(node.getResult(), LockType::READ_WRITE);
-  generator.callBuiltin<builtin::InvokeLoader>(name, node.getResult());
+  generator.callBuiltin<builtin::InvokeLoader>(node.getResult());
   generator.callBuiltin<builtin::Release>(node.getResult());
   generator.callBuiltin<builtin::Return>(node.getResult());
   generator.setInsertionPoint(save);

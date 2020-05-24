@@ -18,7 +18,9 @@ class AthenaRuntime_Op<string mnemonic, list<OpTrait> traits = []> :
 
 def AthenaRuntime_DeviceType : Type<CPred<"$_self.isa<DeviceType>()">,
                                           "Athena Runtime Device type">;
-def AthenaRuntime_EventType : Type<CPred<"$_self.isa<DeviceType>()">,
+def AthenaRuntime_EventType : Type<CPred<"$_self.isa<EventType>()">,
                                          "Athena Runtime Event type">;
+def AthenaRuntime_GraphHandleType : Type<CPred<"$_self.isa<GraphHandleType>()">,
+                                             "Athena Runtime GraphHandle type">;
 
 #endif // ATHENA_RUNTIME_DIALECT

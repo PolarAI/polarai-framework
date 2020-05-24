@@ -68,12 +68,15 @@ int main(int argc, char** argv) {
   mlir::registerAllPasses();
 
   mlir::registerDialect<mlir::ath_graph::AthenaGraphDialect>();
-  mlir::registerPass("convert-graph-to-runtime",
-                     "Converts Athena Graph to Runtime calls",
-                     mlir::createLowerGraphToRuntimePass);
+  // mlir::registerPass("convert-graph-to-runtime",
+  //                    "Converts Athena Graph to Runtime calls",
+  //                    mlir::createLowerGraphToRuntimePass);
   mlir::registerPass("deploy-default-functions",
                      "Adds definitions of default Athena functions",
                      mlir::createDeployDefaultFunctionsPass);
+  mlir::registerPass("destroy-graph-relations",
+                     "Removes explicit dependencies between Graph nodes",
+                     mlir::createGraphRelationDestructorPass);
 
   llvm::InitLLVM y(argc, argv);
 
