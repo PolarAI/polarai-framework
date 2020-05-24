@@ -30,11 +30,11 @@ AthenaRuntimeDialect::AthenaRuntimeDialect(mlir::MLIRContext* context)
 }
 
 mlir::Type AthenaRuntimeDialect::parseType(mlir::DialectAsmParser& parser) const {
-  if (!parser.parseKeyword("device")) {
+  if (!parser.parseOptionalKeyword("device")) {
     return DeviceType::get(getContext());
-  } else if (!parser.parseKeyword("event")) {
+  } else if (!parser.parseOptionalKeyword("event")) {
     return EventType::get(getContext());
-  } else if (!parser.parseKeyword("graph_handle")) {
+  } else if (!parser.parseOptionalKeyword("graph_handle")) {
     return GraphHandleType::get(getContext());
   } else {
     return mlir::Type{};

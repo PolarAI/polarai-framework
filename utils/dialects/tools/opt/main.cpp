@@ -79,6 +79,9 @@ int main(int argc, char** argv) {
   mlir::registerPass("destroy-graph-relations",
                      "Removes explicit dependencies between Graph nodes",
                      mlir::createGraphRelationDestructorPass);
+  mlir::registerPass("legalize-barriers",
+                     "Adds event arguments to Runtime barriers",
+                     mlir::createBarrierLegalizerPass);
 
   llvm::InitLLVM y(argc, argv);
 

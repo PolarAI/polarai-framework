@@ -11,8 +11,8 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_GRAPHTORUNTIMEPASS_H
-#define ATHENA_GRAPHTORUNTIMEPASS_H
+#ifndef ATHENA_RUNTIMETOLLVM_H
+#define ATHENA_RUNTIMETOLLVM_H
 
 #include <memory>
 
@@ -24,12 +24,14 @@ class OwningRewritePatternList;
 
 template <typename OpT> class OperationPass;
 
-void populateGraphToRuntimeConversionPatterns(
+void populateRuntimeToLLVMConversionPatterns(
+    
     OwningRewritePatternList& loweringPatterns, MLIRContext* ctx);
 
-auto createLowerGraphToRuntimePass()
+auto createLowerRuntimeToLLVMPass()
     -> std::unique_ptr<OperationPass<ModuleOp>>;
 
 } // namespace mlir
 
-#endif // ATHENA_GRAPHTORUNTIMEPASS_H
+#endif // ATHENA_RUNTIMETOLLVM_H
+
