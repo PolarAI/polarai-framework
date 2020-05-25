@@ -70,11 +70,12 @@ module {
 // CHECK-NEXT: "ath_graph.lock"(%2) {lock_type = "read_write"} : (tensor<8xf32>) -> ()
 // CHECK-NEXT: %cst = constant 1.000000e+00 : f32
 // CHECK-NEXT: %3 = "ath_rt.select_device"() {nodeId = 2 : index} : () -> !ath_rt.device
-// CHECK-NEXT: %4 = "ath_rt.launch"(%3, %1, %cst, %0, %cst, %2) {kernel = ""} : (!ath_rt.device, tensor<8xf32>, f32, tensor<8xf32>, f32, tensor<8xf32>) -> !ath_rt.event
+// CHECK-NEXT: %4 = "ath_rt.null_event"() : () -> !ath_rt.event
+// CHECK-NEXT: %out_tensor, %out_event = "ath_rt.launch"(%3, %4, %1, %cst, %0, %cst, %2) {global_size = [8], kernel = "dummy", local_size = [0]} : (!ath_rt.device, !ath_rt.event, tensor<8xf32>, f32, tensor<8xf32>, f32, tensor<8xf32>) -> (tensor<8xf32>, !ath_rt.event)
 // CHECK-NEXT: "ath_graph.release"(%1) : (tensor<8xf32>) -> ()
 // CHECK-NEXT: "ath_graph.release"(%0) : (tensor<8xf32>) -> ()
 // CHECK-NEXT: "ath_graph.release"(%2) : (tensor<8xf32>) -> ()
-// CHECK-NEXT: return %4 : !ath_rt.event
+// CHECK-NEXT: return %out_event : !ath_rt.event
 // CHECK-NEXT: }
 // CHECK-NEXT: func @mainGraph(%arg0: !ath_rt.graph_handle) {
 // CHECK-NEXT: %0 = call @inputA(%arg0) : (!ath_rt.graph_handle) -> !ath_rt.event

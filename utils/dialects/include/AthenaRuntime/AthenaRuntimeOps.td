@@ -2,6 +2,7 @@
 #define ATHENA_RUNTIME_OPS
 
 include "AthenaRuntimeDialect.td"
+
 include "mlir/IR/OpAsmInterface.td"
 include "mlir/IR/SymbolInterfaces.td"
 include "mlir/Interfaces/CallInterfaces.td"
@@ -12,9 +13,13 @@ def AthenaRuntime_LaunchOp : AthenaRuntime_Op<"launch"> {
   let summary = "Launches kernel on a specific device";
   let description = [{ TBD }];
 
-  let arguments = (ins AthenaRuntime_DeviceType:$device,
-                       StrAttr:$kernel, Variadic<AnyType>:$operands);
-  let results = (outs AthenaRuntime_EventType);
+  let arguments = (ins AthenaRuntime_DeviceType:$device, 
+                       AthenaRuntime_EventType:$blocking_event,
+                       StrAttr:$kernel, I64ArrayAttr:$global_size,
+                       I64ArrayAttr:$local_size,
+                       Variadic<AnyType>:$operands);
+  let results = (outs AnyTensor:$out_tensor,
+                      AthenaRuntime_EventType:$out_event);
 }
 
 def AthenaRuntime_DeviceSelectOp : AthenaRuntime_Op<"select_device", 
@@ -24,6 +29,25 @@ def AthenaRuntime_DeviceSelectOp : AthenaRuntime_Op<"select_device",
 
   let arguments = (ins IndexAttr:$nodeId);
   let results = (outs AthenaRuntime_DeviceType);
+}
+
+def AthenaRuntime_AllocOp : AthenaRuntime_Op<"alloc"> {
+  let summary = "Allocates tensor on a particular device";
+  
+  let arguments = (ins AthenaRuntime_DeviceType:$device, AnyTensor:$tensor);
+}
+
+def AthenaRuntime_LockOp : AthenaRuntime_Op<"lock"> {
+  let summary = "Locks tensor memory on a particular device";
+
+  let arguments = (ins AthenaRuntime_DeviceType:$device, AnyTensor:$tensor, 
+                   StrAttr:$lock_type);
+}
+
+def AthenaRuntime_ReleaseOp : AthenaRuntime_Op<"release"> {
+  let summary = "Indicates that tensor memory can be freed";
+
+  let arguments = (ins AthenaRuntime_DeviceType:$device, AnyTensor:$tensor);
 }
 
 def AthenaRuntime_BarrierOp : AthenaRuntime_Op<"barrier"> {

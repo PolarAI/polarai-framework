@@ -56,12 +56,31 @@ struct BuiltinConversionPattern : public AthenaGraphConversionPattern<OpT> {
     auto device = rewriter.create<ath_rt::DeviceSelectOp>(
         op->getLoc(), deviceType, nodeIdAttr);
 
-    auto eventType = ath_rt::EventType::get(op->getContext());
+    SmallVector<mlir::Type, 2> resTypes;
+    resTypes.push_back(operands.back().getType());
+    resTypes.push_back(ath_rt::EventType::get(op->getContext()));
+
+    auto definingOp = operands.back().getDefiningOp();
+    mlir::Value blockingEvent;
+    if (llvm::isa<ath_rt::LaunchOp>(definingOp)) {
+      blockingEvent = llvm::cast<ath_rt::LaunchOp>(definingOp).getResult(1);
+    } else {
+      blockingEvent =
+          rewriter.create<ath_rt::NullEventOp>(op->getLoc(), resTypes.back());
+    }
+
+    RankedTensorType tensorType =
+        concreteOp.getResult().getType().template cast<RankedTensorType>();
+    auto globalSize = rewriter.getI64ArrayAttr(tensorType.getShape());
+    SmallVector<int64_t, 3> local(tensorType.getRank());
+    auto localSize = rewriter.getI64ArrayAttr(local);
 
     // FIXME this pattern is incorrect if node performs more than one
     //       computation.
-    rewriter.replaceOpWithNewOp<ath_rt::LaunchOp>(op, eventType, device, "",
-                                                  operands);
+    auto launchOp = rewriter.create<ath_rt::LaunchOp>(
+        op->getLoc(), resTypes, device, blockingEvent, "dummy", globalSize,
+        localSize, operands);
+    rewriter.replaceOp(op, launchOp.getResult(0));
     return success();
   }
 };
@@ -73,8 +92,15 @@ struct GraphReturnConversionPattern
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
-    mlir::Value retVal = operands[0];
-    if (retVal.getType().isa<RankedTensorType>()) {
+    llvm::dbgs() << " operands size: " << operands.size();
+    auto val = operands.front();
+    val.dump();
+    mlir::Value retVal;
+    auto definingOp = operands.front().getDefiningOp();
+    if (llvm::isa<ath_rt::LaunchOp>(definingOp)) {
+      auto launchOp = llvm::cast<ath_rt::LaunchOp>(definingOp);
+      retVal = launchOp.getResult(1);
+    } else {
       retVal = rewriter.create<ath_rt::NullEventOp>(
           op->getLoc(), ath_rt::EventType::get(op->getContext()));
     }
@@ -84,10 +110,84 @@ struct GraphReturnConversionPattern
   }
 };
 
+struct AllocOpConversionPattern
+    : public AthenaGraphConversionPattern<ath_graph::AllocOp> {
+  using AthenaGraphConversionPattern<
+      ath_graph::AllocOp>::AthenaGraphConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter& rewriter) const override {
+
+    auto concreteOp = llvm::cast<ath_graph::AllocOp>(op);
+    auto node = concreteOp.template getParentOfType<FuncOp>();
+
+    auto nodeIdAttr = node.getAttrOfType<mlir::IntegerAttr>(
+        ath_graph::NodeOp::getNodeIdAttrName());
+    auto deviceType = ath_rt::DeviceType::get(op->getContext());
+
+    auto device = rewriter.create<ath_rt::DeviceSelectOp>(
+        op->getLoc(), deviceType, nodeIdAttr);
+    rewriter.replaceOpWithNewOp<ath_rt::AllocOp>(op, device, operands[0]);
+
+    return success();
+  }
+};
+
+struct ReleaseOpConversionPattern
+    : public AthenaGraphConversionPattern<ath_graph::ReleaseOp> {
+  using AthenaGraphConversionPattern<
+      ath_graph::ReleaseOp>::AthenaGraphConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter& rewriter) const override {
+
+    auto concreteOp = llvm::cast<ath_graph::ReleaseOp>(op);
+    auto node = concreteOp.getParentOfType<FuncOp>();
+
+    auto nodeIdAttr = node.getAttrOfType<mlir::IntegerAttr>(
+        ath_graph::NodeOp::getNodeIdAttrName());
+    auto deviceType = ath_rt::DeviceType::get(op->getContext());
+
+    auto device = rewriter.create<ath_rt::DeviceSelectOp>(
+        op->getLoc(), deviceType, nodeIdAttr);
+    rewriter.replaceOpWithNewOp<ath_rt::ReleaseOp>(op, device, operands[0]);
+
+    return success();
+  }
+};
+
+struct LockOpConversionPattern
+    : public AthenaGraphConversionPattern<ath_graph::LockOp> {
+  using AthenaGraphConversionPattern<
+      ath_graph::LockOp>::AthenaGraphConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter& rewriter) const override {
+
+    auto concreteOp = llvm::cast<ath_graph::LockOp>(op);
+    auto node = concreteOp.getParentOfType<FuncOp>();
+
+    auto nodeIdAttr = node.getAttrOfType<mlir::IntegerAttr>(
+        ath_graph::NodeOp::getNodeIdAttrName());
+    auto deviceType = ath_rt::DeviceType::get(op->getContext());
+
+    auto device = rewriter.create<ath_rt::DeviceSelectOp>(
+        op->getLoc(), deviceType, nodeIdAttr);
+    rewriter.replaceOpWithNewOp<ath_rt::LockOp>(op, device, operands[0],
+                                                concreteOp.lock_type());
+
+    return success();
+  }
+};
+
 struct GraphTerminatorConversionPattern
     : public AthenaGraphConversionPattern<ath_graph::GraphTerminatorOp> {
   using AthenaGraphConversionPattern<
       ath_graph::GraphTerminatorOp>::AthenaGraphConversionPattern;
+
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
@@ -233,6 +333,9 @@ protected:
     target.addIllegalOp<ath_graph::GraphTerminatorOp>();
     target.addIllegalOp<ath_graph::GraphOp>();
     target.addIllegalOp<ath_graph::BarrierOp>();
+    target.addIllegalOp<ath_graph::AllocOp>();
+    target.addIllegalOp<ath_graph::ReleaseOp>();
+    target.addIllegalOp<ath_graph::LockOp>();
     target.addIllegalOp<ath_graph::AddOp>();
     target.addIllegalOp<ath_graph::MulOp>();
     target.addIllegalOp<ath_graph::MatmulOp>();
@@ -250,7 +353,7 @@ protected:
 namespace mlir {
 void populateGraphToRuntimeConversionPatterns(
     OwningRewritePatternList& loweringPatterns, MLIRContext* ctx) {
-  loweringPatterns.insert<
+  loweringPatterns.insert <
       // clang-format off
       GraphOpConversionPattern,
       NodeOpConversionPattern,
@@ -258,6 +361,9 @@ void populateGraphToRuntimeConversionPatterns(
       GraphReturnConversionPattern,
       EvalOpConversionPattern,
       BarrierConversionPattern,
+      AllocOpConversionPattern,
+      LockOpConversionPattern,
+      ReleaseOpConversionPattern,
       BuiltinConversionPattern<ath_graph::AddOp>,
       BuiltinConversionPattern<ath_graph::MulOp>,
       BuiltinConversionPattern<ath_graph::MatmulOp>,
