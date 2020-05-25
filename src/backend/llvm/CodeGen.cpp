@@ -13,11 +13,10 @@
 
 #include <AthenaGraph/AthenaGraphOps.h>
 #include <athena/backend/llvm/CodeGen.h>
-#include <athena/core/Allocator.h>
-#include <athena/core/DataType.h>
 #include <athena/core/Generator.h>
-#include <athena/core/inner/GenBuiltins.h>
-#include <athena/core/inner/Tensor.h>
+#include <athena/core/internal/GenBuiltins.h>
+#include <athena/core/tensor/DataType.h>
+#include <athena/core/tensor/internal/TensorInternal.h>
 
 #include <llvm/ADT/APFloat.h>
 #include <llvm/ADT/SmallVector.h>
@@ -38,14 +37,14 @@
 #include <vector>
 
 using namespace athena::core;
-using namespace athena::core::inner;
+using namespace athena::core::internal;
 
-struct MlirValueImpl : inner::GenValueImplBase {
+struct MlirValueImpl : internal::GenValueImplBase {
   mlir::Value value;
   MlirValueImpl(mlir::Value val) : value(val) {}
 };
 
-struct MlirNodeImpl : inner::GenNodeImplBase {
+struct MlirNodeImpl : internal::GenNodeImplBase {
   mlir::ath_graph::NodeOp node;
   MlirNodeImpl(mlir::ath_graph::NodeOp node) : node(node) {}
   auto getOperand(size_t i) -> GenValue override {
@@ -62,20 +61,20 @@ struct MlirNodeImpl : inner::GenNodeImplBase {
   };
 };
 
-struct MlirGraphImpl : inner::GenGraphImplBase {
+struct MlirGraphImpl : internal::GenGraphImplBase {
   mlir::ath_graph::GraphOp graph;
   MlirGraphImpl(mlir::ath_graph::GraphOp graph) : graph(graph) {}
 };
 
-struct MlirInsPointImpl : inner::GenInsPointImplBase {
+struct MlirInsPointImpl : internal::GenInsPointImplBase {
   mlir::OpBuilder::InsertPoint point;
   MlirInsPointImpl(mlir::OpBuilder::InsertPoint ip) : point(ip) {}
 };
 
-static auto getTensorType(mlir::OpBuilder& builder, const inner::Tensor& tensor)
+static auto getTensorType(mlir::OpBuilder& builder, const internal::TensorInternal& tensor)
     -> mlir::RankedTensorType {
   ::llvm::SmallVector<int64_t, 3> shape;
-  for (auto dim : tensor.getShapeView()) {
+  for (long dim : tensor.getShapeView()) {
     shape.push_back(dim);
   }
   mlir::Type dataType;
@@ -92,7 +91,7 @@ static auto getTensorType(mlir::OpBuilder& builder, const inner::Tensor& tensor)
 }
 
 namespace athena::backend::llvm {
-void populateCodeGenPatterns(athena::core::Generator& generator,
+void populateCodeGenPatterns(athena::core::internal::Generator& generator,
                              mlir::OpBuilder& builder) {
 
   //===--------------------------------------------------------------------===//
@@ -148,14 +147,15 @@ void populateCodeGenPatterns(athena::core::Generator& generator,
   generator.registerConstantFunctor(constantFunctor);
 
   std::function<GenNode(std::string_view, size_t, size_t,
-                        const std::vector<inner::Tensor>&, inner::Tensor&)>
+                        const std::vector<internal::TensorInternal*>&,
+                        internal::TensorInternal&)>
       nodeFunctor = [&](std::string_view name, size_t nodeId, size_t clusterId,
-                        const std::vector<inner::Tensor>& operands,
-                        inner::Tensor& out) {
+                        const std::vector<internal::TensorInternal*>& operands,
+                        internal::TensorInternal& out) {
         ::llvm::SmallVector<mlir::Type, 5> nodeOperandTypes;
 
         for (const auto& tensor : operands) {
-          auto tensorType = getTensorType(builder, tensor);
+          auto tensorType = getTensorType(builder, *tensor);
           nodeOperandTypes.push_back(tensorType);
         }
 
@@ -241,10 +241,10 @@ void populateCodeGenPatterns(athena::core::Generator& generator,
   generator.registerFunctor<builtin::Alloc>(allocFunctor);
 
   builtin_functor_t<builtin::Lock> lockFunctor =
-      [&](GenValue tensor, core::LockType lockType) -> GenValue {
+      [&](GenValue tensor, core::internal::LockType lockType) -> GenValue {
     auto tensorVal = tensor.value<MlirValueImpl>().value;
     mlir::StringAttr mlirLockType;
-    if (lockType == core::LockType::READ) {
+    if (lockType == core::internal::LockType::READ) {
       mlirLockType = builder.getStringAttr("read");
     } else {
       mlirLockType = builder.getStringAttr("read_write");

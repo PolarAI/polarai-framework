@@ -17,15 +17,16 @@ namespace athena::backend::llvm::codegen {
 
 void registerAllocate(LLVMGenerator* generator) {
   std::function<void(::llvm::LLVMContext&, ::llvm::Module&,
-                     ::llvm::IRBuilder<>&, core::inner::Tensor&)>
+                     ::llvm::IRBuilder<>&, core::internal::TensorInternal&)>
       f = [generator](::llvm::LLVMContext& ctx, ::llvm::Module& module,
-                      ::llvm::IRBuilder<>& builder, core::inner::Tensor& a) {
+                      ::llvm::IRBuilder<>& builder,
+                      core::internal::TensorInternal& a) {
         ::llvm::Function* calledFunction =
             generator->findLLVMFunction("athn_allocate_v");
 
         if (!calledFunction) {
-          core::FatalError(core::ATH_FATAL_OTHER,
-                           "Unknown function referenced");
+          utils::FatalError(utils::ATH_FATAL_OTHER,
+                            "Unknown function referenced");
         }
 
         std::vector<::llvm::Value*> ArgsV;
@@ -43,8 +44,8 @@ void registerAllocate(LLVMGenerator* generator) {
         ArgsV.push_back(tensorConst);
         auto callInst = builder.CreateCall(calledFunction, ArgsV);
         if (!callInst) {
-          new core::FatalError(core::ATH_FATAL_OTHER,
-                               "Call instruction for allocate is not created");
+          new utils::FatalError(utils::ATH_FATAL_OTHER,
+                                "Call instruction for allocate is not created");
         }
       };
 

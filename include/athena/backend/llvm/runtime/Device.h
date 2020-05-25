@@ -18,7 +18,7 @@
 #include <athena/backend/llvm/MemoryRecord.h>
 #include <athena/backend/llvm/llvm_export.h>
 #include <athena/backend/llvm/runtime/Queue.h>
-#include <athena/core/inner/Tensor.h>
+#include <athena/core/tensor/internal/TensorInternal.h>
 
 #include <cstddef>
 #include <memory>
@@ -54,10 +54,10 @@ public:
   virtual bool operator==(const Device& device) const { return false; };
   bool operator!=(const Device& device) const { return !(*this == device); };
 
-  virtual void copyToHost(const core::inner::Tensor& tensor,
+  virtual void copyToHost(const core::internal::TensorInternal& tensor,
                           void* dest) const {};
   virtual void copyToHost(MemoryRecord record, void* dest) const {};
-  virtual void copyToDevice(const core::inner::Tensor& tensor,
+  virtual void copyToDevice(const core::internal::TensorInternal& tensor,
                             void* src) const {};
   virtual void copyToDevice(MemoryRecord record, void* src) const {};
 

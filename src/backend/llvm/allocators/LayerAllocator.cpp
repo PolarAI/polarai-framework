@@ -12,14 +12,14 @@
 //===----------------------------------------------------------------------===//
 
 #include "LayerAllocator.h"
-#include <athena/core/FatalError.h>
+#include <athena/utils/error/FatalError.h>
 
 #include <mutex>
 
-using namespace athena::core;
+using namespace athena::utils;
 
 namespace athena::backend::llvm {
-void LayerAllocator::allocate(const core::inner::Tensor& tensor,
+void LayerAllocator::allocate(const core::internal::TensorInternal& tensor,
                               Device& device) {
   MemoryRecord record{tensor.getVirtualAddress(),
                       tensor.getSize() *
@@ -32,15 +32,16 @@ void LayerAllocator::allocate(const core::inner::Tensor& tensor,
   mLocks.insert({record, std::list<LockDescriptor>()});
   mMemTags[record] = 1;
 }
-void LayerAllocator::lock(const core::inner::Tensor& tensor, Device& device,
-                          core::LockType lockType) {
+void LayerAllocator::lock(const core::internal::TensorInternal& tensor,
+                          Device& device, core::internal::LockType lockType) {
   std::scoped_lock curLock{mMutex};
 
   MemoryRecord record{tensor.getVirtualAddress(),
                       tensor.getSize() *
                           core::sizeOfDataType(tensor.getDataType())};
 
-  if (lockType == core::LockType::READ_WRITE && !mLocks[record].empty()) {
+  if (lockType == core::internal::LockType::READ_WRITE &&
+      !mLocks[record].empty()) {
     new FatalError(
         ATH_BAD_ACCESS,
         "Attempt get READ_WRITE lock for tensor that is already locked: ",
@@ -66,7 +67,7 @@ void LayerAllocator::lock(const core::inner::Tensor& tensor, Device& device,
     device.copyToDevice(record, mRAMAllocator->getPtr(record));
   }
 
-  if (lockType == core::LockType::READ_WRITE) {
+  if (lockType == core::internal::LockType::READ_WRITE) {
     mMemTags[record]++;
   }
 
@@ -77,7 +78,7 @@ void LayerAllocator::lock(const core::inner::Tensor& tensor, Device& device,
       LockDescriptor{lockType, MemoryDomain::Device, &device});
   mDeviceAllocators[device.getDeviceName()]->lock(record);
 }
-void LayerAllocator::allocate(const core::inner::Tensor& tensor) {
+void LayerAllocator::allocate(const core::internal::TensorInternal& tensor) {
   MemoryRecord record{tensor.getVirtualAddress(),
                       tensor.getSize() *
                           core::sizeOfDataType(tensor.getDataType())};
@@ -91,7 +92,7 @@ void LayerAllocator::allocate(MemoryRecord record) {
   mLocks.insert({record, std::list<LockDescriptor>()});
   mMemTags[record] = 1;
 }
-void LayerAllocator::deallocate(const core::inner::Tensor& tensor) {
+void LayerAllocator::deallocate(const core::internal::TensorInternal& tensor) {
   MemoryRecord record{tensor.getVirtualAddress(),
                       tensor.getSize() *
                           core::sizeOfDataType(tensor.getDataType())};
@@ -123,7 +124,7 @@ void LayerAllocator::deallocate(const core::inner::Tensor& tensor) {
     mLocks.erase(record);
   }
 }
-void* LayerAllocator::get(const core::inner::Tensor& tensor) {
+void* LayerAllocator::get(const core::internal::TensorInternal& tensor) {
   MemoryRecord record{tensor.getVirtualAddress(),
                       tensor.getSize() *
                           core::sizeOfDataType(tensor.getDataType())};
@@ -137,14 +138,15 @@ void* LayerAllocator::get(const core::inner::Tensor& tensor) {
   return nullptr; // suppress GCC warning
 }
 
-void LayerAllocator::lock(const core::inner::Tensor& tensor, LockType type) {
+void LayerAllocator::lock(const core::internal::TensorInternal& tensor,
+                          LockType type) {
   std::scoped_lock lock{mMutex};
 
   MemoryRecord record{tensor.getVirtualAddress(),
                       tensor.getSize() *
                           core::sizeOfDataType(tensor.getDataType())};
 
-  if (type == core::LockType::READ_WRITE && !mLocks[record].empty()) {
+  if (type == core::internal::LockType::READ_WRITE && !mLocks[record].empty()) {
     new FatalError(
         ATH_BAD_ACCESS,
         "Attempt get READ_WRITE lock for tensor that is already locked: ",
@@ -159,7 +161,7 @@ void LayerAllocator::lock(const core::inner::Tensor& tensor, LockType type) {
     updateHost(record);
   }
 
-  if (type == core::LockType::READ_WRITE) {
+  if (type == core::internal::LockType::READ_WRITE) {
     mMemTags[record]++;
   }
 
@@ -168,7 +170,7 @@ void LayerAllocator::lock(const core::inner::Tensor& tensor, LockType type) {
   mLocks[record].push_back(LockDescriptor{type, MemoryDomain::RAM, nullptr});
   mRAMAllocator->lock(record);
 }
-void LayerAllocator::release(const core::inner::Tensor& tensor) {
+void LayerAllocator::release(const core::internal::TensorInternal& tensor) {
   std::scoped_lock lock{mMutex};
 
   MemoryRecord record{tensor.getVirtualAddress(),
@@ -185,7 +187,7 @@ void LayerAllocator::release(const core::inner::Tensor& tensor) {
     mLocks[record].erase(it);
   }
 }
-void* LayerAllocator::getImpl(const core::inner::Tensor& tensor,
+void* LayerAllocator::getImpl(const core::internal::TensorInternal& tensor,
                               Device& device) {
   std::scoped_lock lock{mMutex};
   MemoryRecord record{tensor.getVirtualAddress(),
@@ -240,7 +242,8 @@ void LayerAllocator::updateHost(MemoryRecord record) {
     }
   }
 }
-void LayerAllocator::release(const inner::Tensor& tensor, Device& device) {
+void LayerAllocator::release(const core::internal::TensorInternal& tensor,
+                             Device& device) {
   std::scoped_lock lock{mMutex};
 
   MemoryRecord record{tensor.getVirtualAddress(),

@@ -46,7 +46,6 @@ add_custom_target(generator_cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/runtime/builtins_legacy.td ${GENERATOR_CPP} driver
         )
 
-add_subdirectory(runtime/cpu)
 add_subdirectory(runtime/driver)
 add_subdirectory(runtime/legacy_driver)
 add_subdirectory(runtime/support)
@@ -87,7 +86,6 @@ llvm_map_components_to_libnames(llvm_libs
         AllTargetsInfos
         lto)
 
-add_dependencies(${ATH_BACKEND_LLVM} ${ATH_RT_LLVM_CPU})
 target_link_libraries(${ATH_BACKEND_LLVM} PRIVATE
         ${llvm_libs}
         ${ATH_RT_LLVM_DRIVER}

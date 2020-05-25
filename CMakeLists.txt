@@ -67,6 +67,7 @@ if (NOT ATHENA_DOCS_ONLY)
     add_subdirectory(utils/athena-tablegen)
     add_subdirectory(utils/test_runner)
     add_subdirectory(utils/dialects)
+    add_subdirectory(utils/debugger)
     add_subdirectory(src)
 
     if (NOT ATHENA_DISABLE_TESTS)

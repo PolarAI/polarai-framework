@@ -19,6 +19,6 @@ class Queue {
 public:
   virtual void wait() = 0;
 };
-}
+} // namespace athena::backend::llvm
 
 #endif // ATHENA_QUEUE_H

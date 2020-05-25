@@ -18,13 +18,13 @@
 
 namespace athena::backend::llvm {
 
-TEST(RuntimeDriverTest, TestCreation) {
+TEST(RuntimeDriverTest, DISABLED_TestCreation) {
   RuntimeDriver driver;
   driver.load();
   ASSERT_TRUE(driver.isLoaded());
 }
 
-TEST(RuntimeDriverTest, TestFunctionLoad) {
+TEST(RuntimeDriverTest, DISABLED_TestFunctionLoad) {
   RuntimeDriver driver;
   driver.load();
   ASSERT_TRUE(driver.hasFeature("float"));

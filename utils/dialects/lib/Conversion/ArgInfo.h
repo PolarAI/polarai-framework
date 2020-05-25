@@ -36,6 +36,7 @@ uint32_t getArgsCount(mlir::Operation* op);
 /// \param operands is a view into array of converted builtin operands.
 /// \param rewriter is a ConversionPatternRewriter for current op.
 void fillArgDesc(mlir::Value argDescArray, mlir::Operation* op,
-                 llvm::ArrayRef<mlir::Value> operands, mlir::ConversionPatternRewriter& rewriter);
+                 llvm::ArrayRef<mlir::Value> operands,
+                 mlir::ConversionPatternRewriter& rewriter);
 
 #endif // ATHENA_ARGINFO_H

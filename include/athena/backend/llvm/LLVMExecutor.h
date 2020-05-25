@@ -13,11 +13,11 @@
 #ifndef ATHENA_LLVMEXECUTOR_H
 #define ATHENA_LLVMEXECUTOR_H
 
-#include <athena/backend/llvm/llvm_export.h>
 #include <athena/backend/llvm/BackendAllocator.h>
-#include <athena/core/Allocator.h>
-#include <athena/core/Executor.h>
-#include <athena/core/Traversal.h>
+#include <athena/backend/llvm/llvm_export.h>
+#include <athena/core/graph/Traversal.h>
+#include <athena/core/internal/Executor.h>
+#include <athena/core/loader/internal/TensorAllocator.h>
 
 namespace llvm {
 class Module;
@@ -32,14 +32,12 @@ class LegacyRuntimeDriver;
 /**
  * Execute Graph with LLVM-based backend
  */
-class ATH_BACKEND_LLVM_EXPORT LLVMExecutor : public athena::core::Executor {
+class ATH_BACKEND_LLVM_EXPORT LLVMExecutor
+    : public athena::core::internal::Executor {
 private:
   std::shared_ptr<AthenaJIT> mJITCompiler{nullptr};
   std::unique_ptr<BackendAllocator> mAllocator;
   std::shared_ptr<LegacyRuntimeDriver> mRuntimeDriver;
-
-  template <typename T>
-  using ClusterContainer = std::vector<core::inner::NodeDependencies<T>>;
 
   /**
    * Generate LLVM IR for Graph
@@ -71,7 +69,7 @@ public:
    *
    * @return Associated Allocator
    */
-  core::Allocator& getAllocator();
+  BackendAllocator& getAllocator();
   /**
    * Set Allocator to be used
    * @param allocator User Allocator

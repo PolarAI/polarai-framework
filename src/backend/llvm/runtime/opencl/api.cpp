@@ -110,7 +110,8 @@ launch(athena::backend::llvm::Device* device,
 
   for (size_t i = 0; i < cmd.argsCount; i++) {
     if (cmd.args[i].type == ArgDesc::TENSOR) {
-      auto tensor = static_cast<athena::core::inner::Tensor*>(cmd.args[i].arg);
+      auto tensor =
+          static_cast<athena::core::internal::TensorInternal*>(cmd.args[i].arg);
       auto* buf = backendAllocator->get<cl_mem>(*tensor, *device);
       clSetKernelArg(kernel, i, sizeof(cl_mem), buf);
     } else {

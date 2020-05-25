@@ -20,15 +20,17 @@
 #else
 #include "../../../src/backend/llvm/allocators/LayerAllocator.h"
 #include <CL/cl.h>
-#include <athena/core/Context.h>
+#include <athena/core/context/Context.h>
 #endif
 
 using initContextPtr = void (*)(athena::backend::llvm::DeviceContainer);
 using releaseContextPtr = void (*)();
 using getAvailableDevicesPtr = athena::backend::llvm::DeviceContainer (*)();
 using addProgramPtr = void (*)(athena::backend::llvm::Device*, ProgramDesc);
-using linkProgramsPtr = void(*)(athena::backend::llvm::Device*);
-using launchPtr = void(*)(athena::backend::llvm::Device*, athena::backend::llvm::BackendAllocator*, LaunchCommand);
+using linkProgramsPtr = void (*)(athena::backend::llvm::Device*);
+using launchPtr = void (*)(athena::backend::llvm::Device*,
+                           athena::backend::llvm::BackendAllocator*,
+                           LaunchCommand);
 
 class RuntimeTestBase : public testing::Test {
 protected:
@@ -130,7 +132,11 @@ TEST_F(OpenCLRuntimeTest, ExecutesSimpleKernel) {
     allocator.registerDevice(deviceContainer.devices[i]);
 
     Context ctx;
-    inner::Tensor tensor(DataType::FLOAT, {3}, ctx);
+    auto ctxInternalPtr = ctx.internal();
+    auto tensorIndex = ctxInternalPtr->create<TensorInternal>(
+        ctxInternalPtr, ctxInternalPtr->getNextPublicIndex(), DataType::FLOAT,
+        TensorShape{30});
+    auto& tensor = ctxInternalPtr->getRef<TensorInternal>(tensorIndex);
 
     allocator.allocate(tensor);
     allocator.lock(tensor, LockType::READ_WRITE);

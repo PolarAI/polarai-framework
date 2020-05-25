@@ -31,7 +31,6 @@ void WrapperBackend::run(llvm::raw_ostream& o) {
   o << "using namespace athena::core::inner;\n";
   o << "using namespace athena::core;\n\n";
 
-
   o << "#include <cstring>\n\n";
   o << "extern \"C\" {\n";
 

@@ -34,16 +34,13 @@ public:
 #pragma GCC diagnistic pop
   }
 
-  void wait() override {
-    clFlush(mQueue);
-  }
+  void wait() override { clFlush(mQueue); }
 
-  cl_command_queue getNativeQueue() {
-    return mQueue;
-  }
+  cl_command_queue getNativeQueue() { return mQueue; }
+
 private:
   cl_command_queue mQueue;
 };
-}
+} // namespace athena::backend::llvm
 
 #endif // ATHENA_OPENCLQUEUE_H

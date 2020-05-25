@@ -199,4 +199,3 @@ Mark tensor as non-removable
 | Operand | Description |
 | :-----: | ----------- |
 `tensor` | tensor of any type values
-

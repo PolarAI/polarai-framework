@@ -16,7 +16,7 @@
 
 #include <athena/backend/llvm/AllocatorLayerBase.h>
 #include <athena/backend/llvm/MemoryRecord.h>
-#include <athena/core/FatalError.h>
+#include <athena/utils/error/FatalError.h>
 
 #include <unordered_map>
 #include <unordered_set>
@@ -34,7 +34,7 @@ private:
     size_t freedMem = 0;
     while (freedMem < record.allocationSize) {
       if (mReleasedAllocations.size() == 0)
-        new core::FatalError(core::ATH_FATAL_OTHER, "Out of memory!");
+        new utils::FatalError(utils::ATH_FATAL_OTHER, "Out of memory!");
       MemoryRecord alloc = *mReleasedAllocations.begin();
       freedMem += alloc.allocationSize;
       mOffloadCallback(alloc, *this);
@@ -47,8 +47,8 @@ private:
 public:
   ~TrivialAllocator() override = default;
 
-  void registerMemoryOffloadCallback(
-      MemoryOffloadCallbackT function) override {}
+  void registerMemoryOffloadCallback(MemoryOffloadCallbackT function) override {
+  }
   void allocate(MemoryRecord record) override {
     if (mMemMap.count(record))
       return; // no double allocations are allowed
@@ -59,15 +59,15 @@ public:
       mem = new unsigned char[record.allocationSize];
     }
     if (mem == nullptr)
-      new core::FatalError(core::ATH_FATAL_OTHER,
-                           "Failed to allocate RAM memory!");
+      new utils::FatalError(utils::ATH_FATAL_OTHER,
+                            "Failed to allocate RAM memory!");
     mMemMap[record] = mem;
     mTags[record] = 1;
   }
   void deallocate(MemoryRecord record) override {
     if (mLockedAllocations.count(record)) {
-      new core::FatalError(core::ATH_BAD_ACCESS, "Double free on vaddr ",
-                           record.virtualAddress);
+      new utils::FatalError(utils::ATH_BAD_ACCESS, "Double free on vaddr ",
+                            record.virtualAddress);
     }
 
     delete[] reinterpret_cast<unsigned char*>(mMemMap[record]);
@@ -89,13 +89,9 @@ public:
     return mMemMap.count(record) > 0;
   }
 
-  size_t getTag(MemoryRecord record) override {
-    return mTags[record];
-  }
+  size_t getTag(MemoryRecord record) override { return mTags[record]; }
 
-  void setTag(MemoryRecord record, size_t tag) override {
-    mTags[record] = tag;
-  }
+  void setTag(MemoryRecord record, size_t tag) override { mTags[record] = tag; }
 };
 } // namespace athena::backend::llvm
 

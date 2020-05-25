@@ -15,7 +15,7 @@
 #define ATHENA_GRAPHPARTITIONPLANNER_H
 
 #include <athena/backend/llvm/runtime/Device.h>
-#include <athena/core/Graph.h>
+#include <athena/core/graph/Graph.h>
 
 namespace athena::backend::llvm {
 class GraphPartitionPlanner {

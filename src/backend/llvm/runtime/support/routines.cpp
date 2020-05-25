@@ -20,10 +20,9 @@ ATH_RT_SUPPORT_EXPORT void ath_release_tensor(Device& device,
   allocator.release(record, device);
 }
 
-ATH_RT_SUPPORT_EXPORT void ath_lock_tensor(Device& device,
-                                           BackendAllocator& allocator,
-                                           MemoryRecord& record,
-                                           athena::core::LockType type) {
+ATH_RT_SUPPORT_EXPORT void
+ath_lock_tensor(Device& device, BackendAllocator& allocator,
+                MemoryRecord& record, athena::core::internal::LockType type) {
   allocator.lock(record, device, type);
 }
 

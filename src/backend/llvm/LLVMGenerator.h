@@ -15,9 +15,7 @@
 
 #include <athena/backend/llvm/LLVMGeneratorFunctor.h>
 #include <athena/backend/llvm/runtime/Device.h>
-#include <athena/core/AbstractGenerator.h>
-#include <athena/core/AbstractLoader.h>
-#include <athena/core/Allocator.h>
+#include <athena/core/Generator.h>
 
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Module.h>
@@ -28,7 +26,7 @@ namespace athena::backend::llvm {
 /**
  * LLVM-based code generator
  */
-class LLVMGenerator : public core::AbstractGenerator {
+class LLVMGenerator : public core::internal::Generator {
 private:
   std::map<std::string, LLVMGeneratorFunctor<void>> mFunctorsMap;
   const std::unique_ptr<::llvm::Module>& mGeneratedModule;
@@ -41,36 +39,37 @@ private:
 
   Device* mCurrentPreferredDevice;
 
-  core::Allocator& mAllocator;
+  backend::llvm::BackendAllocator& mAllocator;
 
   std::unordered_map<std::string_view, Device*> mGraphMap;
 
 protected:
-  void generateImpl(std::string&, core::inner::Tensor& a) override;
-  void generateImpl(std::string&, core::inner::Tensor& a, void*& b) override;
-  void generateImpl(std::string&, core::inner::Tensor& a,
-                    core::inner::Tensor& b) override;
-  void generateImpl(std::string&, core::inner::Tensor& a,
-                    core::inner::Tensor& b, core::inner::Tensor& c) override;
-  void generateImpl(std::string&, core::inner::Tensor& a, uint64_t scaleA,
-                    core::inner::Tensor& b, uint64_t scaleB,
-                    core::inner::Tensor& c) override;
-  void generateImpl(std::string&, void*, core::inner::Tensor& a,
-                    core::inner::Tensor& b, core::inner::Tensor& c) override;
+  void generateImpl(std::string&, core::internal::TensorInternal& a);
+  void generateImpl(std::string&, core::internal::TensorInternal& a, void*& b);
+  void generateImpl(std::string&, core::internal::TensorInternal& a,
+                    core::internal::TensorInternal& b);
+  void generateImpl(std::string&, core::internal::TensorInternal& a,
+                    core::internal::TensorInternal& b,
+                    core::internal::TensorInternal& c);
+  void generateImpl(std::string&, core::internal::TensorInternal& a,
+                    uint64_t scaleA, core::internal::TensorInternal& b,
+                    uint64_t scaleB, core::internal::TensorInternal& c);
+  void generateImpl(std::string&, void*, core::internal::TensorInternal& a,
+                    core::internal::TensorInternal& b,
+                    core::internal::TensorInternal& c);
 
 public:
   explicit LLVMGenerator(::llvm::LLVMContext& ctx,
                          const std::unique_ptr<::llvm::Module>& module,
-                         core::Allocator& allocator,
+                         llvm::BackendAllocator& allocator,
                          std::vector<std::unique_ptr<::llvm::Module>>& existing,
                          std::unordered_map<std::string_view, Device*> map);
   /**
    * Generate code to execute loaders subroutines
    * @param loader Loader to be used
-   * @param tensor Destination Tensor
+   * @param TensorInternal Destination TensorInternal
    */
-  void generateLoad(const core::AbstractLoader& loader,
-                    core::inner::Tensor& tensor) override;
+  void generateLoad();
   /**
    *
    * @return LLVM IR Builder
@@ -81,24 +80,24 @@ public:
    * Notifies generator that Node code generation begins
    * @param name Node name
    */
-  void openNode(std::string_view name) override;
+  void openNode(std::string_view name);
   /**
    * Notifies generator that Node code generation ends
    */
-  void closeNode() override;
+  void closeNode();
 
   /**
    * Creates empty function without arguments and sets it as current main
    * block
    * @param name Function name
    */
-  void generateFunctionHeader(const std::string& name) override;
+  void generateFunctionHeader(const std::string& name);
 
   /**
    * Generates return command for current function and removes it from current
    * main block
    */
-  void generateFunctionFooter() override;
+  void generateFunctionFooter();
 
   /**
    * Register new functor
@@ -110,8 +109,8 @@ public:
   void registerFunctor(const std::string& name,
                        std::function<void(Args...)>& f) {
     if (mFunctorsMap.count(name)) {
-      core::FatalError(core::ATH_FATAL_OTHER,
-                       "Functor already registered: " + name);
+      utils::FatalError(utils::ATH_FATAL_OTHER,
+                        "Functor already registered: " + name);
     }
     mFunctorsMap[name] = LLVMGeneratorFunctor(f);
   }
@@ -130,7 +129,7 @@ public:
    *
    * @return Associated Allocator
    */
-  core::Allocator& getAllocator() { return mAllocator; }
+  llvm::BackendAllocator& getAllocator() { return mAllocator; }
 
   void
   setExistingModules(std::vector<std::unique_ptr<::llvm::Module>>&& modules) {

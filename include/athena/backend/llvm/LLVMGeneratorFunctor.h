@@ -15,8 +15,7 @@
 #define ATHENA_LLVMGENERATORFUNCTOR_H
 
 #include <athena/backend/llvm/llvm_export.h>
-#include <athena/core/FatalError.h>
-#include <athena/core/inner/Tensor.h>
+#include <athena/utils/error/FatalError.h>
 
 #include <any>
 #include <functional>

@@ -24,7 +24,7 @@ void registerFill(LLVMGenerator* generator);
 
 template <typename T>
 ::llvm::Constant* getFPConstant(::llvm::LLVMContext& ctx, T value) {
-  new core::FatalError(core::ATH_FATAL_OTHER, "Unable to create FP constant");
+  new utils::FatalError(utils::ATH_FATAL_OTHER, "Unable to create FP constant");
   return nullptr; // unreachable
 }
 
@@ -35,16 +35,18 @@ template <>
 
 using BuiltinThreeTensorArgs = std::function<void(
     ::llvm::LLVMContext&, ::llvm::Module&, ::llvm::IRBuilder<>&,
-    core::inner::Tensor&, core::inner::Tensor&, core::inner::Tensor&)>;
+    core::internal::TensorInternal&, core::internal::TensorInternal&,
+    core::internal::TensorInternal&)>;
 
 using BuiltinThreeTensorWithOptsArgs = std::function<void(
     ::llvm::LLVMContext&, ::llvm::Module&, ::llvm::IRBuilder<>&, void*,
-    core::inner::Tensor&, core::inner::Tensor&, core::inner::Tensor&)>;
+    core::internal::TensorInternal&, core::internal::TensorInternal&,
+    core::internal::TensorInternal&)>;
 
-using BuiltinTATATArgs =
-    std::function<void(::llvm::LLVMContext&, ::llvm::Module&,
-                       ::llvm::IRBuilder<>&, core::inner::Tensor&, uint64_t,
-                       core::inner::Tensor&, uint64_t, core::inner::Tensor&)>;
+using BuiltinTATATArgs = std::function<void(
+    ::llvm::LLVMContext&, ::llvm::Module&, ::llvm::IRBuilder<>&,
+    core::internal::TensorInternal&, uint64_t, core::internal::TensorInternal&,
+    uint64_t, core::internal::TensorInternal&)>;
 
 template <typename T>
 void registerStandardBuiltin(const std::string& name, LLVMGenerator* generator);

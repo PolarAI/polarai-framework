@@ -17,18 +17,19 @@ namespace athena::backend::llvm::codegen {
 
 void registerFill(LLVMGenerator* generator) {
   std::function<void(::llvm::LLVMContext&, ::llvm::Module&,
-                     ::llvm::IRBuilder<>&, core::inner::Tensor&, void*&)>
+                     ::llvm::IRBuilder<>&, core::internal::TensorInternal&,
+                     void*&)>
       f = [generator](::llvm::LLVMContext& ctx, ::llvm::Module& module,
-                      ::llvm::IRBuilder<>& builder, core::inner::Tensor& a,
-                      void*& filler) {
+                      ::llvm::IRBuilder<>& builder,
+                      core::internal::TensorInternal& a, void*& filler) {
         // todo handle different data types
 
         ::llvm::Function* calledFunction =
             generator->findLLVMFunction("athn_fill_f");
 
         if (!calledFunction) {
-          core::FatalError(core::ATH_FATAL_OTHER,
-                           "Unknown function referenced");
+          utils::FatalError(utils::ATH_FATAL_OTHER,
+                            "Unknown function referenced");
         }
 
         std::vector<::llvm::Value*> ArgsV;

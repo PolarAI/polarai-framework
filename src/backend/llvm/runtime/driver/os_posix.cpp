@@ -16,8 +16,7 @@
 namespace athena::backend::llvm {
 void* RuntimeDriver::getFunctionPtr(std::string_view funcName) {
   if (void* function = dlsym(mLibraryHandle, funcName.data()); !function) {
-    new ::athena::core::FatalError(core::ATH_FATAL_OTHER,
-                                   "RuntimeDriver: ", dlerror());
+    new utils::FatalError(utils::ATH_FATAL_OTHER, "RuntimeDriver: ", dlerror());
     return nullptr;
   } else {
     return function;

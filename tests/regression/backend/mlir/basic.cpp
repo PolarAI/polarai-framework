@@ -10,11 +10,11 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 //===----------------------------------------------------------------------===//
-
+//
 #include <athena/backend/llvm/CodeGen.h>
-#include <athena/core/DataType.h>
 #include <athena/core/Generator.h>
-#include <athena/core/inner/Tensor.h>
+#include <athena/core/tensor/DataType.h>
+#include <athena/core/tensor/internal/TensorInternal.h>
 
 #include "llvm/Support/raw_ostream.h"
 #include <llvm/Support/Debug.h>

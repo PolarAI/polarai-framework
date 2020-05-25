@@ -1,0 +1,12 @@
+[submodule "contrib/imgui"]
+	path = contrib/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "contrib/glfw"]
+	path = contrib/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "contrib/imnodes"]
+	path = contrib/imnodes
+	url = https://github.com/Nelarius/imnodes.git
+[submodule "contrib/imgui-flame-graph"]
+	path = contrib/imgui-flame-graph
+	url = https://github.com/bwrsandman/imgui-flame-graph.git

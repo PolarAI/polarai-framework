@@ -22,7 +22,8 @@ struct MemoryRecord;
 
 class AllocatorLayerBase {
 public:
-  using MemoryOffloadCallbackT = std::function<void(MemoryRecord, AllocatorLayerBase& layer)>;
+  using MemoryOffloadCallbackT =
+      std::function<void(MemoryRecord, AllocatorLayerBase& layer)>;
 
   virtual ~AllocatorLayerBase() = default;
 

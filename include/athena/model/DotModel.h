@@ -14,7 +14,7 @@
 #ifndef ATHENA_DOTMODEL_H
 #define ATHENA_DOTMODEL_H
 
-#include <athena/core/Graph.h>
+#include <athena/core/graph/Graph.h>
 #include <athena/model/model_export.h>
 
 #include <ostream>

@@ -14,11 +14,9 @@
 #ifndef ATHENA_GENERATOR_H
 #define ATHENA_GENERATOR_H
 
-#include <athena/core/AbstractLoader.h>
-#include <athena/core/Context.h>
-#include <athena/core/inner/GenBuiltins.h>
-#include <athena/core/inner/GenValues.h>
-#include <athena/core/inner/Tensor.h>
+#include <athena/core/internal/GenBuiltins.h>
+#include <athena/core/internal/GenValues.h>
+#include <athena/core/tensor/internal/TensorInternal.h>
 
 #include <any>
 #include <cstddef>
@@ -30,9 +28,9 @@
 #include <utility>
 #include <variant>
 
-namespace athena::core {
+#include <athena/core/core_export.h>
 
-/// A bridge between \c GraphCompiler and a backend.
+namespace athena::core::internal {
 class ATH_CORE_EXPORT Generator {
 public:
   using SupportedConstantT =
@@ -79,8 +77,8 @@ public:
   /// \param nodeName is a name of Node. Will be used for function name.
   /// \return a backend-specific handle to node.
   auto createNode(std::string_view nodeName, size_t nodeId, size_t clusterId,
-                  std::vector<inner::Tensor>& args, inner::Tensor& outValue)
-      -> GenNode {
+                  std::vector<internal::TensorInternal*>& args,
+                  internal::TensorInternal& outValue) -> GenNode {
     return mCreateNodeFunc(nodeName, nodeId, clusterId, args, outValue);
   }
 
@@ -105,7 +103,7 @@ public:
   /// \tparam B is a builtin being generated.
   /// \param functor is a function object that generates specified builtin.
   template <builtin B>
-  void registerFunctor(inner::builtin_functor_t<B>& functor) {
+  void registerFunctor(internal::builtin_functor_t<B>& functor) {
     std::get<static_cast<int>(B)>(mGeneratorFunctors) = std::move(functor);
   }
 
@@ -116,7 +114,8 @@ public:
 
   void registerNodeFunctor(
       std::function<GenNode(std::string_view, size_t, size_t,
-                            const std::vector<inner::Tensor>&, inner::Tensor&)>
+                            const std::vector<internal::TensorInternal*>&,
+                            internal::TensorInternal&)>
           functor) {
     mCreateNodeFunc = std::move(functor);
   }
@@ -149,14 +148,15 @@ private:
   std::function<void(GenNode)> mSetNodeInsertionPointFunc;
   std::function<void(GenGraph)> mSetGraphInsertionPointFunc;
   std::function<GenInsertionPoint()> mGetInsertionPointFunc;
-  inner::BuiltinMap mGeneratorFunctors;
+  BuiltinMap mGeneratorFunctors;
   std::function<GenNode(std::string_view, size_t, size_t,
-                        const std::vector<inner::Tensor>&, inner::Tensor&)>
+                        const std::vector<internal::TensorInternal*>&,
+                        internal::TensorInternal&)>
       mCreateNodeFunc;
   std::function<GenGraph(std::string_view, size_t)> mCreateGraphFunc;
   // todo support half constants
   std::function<GenValue(SupportedConstantT)> mCreateConstantFunc;
 };
-} // namespace athena::core
+} // namespace athena::core::internal
 
 #endif // ATHENA_GENERATOR_H

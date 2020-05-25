@@ -30,12 +30,13 @@ template <typename T>
 void generateStandardBuiltinCall(
     const std::string& name, LLVMGenerator* generator, ::llvm::LLVMContext& ctx,
     ::llvm::Module& module, ::llvm::IRBuilder<>& builder,
-    core::inner::Tensor& a, core::inner::Tensor& b, core::inner::Tensor& c) {
+    core::internal::TensorInternal& a, core::internal::TensorInternal& b,
+    core::internal::TensorInternal& c) {
   ::llvm::Function* calledFunction =
       generator->findLLVMFunction(Mangler::getMangledName<T>(name));
 
   if (!calledFunction) {
-    core::FatalError(core::ATH_FATAL_OTHER, "Unknown function referenced");
+    utils::FatalError(utils::ATH_FATAL_OTHER, "Unknown function referenced");
   }
 
   std::vector<::llvm::Value*> ArgsV;
@@ -64,8 +65,9 @@ template <typename T>
 void generateStandardBuiltinCall(
     const std::string& name, LLVMGenerator* generator, ::llvm::LLVMContext& ctx,
     ::llvm::Module& module, ::llvm::IRBuilder<>& builder,
-    core::inner::Tensor& a, uint64_t scaleA, core::inner::Tensor& b,
-    uint64_t scaleB, core::inner::Tensor& c) {
+    core::internal::TensorInternal& a, uint64_t scaleA,
+    core::internal::TensorInternal& b, uint64_t scaleB,
+    core::internal::TensorInternal& c) {
   auto realScaleA = *reinterpret_cast<T*>(&scaleA);
   auto realScaleB = *reinterpret_cast<T*>(&scaleB);
 
@@ -73,7 +75,7 @@ void generateStandardBuiltinCall(
       generator->findLLVMFunction(Mangler::getMangledName<T>(name));
 
   if (!calledFunction) {
-    core::FatalError(core::ATH_FATAL_OTHER, "Unknown function referenced");
+    utils::FatalError(utils::ATH_FATAL_OTHER, "Unknown function referenced");
   }
 
   std::vector<::llvm::Value*> ArgsV;
@@ -106,12 +108,13 @@ template <typename T>
 void generateStandardBuiltinCall(
     const std::string& name, LLVMGenerator* generator, ::llvm::LLVMContext& ctx,
     ::llvm::Module& module, ::llvm::IRBuilder<>& builder, void* opts,
-    core::inner::Tensor& a, core::inner::Tensor& b, core::inner::Tensor& c) {
+    core::internal::TensorInternal& a, core::internal::TensorInternal& b,
+    core::internal::TensorInternal& c) {
   ::llvm::Function* calledFunction =
       generator->findLLVMFunction(Mangler::getMangledName<T>(name));
 
   if (!calledFunction) {
-    core::FatalError(core::ATH_FATAL_OTHER, "Unknown function referenced");
+    utils::FatalError(utils::ATH_FATAL_OTHER, "Unknown function referenced");
   }
 
   std::vector<::llvm::Value*> ArgsV;
@@ -149,8 +152,10 @@ void registerStandardBuiltin<BuiltinThreeTensorArgs>(const std::string& name,
                                                      LLVMGenerator* generator) {
   BuiltinThreeTensorArgs f =
       [generator, name](::llvm::LLVMContext& ctx, ::llvm::Module& module,
-                        ::llvm::IRBuilder<>& builder, core::inner::Tensor& a,
-                        core::inner::Tensor& b, core::inner::Tensor& c) {
+                        ::llvm::IRBuilder<>& builder,
+                        core::internal::TensorInternal& a,
+                        core::internal::TensorInternal& b,
+                        core::internal::TensorInternal& c) {
         if (a.getDataType() == core::DataType::FLOAT) {
           generateStandardBuiltinCall<float>(name, generator, ctx, module,
                                              builder, a, b, c);
@@ -158,7 +163,7 @@ void registerStandardBuiltin<BuiltinThreeTensorArgs>(const std::string& name,
           generateStandardBuiltinCall<double>(name, generator, ctx, module,
                                               builder, a, b, c);
         } else {
-          new core::FatalError(core::ATH_FATAL_OTHER, "Unsupported type");
+          new utils::FatalError(utils::ATH_FATAL_OTHER, "Unsupported type");
         }
       };
   generator->registerFunctor(name, f);
@@ -175,13 +180,14 @@ template <>
 void registerStandardBuiltin<BuiltinTATATArgs>(const std::string& name,
                                                LLVMGenerator* generator) {
   std::function<void(::llvm::LLVMContext&, ::llvm::Module&,
-                     ::llvm::IRBuilder<>&, core::inner::Tensor&, uint64_t&,
-                     core::inner::Tensor&, uint64_t&, core::inner::Tensor&)>
+                     ::llvm::IRBuilder<>&, core::internal::TensorInternal&,
+                     uint64_t&, core::internal::TensorInternal&, uint64_t&,
+                     core::internal::TensorInternal&)>
       f = [generator, name](::llvm::LLVMContext& ctx, ::llvm::Module& module,
                             ::llvm::IRBuilder<>& builder,
-                            core::inner::Tensor& a, uint64_t scaleA,
-                            core::inner::Tensor& b, uint64_t scaleB,
-                            core::inner::Tensor& c) {
+                            core::internal::TensorInternal& a, uint64_t scaleA,
+                            core::internal::TensorInternal& b, uint64_t scaleB,
+                            core::internal::TensorInternal& c) {
         if (a.getDataType() == core::DataType::FLOAT) {
           generateStandardBuiltinCall<float>(name, generator, ctx, module,
                                              builder, a, scaleA, b, scaleB, c);
@@ -189,7 +195,7 @@ void registerStandardBuiltin<BuiltinTATATArgs>(const std::string& name,
           generateStandardBuiltinCall<double>(name, generator, ctx, module,
                                               builder, a, scaleA, b, scaleB, c);
         } else {
-          new core::FatalError(core::ATH_FATAL_OTHER, "Unsupported type");
+          new utils::FatalError(utils::ATH_FATAL_OTHER, "Unsupported type");
         }
       };
 
@@ -206,13 +212,15 @@ void registerStandardBuiltin<BuiltinTATATArgs>(const std::string& name,
 template <>
 void registerStandardBuiltin<BuiltinThreeTensorWithOptsArgs>(
     const std::string& name, LLVMGenerator* generator) {
-  std::function<void(::llvm::LLVMContext&, ::llvm::Module&,
-                     ::llvm::IRBuilder<>&, void*&, core::inner::Tensor&,
-                     core::inner::Tensor&, core::inner::Tensor&)>
+  std::function<void(
+      ::llvm::LLVMContext&, ::llvm::Module&, ::llvm::IRBuilder<>&, void*&,
+      core::internal::TensorInternal&, core::internal::TensorInternal&,
+      core::internal::TensorInternal&)>
       f = [generator, name](::llvm::LLVMContext& ctx, ::llvm::Module& module,
                             ::llvm::IRBuilder<>& builder, void*& opts,
-                            core::inner::Tensor& a, core::inner::Tensor& b,
-                            core::inner::Tensor& c) {
+                            core::internal::TensorInternal& a,
+                            core::internal::TensorInternal& b,
+                            core::internal::TensorInternal& c) {
         if (a.getDataType() == core::DataType::FLOAT) {
           generateStandardBuiltinCall<float>(name, generator, ctx, module,
                                              builder, opts, a, b, c);
@@ -220,7 +228,7 @@ void registerStandardBuiltin<BuiltinThreeTensorWithOptsArgs>(
           generateStandardBuiltinCall<double>(name, generator, ctx, module,
                                               builder, opts, a, b, c);
         } else {
-          new core::FatalError(core::ATH_FATAL_OTHER, "Unsupported type");
+          new utils::FatalError(utils::ATH_FATAL_OTHER, "Unsupported type");
         }
       };
 

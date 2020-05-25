@@ -16,7 +16,7 @@
 
 #include <athena/backend/llvm/driver/driver_export.h>
 #include <athena/backend/llvm/runtime/Device.h>
-#include <athena/core/FatalError.h>
+#include <athena/utils/error/FatalError.h>
 
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Module.h"

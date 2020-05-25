@@ -11,12 +11,14 @@
  * the License.
  */
 
-#include <athena/core/TensorShape.h>
+#include <athena/core/tensor/TensorShape.h>
 
 #include <gtest/gtest.h>
 #include <numeric>
 
-namespace athena::core {
+using namespace athena::core;
+
+namespace {
 TEST(TensorShapeTest, CreationWithInitList) {
   TensorShape shape{3, 2, 3};
   std::vector<size_t> expected{3, 2, 3};
@@ -96,4 +98,4 @@ TEST(TensorShapeTest, SubShape) {
       std::vector<size_t>(expected.begin() + 1, expected.end()));
   ASSERT_EQ(shape.getSubShape(), shapeSecond);
 }
-} // namespace athena::core
+} // namespace

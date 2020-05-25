@@ -48,7 +48,7 @@ public:
     // fixme it must compare device ids.
     return mDeviceName == device.getDeviceName();
   }
-  void copyToHost(const core::inner::Tensor& tensor,
+  void copyToHost(const core::internal::TensorInternal& tensor,
                   void* dest) const override {
     MemoryRecord record{tensor.getVirtualAddress(),
                         tensor.getShapeView().getTotalSize() *
@@ -62,7 +62,7 @@ public:
                         0, // num events
                         nullptr, nullptr);
   }
-  void copyToDevice(const core::inner::Tensor& tensor,
+  void copyToDevice(const core::internal::TensorInternal& tensor,
                     void* src) const override {
     MemoryRecord record{tensor.getVirtualAddress(),
                         tensor.getShapeView().getTotalSize() *
@@ -72,9 +72,9 @@ public:
   void copyToDevice(MemoryRecord record, void* src) const override {
     auto buf = *static_cast<cl_mem*>(mAllocator->getPtr(record));
     clEnqueueWriteBuffer(mQueue->getNativeQueue(), buf, CL_TRUE, 0, // offset
-                        record.allocationSize, src,
-                        0, // num events
-                        nullptr, nullptr);
+                         record.allocationSize, src,
+                         0, // num events
+                         nullptr, nullptr);
   }
 
   cl_device_id getNativeDevice() { return mClDeviceId; }

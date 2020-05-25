@@ -22,7 +22,7 @@
 #include "mlir/IR/StandardTypes.h"
 
 #include <athena/backend/llvm/mlir/mlir_export.h>
-#include <athena/core/AbstractGenerator.h>
+#include <athena/core/Generator.h>
 
 #include <map>
 

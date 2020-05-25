@@ -13,9 +13,9 @@
 
 #include "../../../../src/backend/llvm/allocators/LayerAllocator.h"
 #include <athena/backend/llvm/runtime/Device.h>
-#include <athena/core/inner/Tensor.h>
+#include <athena/core/tensor/internal/TensorInternal.h>
 
-#include <athena/core/Context.h>
+#include <athena/core/context/Context.h>
 #include <gtest/gtest.h>
 
 using namespace athena::backend::llvm;
@@ -50,8 +50,11 @@ TEST(LLVMBackend, LayerAllocatorSimple) {
   LayerAllocator allocator;
 
   Context ctx;
-  inner::Tensor tensor(DataType::FLOAT, {30}, ctx);
-
+  auto ctxInternalPtr = ctx.internal();
+  auto tensorIndex = ctxInternalPtr->create<TensorInternal>(
+      ctxInternalPtr, ctxInternalPtr->getNextPublicIndex(), DataType::FLOAT,
+      TensorShape{30});
+  auto& tensor = ctxInternalPtr->getRef<TensorInternal>(tensorIndex);
   allocator.allocate(tensor);
   auto ptr = allocator.get(tensor);
   ASSERT_NE(ptr, nullptr);
@@ -66,7 +69,11 @@ TEST(LLVMBackend, LayerAllocatorDevice) {
   allocator.registerDevice(device);
 
   Context ctx;
-  inner::Tensor tensor(DataType::FLOAT, {30}, ctx);
+  auto ctxInternalPtr = ctx.internal();
+  auto tensorIndex = ctxInternalPtr->create<TensorInternal>(
+      ctxInternalPtr, ctxInternalPtr->getNextPublicIndex(), DataType::FLOAT,
+      TensorShape{30});
+  auto& tensor = ctxInternalPtr->getRef<TensorInternal>(tensorIndex);
 
   allocator.allocate(tensor, device);
   auto ptr = allocator.get<void*>(tensor, device);
@@ -80,7 +87,11 @@ TEST(LLVMBackend, LayerAllocatorDeviceDoubleLock) {
   allocator.registerDevice(device);
 
   Context ctx;
-  inner::Tensor tensor(DataType::FLOAT, {30}, ctx);
+  auto ctxInternalPtr = ctx.internal();
+  auto tensorIndex = ctxInternalPtr->create<TensorInternal>(
+      ctxInternalPtr, ctxInternalPtr->getNextPublicIndex(), DataType::FLOAT,
+      TensorShape{30});
+  auto& tensor = ctxInternalPtr->getRef<TensorInternal>(tensorIndex);
 
   allocator.allocate(tensor, device);
   allocator.lock(tensor, device, LockType::READ);

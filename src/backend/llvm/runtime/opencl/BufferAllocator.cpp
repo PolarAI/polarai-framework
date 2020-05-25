@@ -13,7 +13,7 @@
 
 #include "BufferAllocator.h"
 
-#include <athena/core/FatalError.h>
+#include <athena/utils/error/FatalError.h>
 
 namespace athena::backend::llvm {
 void BufferAllocator::allocate(MemoryRecord record) {
@@ -36,8 +36,8 @@ void BufferAllocator::allocate(MemoryRecord record) {
   }
 
   if (errCode != CL_SUCCESS) {
-    new core::FatalError(core::ATH_FATAL_OTHER,
-                         "Failed to allocate OpenCL buffer!");
+    new utils::FatalError(utils::ATH_FATAL_OTHER,
+                          "Failed to allocate OpenCL buffer!");
   }
 
   mBuffers[record] = buffer;
@@ -45,15 +45,14 @@ void BufferAllocator::allocate(MemoryRecord record) {
 }
 void BufferAllocator::deallocate(MemoryRecord record) {
   if (mLockedAllocations.count(record)) {
-    new core::FatalError(core::ATH_FATAL_OTHER,
-                         "Attempt to deallocate locked buffer: ",
-                         record.virtualAddress);
+    new utils::FatalError(
+        utils::ATH_FATAL_OTHER,
+        "Attempt to deallocate locked buffer: ", record.virtualAddress);
   }
 
   if (!mBuffers.count(record)) {
-    new core::FatalError(core::ATH_FATAL_OTHER,
-                         "Double free of vaddr: ",
-                         record.virtualAddress);
+    new utils::FatalError(utils::ATH_FATAL_OTHER,
+                          "Double free of vaddr: ", record.virtualAddress);
   }
 
   if (mReleasedAllocations.count(record)) {
@@ -82,7 +81,7 @@ void BufferAllocator::freeMemory(MemoryRecord record) {
   size_t freedMem = 0;
   while (freedMem < record.allocationSize) {
     if (mReleasedAllocations.size() == 0)
-      new core::FatalError(core::ATH_FATAL_OTHER, "Out of memory!");
+      new utils::FatalError(utils::ATH_FATAL_OTHER, "Out of memory!");
     MemoryRecord alloc = *mReleasedAllocations.begin();
     freedMem += alloc.allocationSize;
     mCallback(alloc, *this);

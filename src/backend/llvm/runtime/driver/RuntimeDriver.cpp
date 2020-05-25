@@ -36,8 +36,7 @@ void RuntimeDriver::load(std::string_view libraryName) {
   char* errMsg = nullptr;
   if (mLibraryHandle = loadOsLibrary(name.data(), &errMsg);
       !mLibraryHandle || errMsg) {
-    new ::athena::core::FatalError(core::ATH_FATAL_OTHER,
-                                   "RuntimeDriver: ", errMsg);
+    new utils::FatalError(utils::ATH_FATAL_OTHER, "RuntimeDriver: ", errMsg);
   }
 
   mHasBuiltinHandle =
@@ -53,8 +52,8 @@ void RuntimeDriver::unload() {
     char* errMsg;
     closeOsLibrary(mLibraryHandle, &errMsg);
     if (errMsg) {
-      ::athena::core::FatalError err(
-          core::ATH_FATAL_OTHER, "RuntimeDriver: " + std::string(dlerror()));
+      utils::FatalError err(utils::ATH_FATAL_OTHER,
+                            "RuntimeDriver: " + std::string(dlerror()));
     }
   }
   mLibraryHandle = nullptr;

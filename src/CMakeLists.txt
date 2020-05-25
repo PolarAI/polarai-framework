@@ -27,9 +27,10 @@ add_athena_library(athena ${LIB_TYPE}
 
 add_subdirectory(backend)
 add_subdirectory(core)
-add_subdirectory(ops)
+add_subdirectory(operation)
 add_subdirectory(loaders)
 add_subdirectory(model)
+add_subdirectory(utils)
 
 # --- Library options ---
 set_target_properties(athena PROPERTIES
@@ -59,9 +60,10 @@ target_link_libraries(athena
         ${WHOLE_ARCHIVE}
         ${ATH_BACKEND_LLVM}
         ${ATH_CORE}
-        ${ATH_MEM_LOADER}
-        ${ATH_OPS}
+        ${ATH_LOADERS}
+        ${ATH_OPERATION}
         ${ATH_MODEL}
+        ${ATH_UTILS}
         ${NOWHOLE_ARCHIVE})
 
 target_compile_features(athena

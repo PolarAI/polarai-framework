@@ -16,8 +16,7 @@
 #include "codegen/register_default_functors.h"
 #include "utils.h"
 
-#include <athena/core/FatalError.h>
-#include <athena/loaders/MemoryLoader/MemoryLoader.h>
+#include <athena/utils/error/FatalError.h>
 
 #include <utility>
 
@@ -25,7 +24,7 @@ namespace athena::backend::llvm {
 
 llvm::LLVMGenerator::LLVMGenerator(
     ::llvm::LLVMContext& ctx, const std::unique_ptr<::llvm::Module>& module,
-    core::Allocator& allocator,
+    llvm::BackendAllocator& allocator,
     std::vector<std::unique_ptr<::llvm::Module>>& existing,
     std::unordered_map<std::string_view, Device*> map)
     : mGeneratedModule(module), mCurrentMainBlock(nullptr),
@@ -39,67 +38,73 @@ llvm::LLVMGenerator::LLVMGenerator(
 
 ::llvm::IRBuilder<>& LLVMGenerator::getBuilder() { return mBuilder; }
 
-void LLVMGenerator::generateLoad(const core::AbstractLoader& loader,
-                                 core::inner::Tensor& tensor) {
-  ::llvm::Function* loadFunction =
-      mGeneratedModule->getFunction(loader.getLoadCName());
+void LLVMGenerator::generateLoad() {
+  ::llvm::Function* loadFunction = mGeneratedModule->getFunction("");
 
   if (!loadFunction) {
     std::vector<::llvm::Type*> args(3, ::llvm::Type::getInt64Ty(mContext));
     ::llvm::FunctionType* FT = ::llvm::FunctionType::get(
         ::llvm::Type::getVoidTy(mContext), args, false);
 
-    loadFunction =
-        ::llvm::Function::Create(FT, ::llvm::Function::ExternalLinkage,
-                                 loader.getLoadCName(), mGeneratedModule.get());
+    loadFunction = ::llvm::Function::Create(
+        FT, ::llvm::Function::ExternalLinkage, "", mGeneratedModule.get());
   }
 
   if (!loadFunction) {
-    core::FatalError(core::ATH_FATAL_OTHER, "Unknown function referenced");
+    utils::FatalError(utils::ATH_FATAL_OTHER, "Unknown function referenced");
   }
-
+  auto loader = nullptr;
   std::vector<::llvm::Value*> ArgsV;
   ::llvm::Constant* loaderConst = ::llvm::ConstantInt::get(
-      ::llvm::Type::getInt64Ty(mContext), reinterpret_cast<size_t>(&loader));
+      ::llvm::Type::getInt64Ty(mContext), reinterpret_cast<size_t>(loader));
   ArgsV.push_back(loaderConst);
   ::llvm::Constant* allocatorConst =
       ::llvm::ConstantInt::get(::llvm::Type::getInt64Ty(mContext),
                                reinterpret_cast<size_t>(&mAllocator));
   ArgsV.push_back(allocatorConst);
+  auto tensor = nullptr;
   ::llvm::Constant* tensorConst = ::llvm::ConstantInt::get(
       ::llvm::Type::getInt64Ty(mContext), reinterpret_cast<size_t>(&tensor));
   ArgsV.push_back(tensorConst);
   mBuilder.CreateCall(loadFunction, ArgsV);
 }
-void LLVMGenerator::generateImpl(std::string& name, core::inner::Tensor& a) {
+void LLVMGenerator::generateImpl(std::string& name,
+                                 core::internal::TensorInternal& a) {
   mFunctorsMap[name](mContext, *mGeneratedModule, mBuilder, a);
 }
-void LLVMGenerator::generateImpl(std::string& name, core::inner::Tensor& a,
-                                 void*& b) {
+void LLVMGenerator::generateImpl(std::string& name,
+                                 core::internal::TensorInternal& a, void*& b) {
   mFunctorsMap[name](mContext, *mGeneratedModule, mBuilder, a, b);
 }
-void LLVMGenerator::generateImpl(std::string& name, core::inner::Tensor& a,
-                                 core::inner::Tensor& b) {
+void LLVMGenerator::generateImpl(std::string& name,
+                                 core::internal::TensorInternal& a,
+                                 core::internal::TensorInternal& b) {
   mFunctorsMap[name](mContext, *mGeneratedModule, mBuilder, a, b);
 }
-void LLVMGenerator::generateImpl(std::string& name, core::inner::Tensor& a,
-                                 core::inner::Tensor& b,
-                                 core::inner::Tensor& c) {
+void LLVMGenerator::generateImpl(std::string& name,
+                                 core::internal::TensorInternal& a,
+                                 core::internal::TensorInternal& b,
+                                 core::internal::TensorInternal& c) {
   mFunctorsMap[name](mContext, *mGeneratedModule, mBuilder, a, b, c);
 }
-void LLVMGenerator::generateImpl(std::string& name, core::inner::Tensor& a,
-                                 uint64_t scaleA, core::inner::Tensor& b,
-                                 uint64_t scaleB, core::inner::Tensor& c) {
+void LLVMGenerator::generateImpl(std::string& name,
+                                 core::internal::TensorInternal& a,
+                                 uint64_t scaleA,
+                                 core::internal::TensorInternal& b,
+                                 uint64_t scaleB,
+                                 core::internal::TensorInternal& c) {
   mFunctorsMap[name](mContext, *mGeneratedModule, mBuilder, a, scaleA, b,
                      scaleB, c);
 }
 void LLVMGenerator::generateImpl(std::string& name, void* options,
-                                 core::inner::Tensor& a, core::inner::Tensor& b,
-                                 core::inner::Tensor& c) {
+                                 core::internal::TensorInternal& a,
+                                 core::internal::TensorInternal& b,
+                                 core::internal::TensorInternal& c) {
   mFunctorsMap[name](mContext, *mGeneratedModule, mBuilder, options, a, b, c);
 }
 void LLVMGenerator::openNode(std::string_view name) {
-  athena_assert(mCurrentBlock == mCurrentMainBlock, "There is an opened node");
+  utils::athena_assert(mCurrentBlock == mCurrentMainBlock,
+                       "There is an opened node");
   mCurrentPreferredDevice = mGraphMap[name];
   ::llvm::FunctionType* FT =
       ::llvm::FunctionType::get(::llvm::Type::getVoidTy(mContext), false);

@@ -13,7 +13,7 @@
 
 #include "AthenaJIT.h"
 
-#include <athena/core/FatalError.h>
+#include <athena/utils/error/FatalError.h>
 
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/Transforms/IPO/AlwaysInliner.h>
@@ -47,7 +47,7 @@ AthenaJIT::AthenaJIT(::llvm::orc::JITTargetMachineBuilder JTMB,
       ::llvm::pointerToJITTargetAddress(explodeOnLazyCompileFailure));
 
   if (!callThroughMgr) {
-    new core::FatalError(core::ATH_FATAL_OTHER, "");
+    new utils::FatalError(utils::ATH_FATAL_OTHER, "");
   }
 
   mCallThroughManager = std::move(*callThroughMgr);
@@ -94,14 +94,14 @@ std::unique_ptr<AthenaJIT> AthenaJIT::create() {
 
   if (!JTMB) {
     ::llvm::consumeError(JTMB.takeError());
-    new core::FatalError(core::ATH_FATAL_OTHER, "Unable to detect host");
+    new utils::FatalError(utils::ATH_FATAL_OTHER, "Unable to detect host");
   }
 
   auto DL = JTMB->getDefaultDataLayoutForTarget();
   if (!DL) {
     ::llvm::consumeError(DL.takeError());
-    new core::FatalError(core::ATH_FATAL_OTHER,
-                         "Unable to get target data layout");
+    new utils::FatalError(utils::ATH_FATAL_OTHER,
+                          "Unable to get target data layout");
   }
 
   return std::make_unique<AthenaJIT>(std::move(*JTMB), std::move(*DL));
@@ -131,8 +131,8 @@ AthenaJIT::optimizeModule(::llvm::orc::ThreadSafeModule TSM,
         module.print(preOptStream, nullptr);
         preOptStream.close();
       } else {
-        log() << "Unable to open file for writing "
-              << fileNamePrefix + "_pre_opt.ll";
+        utils::log() << "Unable to open file for writing "
+                     << fileNamePrefix.data() << "_pre_opt.ll";
       }
     });
   }
@@ -183,8 +183,8 @@ AthenaJIT::optimizeModule(::llvm::orc::ThreadSafeModule TSM,
         module.print(postOptStream, nullptr);
         postOptStream.close();
       } else {
-        log() << "Unable to open file for writing "
-              << fileNamePrefix + "_post_opt.ll";
+        utils::log() << "Unable to open file for writing "
+                     << fileNamePrefix.data() << "_post_opt.ll";
       }
     });
   }
@@ -199,13 +199,13 @@ void AthenaJIT::setUpJITDylib(JITDylib* jitDylib) {
   auto err = cxxRuntimeOverrides.enable(*jitDylib, mMangle);
   if (err) {
     // todo print err message
-    new core::FatalError(core::ATH_FATAL_OTHER, "Unexpected JIT error");
+    new utils::FatalError(utils::ATH_FATAL_OTHER, "Unexpected JIT error");
   }
 
   char prefix = mDataLayout.getGlobalPrefix();
   auto generator = DynamicLibrarySearchGenerator::GetForCurrentProcess(prefix);
   if (!generator) {
-    new core::FatalError(core::ATH_FATAL_OTHER, "Failed to create generator");
+    new utils::FatalError(utils::ATH_FATAL_OTHER, "Failed to create generator");
   }
   jitDylib->addGenerator(std::move(*generator));
 }

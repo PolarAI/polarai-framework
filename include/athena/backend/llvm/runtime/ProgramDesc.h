@@ -17,15 +17,11 @@
 #define ATHENA_PROGRAMDESC_H
 
 struct ProgramDesc {
-  enum ProgramType {
-    SPIRV,
-    BINARY,
-    TEXT
-  };
+  enum ProgramType { SPIRV, BINARY, TEXT };
 
   ProgramType type;
   size_t length;
-  const char *data;
+  const char* data;
 };
 
 #endif // ATHENA_PROGRAMDESC_H

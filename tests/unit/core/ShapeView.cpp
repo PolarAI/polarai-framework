@@ -11,14 +11,16 @@
  * the License.
  */
 
-#include <athena/core/FatalError.h>
-#include <athena/core/ShapeView.h>
-#include <athena/core/TensorShape.h>
+#include <athena/core/tensor/ShapeView.h>
+#include <athena/core/tensor/TensorShape.h>
+#include <athena/utils/error/FatalError.h>
 
 #include <gtest/gtest.h>
 #include <numeric>
 
-namespace athena::core {
+using namespace athena::core;
+
+namespace {
 TEST(TensorViewTest, CreationEmpty) {
   TensorShape shape{};
   ShapeView view = shape.getShapeView();
@@ -59,4 +61,4 @@ TEST(TensorViewTest, CheckFieldsAndFunctions) {
     ++index;
   }
 }
-} // namespace athena::core
+} // namespace

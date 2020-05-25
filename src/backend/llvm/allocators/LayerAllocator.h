@@ -22,18 +22,18 @@
 #include <athena/backend/llvm/llvm_export.h>
 #include <athena/backend/llvm/runtime/Device.h>
 
+#include <list>
 #include <map>
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
-#include <list>
 
 namespace athena::backend::llvm {
 
 enum class MemoryDomain { Swap, RAM, Device };
 
 struct LockDescriptor {
-  core::LockType lockType;
+  core::internal::LockType lockType;
   MemoryDomain domain;
   Device* device;
 };
@@ -66,11 +66,11 @@ private:
 
   std::unordered_map<MemoryRecord, int> mMemTags;
 
-//  std::unordered_map<MemoryRecord, MemoryDomain> mLockDomainMap;
-//  // todo replace map with another structure to allow memory on multiple devices
-//  std::unordered_map<MemoryRecord, Device*> mDeviceMap;
-//  std::unordered_set<MemoryRecord> mRAMSet;
-//  std::unordered_map<MemoryRecord, std::string> mSwapMap;
+  //  std::unordered_map<MemoryRecord, MemoryDomain> mLockDomainMap;
+  //  // todo replace map with another structure to allow memory on multiple
+  //  devices std::unordered_map<MemoryRecord, Device*> mDeviceMap;
+  //  std::unordered_set<MemoryRecord> mRAMSet;
+  //  std::unordered_map<MemoryRecord, std::string> mSwapMap;
 
   void updateHost(MemoryRecord record);
 
@@ -79,23 +79,27 @@ public:
   ~LayerAllocator() override = default;
   void registerDevice(Device& device) override;
 
-  void allocate(const core::inner::Tensor& tensor, Device& device) override;
-  void allocate(const core::inner::Tensor& tensor) override;
+  void allocate(const core::internal::TensorInternal& tensor,
+                Device& device) override;
+  void allocate(const core::internal::TensorInternal& tensor) override;
   void allocate(MemoryRecord record);
 
-  void deallocate(const core::inner::Tensor& tensor) override;
+  void deallocate(const core::internal::TensorInternal& tensor) override;
 
-  void lock(const core::inner::Tensor& tensor, core::LockType type) override;
-  void lock(const core::inner::Tensor& tensor, Device& device, core::LockType type) override;
+  void lock(const core::internal::TensorInternal& tensor,
+            core::internal::LockType type) override;
+  void lock(const core::internal::TensorInternal& tensor, Device& device,
+            core::internal::LockType type) override;
 
-  void release(const core::inner::Tensor& tensor) override;
-  void release(const core::inner::Tensor& tensor, Device& device);
+  void release(const core::internal::TensorInternal& tensor) override;
+  void release(const core::internal::TensorInternal& tensor, Device& device);
 
-  void* get(const core::inner::Tensor& tensor) override;
+  void* get(const core::internal::TensorInternal& tensor) override;
   using BackendAllocator::get;
 
 protected:
-  void* getImpl(const core::inner::Tensor& tensor, Device& device) override;
+  void* getImpl(const core::internal::TensorInternal& tensor,
+                Device& device) override;
 };
 } // namespace athena::backend::llvm
 

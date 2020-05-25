@@ -15,8 +15,8 @@
 
 #include "llvm/IR/Verifier.h"
 
-#include <llvm/Target/TargetMachine.h>
 #include <llvm/Support/Host.h>
+#include <llvm/Target/TargetMachine.h>
 
 namespace athena::backend::llvm {
 
@@ -33,8 +33,8 @@ LegacyRuntimeDriver::operator=(LegacyRuntimeDriver&& rhs) noexcept {
 }
 void* LegacyRuntimeDriver::getFunctionPtr(std::string_view funcName) {
   if (void* function = dlsym(mLibraryHandle, funcName.data()); !function) {
-    new ::athena::core::FatalError(core::ATH_FATAL_OTHER,
-                                   "RuntimeDriver: " + std::string(dlerror()));
+    new utils::FatalError(utils::ATH_FATAL_OTHER,
+                          "RuntimeDriver: " + std::string(dlerror()));
     return nullptr;
   } else {
     return function;
@@ -42,15 +42,15 @@ void* LegacyRuntimeDriver::getFunctionPtr(std::string_view funcName) {
 }
 void LegacyRuntimeDriver::load(std::string_view nameLibrary) {
   if (mLibraryHandle = dlopen(nameLibrary.data(), RTLD_LAZY); !mLibraryHandle) {
-    new ::athena::core::FatalError(core::ATH_FATAL_OTHER,
-                                   "RuntimeDriver: " + std::string(dlerror()));
+    new utils::FatalError(utils::ATH_FATAL_OTHER,
+                          "RuntimeDriver: " + std::string(dlerror()));
   }
   prepareModules();
 }
 void LegacyRuntimeDriver::unload() {
   if (mLibraryHandle && dlclose(mLibraryHandle)) {
-    ::athena::core::FatalError err(core::ATH_FATAL_OTHER,
-                                   "RuntimeDriver: " + std::string(dlerror()));
+    utils::FatalError err(utils::ATH_FATAL_OTHER,
+                          "RuntimeDriver: " + std::string(dlerror()));
   }
   mLibraryHandle = nullptr;
 }
@@ -72,9 +72,9 @@ void LegacyRuntimeDriver::prepareModules() {
   bool isBroken = ::llvm::verifyModule(*newModule, &stream, &brokenDebugInfo);
   stream.flush();
   if (isBroken || brokenDebugInfo) {
-    err() << str;
+    utils::err() << str.data();
     newModule->print(::llvm::errs(), nullptr);
-    new core::FatalError(core::ATH_FATAL_OTHER, "incorrect ir");
+    new utils::FatalError(utils::ATH_FATAL_OTHER, "incorrect ir");
   }
 #endif
   mModules.push_back(std::move(newModule));

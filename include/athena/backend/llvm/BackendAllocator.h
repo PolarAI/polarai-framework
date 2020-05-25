@@ -15,31 +15,34 @@
 #define ATHENA_BACKENDALLOCATOR_H
 
 #include <athena/backend/llvm/runtime/Device.h>
-#include <athena/core/Allocator.h>
+#include <athena/core/loader/internal/TensorAllocator.h>
+#include <athena/core/tensor/internal/TensorInternal.h>
+
+using namespace athena::core::internal;
 
 namespace athena::backend::llvm {
-class BackendAllocator : public core::Allocator {
+class BackendAllocator : public TensorAllocator {
 protected:
-  virtual void* getImpl(const core::inner::Tensor& tensor, Device& device) = 0;
+  virtual void* getImpl(const TensorInternal& tensor, Device& device) = 0;
 
 public:
   virtual void registerDevice(Device& device) = 0;
 
   /// Allocates memory on a particular device.
-  virtual void allocate(const core::inner::Tensor& tensor, Device& device) = 0;
+  virtual void allocate(const TensorInternal& tensor, Device& device) = 0;
   // fixme implement
   virtual void allocate(const MemoryRecord& record, Device& device){};
 
   /// Locks tensor raw memory on a particular device.
-  virtual void lock(const core::inner::Tensor& tensor, Device& device,
-                    core::LockType type) = 0;
+  virtual void lock(const TensorInternal& tensor, Device& device,
+                    LockType type) = 0;
   // fixme implement
   virtual void lock(const MemoryRecord& record, Device& device,
-                    core::LockType type){};
-  virtual void release(const MemoryRecord& record, Device& device) {};
+                    LockType type){};
+  virtual void release(const MemoryRecord& record, Device& device){};
 
   template <typename BufferT>
-  BufferT* get(const core::inner::Tensor& tensor, Device& device) {
+  BufferT* get(const TensorInternal& tensor, Device& device) {
     return reinterpret_cast<BufferT*>(getImpl(tensor, device));
   }
 };

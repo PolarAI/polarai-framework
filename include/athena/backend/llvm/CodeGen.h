@@ -21,6 +21,6 @@ class OpBuilder;
 namespace athena::backend::llvm {
 /// Feeds Generator with functors to generate correct MLIR.
 ATH_BACKEND_LLVM_EXPORT void
-populateCodeGenPatterns(athena::core::Generator& generator,
+populateCodeGenPatterns(core::internal::Generator& generator,
                         mlir::OpBuilder& builder);
 } // namespace athena::backend::llvm

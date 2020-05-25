@@ -39,12 +39,12 @@ public:
   RuntimeDriverTest() : mDriver(*mContext) {}
 };
 
-TEST_F(RuntimeDriverTest, TestCreation) {
+TEST_F(RuntimeDriverTest, DISABLED_TestCreation) {
   mDriver.reload(mPathToRuntimeCPU);
   ASSERT_TRUE(mDriver.isLoaded());
 }
 
-TEST_F(RuntimeDriverTest, TestFunctionLoad) {
+TEST_F(RuntimeDriverTest, DISABLED_TestFunctionLoad) {
   mDriver.load(mPathToRuntimeCPU);
   auto& modules = mDriver.getModules();
   ASSERT_GT(modules.size(), 0);

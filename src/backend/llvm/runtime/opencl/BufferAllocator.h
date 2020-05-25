@@ -52,6 +52,6 @@ private:
   std::unordered_set<MemoryRecord> mReleasedAllocations;
   std::unordered_map<MemoryRecord, int> mTags;
 };
-}
+} // namespace athena::backend::llvm
 
 #endif // ATHENA_BUFFERALLOCATOR_H
