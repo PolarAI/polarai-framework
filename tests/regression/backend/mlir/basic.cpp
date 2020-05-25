@@ -15,8 +15,9 @@
 #include <athena/core/Generator.h>
 #include <athena/core/tensor/DataType.h>
 #include <athena/core/tensor/internal/TensorInternal.h>
+#include <athena/core/context/Context.h>
 
-#include "llvm/Support/raw_ostream.h"
+#include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/Debug.h>
 #include <mlir/IR/Builders.h>
 #include <mlir/IR/MLIRContext.h>
@@ -32,58 +33,57 @@
 
 using ::testing::Test;
 using namespace athena::core;
+using namespace athena::core::internal;
 using namespace athena::backend::llvm;
 
 constexpr static int tensorSize = 8;
 
 static constexpr auto checks = R"(
-CHECK: module {
-CHECK-NEXT: "ath_graph.node"() ( {
-CHECK-NEXT: ^bb0(%arg0: index, %arg1: index):  // no predecessors
-CHECK-NEXT: %0 = "ath_graph.get_tensor"(%arg0) {virtual_address = 1 : index} : (index) -> tensor<8xf32>
-CHECK-NEXT: "ath_graph.alloc"(%0) : (tensor<8xf32>) -> ()
-CHECK-NEXT: "ath_graph.lock"(%0) {lock_type = "read_write"} : (tensor<8xf32>) -> ()
-CHECK-NEXT: "ath_graph.invoke_loader"(%0) {loader_routine = "inputA"} : (tensor<8xf32>) -> ()
-CHECK-NEXT: "ath_graph.release"(%0) : (tensor<8xf32>) -> ()
-CHECK-NEXT: "ath_graph.return"(%0) : (tensor<8xf32>) -> ()
-CHECK-NEXT: }) {cluster_id = 0 : index, node_id = 0 : index, sym_name = "inputA", type = (index, index) -> tensor<8xf32>} : () -> ()
-CHECK-NEXT: "ath_graph.node"() ( {
-CHECK-NEXT: ^bb0(%arg0: index, %arg1: index):  // no predecessors
-CHECK-NEXT: %0 = "ath_graph.get_tensor"(%arg0) {virtual_address = 9 : index} : (index) -> tensor<8xf32>
-CHECK-NEXT: "ath_graph.alloc"(%0) : (tensor<8xf32>) -> ()
-CHECK-NEXT: "ath_graph.lock"(%0) {lock_type = "read_write"} : (tensor<8xf32>) -> ()
-CHECK-NEXT: "ath_graph.invoke_loader"(%0) {loader_routine = "inputB"} : (tensor<8xf32>) -> ()
-CHECK-NEXT: "ath_graph.release"(%0) : (tensor<8xf32>) -> ()
-CHECK-NEXT: "ath_graph.return"(%0) : (tensor<8xf32>) -> ()
-CHECK-NEXT: }) {cluster_id = 0 : index, node_id = 1 : index, sym_name = "inputB", type = (index, index) -> tensor<8xf32>} : () -> ()
-CHECK-NEXT: "ath_graph.node"() ( {
-CHECK-NEXT: ^bb0(%arg0: tensor<8xf32>, %arg1: tensor<8xf32>, %arg2: index, %arg3: index):  // no predecessors
-CHECK-NEXT: %0 = "ath_graph.get_tensor"(%arg2) {virtual_address = 17 : index} : (index) -> tensor<8xf32>
-CHECK-NEXT: "ath_graph.lock"(%arg0) {lock_type = "read"} : (tensor<8xf32>) -> ()
-CHECK-NEXT: "ath_graph.lock"(%arg1) {lock_type = "read"} : (tensor<8xf32>) -> ()
-CHECK-NEXT: "ath_graph.alloc"(%0) : (tensor<8xf32>) -> ()
-CHECK-NEXT: "ath_graph.lock"(%0) {lock_type = "read_write"} : (tensor<8xf32>) -> ()
-CHECK-NEXT: %1 = "std.constant"() {value = 1.000000e+00 : f32} : () -> f32
-CHECK-NEXT: "ath_graph.add"(%arg0, %1, %arg1, %1, %0) : (tensor<8xf32>, f32, tensor<8xf32>, f32, tensor<8xf32>) -> ()
-CHECK-NEXT: "ath_graph.release"(%arg0) : (tensor<8xf32>) -> ()
-CHECK-NEXT: "ath_graph.release"(%arg1) : (tensor<8xf32>) -> ()
-CHECK-NEXT: "ath_graph.release"(%0) : (tensor<8xf32>) -> ()
-CHECK-NEXT: "ath_graph.return"(%0) : (tensor<8xf32>) -> ()
-CHECK-NEXT: }) {cluster_id = 1 : index, node_id = 2 : index, sym_name = "sum", type = (tensor<8xf32>, tensor<8xf32>, index, index) -> tensor<8xf32>} : () -> ()
-CHECK-NEXT: "ath_graph.graph"() ( {
-CHECK-NEXT: ^bb0(%arg0: index, %arg1: index):  // no predecessors
-CHECK-NEXT: %0 = "ath_graph.eval"(%arg0, %arg1) {node = @inputA} : (index, index) -> tensor<8xf32>
-CHECK-NEXT: %1 = "ath_graph.eval"(%arg0, %arg1) {node = @inputB} : (index, index) -> tensor<8xf32>
-CHECK-NEXT: %2 = "ath_graph.eval"(%0, %1, %arg0, %arg1) {node = @sum} : (tensor<8xf32>, tensor<8xf32>, index, index) -> tensor<8xf32>
-CHECK-NEXT: "ath_graph.graph_terminator"() : () -> ()
-CHECK-NEXT: }) {sym_name = "mainGraph", type = (index, index) -> ()} : () -> ()
-CHECK-NEXT: }
+// CHECK: module {
+// CHECK-NEXT: "ath_graph.node"() ( {
+// CHECK-NEXT: %0 = "ath_graph.create_tensor"() {virtual_address = 1 : index} : () -> tensor<8xf32>
+// CHECK-NEXT: "ath_graph.alloc"(%0) : (tensor<8xf32>) -> ()
+// CHECK-NEXT: "ath_graph.lock"(%0) {lock_type = "read_write"} : (tensor<8xf32>) -> ()
+// CHECK-NEXT: "ath_graph.invoke_loader"(%0) : (tensor<8xf32>) -> ()
+// CHECK-NEXT: "ath_graph.release"(%0) : (tensor<8xf32>) -> ()
+// CHECK-NEXT: "ath_graph.return"(%0) : (tensor<8xf32>) -> ()
+// CHECK-NEXT: }) {cluster_id = 0 : index, node_id = 0 : index, sym_name = "inputA", type = () -> tensor<8xf32>} : () -> ()
+// CHECK-NEXT: "ath_graph.node"() ( {
+// CHECK-NEXT: %0 = "ath_graph.create_tensor"() {virtual_address = 33 : index} : () -> tensor<8xf32>
+// CHECK-NEXT: "ath_graph.alloc"(%0) : (tensor<8xf32>) -> ()
+// CHECK-NEXT: "ath_graph.lock"(%0) {lock_type = "read_write"} : (tensor<8xf32>) -> ()
+// CHECK-NEXT: "ath_graph.invoke_loader"(%0) : (tensor<8xf32>) -> ()
+// CHECK-NEXT: "ath_graph.release"(%0) : (tensor<8xf32>) -> ()
+// CHECK-NEXT: "ath_graph.return"(%0) : (tensor<8xf32>) -> ()
+// CHECK-NEXT: }) {cluster_id = 0 : index, node_id = 1 : index, sym_name = "inputB", type = () -> tensor<8xf32>} : () -> ()
+// CHECK-NEXT: "ath_graph.node"() ( {
+// CHECK-NEXT: ^bb0(%arg0: tensor<8xf32>, %arg1: tensor<8xf32>):  // no predecessors
+// CHECK-NEXT: %0 = "ath_graph.create_tensor"() {virtual_address = 65 : index} : () -> tensor<8xf32>
+// CHECK-NEXT: "ath_graph.lock"(%arg0) {lock_type = "read"} : (tensor<8xf32>) -> ()
+// CHECK-NEXT: "ath_graph.lock"(%arg1) {lock_type = "read"} : (tensor<8xf32>) -> ()
+// CHECK-NEXT: "ath_graph.alloc"(%0) : (tensor<8xf32>) -> ()
+// CHECK-NEXT: "ath_graph.lock"(%0) {lock_type = "read_write"} : (tensor<8xf32>) -> ()
+// CHECK-NEXT: %1 = "std.constant"() {value = 1.000000e+00 : f32} : () -> f32
+// CHECK-NEXT: %2 = "ath_graph.add"(%arg0, %1, %arg1, %1, %0) : (tensor<8xf32>, f32, tensor<8xf32>, f32, tensor<8xf32>) -> tensor<8xf32>
+// CHECK-NEXT: "ath_graph.release"(%arg0) : (tensor<8xf32>) -> ()
+// CHECK-NEXT: "ath_graph.release"(%arg1) : (tensor<8xf32>) -> ()
+// CHECK-NEXT: "ath_graph.release"(%0) : (tensor<8xf32>) -> ()
+// CHECK-NEXT: "ath_graph.return"(%2) : (tensor<8xf32>) -> ()
+// CHECK-NEXT: }) {cluster_id = 1 : index, node_id = 2 : index, sym_name = "sum", type = (tensor<8xf32>, tensor<8xf32>) -> tensor<8xf32>} : () -> ()
+// CHECK-NEXT: "ath_graph.graph"() ( {
+// CHECK-NEXT: %0 = "ath_graph.eval"() {node = @inputA} : () -> tensor<8xf32>
+// CHECK-NEXT: %1 = "ath_graph.eval"() {node = @inputB} : () -> tensor<8xf32>
+// CHECK-NEXT: "ath_graph.barrier"() {clusterId = 0 : index} : () -> ()
+// CHECK-NEXT: %2 = "ath_graph.eval"(%0, %1) {node = @sum} : (tensor<8xf32>, tensor<8xf32>) -> tensor<8xf32>
+// CHECK-NEXT: "ath_graph.graph_terminator"() : () -> ()
+// CHECK-NEXT: }) {sym_name = "mainGraph", type = () -> ()} : () -> ()
+// CHECK-NEXT: }
 )";
 
 static GenNode createInputNode(Context& ctx, std::string_view name,
-                               size_t nodeId, inner::Tensor& outValue,
+                               size_t nodeId, internal::TensorInternal& outValue,
                                Generator& generator) {
-  std::vector<inner::Tensor> args;
+  std::vector<internal::TensorInternal*> args;
   GenNode node = generator.createNode(name, nodeId, 0, args, outValue);
 
   auto save = generator.getInsertionPoint();
@@ -108,14 +108,18 @@ TEST(MLIRRegression, BasicIR) {
   populateCodeGenPatterns(generator, builder);
 
   Context ctx;
+  auto ctxInternal = ctx.internal();
 
-  inner::Tensor tensorA(DataType::FLOAT, {tensorSize}, ctx);
-  inner::Tensor tensorB(DataType::FLOAT, {tensorSize}, ctx);
+  auto tensorAId = ctxInternal->create<internal::TensorInternal>(ctxInternal, ctxInternal->getNextPublicIndex(), DataType::FLOAT, TensorShape{tensorSize});
+  auto tensorA = ctxInternal->getRef<internal::TensorInternal>(tensorAId);
+  auto tensorBId = ctxInternal->create<internal::TensorInternal>(ctxInternal, ctxInternal->getNextPublicIndex(), DataType::FLOAT, TensorShape{tensorSize});
+  auto tensorB = ctxInternal->getRef<internal::TensorInternal>(tensorBId);
   auto nodeA = createInputNode(ctx, "inputA", 0, tensorA, generator);
   auto nodeB = createInputNode(ctx, "inputB", 1, tensorB, generator);
 
-  std::vector<inner::Tensor> args{tensorA, tensorB};
-  inner::Tensor tensorC(DataType::FLOAT, {tensorSize}, ctx);
+  std::vector<internal::TensorInternal*> args{&tensorA, &tensorB};
+  auto tensorCId = ctxInternal->create<internal::TensorInternal>(ctxInternal, ctxInternal->getNextPublicIndex(), DataType::FLOAT, TensorShape{tensorSize});
+  auto tensorC = ctxInternal->getRef<internal::TensorInternal>(tensorCId);
   auto nodeC = generator.createNode("sum", 2, 1, args, tensorC);
 
   auto save = generator.getInsertionPoint();
@@ -153,7 +157,6 @@ TEST(MLIRRegression, BasicIR) {
   std::string str;
   ::llvm::raw_string_ostream stream(str);
   module.print(stream);
-  ::llvm::dbgs() << str << "\n";
   auto result =
       effcee::Match(str, checks,
   effcee::Options().SetChecksName("checks"));

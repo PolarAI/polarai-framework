@@ -16,6 +16,8 @@
 #ifndef ATHENA_LAUNCHCOMMAND_H
 #define ATHENA_LAUNCHCOMMAND_H
 
+#include <cstdint>
+
 struct ArgDesc {
   enum ArgType { TENSOR = 0, DATA = 1 };
   uint64_t size;
