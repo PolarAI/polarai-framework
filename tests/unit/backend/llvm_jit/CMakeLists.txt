@@ -20,6 +20,7 @@ get_property(conversion_libs GLOBAL PROPERTY MLIR_CONVERSION_LIBS)
 add_athena_executable(TestUnitJITRunnable 
                       AthenaJIT.cpp
                       $<TARGET_OBJECTS:${AthenaJitTarget}>)
+target_include_directories(TestUnitJITRunnable PRIVATE ${LLVM_INCLUDE_DIRS})
 
 llvm_map_components_to_libnames(llvm_libs
         core

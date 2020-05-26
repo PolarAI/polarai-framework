@@ -315,7 +315,8 @@ struct BarrierConversionPattern
 class GraphToRuntimePass
     : public PassWrapper<GraphToRuntimePass, OperationPass<ModuleOp>> {
 protected:
-  void runOnOperation() {
+  void runOnOperation() override {
+    ::llvm::dbgs() << "ruuuun\n";
     OwningRewritePatternList patterns;
     populateGraphToRuntimeConversionPatterns(patterns, &getContext());
     ConversionTarget target(getContext());
@@ -324,7 +325,7 @@ protected:
     target.addLegalOp<FuncOp>();
     target.addLegalOp<ReturnOp>();
     target.addLegalDialect<StandardOpsDialect>();
-    target.addLegalDialect<ath_rt::AthenaRuntimeDialect>();
+    // target.addLegalDialect<ath_rt::AthenaRuntimeDialect>();
     target.addLegalDialect<ath_graph::AthenaGraphDialect>();
 
     target.addIllegalOp<ath_graph::EvalOp>();
@@ -342,7 +343,7 @@ protected:
     target.addIllegalOp<ath_graph::TransposeOp>();
     target.addIllegalOp<ath_graph::FillOp>();
 
-    if (failed(applyPartialConversion(getOperation(), target, patterns))) {
+    if (failed(applyFullConversion(getOperation(), target, patterns))) {
       signalPassFailure();
     }
   }
