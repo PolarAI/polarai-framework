@@ -17,7 +17,6 @@ llvm_map_components_to_libnames(llvm_libs
         orcjit
         AllTargetsCodeGens AllTargetsAsmParsers AllTargetsDescs AllTargetsInfos
         lto)
-target_include_directories(${AthenaJitTarget} PRIVATE ${LLVM_INCLUDE_DIRS})
 target_include_directories(${AthenaJitTarget} PUBLIC 
                            ${PROJECT_BINARY_DIR}/utils/dialects/include
                            ${PROJECT_SOURCE_DIR}/utils/dialects/include)
