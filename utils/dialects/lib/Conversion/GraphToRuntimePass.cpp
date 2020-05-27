@@ -325,25 +325,23 @@ protected:
     target.addLegalOp<FuncOp>();
     target.addLegalOp<ReturnOp>();
     target.addLegalDialect<StandardOpsDialect>();
-    target.addLegalDialect<ath_rt::AthenaRuntimeDialect>();
-    target.addLegalOp<ath_graph::CreateTensorOp>();
-    target.addLegalOp<ath_graph::InvokeLoaderOp>();
-    // target.addLegalDialect<ath_graph::AthenaGraphDialect>();
+    // target.addLegalDialect<ath_rt::AthenaRuntimeDialect>();
+    target.addLegalDialect<ath_graph::AthenaGraphDialect>();
 
-    // target.addIllegalOp<ath_graph::EvalOp>();
-    // target.addIllegalOp<ath_graph::NodeOp>();
-    // target.addIllegalOp<ath_graph::ReturnOp>();
-    // target.addIllegalOp<ath_graph::GraphTerminatorOp>();
-    // target.addIllegalOp<ath_graph::GraphOp>();
-    // target.addIllegalOp<ath_graph::BarrierOp>();
-    // target.addIllegalOp<ath_graph::AllocOp>();
-    // target.addIllegalOp<ath_graph::ReleaseOp>();
-    // target.addIllegalOp<ath_graph::LockOp>();
-    // target.addIllegalOp<ath_graph::AddOp>();
-    // target.addIllegalOp<ath_graph::MulOp>();
-    // target.addIllegalOp<ath_graph::MatmulOp>();
-    // target.addIllegalOp<ath_graph::TransposeOp>();
-    // target.addIllegalOp<ath_graph::FillOp>();
+    target.addIllegalOp<ath_graph::EvalOp>();
+    target.addIllegalOp<ath_graph::NodeOp>();
+    target.addIllegalOp<ath_graph::ReturnOp>();
+    target.addIllegalOp<ath_graph::GraphTerminatorOp>();
+    target.addIllegalOp<ath_graph::GraphOp>();
+    target.addIllegalOp<ath_graph::BarrierOp>();
+    target.addIllegalOp<ath_graph::AllocOp>();
+    target.addIllegalOp<ath_graph::ReleaseOp>();
+    target.addIllegalOp<ath_graph::LockOp>();
+    target.addIllegalOp<ath_graph::AddOp>();
+    target.addIllegalOp<ath_graph::MulOp>();
+    target.addIllegalOp<ath_graph::MatmulOp>();
+    target.addIllegalOp<ath_graph::TransposeOp>();
+    target.addIllegalOp<ath_graph::FillOp>();
 
     if (failed(applyFullConversion(getOperation(), target, patterns))) {
       signalPassFailure();

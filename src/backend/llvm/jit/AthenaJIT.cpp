@@ -68,8 +68,8 @@ void AthenaJIT::setupMlirPassManager() {
   auto IRPrintingConfig =
       std::make_unique<mlir::PassManager::IRPrinterConfig>(true);
   mContext.disableMultithreading();
-  // mMlirPassManager.addPass(mlir::createGraphRelationDestructorPass());
-  mMlirPassManager.addPass(mlir::createLowerGraphToRuntimePass());
+  mMlirPassManager.addPass(mlir::createGraphRelationDestructorPass());
+  mMlirPassManager.addNestedPass<mlir::ModuleOp>(mlir::createLowerGraphToRuntimePass());
   // mMlirPassManager.addNestedPass<mlir::FuncOp>(mlir::createBarrierLegalizerPass());
   // mMlirPassManager.addPass(mlir::createLowerRuntimeToLLVMPass());
   mMlirPassManager.enableIRPrinting(std::move(IRPrintingConfig));
@@ -88,9 +88,6 @@ void AthenaJIT::compileModule() {
   if (mlir::failed(res)) {
     ::llvm::errs() << "JIT error\n";
   }
-
-  // auto pass = mlir::createLowerGraphToRuntimePass();
-  // pass->
 
   mInternalModule->dump();
   mInternalModule->print(::llvm::dbgs());
