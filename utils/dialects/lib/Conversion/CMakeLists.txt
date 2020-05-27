@@ -5,6 +5,7 @@ add_mlir_conversion_library(MLIRAthenaConversion
 
         ADDITIONAL_HEADER_DIRS
         ${PROJECT_SOURCE_DIR}/include/
+        ${PROJECT_BINARY_DIR}/include
 
         DEPENDS
         MLIRAthenaGraph

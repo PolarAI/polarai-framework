@@ -156,6 +156,7 @@ TEST(MLIRRegression, BasicIR) {
 
   std::string str;
   ::llvm::raw_string_ostream stream(str);
+  ::llvm::dbgs() << str << "\n";
   module.print(stream);
   auto result =
       effcee::Match(str, checks,
