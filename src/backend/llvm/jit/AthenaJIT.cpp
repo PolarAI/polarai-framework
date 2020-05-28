@@ -7,7 +7,6 @@
 #include "Passes/Passes.h"
 
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
-#include "mlir/Target/LLVMIR/ModuleTranslation.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/MLIRContext.h"
@@ -15,6 +14,7 @@
 #include "mlir/InitAllPasses.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Pass/PassManager.h"
+#include "mlir/Target/LLVMIR/ModuleTranslation.h"
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
 #include "llvm/Support/InitLLVM.h"
 #include "llvm/Support/TargetSelect.h"
@@ -47,7 +47,6 @@ void AthenaJIT::addModule(const mlir::OwningModuleRef& ref) {
 
   for (auto& op : *ref) {
     if (!::llvm::isa<mlir::ModuleTerminatorOp>(op)) {
-      ::llvm::dbgs() << "Boom\n";
       builder.clone(op);
     }
   }
@@ -63,13 +62,12 @@ auto AthenaJIT::lookupSymbol(::llvm::StringRef symbolName)
 }
 void AthenaJIT::setupMlirPassManager() {
   mMlirPassManager.addPass(mlir::createCanonicalizerPass());
-  auto IRPrintingConfig =
-      std::make_unique<mlir::PassManager::IRPrinterConfig>(true);
-  mContext.disableMultithreading();
-  mMlirPassManager.enableIRPrinting(std::move(IRPrintingConfig));
   mMlirPassManager.addPass(mlir::createGraphRelationDestructorPass());
   mMlirPassManager.addPass(mlir::createLowerGraphToRuntimePass());
-  mMlirPassManager.addPass(mlir::createBarrierLegalizerPass());
+  auto& funcOpt = mMlirPassManager.nest<mlir::FuncOp>();
+  funcOpt.addPass(mlir::createBarrierLegalizerPass());
+  funcOpt.addPass(mlir::createLegalizeRTForLoweringPass());
+  mMlirPassManager.addPass(mlir::createDeployDefaultFunctionsPass());
   mMlirPassManager.addPass(mlir::createLowerRuntimeToLLVMPass());
 }
 void AthenaJIT::compileModule() {
@@ -77,22 +75,23 @@ void AthenaJIT::compileModule() {
   if (mlir::failed(res)) {
     ::llvm::errs() << "JIT error\n";
   }
-  
+
   mInternalModule->print(::llvm::dbgs());
   // todo check result
 
-  auto llvmModule = mlir::LLVM::ModuleTranslation::translateModule(mInternalModule->getOperation());
+  auto llvmModule =
+  mlir::LLVM::ModuleTranslation::translateModule(mInternalModule->getOperation());
   llvmModule->print(::llvm::dbgs(), nullptr);
 
   std::unique_ptr<LLVMContext> llvmCtx = std::make_unique<LLVMContext>();
   auto newModule =
-      mlir::LLVM::cloneModuleIntoNewContext(llvmCtx.get(), llvmModule.get());
+  mlir::LLVM::cloneModuleIntoNewContext(llvmCtx.get(), llvmModule.get());
   newModule->print(::llvm::dbgs(), nullptr);
 
   ThreadSafeModule tsm(std::move(newModule), std::move(llvmCtx));
   auto err = mJITInstance->addIRModule(std::move(tsm));
   if (err) {
-    llvm_unreachable("Unexpected error");
+  llvm_unreachable("Unexpected error");
   }
 }
 } // namespace athena::backend::llvm

@@ -54,7 +54,6 @@ protected:
 } // namespace
 
 namespace mlir {
-
 std::unique_ptr<OperationPass<FuncOp>> createBarrierLegalizerPass() {
   return std::make_unique<BarrierLegalizerPass>();
 }

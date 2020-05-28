@@ -12,6 +12,8 @@ public:
   void addModule(const mlir::OwningModuleRef& ref);
   auto lookupSymbol(::llvm::StringRef symbolName) -> ::llvm::JITTargetAddress;
 
+  auto getContext() -> mlir::MLIRContext* { return &mContext; }
+
 private:
   void setupMlirPassManager();
   void compileModule();

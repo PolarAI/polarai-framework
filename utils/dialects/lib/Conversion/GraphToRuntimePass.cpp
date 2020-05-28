@@ -92,9 +92,6 @@ struct GraphReturnConversionPattern
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
-    llvm::dbgs() << " operands size: " << operands.size();
-    auto val = operands.front();
-    val.dump();
     mlir::Value retVal;
     auto definingOp = operands.front().getDefiningOp();
     if (llvm::isa<ath_rt::LaunchOp>(definingOp)) {

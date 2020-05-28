@@ -24,6 +24,7 @@ template <typename OpT> class OperationPass;
 std::unique_ptr<OperationPass<ModuleOp>> createDeployDefaultFunctionsPass();
 std::unique_ptr<OperationPass<ModuleOp>> createGraphRelationDestructorPass();
 std::unique_ptr<OperationPass<FuncOp>> createBarrierLegalizerPass();
+std::unique_ptr<OperationPass<FuncOp>> createLegalizeRTForLoweringPass();
 } // namespace mlir
 
 #endif // ATHENA_PASSES_H

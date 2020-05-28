@@ -554,7 +554,7 @@ class RuntimeToLLVM
     target.addLegalDialect<LLVM::LLVMDialect>();
     target.addLegalOp<ModuleOp>();
     target.addLegalOp<ModuleTerminatorOp>();
-    if (failed(applyPartialConversion(getOperation(), target, patterns))) {
+    if (failed(applyFullConversion(getOperation(), target, patterns))) {
       signalPassFailure();
     }
   }
