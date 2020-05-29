@@ -78,24 +78,21 @@ void AthenaJIT::setupMlirPassManager() {
 void AthenaJIT::compileModule() {
   auto res = mMlirPassManager.run(*mInternalModule);
   if (mlir::failed(res)) {
+    // todo throw a real error.
     ::llvm::errs() << "JIT error\n";
   }
 
-  mInternalModule->print(::llvm::dbgs());
-  // todo check result
-
   auto llvmModule = mlir::LLVM::ModuleTranslation::translateModule(
       mInternalModule->getOperation());
-  llvmModule->print(::llvm::dbgs(), nullptr);
 
   std::unique_ptr<LLVMContext> llvmCtx = std::make_unique<LLVMContext>();
   auto newModule =
       mlir::LLVM::cloneModuleIntoNewContext(llvmCtx.get(), llvmModule.get());
-  newModule->print(::llvm::dbgs(), nullptr);
 
   ThreadSafeModule tsm(std::move(newModule), std::move(llvmCtx));
   auto err = mJITInstance->addIRModule(std::move(tsm));
   if (err) {
+    // todo throw a real error.
     llvm_unreachable("Unexpected error");
   }
 }
