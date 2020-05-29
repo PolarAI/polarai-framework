@@ -55,12 +55,29 @@ struct NodeOpRewriter : mlir::ConversionPattern {
                   ConversionPatternRewriter& rewriter) const override {
     auto nodeOp = llvm::cast<ath_graph::NodeOp>(op);
 
+    auto oldArgsCount = nodeOp.getNumArguments();
     auto newType = rewriter.getFunctionType({}, nodeOp.getType().getResults());
-    nodeOp.setType(newType);
 
-    TypeConverter::SignatureConversion newSignature(nodeOp.getNumArguments());
+    auto newNode = nodeOp.clone();
+    newNode.setType(newType);
+    // auto newNode = rewriter.create<ath_graph::NodeOp>(
+    //     op->getLoc(), nodeOp.getName(), newType,
+    //     nodeOp
+    //         .getAttrOfType<IntegerAttr>(ath_graph::NodeOp::getNodeIdAttrName())
+    //         .getInt(),
+    //     nodeOp
+    //         .getAttrOfType<IntegerAttr>(
+    //             ath_graph::NodeOp::getClusterIdAttrName())
+    //         .getInt());
 
-    rewriter.applySignatureConversion(&nodeOp.getBody(), newSignature);
+    // rewriter.inlineRegionBefore(nodeOp.getBody(), newNode.getBody(),
+    //                             newNode.getBody().end());
+
+    rewriter.insert(newNode);
+    TypeConverter::SignatureConversion newSignature(oldArgsCount);
+
+    rewriter.applySignatureConversion(&newNode.getBody(), newSignature);
+    rewriter.eraseOp(nodeOp);
 
     return success();
   }
@@ -74,7 +91,6 @@ protected:
 
     // Step 1. Replace all arguments with tensor creation commands.
     module.walk([](ath_graph::EvalOp evalOp) {
-
       if (evalOp.getNumOperands()) {
         for (auto curOp : llvm::enumerate(evalOp.getOperands())) {
           auto operand = curOp.value();
@@ -104,12 +120,10 @@ protected:
     patterns.insert<NodeOpRewriter>(&getContext());
     patterns.insert<EvalOpRewriter>(&getContext());
     ConversionTarget target(getContext());
-    target.addDynamicallyLegalOp<ath_graph::EvalOp>([](ath_graph::EvalOp op) {
-      return op.getNumOperands() == 0;
-    });
-    target.addDynamicallyLegalOp<ath_graph::NodeOp>([](ath_graph::NodeOp op) {
-      return op.getType().getNumInputs() == 0;
-    });
+    target.addDynamicallyLegalOp<ath_graph::EvalOp>(
+        [](ath_graph::EvalOp op) { return op.getNumOperands() == 0; });
+    target.addDynamicallyLegalOp<ath_graph::NodeOp>(
+        [](ath_graph::NodeOp op) { return op.getType().getNumInputs() == 0; });
     if (failed(applyPartialConversion(getOperation(), target, patterns))) {
       signalPassFailure();
     }

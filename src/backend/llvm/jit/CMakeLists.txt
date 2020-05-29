@@ -20,6 +20,8 @@ llvm_map_components_to_libnames(llvm_libs
 target_include_directories(${AthenaJitTarget} PUBLIC 
                            ${PROJECT_BINARY_DIR}/utils/dialects/include
                            ${PROJECT_SOURCE_DIR}/utils/dialects/include)
+target_include_directories(${AthenaJitTarget} PUBLIC ${LLVM_INCLUDE_DIRS})
+target_compile_definitions(${AthenaJitTarget} PRIVATE ${LLVM_DEFINITIONS})
 target_link_libraries(${AthenaJitTarget} PUBLIC
                       ${llvm_libs}
                       MLIRIR

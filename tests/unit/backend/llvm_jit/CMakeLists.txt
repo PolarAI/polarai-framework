@@ -42,5 +42,6 @@ target_link_libraries(TestUnitJITRunnable PRIVATE
                       MLIRAthenaConversion
                       AthenaDep::googletest)
 target_include_directories(TestUnitJITRunnable PRIVATE
+                           ${LLVM_INCLUDE_DIRS}
                            ${PROJECT_BINARY_DIR}/utils/dialects/include
                            ${PROJECT_SOURCE_DIR}/utils/dialects/include)
