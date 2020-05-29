@@ -21,8 +21,12 @@ add_athena_executable(
         ${REG_TEST_SRC})
 
 target_include_directories(TestRegressionMLIRRunnable PRIVATE ${LLVM_INCLUDE_DIRS})
+get_property(dialect_libs GLOBAL PROPERTY MLIR_DIALECT_LIBS)
+get_property(conversion_libs GLOBAL PROPERTY MLIR_CONVERSION_LIBS)
 target_link_libraries(TestRegressionMLIRRunnable PRIVATE
         athena
+        ${dialect_libs}
+        ${conversion_libs}
         AthenaDep::googletest
         AthenaDep::effcee)
 

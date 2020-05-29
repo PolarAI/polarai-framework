@@ -7,7 +7,7 @@ class AthenaJIT {
 public:
   AthenaJIT(std::unique_ptr<::llvm::orc::LLJIT> jit);
 
-  static auto create() -> std::unique_ptr<AthenaJIT>;
+  static auto create() -> std::shared_ptr<AthenaJIT>;
 
   void addModule(const mlir::OwningModuleRef& ref);
   auto lookupSymbol(::llvm::StringRef symbolName) -> ::llvm::JITTargetAddress;

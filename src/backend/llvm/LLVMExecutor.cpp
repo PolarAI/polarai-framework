@@ -1,73 +1,61 @@
-/*
- * Copyright (c) 2019 Athena. All rights reserved.
- * https://getathena.ml
- *
- * Licensed under MIT license.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2020 Athena. All rights reserved.
+// https://getathena.ml
+//
+// Licensed under MIT license.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+//===----------------------------------------------------------------------===//
 
 #include "GraphPartitionPlanner.h"
-#include "LLVMGenerator.h"
 #include "allocators/LayerAllocator.h"
 #include "jit/AthenaJIT.h"
-#include "runtime/legacy_driver/runtime-driver.h"
 
 #include <athena/backend/llvm/LLVMExecutor.h>
+#include <athena/backend/llvm/CodeGen.h>
 #include <athena/core/graph/internal/GraphCompiler.h>
+#include <athena/core/Generator.h>
 #include <athena/utils/error/FatalError.h>
 
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/Support/Host.h"
+#include "mlir/IR/Builders.h"
+
 #include <algorithm>
-#include <athena/utils/error/FatalError.h>
+
+using namespace athena::core;
+
+template <typename FuncT, typename T> static FuncT* func_cast(T x) {
+  return reinterpret_cast<FuncT*>(static_cast<intptr_t>(x));
+}
 
 namespace athena::backend::llvm {
 
-void LLVMExecutor::setGraph(athena::core::Graph& graph) {
-  auto modules = compileGraph(graph);
+void LLVMExecutor::addGraph(Graph& graph) {
+  Generator generator;
 
-  // At the moment compileGraph method always returns exactly 1 module.
-  // That may change in future when we decide to go with a more complex
-  // structure of neural networks.
-  for (auto& module : modules) {
-    auto err = mJITCompiler->addModule(module);
-    if (err) {
-      utils::FatalError(utils::ATH_FATAL_OTHER, "Error adding module to JIT");
-    }
-  }
+  mlir::OpBuilder opBuilder(mJITCompiler->getContext());
+  auto module = opBuilder.create<mlir::ModuleOp>(opBuilder.getUnknownLoc());
+  mlir::OwningModuleRef ref(module);
+  opBuilder.setInsertionPointToStart(module.getBody());
+  populateCodeGenPatterns(generator, opBuilder);
 
-  // Prepare runtime library
-  auto& tmp = mRuntimeDriver->getModules();
-  for (auto& module : tmp) {
-    module->setDataLayout(mJITCompiler->getDataLayout()); // fixme hack
-    auto err = mJITCompiler->addModule(module);
-    if (err) {
-      new utils::FatalError(utils::ATH_FATAL_OTHER, "Unable to add module");
-    }
-  }
+  core::internal::GraphCompiler::compileForward(graph, generator);
+
+  mJITCompiler->addModule(ref);
 }
 
-void LLVMExecutor::evaluate() {
-  auto sym = mJITCompiler->lookup("evaluateGraph");
-  utils::athena_assert((bool)sym, "Failed to find evaluateGraph function. ",
-                       "Did you forget to set Graph?");
+void LLVMExecutor::evaluate(Graph& graph) {
+  auto sym = mJITCompiler->lookupSymbol(graph.getName().getString());
+  utils::athena_assert((bool)sym, "Failed to find graph function. ",
+                       "Did you forget to add Graph?");
 
-  auto evaluateFunction = (void (*)())(intptr_t)sym.get().getAddress();
-  evaluateFunction();
-}
-
-void LLVMExecutor::optimizeGraph() {
-  auto sym = mJITCompiler->lookup("optimizeGraph");
-  utils::athena_assert((bool)sym, "Failed to find optimizeGraph function. ",
-                       "Did you forget to set Graph?");
-
-  auto optimizeFunction = (void (*)())(intptr_t)sym.get().getAddress();
-  optimizeFunction();
+  auto evaluateFunction = func_cast<void(void*)>(sym);
+  evaluateFunction(nullptr);
 }
 
 LLVMExecutor::LLVMExecutor() : mJITCompiler(AthenaJIT::create()) {
@@ -76,52 +64,11 @@ LLVMExecutor::LLVMExecutor() : mJITCompiler(AthenaJIT::create()) {
                           "Unable to create JIT compiler");
   }
 
-  mRuntimeDriver =
-      std::make_unique<LegacyRuntimeDriver>(mJITCompiler->getContext());
-
-  // TODO better RT lib handling
-  auto libName = std::getenv("ATHENA_RT_LIBRARY");
-  mRuntimeDriver->load(libName);
-  utils::athena_assert(mRuntimeDriver->isLoaded(), "Failed to load runtime.");
-
   mAllocator = std::make_unique<LayerAllocator>();
 }
 
 llvm::BackendAllocator& LLVMExecutor::getAllocator() { return *mAllocator; }
 void LLVMExecutor::setAllocator(std::unique_ptr<BackendAllocator>& allocator) {
   mAllocator = std::move(allocator);
-}
-
-std::vector<std::unique_ptr<::llvm::Module>>
-LLVMExecutor::compileGraph(athena::core::Graph& graph) {
-  auto llvmModule = std::make_unique<::llvm::Module>(
-      graph.getName().getString(), mJITCompiler->getContext());
-
-  llvmModule->setDataLayout(mJITCompiler->getDataLayout());
-  // TODO get real target triple
-  llvmModule->setTargetTriple(::llvm::sys::getDefaultTargetTriple());
-
-  GraphPartitionPlanner planner(graph);
-  // todo do actual partitioning
-  DeviceContainer devices =
-      planner.getPartitionedDevices(mRuntimeDriver->getAvailableDevices());
-  auto partitioning = planner.getGraphPartitioning();
-
-  for (size_t idx = 0; idx < devices.count; idx++) {
-    mAllocator->registerDevice(devices.devices[idx]);
-  }
-
-  mRuntimeDriver->initializeContext(devices);
-
-  LLVMGenerator generator(mJITCompiler->getContext(), llvmModule, *mAllocator,
-                          mRuntimeDriver->getModules(), partitioning);
-
-  core::internal::GraphCompiler::compileForward(graph, generator);
-  core::internal::GraphCompiler::compileBackward(graph, generator);
-
-  std::vector<std::unique_ptr<::llvm::Module>> resultModules;
-  resultModules.push_back(std::move(llvmModule));
-
-  return resultModules;
 }
 } // namespace athena::backend::llvm

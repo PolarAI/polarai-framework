@@ -30,7 +30,7 @@ AthenaJIT::AthenaJIT(std::unique_ptr<::llvm::orc::LLJIT> jit)
     : mJITInstance(std::move(jit)), mMlirPassManager(&mContext) {
   setupMlirPassManager();
 };
-auto AthenaJIT::create() -> std::unique_ptr<AthenaJIT> {
+auto AthenaJIT::create() -> std::shared_ptr<AthenaJIT> {
   ::llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
   auto JIT = ExitOnErr(LLJITBuilder().create());
   JIT->getMainJITDylib().addGenerator(
@@ -38,7 +38,7 @@ auto AthenaJIT::create() -> std::unique_ptr<AthenaJIT> {
           ::llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(
               JIT->getDataLayout().getGlobalPrefix())));
 
-  return std::make_unique<AthenaJIT>(std::move(JIT));
+  return std::make_shared<AthenaJIT>(std::move(JIT));
 }
 
 void AthenaJIT::addModule(const mlir::OwningModuleRef& ref) {
