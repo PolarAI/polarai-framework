@@ -1,0 +1,17 @@
+#pragma once
+
+#include <vector>
+#include <string>
+
+constexpr static auto HasOpenCL = @ATH_HAS_OPENCL@;
+
+inline std::vector<std::string> getListOfLibraries() {
+  std::vector<std::string> libraries;
+
+  if constexpr (HasOpenCL) {
+    // fixme find a better way to extract libnames
+    libraries.emplace_back("lib@ATH_RT_LLVM_OCL@.so");
+  }
+
+  return libraries;
+}    

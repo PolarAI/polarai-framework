@@ -69,6 +69,7 @@ if (NOT ATHENA_DOCS_ONLY)
     add_subdirectory(utils/dialects)
     add_subdirectory(utils/debugger)
     add_subdirectory(src)
+    add_subdirectory(utils/lsdevice)
 
     if (NOT ATHENA_DISABLE_TESTS)
         add_subdirectory(tests)

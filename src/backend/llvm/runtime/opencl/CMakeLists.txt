@@ -1,4 +1,5 @@
 set(ATH_RT_LLVM_OCL "AthenaLLVMOCLRT" CACHE STRING "" FORCE)
+set(ATH_HAS_OPENCL "true" CACHE STRING "" FORCE)
 add_athena_library(${ATH_RT_LLVM_OCL} MODULE
         ATH_RT_LLVM # export name
         backend/llvm/runtime/runtime_export.h # export file name
