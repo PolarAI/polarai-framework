@@ -28,14 +28,17 @@ include(AddMLIR)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
-add_subdirectory(runtime/driver)
 add_subdirectory(runtime/support)
 add_subdirectory(jit)
 
 find_package(OpenCL)
 if (${OpenCL_FOUND})
     add_subdirectory(runtime/opencl)
+else()
+    set(ATH_HAS_OPENCL "false" CACHE STRING "" FORCE)
 endif ()
+
+add_subdirectory(runtime/driver)
 
 add_athena_library(${ATH_BACKEND_LLVM} STATIC
         ATH_BACKEND_LLVM # export name
