@@ -31,7 +31,12 @@ AthenaJIT::AthenaJIT(std::unique_ptr<::llvm::orc::LLJIT> jit)
   setupMlirPassManager();
 };
 auto AthenaJIT::create() -> std::unique_ptr<AthenaJIT> {
+  ::llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
   auto JIT = ExitOnErr(LLJITBuilder().create());
+  JIT->getMainJITDylib().addGenerator(
+      ::llvm::cantFail(
+          ::llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(
+              JIT->getDataLayout().getGlobalPrefix())));
 
   return std::make_unique<AthenaJIT>(std::move(JIT));
 }
@@ -79,19 +84,19 @@ void AthenaJIT::compileModule() {
   mInternalModule->print(::llvm::dbgs());
   // todo check result
 
-  auto llvmModule =
-  mlir::LLVM::ModuleTranslation::translateModule(mInternalModule->getOperation());
+  auto llvmModule = mlir::LLVM::ModuleTranslation::translateModule(
+      mInternalModule->getOperation());
   llvmModule->print(::llvm::dbgs(), nullptr);
 
   std::unique_ptr<LLVMContext> llvmCtx = std::make_unique<LLVMContext>();
   auto newModule =
-  mlir::LLVM::cloneModuleIntoNewContext(llvmCtx.get(), llvmModule.get());
+      mlir::LLVM::cloneModuleIntoNewContext(llvmCtx.get(), llvmModule.get());
   newModule->print(::llvm::dbgs(), nullptr);
 
   ThreadSafeModule tsm(std::move(newModule), std::move(llvmCtx));
   auto err = mJITInstance->addIRModule(std::move(tsm));
   if (err) {
-  llvm_unreachable("Unexpected error");
+    llvm_unreachable("Unexpected error");
   }
 }
 } // namespace athena::backend::llvm
