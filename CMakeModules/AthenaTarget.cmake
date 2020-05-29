@@ -21,7 +21,6 @@ function(add_athena_library target_name modifier export_name export_header_name)
 
     set_target_properties(${target_name} PROPERTIES
                 BUILD_RPATH "${CMAKE_BUILD_RPATH};${PROJECT_BINARY_DIR}/lib"
-#                BUILD_WITH_INSTALL_RPATH ON
                 LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib 
                 RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
@@ -36,7 +35,6 @@ function(add_athena_executable target_name)
     athena_disable_exceptions(${target_name})
     set_target_properties(${target_name} PROPERTIES
                 BUILD_RPATH "${CMAKE_BUILD_RPATH};${PROJECT_BINARY_DIR}/lib"
-#                BUILD_WITH_INSTALL_RPATH ON
                 RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 endfunction()
 
