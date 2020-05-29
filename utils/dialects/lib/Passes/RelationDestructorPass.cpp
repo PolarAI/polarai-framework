@@ -60,18 +60,6 @@ struct NodeOpRewriter : mlir::ConversionPattern {
 
     auto newNode = nodeOp.clone();
     newNode.setType(newType);
-    // auto newNode = rewriter.create<ath_graph::NodeOp>(
-    //     op->getLoc(), nodeOp.getName(), newType,
-    //     nodeOp
-    //         .getAttrOfType<IntegerAttr>(ath_graph::NodeOp::getNodeIdAttrName())
-    //         .getInt(),
-    //     nodeOp
-    //         .getAttrOfType<IntegerAttr>(
-    //             ath_graph::NodeOp::getClusterIdAttrName())
-    //         .getInt());
-
-    // rewriter.inlineRegionBefore(nodeOp.getBody(), newNode.getBody(),
-    //                             newNode.getBody().end());
 
     rewriter.insert(newNode);
     TypeConverter::SignatureConversion newSignature(oldArgsCount);

@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "../utils/LaunchCommand.h"
+#include "../utils/TensorInfo.h"
 #include "Passes/Passes.h"
 
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
@@ -38,7 +39,7 @@ protected:
       SmallVector<LLVM::LLVMType, 3> args;
       args.push_back(voidPtrTy); // GraphHandle
       args.push_back(voidPtrTy); // Device
-      args.push_back(voidPtrTy); // Tensor
+      args.push_back(getTensorInfoType(llvmDialect).getPointerTo()); // Tensor
 
       auto funcTy = LLVM::LLVMType::getFunctionTy(
           LLVM::LLVMType::getVoidTy(llvmDialect), args, false);
@@ -51,7 +52,7 @@ protected:
       SmallVector<LLVM::LLVMType, 4> args;
       args.push_back(voidPtrTy);                               // GraphHandle
       args.push_back(voidPtrTy);                               // Device
-      args.push_back(voidPtrTy);                               // Tensor
+      args.push_back(getTensorInfoType(llvmDialect).getPointerTo());          // Tensor
       args.push_back(LLVM::LLVMType::getInt32Ty(llvmDialect)); // Lock type
 
       auto funcTy = LLVM::LLVMType::getFunctionTy(
@@ -73,18 +74,20 @@ protected:
       SmallVector<LLVM::LLVMType, 2> args;
       args.push_back(voidPtrTy);                               // GraphHandle
       args.push_back(LLVM::LLVMType::getInt64Ty(llvmDialect)); // NodeId
-      args.push_back(voidPtrTy);                               // Tensor
+      args.push_back(getTensorInfoType(llvmDialect).getPointerTo()); // Tensor
 
-      auto funcTy = LLVM::LLVMType::getFunctionTy(LLVM::LLVMType::getVoidTy(llvmDialect), args, false);
+      auto funcTy = LLVM::LLVMType::getFunctionTy(
+                           LLVM::LLVMType::getVoidTy(llvmDialect), args, false);
       builder.create<mlir::LLVM::LLVMFuncOp>(builder.getUnknownLoc(),
                                              "ath_load", funcTy);
     }
     {
       SmallVector<LLVM::LLVMType, 2> args;
       args.push_back(LLVM::LLVMType::getInt64Ty(llvmDialect)); // Count
-      args.push_back(voidPtrTy);                               // Events
+      args.push_back(voidPtrTy.getPointerTo());                // Events
 
-      auto funcTy = LLVM::LLVMType::getFunctionTy(LLVM::LLVMType::getVoidTy(llvmDialect), args, false);
+      auto funcTy = LLVM::LLVMType::getFunctionTy(
+                           LLVM::LLVMType::getVoidTy(llvmDialect), args, false);
       builder.create<mlir::LLVM::LLVMFuncOp>(builder.getUnknownLoc(),
                                              "ath_barrier", funcTy);
     }

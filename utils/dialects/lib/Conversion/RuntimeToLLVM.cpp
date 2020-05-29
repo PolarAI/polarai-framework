@@ -72,8 +72,8 @@ static void setArrayEltTo(Value arrayAlloca, Value value, unsigned index,
       createUInt32Constant(index, &arrayType.getDialect(), rewriter, loc);
 
   auto eltPtr =
-      rewriter.create<LLVM::GEPOp>(loc, arrayType.getPointerElementTy(),
-                                   arrayAlloca, ValueRange{zero, idxConst});
+      rewriter.create<LLVM::GEPOp>(loc, arrayType,
+                                   arrayAlloca, ValueRange{idxConst});
   rewriter.create<LLVM::StoreOp>(loc, value, eltPtr);
 }
 
@@ -169,7 +169,7 @@ struct CreateTensorOpLoweringPattern
                                      rewriter, op->getLoc());
     setStructFieldTo(tensorInfo, getTensorInfoType(llvmDialect), dims, 2,
                      rewriter, op->getLoc());
-    auto arr = createArray(LLVM::LLVMType::getInt32Ty(llvmDialect),
+    auto arr = createArray(LLVM::LLVMType::getInt64Ty(llvmDialect),
                            tensorType.getRank(), rewriter, op->getLoc());
     for (auto dim : llvm::enumerate(tensorType.getShape())) {
       auto dimConst = createUInt64Constant(dim.value(), llvmDialect, rewriter,
@@ -285,7 +285,7 @@ struct BarrierOpLoweringPattern
 
     auto callee = module.lookupSymbol<LLVM::LLVMFuncOp>("ath_barrier");
 
-    auto numEvents = createUInt32Constant(concreteOp.getNumOperands(),
+    auto numEvents = createUInt64Constant(concreteOp.getNumOperands(),
                                           llvmDialect, rewriter,
                                           op->getLoc());
 
@@ -399,7 +399,7 @@ struct LaunchOpLoweringPattern
 
     concreteOp.getResult(0).replaceAllUsesWith(operands.back());
 
-    auto argsArray = createArray(getArgDescType(llvmDialect),
+    auto argsArray = createArray(getArgDescType(llvmDialect).getPointerTo(),
                                  operands.size() - 3, rewriter, op->getLoc());
 
     auto argsOperands =
@@ -437,7 +437,8 @@ struct LaunchOpLoweringPattern
             valAlloc);
         setStructFieldTo(argDesc, getArgDescType(llvmDialect), bitcastArg, 1,
                          rewriter, op->getLoc());
-        setStructFieldTo(argDesc, getArgDescType(llvmDialect), one, 2, rewriter,
+        auto one32 = createUInt32Constant(1, llvmDialect, rewriter, op->getLoc());
+        setStructFieldTo(argDesc, getArgDescType(llvmDialect), one32, 2, rewriter,
                          op->getLoc());
       }
       setArrayEltTo(argsArray, argDesc, operand.index(), rewriter,
@@ -448,7 +449,7 @@ struct LaunchOpLoweringPattern
                                            rewriter, op->getLoc());
 
     // Set kernel name
-    llvm::Twine kernelNameTwine = concreteOp.kernel() + "\0";
+    llvm::Twine kernelNameTwine = concreteOp.kernel() + "\0\0";
     std::string kernelNameStr = kernelNameTwine.str();
 
     Operation* globalString =
@@ -469,8 +470,9 @@ struct LaunchOpLoweringPattern
     }
     auto kerNameGlobalAddr =
         rewriter.create<LLVM::AddressOfOp>(op->getLoc(), kernelNameVal);
+    auto kerNamePtr = rewriter.create<LLVM::BitcastOp>(op->getLoc(), LLVM::LLVMType::getInt8Ty(llvmDialect).getPointerTo(), kerNameGlobalAddr);
     setStructFieldTo(launchCommand, getLaunchCommandType(llvmDialect),
-                     kerNameGlobalAddr, 0, rewriter, op->getLoc());
+                     kerNamePtr, 0, rewriter, op->getLoc());
 
     // Set kernel arg count
     auto argCount = createUInt64Constant(operands.size() - 3, llvmDialect,

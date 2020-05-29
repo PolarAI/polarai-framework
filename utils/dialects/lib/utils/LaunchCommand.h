@@ -34,11 +34,11 @@ getLaunchCommandType(mlir::LLVM::LLVMDialect* llvmDialect) {
 
   LLVM::LLVMType argDescTy = getArgDescType(llvmDialect);
   auto kernelNameTy = LLVM::LLVMType::getInt8Ty(llvmDialect).getPointerTo();
-  auto argsCountTy = LLVM::LLVMType::getInt32Ty(llvmDialect);
-  auto argsTy = argDescTy.getPointerTo();
-  auto workDimTy = LLVM::LLVMType::getIntNTy(llvmDialect, sizeof(size_t) * 8);
+  auto argsCountTy = LLVM::LLVMType::getInt64Ty(llvmDialect);
+  auto argsTy = argDescTy.getPointerTo().getPointerTo();
+  auto workDimTy = LLVM::LLVMType::getInt64Ty(llvmDialect);
   auto dimSizeTy =
-      LLVM::LLVMType::getIntNTy(llvmDialect, sizeof(size_t) * 8).getPointerTo();
+      LLVM::LLVMType::getInt64Ty(llvmDialect).getPointerTo();
   return LLVM::LLVMType::getStructTy(kernelNameTy, argsCountTy, argsTy,
                                      workDimTy, dimSizeTy, dimSizeTy);
 }
