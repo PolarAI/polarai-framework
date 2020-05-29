@@ -55,22 +55,6 @@ protected:
         dynLib.getAddressOfSymbol("getAvailableDevices");
     getAvailableDevicesFunc =
         reinterpret_cast<getAvailableDevicesPtr>(getAvailableDevicesRaw);
-
-    void* initializeContextRaw = dynLib.getAddressOfSymbol("initializeContext");
-    initializeContextFunc =
-        reinterpret_cast<initContextPtr>(initializeContextRaw);
-
-    void* releaseContextRaw = dynLib.getAddressOfSymbol("releaseContext");
-    releaseContextFunc = reinterpret_cast<releaseContextPtr>(releaseContextRaw);
-
-    void* addProgramsRaw = dynLib.getAddressOfSymbol("addProgram");
-    addProgramFunc = reinterpret_cast<addProgramPtr>(addProgramsRaw);
-
-    void* linkProgramsRaw = dynLib.getAddressOfSymbol("linkPrograms");
-    linkProgramFunc = reinterpret_cast<linkProgramsPtr>(linkProgramsRaw);
-
-    void* launchRaw = dynLib.getAddressOfSymbol("launch");
-    launchFunc = reinterpret_cast<launchPtr>(launchRaw);
   }
 
 public:

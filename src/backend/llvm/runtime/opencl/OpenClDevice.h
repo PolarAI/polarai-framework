@@ -1,3 +1,16 @@
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2020 Athena. All rights reserved.
+// https://getathena.ml
+//
+// Licensed under MIT license.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+//===----------------------------------------------------------------------===//
+
 #ifndef ATHENA_OPENCLDEVICE_H
 #define ATHENA_OPENCLDEVICE_H
 
@@ -87,6 +100,11 @@ public:
 
   void setLinkedProgram(cl_program program) { mLinkedProgram = program; }
   cl_program getLinkedProgram() { return mLinkedProgram; }
+
+  Event* launch(BackendAllocator&, LaunchCommand&, Event*) override;
+
+  void addModule(ProgramDesc prog) override;
+  void linkModules() override;
 
 private:
   cl_device_id mClDeviceId;
