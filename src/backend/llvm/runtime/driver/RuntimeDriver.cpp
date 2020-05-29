@@ -7,8 +7,6 @@
 
 namespace athena::backend::llvm {
 RuntimeDriver::RuntimeDriver() {
-  ::llvm::sys::DynamicLibrary::SearchOrder =
-      ::llvm::sys::DynamicLibrary::SO_LoadedFirst;
   auto libraries = getListOfLibraries();
 
   for (auto lib : libraries) {
