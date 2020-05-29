@@ -99,9 +99,7 @@ static GenNode createInputNode(Context& ctx, std::string_view name,
   return node;
 }
 
-TEST(MLIRRegression, BasicIR) {
-  mlir::registerAllDialects();
-
+TEST(MLIRRegression, DISABLED_BasicIR) {
   mlir::MLIRContext context;
   mlir::OpBuilder builder(&context);
   auto module = builder.create<mlir::ModuleOp>(builder.getUnknownLoc());
