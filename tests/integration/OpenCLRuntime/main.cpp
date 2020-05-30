@@ -14,33 +14,22 @@
 #include <athena/backend/llvm/runtime/api.h>
 #include <gtest/gtest.h>
 #include <llvm/Support/DynamicLibrary.h>
+#include "../../../src/backend/llvm/allocators/LayerAllocator.h"
+#include <athena/backend/llvm/runtime/LaunchCommand.h>
+#include <athena/core/context/Context.h>
 
 #ifdef __APPLE__
 #include <OpenCL/cl.h>
 #else
-#include "../../../src/backend/llvm/allocators/LayerAllocator.h"
 #include <CL/cl.h>
-#include <athena/core/context/Context.h>
 #endif
 
 using initContextPtr = void (*)(athena::backend::llvm::DeviceContainer);
-using releaseContextPtr = void (*)();
 using getAvailableDevicesPtr = athena::backend::llvm::DeviceContainer (*)();
-using addProgramPtr = void (*)(athena::backend::llvm::Device*, ProgramDesc);
-using linkProgramsPtr = void (*)(athena::backend::llvm::Device*);
-using launchPtr = void (*)(athena::backend::llvm::Device*,
-                           athena::backend::llvm::BackendAllocator*,
-                           LaunchCommand);
 
 class RuntimeTestBase : public testing::Test {
 protected:
   getAvailableDevicesPtr getAvailableDevicesFunc{};
-  initContextPtr initializeContextFunc;
-  releaseContextPtr releaseContextFunc;
-
-  addProgramPtr addProgramFunc;
-  linkProgramsPtr linkProgramFunc;
-  launchPtr launchFunc;
 
   void SetUp() override {
     std::string errStr;
@@ -107,13 +96,12 @@ TEST_F(OpenCLRuntimeTest, ExecutesSimpleKernel) {
   using namespace athena::backend::llvm;
 
   auto deviceContainer = getAvailableDevicesFunc();
-  // fixme either implement or remove this method from API.
-  // initializeContextFunc(deviceContainer);
 
   for (size_t i = 0; i < deviceContainer.count; i++) {
     LayerAllocator allocator;
+    Device& device = deviceContainer.devices[i];
 
-    allocator.registerDevice(deviceContainer.devices[i]);
+    allocator.registerDevice(device);
 
     Context ctx;
     auto ctxInternalPtr = ctx.internal();
@@ -136,8 +124,8 @@ TEST_F(OpenCLRuntimeTest, ExecutesSimpleKernel) {
     programDesc.length = program.size();
     programDesc.type = ProgramDesc::TEXT;
 
-    addProgramFunc(&deviceContainer.devices[i], programDesc);
-    linkProgramFunc(&deviceContainer.devices[i]);
+    device.addModule(programDesc);
+    device.linkModules();
 
     float b = 10;
 
@@ -160,8 +148,8 @@ TEST_F(OpenCLRuntimeTest, ExecutesSimpleKernel) {
     command.localSize = &count;
 
     allocator.lock(tensor, deviceContainer.devices[i], LockType::READ_WRITE);
-    launchFunc(&deviceContainer.devices[i], &allocator, command);
-    deviceContainer.devices[i].getQueue().wait();
+    device.launch(allocator, command, nullptr);
+    device.getQueue().wait();
     allocator.release(tensor, deviceContainer.devices[i]);
 
     allocator.lock(tensor, LockType::READ);
