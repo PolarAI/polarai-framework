@@ -36,9 +36,10 @@ public:
   createResultTensor(utils::SharedPtr<ContextInternal> context,
                      std::vector<TensorInternal*> tensorIndexes) const = 0;
 
-  virtual void gen(utils::SharedPtr<ContextInternal> context,
-                   core::internal::Generator& generator,
-                   std::vector<utils::Index>& operationArguments) const = 0;
+  virtual GenValue gen(utils::SharedPtr<ContextInternal> context,
+                       core::internal::Generator& generator,
+                       std::vector<utils::Index>& operationArguments,
+                       GenNode parentNode) const = 0;
 
   virtual std::tuple<utils::Index, std::vector<core::internal::Edge>,
                      std::vector<utils::Index>>

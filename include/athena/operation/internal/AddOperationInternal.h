@@ -34,9 +34,11 @@ public:
                      std::vector<core::internal::TensorInternal*> tensorIndexes)
       const override;
 
-  void gen(utils::SharedPtr<core::internal::ContextInternal> context,
-           core::internal::Generator& generator,
-           std::vector<utils::Index>& operationArguments) const override;
+  core::internal::GenValue
+  gen(utils::SharedPtr<core::internal::ContextInternal> context,
+      core::internal::Generator& generator,
+      std::vector<utils::Index>& operationArguments,
+      core::internal::GenNode parentNode) const override;
 
   // output node and edges of generated graph
   std::tuple<utils::Index, std::vector<core::internal::Edge>,

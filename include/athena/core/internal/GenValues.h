@@ -27,9 +27,10 @@ public:
   virtual auto getBatchIndex() -> GenValue = 0;
 };
 class GenValue {
-  std::shared_ptr<internal::GenValueImplBase> mValue;
+  std::shared_ptr<internal::GenValueImplBase> mValue{};
 
 public:
+  GenValue() = default;
   GenValue(std::shared_ptr<internal::GenValueImplBase> val)
       : mValue(std::move(val)) {}
   template <typename T> auto value() const -> T& {
@@ -38,9 +39,10 @@ public:
 };
 
 class GenNode {
-  std::shared_ptr<internal::GenNodeImplBase> mNode;
+  std::shared_ptr<internal::GenNodeImplBase> mNode{};
 
 public:
+  GenNode() = default;
   GenNode(std::shared_ptr<internal::GenNodeImplBase> node)
       : mNode(std::move(node)) {}
   template <typename T> auto node() const -> T& {
@@ -52,9 +54,10 @@ public:
 };
 
 class GenInsertionPoint {
-  std::shared_ptr<internal::GenInsPointImplBase> mPoint;
+  std::shared_ptr<internal::GenInsPointImplBase> mPoint{};
 
 public:
+  GenInsertionPoint() = default;
   GenInsertionPoint(std::shared_ptr<internal::GenInsPointImplBase> point)
       : mPoint(std::move(point)) {}
   template <typename T> auto point() const -> T& {
@@ -63,9 +66,10 @@ public:
 };
 
 class GenGraph {
-  std::shared_ptr<internal::GenGraphImplBase> mGraph;
+  std::shared_ptr<internal::GenGraphImplBase> mGraph{};
 
 public:
+  GenGraph() = default;
   GenGraph(std::shared_ptr<internal::GenGraphImplBase> graph)
       : mGraph(std::move(graph)) {}
   template <typename T> auto graph() -> T& {

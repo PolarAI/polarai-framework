@@ -44,7 +44,7 @@ void LLVMExecutor::addGraph(Graph& graph) {
   opBuilder.setInsertionPointToStart(module.getBody());
   populateCodeGenPatterns(generator, opBuilder);
 
-  core::internal::GraphCompiler::compileForward(graph, generator);
+  core::internal::GraphCompiler::compile(graph, generator);
 
   mJITCompiler->addModule(ref);
 }

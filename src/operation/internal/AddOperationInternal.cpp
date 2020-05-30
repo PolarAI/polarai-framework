@@ -35,11 +35,13 @@ utils::Index AddOperationInternal::createResultTensor(
       context, context->getNextPublicIndex(), dataType, std::move(tensorShape));
 }
 
-void AddOperationInternal::gen(
+core::internal::GenValue AddOperationInternal::gen(
     utils::SharedPtr<core::internal::ContextInternal> context,
     core::internal::Generator& generator,
-    std::vector<utils::Index>& operationArguments) const {
+    std::vector<utils::Index>& operationArguments,
+    core::internal::GenNode) const {
   // TODO call generator
+  return core::internal::GenValue{};
 }
 
 std::tuple<utils::Index, std::vector<core::internal::Edge>,
