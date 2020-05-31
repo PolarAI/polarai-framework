@@ -24,7 +24,6 @@
 #include <CL/cl.h>
 #endif
 
-using initContextPtr = void (*)(athena::backend::llvm::DeviceContainer);
 using getAvailableDevicesPtr = athena::backend::llvm::DeviceContainer (*)();
 
 class RuntimeTestBase : public testing::Test {

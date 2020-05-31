@@ -40,7 +40,7 @@ auto OpenCLDevice::launch(BackendAllocator& allocator, LaunchCommand& cmd,
   }
 
   cl_event* evt = nullptr;
-  cl_event* outEvent = nullptr;
+  cl_event outEvent;
   cl_uint evtCount = 0;
 
   if (oclEvent) {
@@ -49,15 +49,19 @@ auto OpenCLDevice::launch(BackendAllocator& allocator, LaunchCommand& cmd,
   }
 
   // todo check errors.
-  clEnqueueNDRangeKernel(mQueue->getNativeQueue(), kernel, cmd.workDim,
+  auto err = clEnqueueNDRangeKernel(mQueue->getNativeQueue(), kernel, cmd.workDim,
                          nullptr, // global offset
                          cmd.globalSize, cmd.localSize,
                          evtCount, // num events in wait list
                          evt,      // event list
-                         outEvent  // event
+                         &outEvent  // event
   );
 
-  return new OpenCLEvent(*outEvent);
+  if (err != CL_SUCCESS) {
+    std::terminate();
+  }
+
+  return new OpenCLEvent(outEvent);
 }
 
 void OpenCLDevice::addModule(ProgramDesc prog) {
