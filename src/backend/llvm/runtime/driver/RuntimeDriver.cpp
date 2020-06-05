@@ -13,7 +13,7 @@ RuntimeDriver::RuntimeDriver() {
   for (const auto& lib : libraries) {
     std::string errMsg;
     ::llvm::sys::DynamicLibrary dynLib =
-        ::llvm::sys::DynamicLibrary::getPermanentLibrary("/home/alex/Projects/athena_workspace/athena/build/lib/libAthenaLLVMOCLRT.so", &errMsg);
+        ::llvm::sys::DynamicLibrary::getPermanentLibrary(lib, &errMsg);
     if (!dynLib.isValid()) {
       // fixme use Athena logger
       ::llvm::errs() << "Warning: failed to load " << lib << "\n";
