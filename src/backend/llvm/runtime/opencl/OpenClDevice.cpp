@@ -22,8 +22,6 @@
 namespace athena::backend::llvm {
 auto OpenCLDevice::launch(BackendAllocator& allocator, LaunchCommand& cmd,
                           Event* event) -> Event* {
-
-  // auto& queue = static_cast<OpenClQueue&>(oclDevice->getQueue());
   auto oclEvent = static_cast<OpenCLEvent*>(event);
 
   cl_int err;
@@ -65,9 +63,6 @@ auto OpenCLDevice::launch(BackendAllocator& allocator, LaunchCommand& cmd,
                          &outEvent  // event
   );
 
-
-  // FIXME hacky hack to avoid early memory freeing.
-  clWaitForEvents(1, &outEvent);
 
   if (err != CL_SUCCESS) {
     std::terminate();

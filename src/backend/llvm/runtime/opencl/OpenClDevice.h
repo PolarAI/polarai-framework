@@ -26,6 +26,8 @@
 #include <CL/cl.h>
 #endif
 
+#include <string>
+
 namespace athena::backend::llvm {
 class ATH_RT_LLVM_EXPORT OpenCLDevice : public Device {
 public:
