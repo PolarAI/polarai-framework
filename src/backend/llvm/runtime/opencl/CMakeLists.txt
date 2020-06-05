@@ -5,6 +5,7 @@ add_athena_library(${ATH_RT_LLVM_OCL} MODULE
         backend/llvm/runtime/runtime_export.h # export file name
         api.cpp
         OpenClDevice.cpp
+        OpenClEvent.cpp
         BufferAllocator.cpp)
 target_compile_definitions(${ATH_RT_LLVM_OCL} PRIVATE CL_TARGET_OPENCL_VERSION=220)
 

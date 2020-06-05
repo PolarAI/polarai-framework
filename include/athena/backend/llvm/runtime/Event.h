@@ -17,6 +17,7 @@ namespace athena::backend::llvm {
 class Device;
 class Event {
 public:
+  virtual ~Event() = default;
   virtual void wait() = 0;
   virtual void addCallback(std::function<void()>) = 0;
   virtual auto getDevice() -> Device* = 0;

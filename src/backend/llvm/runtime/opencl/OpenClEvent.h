@@ -18,12 +18,13 @@
 #endif
 
 #include <athena/backend/llvm/runtime/Event.h>
+#include <athena/backend/llvm/runtime/runtime_export.h>
 
 namespace athena::backend::llvm {
 class OpenCLDevice;
 void eventCallback(cl_event event, cl_int eventCommandStatus, void* userData);
 
-class OpenCLEvent final : public Event {
+class ATH_RT_LLVM_EXPORT OpenCLEvent final : public Event {
 public:
   explicit OpenCLEvent(OpenCLDevice* dev, cl_event evt);
 
