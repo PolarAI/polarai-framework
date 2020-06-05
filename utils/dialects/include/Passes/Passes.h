@@ -25,6 +25,7 @@ std::unique_ptr<OperationPass<ModuleOp>> createDeployDefaultFunctionsPass();
 std::unique_ptr<OperationPass<ModuleOp>> createGraphRelationDestructorPass();
 std::unique_ptr<OperationPass<FuncOp>> createBarrierLegalizerPass();
 std::unique_ptr<OperationPass<FuncOp>> createLegalizeRTForLoweringPass();
+auto createReleaseDependencyPass() -> std::unique_ptr<OperationPass<FuncOp>>;
 } // namespace mlir
 
 #endif // ATHENA_PASSES_H

@@ -73,7 +73,7 @@ auto OpenCLDevice::launch(BackendAllocator& allocator, LaunchCommand& cmd,
     std::terminate();
   }
 
-  return new OpenCLEvent(outEvent);
+  return new OpenCLEvent(this, outEvent);
 }
 
 void OpenCLDevice::addModule(ProgramDesc prog) {
@@ -124,5 +124,10 @@ void OpenCLDevice::linkModules() {
     std::terminate();
   }
   setLinkedProgram(prog);
+}
+
+void OpenCLDevice::consumeEvent(Event* evt) {
+  auto concrete = static_cast<OpenCLEvent*>(evt);
+  delete concrete;
 }
 } // namespace athena::backend::llvm

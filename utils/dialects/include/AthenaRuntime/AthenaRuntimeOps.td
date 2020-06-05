@@ -47,7 +47,8 @@ def AthenaRuntime_LockOp : AthenaRuntime_Op<"lock"> {
 def AthenaRuntime_ReleaseOp : AthenaRuntime_Op<"release"> {
   let summary = "Indicates that tensor memory can be freed";
 
-  let arguments = (ins AthenaRuntime_DeviceType:$device, AnyTensor:$tensor);
+  let arguments = (ins AthenaRuntime_DeviceType:$device, AnyTensor:$tensor,
+                   Variadic<AthenaRuntime_EventType>:$event);
 }
 
 def AthenaRuntime_BarrierOp : AthenaRuntime_Op<"barrier"> {

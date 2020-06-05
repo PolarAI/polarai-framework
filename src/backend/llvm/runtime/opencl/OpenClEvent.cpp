@@ -11,14 +11,22 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include <functional>
+#include "OpenClEvent.h"
+#include "OpenClDevice.h"
 
 namespace athena::backend::llvm {
-class Device;
-class Event {
-public:
-  virtual void wait() = 0;
-  virtual void addCallback(std::function<void()>) = 0;
-  virtual auto getDevice() -> Device* = 0;
+void eventCallback(cl_event event, cl_int eventCommandStatus, void* userData) {
+  auto* athEvent = static_cast<athena::backend::llvm::OpenCLEvent*>(userData);
+  if (eventCommandStatus == CL_COMPLETE) {
+    for (auto& callback : athEvent->mCallbacks) {
+      callback();
+    }
+  }
+}
+OpenCLEvent::OpenCLEvent(OpenCLDevice* device, cl_event evt)
+    : mDevice(device), mEvent(evt) {
+  clSetEventCallback(evt, CL_COMPLETE, eventCallback, this);
 };
+void OpenCLEvent::wait() { clWaitForEvents(1, &mEvent); }
+auto OpenCLEvent::getDevice() -> Device* { return mDevice; };
 } // namespace athena::backend::llvm

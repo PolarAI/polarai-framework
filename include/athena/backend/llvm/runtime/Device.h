@@ -64,6 +64,8 @@ public:
 
   virtual void addModule(ProgramDesc) = 0;
   virtual void linkModules() = 0;
+
+  virtual void consumeEvent(Event*) = 0;
 };
 } // namespace athena::backend::llvm
 

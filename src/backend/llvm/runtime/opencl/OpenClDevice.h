@@ -104,6 +104,8 @@ public:
   void addModule(ProgramDesc prog) override;
   void linkModules() override;
 
+  void consumeEvent(Event*) override;
+
 private:
   cl_device_id mClDeviceId;
   cl_context mContext;
