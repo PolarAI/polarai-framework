@@ -30,7 +30,7 @@ using namespace athena::core;
 using namespace athena::operation;
 using namespace athena::backend::llvm;
 
-TEST(JITIntegration, DISABLED_AddOperationSample) {
+TEST(JITIntegration, AddOperationSample) {
   Context context;
 
   auto graph = context.create<Graph>("mainGraph");

@@ -102,6 +102,7 @@ void AthenaJIT::setupMlirPassManager() {
   mMlirPassManager.addPass(mlir::createLowerGraphToRuntimePass());
   auto& funcOpt = mMlirPassManager.nest<mlir::FuncOp>();
   funcOpt.addPass(mlir::createBarrierLegalizerPass());
+  funcOpt.addPass(mlir::createReleaseDependencyPass());
   funcOpt.addPass(mlir::createLegalizeRTForLoweringPass());
   mMlirPassManager.addPass(mlir::createDeployDefaultFunctionsPass());
   mMlirPassManager.addPass(mlir::createLowerRuntimeToLLVMPass());

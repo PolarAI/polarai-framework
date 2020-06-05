@@ -3,6 +3,7 @@ add_mlir_conversion_library(MLIRAthenaPasses
         DeployDefaultFunctions.cpp
         BarrierLegalizerPass.cpp
         LegalizeRTForLoweringPass.cpp
+        ReleaseDependencyPass.cpp
 
         ADDITIONAL_HEADER_DIRS
         ${PROJECT_SOURCE_DIR}/include/

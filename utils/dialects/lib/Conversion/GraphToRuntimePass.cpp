@@ -149,7 +149,8 @@ struct ReleaseOpConversionPattern
 
     auto device = rewriter.create<ath_rt::DeviceSelectOp>(
         op->getLoc(), deviceType, nodeIdAttr);
-    rewriter.replaceOpWithNewOp<ath_rt::ReleaseOp>(op, device, operands[0]);
+    rewriter.replaceOpWithNewOp<ath_rt::ReleaseOp>(op, device, operands[0],
+                                                   ValueRange{});
 
     return success();
   }

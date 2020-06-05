@@ -55,9 +55,8 @@ protected:
 
       auto sortedTensors = mlir::topologicalSort(children);
 
-      auto lastLaucnh = llvm::cast<ath_rt::LaunchOp>(sortedTensors.back());
-
-      op.event().push_pack(lastLaucnh.out_event());
+      auto lastLaunch = llvm::cast<ath_rt::LaunchOp>(sortedTensors.back());
+      op.eventMutable().append(lastLaunch.out_event());
     });
   }
 };
