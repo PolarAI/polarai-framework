@@ -4,22 +4,16 @@
 #include <athena/backend/llvm/runtime/Device.h>
 
 #include <llvm/Support/DynamicLibrary.h>
-#include <llvm/Support/raw_ostream.h>
 
 namespace athena::backend::llvm {
 RuntimeDriver::RuntimeDriver() {
   auto libraries = getListOfLibraries();
 
-  for (const auto& lib : libraries) {
-    std::string errMsg;
+  for (auto lib : libraries) {
     ::llvm::sys::DynamicLibrary dynLib =
-        ::llvm::sys::DynamicLibrary::getPermanentLibrary(lib.c_str(), &errMsg);
-    if (!dynLib.isValid()) {
-      // fixme use Athena logger
-      ::llvm::errs() << "Warning: failed to load " << lib << "\n";
-      ::llvm::errs() << errMsg << "\n";
+        ::llvm::sys::DynamicLibrary::getPermanentLibrary(lib.c_str());
+    if (!dynLib.isValid())
       continue;
-    }
 
     void* listDevPtr = dynLib.getAddressOfSymbol("getAvailableDevices");
     auto listDevFunc = reinterpret_cast<DeviceContainer (*)()>(listDevPtr);
