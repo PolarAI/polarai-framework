@@ -26,7 +26,7 @@ RuntimeDriver::RuntimeDriver() {
 
     auto externalDevices = listDevFunc();
     for (int i = 0; i < externalDevices.count; i++) {
-      mDevices.push_back(&externalDevices.devices[i]);
+      mDevices.push_back(externalDevices.devices[i]);
     }
   }
 }

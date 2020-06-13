@@ -34,7 +34,7 @@ GraphPartitionPlanner::getGraphPartitioning() {
     for (auto& nodeState : cluster.content) {
       auto& node = ctx.internal()->getRef<internal::AbstractNodeInternal>(
           nodeState.nodeIndex);
-      partitioning[node.getName().getString()] = mDevices.devices;
+      partitioning[node.getName().getString()] = mDevices.devices[0];
     }
   }
 

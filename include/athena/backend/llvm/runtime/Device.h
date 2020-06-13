@@ -33,7 +33,7 @@ class Event;
 class BackendAllocator;
 
 extern "C" struct ATH_BACKEND_LLVM_EXPORT DeviceContainer {
-  Device* devices;
+  Device** devices;
   size_t count;
 };
 

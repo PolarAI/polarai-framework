@@ -98,7 +98,7 @@ TEST_F(OpenCLRuntimeTest, DISABLED_ExecutesSimpleKernel) {
 
   for (size_t i = 0; i < deviceContainer.count; i++) {
     LayerAllocator allocator;
-    Device& device = deviceContainer.devices[i];
+    Device& device = *deviceContainer.devices[i];
 
     allocator.registerDevice(device);
 
@@ -146,10 +146,9 @@ TEST_F(OpenCLRuntimeTest, DISABLED_ExecutesSimpleKernel) {
     command.globalSize = &count;
     command.localSize = &count;
 
-    allocator.lock(tensor, deviceContainer.devices[i], LockType::READ_WRITE);
+    allocator.lock(tensor, *deviceContainer.devices[i], LockType::READ_WRITE);
     device.launch(allocator, command, nullptr);
-    // device.getQueue().wait();
-    allocator.release(tensor, deviceContainer.devices[i]);
+    allocator.release(tensor, *deviceContainer.devices[i]);
 
     allocator.lock(tensor, LockType::READ);
     auto result = static_cast<float*>(allocator.get(tensor));
