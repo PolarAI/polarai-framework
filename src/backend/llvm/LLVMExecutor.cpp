@@ -40,6 +40,7 @@
 #include "llvm/Support/TargetSelect.h"
 
 #include <algorithm>
+#include <memory>
 
 using namespace athena::core;
 
@@ -72,7 +73,7 @@ void LLVMExecutor::evaluate(Graph& graph) {
   handle.allocator = mAllocator;
   handle.devices.push_back(mRuntimeDriver->getDeviceList().front());
   // fixme host device must be loaded through runtime driver
-  handle.devices.push_back(new HostDevice());
+  handle.devices.emplace_back(new HostDevice());
 
   auto& traversal = graph.traverse();
 
@@ -121,7 +122,7 @@ LLVMExecutor::LLVMExecutor() {
 
   // for (auto dev : mRuntimeDriver->getDeviceList()) {
   // fixme use multiple devices
-  auto* dev = mRuntimeDriver->getDeviceList().front();
+  auto dev = mRuntimeDriver->getDeviceList().front();
   dev->addModule(getOpenCLSPIRVProgram());
   dev->linkModules();
   mAllocator->registerDevice(*dev);
@@ -152,7 +153,7 @@ void LLVMExecutor::setAllocator(std::shared_ptr<BackendAllocator>& allocator) {
   mAllocator = std::move(allocator);
 }
 
-std::vector<Device*>& LLVMExecutor::getDevices() {
+std::vector<std::shared_ptr<Device>>& LLVMExecutor::getDevices() {
   return mRuntimeDriver->getDeviceList();
 }
 } // namespace athena::backend::llvm

@@ -40,6 +40,7 @@ extern "C" struct ATH_BACKEND_LLVM_EXPORT DeviceContainer {
 class ATH_BACKEND_LLVM_EXPORT Device {
 public:
   Device() = default;
+  virtual ~Device() = default;
 
   enum class PartitionDomain { EQUALLY, BY_COUNT, NUMA };
   ///@{ \name Device information

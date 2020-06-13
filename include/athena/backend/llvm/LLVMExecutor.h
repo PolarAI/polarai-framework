@@ -49,7 +49,7 @@ public:
   std::shared_ptr<BackendAllocator> getAllocatorPtr();
   void setAllocator(std::shared_ptr<BackendAllocator>& allocator);
 
-  std::vector<Device*>& getDevices();
+  std::vector<std::shared_ptr<Device>>& getDevices();
 
   void addModule(std::string_view module);
 

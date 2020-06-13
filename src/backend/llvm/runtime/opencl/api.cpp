@@ -52,4 +52,12 @@ ATH_RT_LLVM_EXPORT DeviceContainer getAvailableDevices() {
   DeviceContainer deviceContainer{oclDevices, allDevices.size()};
   return deviceContainer;
 }
+
+ATH_RT_LLVM_EXPORT void consumeDevice(Device* dev) {
+  delete dev;
+}
+
+ATH_RT_LLVM_EXPORT void consumeContainer(DeviceContainer cont) {
+  delete [] cont.devices;
+}
 }

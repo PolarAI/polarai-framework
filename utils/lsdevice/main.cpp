@@ -8,10 +8,10 @@ int main() {
 
   std::cout << "Total device count: " << devices.size() << "\n\n";
 
-  for (auto* device : devices) {
-    std::cout << "------------------"
-              << "\n";
+  for (const auto& device : devices) {
+    std::cout << "------------------\n";
     std::cout << "Device name: " << device->getDeviceName() << "\n";
+    std::cout << "^^^^^^^^^^^^^^^^^^\n";
 
     std::cout << "\n";
   }

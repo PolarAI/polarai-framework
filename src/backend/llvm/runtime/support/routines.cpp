@@ -56,9 +56,9 @@ ATH_RT_SUPPORT_EXPORT void ath_lock(GraphHandle* handle, Device& device,
 ATH_RT_SUPPORT_EXPORT Device* ath_device_select(GraphHandle* handle,
                                                 uint64_t nodeId) {
   if (handle->isHostNode.count(nodeId)) {
-    return handle->devices.back();
+    return handle->devices.back().get();
   }
-  return handle->devices.front(); // TODO real device selection logic.
+  return handle->devices.front().get(); // TODO real device selection logic.
 }
 
 ATH_RT_SUPPORT_EXPORT void ath_barrier(uint32_t count, Event** events) {

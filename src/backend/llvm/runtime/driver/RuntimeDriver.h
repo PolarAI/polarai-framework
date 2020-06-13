@@ -6,9 +6,14 @@ namespace athena::backend::llvm {
 class RuntimeDriver {
 public:
   RuntimeDriver();
-  auto getDeviceList() -> std::vector<Device*>& { return mDevices; };
+  ~RuntimeDriver();
+  auto getDeviceList() -> std::vector<std::shared_ptr<Device>>& {
+    return mDevices;
+  };
 
 private:
-  std::vector<Device*> mDevices;
+  std::vector<std::shared_ptr<Device>> mDevices;
+  std::vector<std::pair<DeviceContainer, std::function<void(DeviceContainer)>>>
+      mRecyclers;
 };
 } // namespace athena::backend::llvm

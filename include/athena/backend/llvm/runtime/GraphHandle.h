@@ -17,7 +17,7 @@ class AbstractLoaderInternal;
 
 struct GraphHandle {
   std::shared_ptr<athena::backend::llvm::BackendAllocator> allocator;
-  std::vector<athena::backend::llvm::Device*> devices;
+  std::vector<std::shared_ptr<athena::backend::llvm::Device>> devices;
   std::unordered_map<uint64_t, athena::core::internal::AbstractLoaderInternal*>
       mLoaders;
   std::set<uint64_t> isHostNode;
