@@ -41,8 +41,8 @@ utils::StringView Graph::getName() const {
   return getGraphInternal()->getName();
 }
 
-std::tuple<Graph, Graph> Graph::getGradient() {
-  auto internalTuple = getGraphInternal()->getGradient();
+std::tuple<Graph, Graph> Graph::getGradient(utils::Index targetNodeIndex) {
+  auto internalTuple = getGraphInternal()->getGradient(targetNodeIndex);
   return std::make_tuple(Graph(mContext, std::get<0>(internalTuple)),
                          Graph(mContext, std::get<1>(internalTuple)));
 }

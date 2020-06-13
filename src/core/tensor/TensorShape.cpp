@@ -24,7 +24,7 @@ TensorShape::TensorShape(std::initializer_list<size_t> rhs)
     : mShape(rhs), mTotalSize(calculateTotalSize()) {}
 TensorShape::TensorShape(std::vector<size_t> rhs)
     : mShape(std::move(rhs)), mTotalSize(calculateTotalSize()) {}
-size_t TensorShape::operator[](size_t index) { return dim(index); }
+size_t TensorShape::operator[](size_t index) const { return dim(index); }
 bool TensorShape::operator==(const TensorShape& rhs) const {
   return ShapeView(*this) == ShapeView(rhs);
 }

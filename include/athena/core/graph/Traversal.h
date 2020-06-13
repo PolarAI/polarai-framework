@@ -16,6 +16,7 @@
 
 #include <athena/core/core_export.h>
 #include <athena/utils/internal/TupleContainers.h>
+#include <athena/utils/error/FatalError.h>
 
 #include <set>
 #include <vector>
@@ -41,6 +42,16 @@ struct ATH_CORE_EXPORT NodeState {
       : nodeIndex(nodeIndex), inputsCount(inputsCount),
         isWayToFrozen(isWayToFrozen), input(std::move(input)),
         output(std::move(output)) {}
+
+  static const Dependency& findDependency(const std::vector<Dependency>& dependence, int64_t mark) {
+    for (auto& dep : dependence) {
+      if (dep.mark == mark) {
+        return dep;
+      }
+    }
+    utils::FatalError(utils::ATH_BAD_ACCESS, "Access by incorrect mark.");
+    return dependence[0];
+  }
 
   size_t nodeIndex;
   size_t inputsCount;

@@ -24,26 +24,30 @@ class ATH_OPERATION_EXPORT AddOperationInternal
     : public core::internal::OperationInternal {
 public:
   AddOperationInternal(
-      utils::SharedPtr<core::internal::ContextInternal> context,
+      utils::WeakPtr<core::internal::ContextInternal> context,
       utils::Index publicNodeIndex, utils::String name = utils::String(""));
 
   ~AddOperationInternal() override = default;
 
   [[nodiscard]] utils::Index
   createResultTensor(utils::SharedPtr<core::internal::ContextInternal> context,
-                     std::vector<core::internal::TensorInternal*> tensorIndexes)
+                     const std::unordered_map<int64_t, utils::Index>& mapMarkToLocalTensorIndex,
+                     const std::vector<core::internal::TensorInternal*>& tensors)
       const override;
 
   core::internal::GenValue
   gen(utils::SharedPtr<core::internal::ContextInternal> context,
       core::internal::Generator& generator,
-      std::vector<utils::Index>& operationArguments,
+      const std::unordered_map<int64_t, utils::Index>& mapMarkToLocalTensorIndex,
+      const std::vector<core::internal::TensorInternal*>& tensors,
+      const core::internal::TensorInternal* resultTensor,
       core::internal::GenNode parentNode) const override;
 
   // output node and edges of generated graph
   std::tuple<utils::Index, std::vector<core::internal::Edge>,
              std::vector<utils::Index>>
-  genDerivative(const core::NodeState* currentNodeState,
+  genDerivative(const core::NodeState* inputNodeState,
+                const core::NodeState* currentNodeState,
                 size_t indexOfOutputDependence,
                 utils::Index gradientGraphFinalNodeIndex) const override;
 

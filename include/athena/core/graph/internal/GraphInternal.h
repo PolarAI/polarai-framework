@@ -60,7 +60,7 @@ public:
 
   void setUpTensors() const;
 
-  std::tuple<utils::Index, utils::Index> getGradient();
+  std::tuple<utils::Index, utils::Index> getGradient(utils::Index targetNodeIndex);
 
 private:
   struct NodeStateIndex {
@@ -78,9 +78,9 @@ private:
                                isPartOfWayToUnfrozenFlags) const;
 
   std::tuple<utils::Index, std::unordered_map<utils::Index, utils::Index>>
-  createGradientGraph() const;
+  createGradientGraph(utils::Index targetNodeIndex) const;
 
-  utils::Index createInitialGradientNode(const NodeState* nodeStatePtr) const;
+  utils::Index createInitialGradientNode(GraphInternal& gradientGraph, const NodeState* nodeStatePtr) const;
 
   utils::Index accumulateOutputNodes(
       GraphInternal& gradient, const NodeState* nodeStatePtr,

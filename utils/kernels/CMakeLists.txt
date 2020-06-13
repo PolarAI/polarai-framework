@@ -24,7 +24,7 @@ function(add_device_target target_name triple)
   file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tmp)
 
   if (triple MATCHES "spirv")
-    set(target_triple "spir64-unknown-unknown")
+    set(target_triple "spir")
   else()
     set(target_triple ${triple})
   endif()
@@ -33,7 +33,7 @@ function(add_device_target target_name triple)
     get_filename_component(filename ${src} NAME)
     add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/tmp/${filename}.ll" 
       COMMAND ${LLVM_BUILD_BINARY_DIR}/clang -cc1 -finclude-default-header 
-      -cl-std=CL1.2 -triple ${target_triple} 
+      -x cl -cl-std=CL2.0 -triple ${target_triple}
       -I ${PROJECT_SOURCE_DIR}/utils/kernels/include
       -emit-llvm -o "${CMAKE_CURRENT_BINARY_DIR}/tmp/${filename}.ll" "${src}"
       DEPENDS ${src})
@@ -56,7 +56,7 @@ function(add_device_target target_name triple)
     add_custom_command(OUTPUT ${outfile}
       COMMAND ${LLVM_BUILD_BINARY_DIR}/llvm-spirv 
       "${CMAKE_CURRENT_BINARY_DIR}/tmp/${target_name}.bc"
-      -o ${outfile}
+      -s -o ${outfile}
       DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/tmp/${target_name}.bc")
   else()
     set(outfile ${CMAKE_CURRENT_BINARY_DIR}/${target_name})

@@ -34,9 +34,14 @@ enum class builtin {
   ///@{
   /// \name Operation builtins
   Add,      ///< Element-wise addition.
-  Mul,      ///< Element-wise multiplication.
+  Copy,     ///< Element-wise copying.
+  Divide,   ///< Element-wise division.
+  LogLoss,  ///< Element-wise logistic loss function.
   MatMul,   ///< Matrix-matrix multiplication.
+  Mul,      ///< Element-wise multiplication.
+  MulConcat,///< Gradient concatenation.
   Fill,     ///< Fill tensor with constant pattern.
+  Sigmoid,  ///< Element-wise sigmoid.
   Slice,    ///< Get subtensor.
   Transpose /// Transpose 2D tensor (matrix).
   ///}
@@ -83,20 +88,41 @@ template <> struct builtin_functor<builtin::Return> {
 
 template <> struct builtin_functor<builtin::Add> {
   using type =
-      std::function<GenValue(GenValue, GenValue, GenValue, GenValue, GenValue)>;
+      std::function<GenValue(GenValue, GenValue, GenValue, GenValue, GenValue, GenValue)>;
+};
+
+template <> struct builtin_functor<builtin::Copy> {
+  using type = std::function<GenValue(GenValue, GenValue, GenValue)>;
+};
+
+template <> struct builtin_functor<builtin::Divide> {
+  using type = std::function<GenValue(GenValue, GenValue, GenValue, GenValue)>;
+};
+
+template <> struct builtin_functor<builtin::LogLoss> {
+  using type = std::function<GenValue(GenValue, GenValue, GenValue, GenValue)>;
+};
+
+template <> struct builtin_functor<builtin::MatMul> {
+  using type =
+  std::function<GenValue(GenValue, GenValue, GenValue, GenValue, GenValue, GenValue, GenValue, GenValue)>;
 };
 
 template <> struct builtin_functor<builtin::Mul> {
   using type = std::function<GenValue(GenValue, GenValue, GenValue, GenValue)>;
 };
 
-template <> struct builtin_functor<builtin::MatMul> {
-  using type =
-      std::function<GenValue(GenValue, GenValue, GenValue, GenValue, GenValue)>;
+template <> struct builtin_functor<builtin::MulConcat> {
+  using type = std::function<GenValue(GenValue, GenValue, GenValue, GenValue, GenValue)>;
+};
+
+
+template <> struct builtin_functor<builtin::Sigmoid> {
+  using type = std::function<GenValue(GenValue, GenValue, GenValue)>;
 };
 
 template <> struct builtin_functor<builtin::Fill> {
-  using type = std::function<GenValue(GenValue, GenValue)>;
+  using type = std::function<GenValue(GenValue, GenValue, GenValue)>;
 };
 
 template <> struct builtin_functor<builtin::Slice> {
@@ -104,7 +130,7 @@ template <> struct builtin_functor<builtin::Slice> {
 };
 
 template <> struct builtin_functor<builtin::Transpose> {
-  using type = std::function<GenValue(GenValue, GenValue)>;
+  using type = std::function<GenValue(GenValue, GenValue, GenValue)>;
 };
 
 template <builtin B>
@@ -120,8 +146,13 @@ using BuiltinMap = std::tuple<
     builtin_functor_t<builtin::InvokeLoader>,
     builtin_functor_t<builtin::Return>,
     builtin_functor_t<builtin::Add>,
-    builtin_functor_t<builtin::Mul>,
+    builtin_functor_t<builtin::Copy>,
+    builtin_functor_t<builtin::Divide>,
+    builtin_functor_t<builtin::LogLoss>,
     builtin_functor_t<builtin::MatMul>,
+    builtin_functor_t<builtin::Mul>,
+    builtin_functor_t<builtin::MulConcat>,
+    builtin_functor_t<builtin::Sigmoid>,
     builtin_functor_t<builtin::Fill>,
     builtin_functor_t<builtin::Slice>,
     builtin_functor_t<builtin::Transpose>>;

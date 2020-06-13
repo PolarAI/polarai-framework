@@ -13,3 +13,6 @@ target_link_libraries(TestIntegrationJITRunnable PRIVATE
         Threads::Threads)
 
 add_test(NAME JITIntegrationTest COMMAND TestIntegrationJITRunnable)
+
+configure_file(dataset_no_intersect.csv "${PROJECT_BINARY_DIR}/bin/dataset_no_intersect.csv" COPYONLY)
+configure_file(dataset_intersect.csv "${PROJECT_BINARY_DIR}/bin/dataset_intersect.csv" COPYONLY)

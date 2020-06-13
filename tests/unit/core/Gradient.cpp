@@ -41,9 +41,8 @@ TEST(Gradient, Topology1) {
   graph.connect(inp1, node, AddOperation::LEFT);
   graph.connect(inp2, node, AddOperation::RIGHT);
   auto out = graph.create<OutputNode>();
-  graph.connect(node, out, Operation::Unmarked);
-  // auto& traversal = graph.traverse();
-  // auto [gradientGraph, connectGraph] =
-  graph.getGradient();
+//  graph.connect(node, out, Operation::Unmarked);
+//   auto& traversal = graph.traverse();
+//   auto [gradientGraph, connectGraph] = graph.getGradient(node);
 }
 } // namespace

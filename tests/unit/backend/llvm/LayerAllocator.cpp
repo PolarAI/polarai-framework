@@ -44,9 +44,8 @@ public:
   Event* launch(BackendAllocator&, LaunchCommand&, Event*) override {
     return nullptr;
   };
-  void addModule(ProgramDesc) override{}
-  void linkModules() override{}
-  void consumeEvent(Event*) override {}
+  void addModule(ProgramDesc) override{};
+  void linkModules() override{};
 };
 
 TEST(LLVMBackend, LayerAllocatorSimple) {

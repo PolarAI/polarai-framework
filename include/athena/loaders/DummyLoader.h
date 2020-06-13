@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Athena. All rights reserved.
+ * Copyright (c) 2018 Athena. All rights reserved.
  * https://getathena.ml
  *
  * Licensed under MIT license.
@@ -11,20 +11,16 @@
  * the License.
  */
 
-#ifndef ATHENA_COPYLOADER_H
-#define ATHENA_COPYLOADER_H
+#ifndef ATHENA_DUMMYLOADER_H
+#define ATHENA_DUMMYLOADER_H
 
-#include <athena/core/loader/AbstractLoader.h>
-#include <athena/loaders/internal/CopyLoaderInternal.h>
+#include <athena/loaders/internal/DummyLoaderInternal.h>
 
 namespace athena::loaders {
-namespace internal {
-class CopyLoaderInternal;
-}
-class ATH_LOADERS_EXPORT AbstractLoader {
+class ATH_LOADERS_EXPORT DummyLoader {
 public:
-  using InternalType = internal::CopyLoaderInternal;
+using InternalType = internal::DummyLoaderInternal;
 };
-} // namespace athena::loaders
+} // namespace athena::operation
 
-#endif // ATHENA_COPYLOADER_H
+#endif // ATHENA_COPYOPERATION_H

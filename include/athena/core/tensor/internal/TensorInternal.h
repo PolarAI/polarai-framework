@@ -27,7 +27,7 @@ class ContextInternal;
 class ATH_CORE_EXPORT TensorInternal : public Entity {
 public:
   TensorInternal(const TensorInternal& rhs) = default;
-  TensorInternal(TensorInternal&& rhs) noexcept = default;
+  TensorInternal(TensorInternal&& rhs) = default;
   explicit TensorInternal(utils::WeakPtr<ContextInternal> context,
                           utils::Index publicIndex, DataType dataType,
                           TensorShape shape);

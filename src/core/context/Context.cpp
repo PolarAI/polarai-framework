@@ -14,17 +14,6 @@
 #include <athena/core/context/Context.h>
 #include <athena/core/context/internal/ContextInternal.h>
 
-// void* operator new(std::size_t sz) {
-//  void *ptr = std::malloc(sz);
-//  //std::cout << "ALLOC: " << static_cast<void*>(ptr) << std::endl;
-//  return ptr;
-//}
-// void operator delete(void* ptr) noexcept
-//{
-//  //std::cout << "DEALLOC: " << static_cast<void*>(ptr) << std::endl;
-//  std::free(ptr);
-//}
-
 namespace athena::core {
 Context::Context(utils::Allocator allocator, size_t defaultCapacity,
                  size_t elementAverageSize)

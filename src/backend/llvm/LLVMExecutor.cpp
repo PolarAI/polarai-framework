@@ -61,6 +61,8 @@ void LLVMExecutor::addGraph(Graph& graph) {
 
   core::internal::GraphCompiler::compile(graph, generator);
 
+  ref->dump();
+
   mJITCompiler->addModule(ref);
 }
 
@@ -123,7 +125,7 @@ LLVMExecutor::LLVMExecutor() {
   // for (auto dev : mRuntimeDriver->getDeviceList()) {
   // fixme use multiple devices
   auto dev = mRuntimeDriver->getDeviceList().front();
-  dev->addModule(getOpenCLSPIRVProgram());
+  dev->addModule(getOpenCLTextProgram());
   dev->linkModules();
   mAllocator->registerDevice(*dev);
   // }

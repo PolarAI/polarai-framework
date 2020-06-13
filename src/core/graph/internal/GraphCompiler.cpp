@@ -29,22 +29,24 @@ void GraphCompiler::compile(Graph& graph, Generator& generator) {
     for (const auto& node : c.content) {
       auto topLevelInsPoint = generator.getInsertionPoint();
       auto& nodeInternal =
-          ctxInternal->get<AbstractNodeInternal>(node.nodeIndex);
+          ctxInternal->getRef<AbstractNodeInternal>(node.nodeIndex);
       if (nodeInternal.getType() == NodeType::OUTPUT) {
         // todo OutputNodes are not generated. Should they?
       generator.setInsertionPoint(topLevelInsPoint);
         continue;
       }
       std::vector<TensorInternal*> inputs;
+      std::unordered_map<int64_t, utils::Index> mapMarkToArgTensorIndex;
+      size_t index = 0;
       for (auto inp : node.input) {
-        auto& incNode = ctxInternal->get<AbstractNodeInternal>(inp.nodeIndex);
-        // fixme do not use const_cast
-        inputs.push_back(const_cast<TensorInternal*>(incNode.getTensorPtr()));
+        mapMarkToArgTensorIndex[inp.mark] = index;
+        auto& incNode = ctxInternal->getRef<AbstractNodeInternal>(inp.nodeIndex);
+        inputs.push_back(incNode.getTensorPtr());
+        ++index;
       }
-      // fixme don't use const_cast
       auto genNode = generator.createNode(
           nodeInternal.getName().getString(), node.nodeIndex, clusterId, inputs,
-          *const_cast<TensorInternal*>(nodeInternal.getTensorPtr()));
+          *nodeInternal.getTensorPtr());
       generatedNodes[node.nodeIndex] = genNode;
 
       generator.setInsertionPoint(genNode);
@@ -59,14 +61,10 @@ void GraphCompiler::compile(Graph& graph, Generator& generator) {
         generator.callBuiltin<builtin::Release>(genNode.getResult());
         generator.callBuiltin<builtin::Return>(genNode.getResult());
       } else if (nodeInternal.getType() == NodeType::DEFAULT) {
-        auto defaultNode = ctxInternal->get<NodeInternal>(node.nodeIndex);
-        std::vector<utils::Index> idx;
-        for (auto inp : node.input) {
-          idx.push_back(inp.nodeIndex);
-        }
+        auto& defaultNode = ctxInternal->get<NodeInternal>(node.nodeIndex);
         // fixme this must accept GenNode and return GenValue.
         auto opResult = defaultNode.getOperationPtr()->gen(
-            ctxInternal, generator, idx, genNode);
+            ctxInternal, generator, mapMarkToArgTensorIndex, inputs, defaultNode.getTensorPtr(), genNode);
 
         generator.callBuiltin<builtin::Return>(opResult);
       }

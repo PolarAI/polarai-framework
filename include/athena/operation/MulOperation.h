@@ -22,7 +22,7 @@ namespace athena::operation {
 class ATH_OPERATION_EXPORT MulOperation : public core::Operation {
 public:
   using InternalType = internal::MulOperationInternal;
-  enum Arguments { LEFT, RIGHT };
+  enum Arguments { LEFT=45, RIGHT };
 };
 } // namespace athena::operation
 

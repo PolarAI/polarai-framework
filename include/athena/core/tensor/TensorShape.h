@@ -43,7 +43,7 @@ public:
 
   TensorShape& operator=(const TensorShape& rhs) = default;
   TensorShape& operator=(TensorShape&& rhs) = default;
-  size_t operator[](size_t);
+  size_t operator[](size_t) const;
   bool operator==(const TensorShape& rhs) const;
   bool operator==(const ShapeView& rhs) const;
   bool operator!=(const TensorShape& rhs) const;

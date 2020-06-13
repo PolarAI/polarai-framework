@@ -149,8 +149,7 @@ struct ReleaseOpConversionPattern
 
     auto device = rewriter.create<ath_rt::DeviceSelectOp>(
         op->getLoc(), deviceType, nodeIdAttr);
-    rewriter.replaceOpWithNewOp<ath_rt::ReleaseOp>(op, device, operands[0],
-                                                   ValueRange{});
+    rewriter.replaceOpWithNewOp<ath_rt::ReleaseOp>(op, device, operands[0]);
 
     return success();
   }
@@ -335,8 +334,12 @@ protected:
     target.addIllegalOp<ath_graph::ReleaseOp>();
     target.addIllegalOp<ath_graph::LockOp>();
     target.addIllegalOp<ath_graph::AddOp>();
+    target.addIllegalOp<ath_graph::DivideOp>();
+    target.addIllegalOp<ath_graph::LogLossOp>();
     target.addIllegalOp<ath_graph::MulOp>();
-    target.addIllegalOp<ath_graph::MatmulOp>();
+    target.addIllegalOp<ath_graph::MulConcatOp>();
+    target.addIllegalOp<ath_graph::MatMulOp>();
+    target.addIllegalOp<ath_graph::SigmoidOp>();
     target.addIllegalOp<ath_graph::TransposeOp>();
     target.addIllegalOp<ath_graph::FillOp>();
 
@@ -363,8 +366,12 @@ void populateGraphToRuntimeConversionPatterns(
       LockOpConversionPattern,
       ReleaseOpConversionPattern,
       BuiltinConversionPattern<ath_graph::AddOp>,
+      BuiltinConversionPattern<ath_graph::DivideOp>,
+      BuiltinConversionPattern<ath_graph::LogLossOp>,
       BuiltinConversionPattern<ath_graph::MulOp>,
-      BuiltinConversionPattern<ath_graph::MatmulOp>,
+      BuiltinConversionPattern<ath_graph::MulConcatOp>,
+      BuiltinConversionPattern<ath_graph::MatMulOp>,
+      BuiltinConversionPattern<ath_graph::SigmoidOp>,
       BuiltinConversionPattern<ath_graph::FillOp>,
       BuiltinConversionPattern<ath_graph::TransposeOp>
       // clang-format on

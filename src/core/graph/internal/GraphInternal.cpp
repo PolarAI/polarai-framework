@@ -14,7 +14,7 @@
 #include <athena/core/graph/internal/GraphInternal.h>
 #include <athena/core/node/internal/NodeInternal.h>
 #include <athena/loaders/internal/ConstantLoaderInternal.h>
-#include <athena/loaders/internal/CopyLoaderInternal.h>
+#include <athena/loaders/internal/DummyLoaderInternal.h>
 #include <athena/operation/AddOperation.h>
 #include <athena/operation/MulOperation.h>
 #include <athena/operation/internal/AddOperationInternal.h>
@@ -55,24 +55,28 @@ void GraphInternal::connect(utils::Index startNode, utils::Index endNode,
   safetyIncrementMapValue(mOutputsCount, startNode, getter);
 }
 
-std::vector<TensorInternal*>
+std::tuple<std::vector<TensorInternal*>, std::unordered_map<int64_t, utils::Index>>
 getOperationArgIndexes(utils::SharedPtr<ContextInternal>& context,
                        const NodeState& nodeState) {
   std::vector<TensorInternal*> operationArgs{};
+  std::unordered_map<int64_t, utils::Index> mapMarkToLocalTensorIndex{};
   operationArgs.reserve(nodeState.input.size());
+  size_t index = 0;
   for (auto& inputDependence : nodeState.input) {
+    mapMarkToLocalTensorIndex[inputDependence.mark] = index;
     operationArgs.push_back(
         context->getPtr<AbstractNodeInternal>(inputDependence.nodeIndex)
             ->getTensorPtr());
+    ++index;
   }
-  return operationArgs;
+  return std::make_tuple(operationArgs, mapMarkToLocalTensorIndex);
 }
 
 void GraphInternal::setUpTensors() const {
   auto contextInternal = mContext.lock();
   for (auto& cluster : mTraversal.getClusters()) {
     for (auto& nodeState : cluster.content) {
-      auto args = getOperationArgIndexes(contextInternal, nodeState);
+      auto [args, mapMarkToLocalTensorIndex] = getOperationArgIndexes(contextInternal, nodeState);
       auto node =
           contextInternal->getPtr<AbstractNodeInternal>(nodeState.nodeIndex);
       if (node->getTensorIndex() != 0) {
@@ -84,7 +88,7 @@ void GraphInternal::setUpTensors() const {
       } else if (node->getType() == NodeType::DEFAULT) {
         auto funcNode = static_cast<NodeInternal*>(node);
         auto tensorIndex = funcNode->getOperationPtr()->createResultTensor(
-            mContext.lock(), args);
+            mContext.lock(), mapMarkToLocalTensorIndex, args);
         funcNode->setTensorIndex(tensorIndex);
       } else if (node->getType() == NodeType::OUTPUT) {
 #ifdef DEBUG
@@ -231,18 +235,20 @@ const Traversal& GraphInternal::traverse() {
 }
 
 utils::Index
-GraphInternal::createInitialGradientNode(const NodeState* nodeStatePtr) const {
+GraphInternal::createInitialGradientNode(GraphInternal& gradientGraph, const NodeState* nodeStatePtr) const {
   auto context = mContext.lock();
   auto& node = context->getRef<AbstractNodeInternal>(nodeStatePtr->nodeIndex);
   auto tensor = node.getTensorPtr();
   auto loaderIndex = context->create<loaders::internal::ConstantLoaderInternal>(
       context, context->getNextPublicIndex(), 1.0);
-  return context->create<InputNodeInternal>(
+  auto resultNodeIndex = context->create<InputNodeInternal>(
       context, context->getNextPublicIndex(), tensor->getShape(),
       tensor->getDataType(), true, loaderIndex,
       (std::string("InitialNode_") +
        std::to_string(context->getNextPublicIndex()))
           .data());
+  gradientGraph.mInputNodeIndexes.emplace_back(resultNodeIndex);
+  return resultNodeIndex;
 }
 
 void GraphInternal::mergeEdges(const std::vector<core::internal::Edge>& edges) {
@@ -270,7 +276,7 @@ utils::Index GraphInternal::accumulateOutputNodes(
            std::to_string(context->getNextPublicIndex()))
               .data());
   auto& shape =
-      context->getRef<AbstractNodeInternal>(nodeStatePtr->output[0].nodeIndex)
+      context->getRef<AbstractNodeInternal>(nodeStatePtr->nodeIndex)
           .getTensorPtr()
           ->getShape();
   auto zeroLoaderIndex =
@@ -297,7 +303,7 @@ utils::Index GraphInternal::accumulateOutputNodes(
       auto operationPtr = node.getOperationPtr();
       auto [newFinalGradientIndex, edges, newInputNodes] =
           operationPtr->genDerivative(
-              nodeStatePtr, indexOutputDependence,
+              nodeStatePtr, resNodeStatePtr, indexOutputDependence,
               mapNodeStateToFinalGradientIndex.at(resNodeStatePtr));
       auto addNodeIndex = context->create<core::internal::NodeInternal>(
           context, context->getNextPublicIndex(), addOperationIndex,
@@ -313,13 +319,6 @@ utils::Index GraphInternal::accumulateOutputNodes(
       for (auto newInputNodeIndex : newInputNodes) {
         gradient.mInputNodeIndexes.emplace_back(newInputNodeIndex);
       }
-    } else if (abstractNode.getType() == NodeType::OUTPUT) {
-      // TODO throw latest node before output node. Now we dont support output
-      // nodes inside of graph.
-      auto outputNodeStatePtr =
-          &mTraversal.getClusters()[dependence.clusterIndex]
-               .content[dependence.nodeStateIndex];
-      return mapNodeStateToFinalGradientIndex.at(outputNodeStatePtr);
     } else {
       // TODO error
     }
@@ -328,8 +327,13 @@ utils::Index GraphInternal::accumulateOutputNodes(
 }
 
 std::tuple<utils::Index, std::unordered_map<utils::Index, utils::Index>>
-GraphInternal::createGradientGraph() const {
+GraphInternal::createGradientGraph(utils::Index targetNodeIndex) const {
   auto context = mContext.lock();
+  auto& targetNode = context->getRef<AbstractNodeInternal>(targetNodeIndex);
+  if (targetNode.getType() != NodeType::DEFAULT) {
+    utils::FatalError(utils::ATH_BAD_ACCESS, "Target node isn't a functional node.");
+    return {};
+  }
   auto gradientGraphIndex = context->create<GraphInternal>(
       mContext, context->getNextPublicIndex(),
       (std::string("GradientGraph_") +
@@ -339,40 +343,40 @@ GraphInternal::createGradientGraph() const {
   std::unordered_map<const NodeState*, utils::Index>
       mapNodeStateToFinalGradientIndex;
   std::unordered_map<utils::Index, utils::Index> inputNodeChangers;
-#ifdef DEBUG
-  if (mTraversal.getClusters().back().content.size() != 1) {
-    utils::FatalError(utils::ATH_ASSERT,
-                      "Error while createGradientGraph() is working. Last "
-                      "cluster of base graph includes more that one node.");
-  }
-#endif
   if (mTraversal.getClusters().size() <= 1) {
     return {};
   }
-  auto nodeStatePtr = &mTraversal.getClusters().back().content.back();
-  auto gradientFinalNodeIndex = createInitialGradientNode(nodeStatePtr);
-  mapNodeStateToFinalGradientIndex[nodeStatePtr] = gradientFinalNodeIndex;
-  gradientGraph.mInputNodeIndexes.emplace_back(gradientFinalNodeIndex);
+  utils::Index gradientFinalNodeIndex = 0;
+  bool targetNodeFound = false;
   size_t indexCluster = mTraversal.getClusters().size() - 1;
-  do {
-    --indexCluster;
-    auto& cluster = mTraversal.getClusters()[indexCluster];
-    for (auto& nodeState : cluster.content) {
-      if (nodeState.isWayToFrozen) {
-        continue;
-      }
-      nodeStatePtr = &nodeState;
-      gradientFinalNodeIndex = accumulateOutputNodes(
-          gradientGraph, nodeStatePtr, mapNodeStateToFinalGradientIndex);
-      mapNodeStateToFinalGradientIndex[nodeStatePtr] = gradientFinalNodeIndex;
-      if (indexCluster == 0) {
-        auto& node = context->getRef<InputNodeInternal>(nodeState.nodeIndex);
-        if (!node.isFrozen()) {
-          inputNodeChangers[node.getPublicIndex()] = gradientFinalNodeIndex;
+  auto& clusterCollection = mTraversal.getClusters();
+  for (auto rClusterIterator = clusterCollection.rbegin(); rClusterIterator != clusterCollection.rend(); ++rClusterIterator) {
+    auto& cluster = *rClusterIterator;
+    for (const auto& nodeState : cluster.content) {
+      if (!targetNodeFound) {
+        if (nodeState.nodeIndex == targetNodeIndex) {
+          targetNodeFound = true;
+          gradientFinalNodeIndex = createInitialGradientNode(gradientGraph, &nodeState);
+          mapNodeStateToFinalGradientIndex[&nodeState] = gradientFinalNodeIndex;
+        }
+      } else {
+        if (nodeState.isWayToFrozen) {
+          continue;
+        }
+        auto nodeStatePtr = &nodeState;
+          gradientFinalNodeIndex = accumulateOutputNodes(
+              gradientGraph, nodeStatePtr, mapNodeStateToFinalGradientIndex);
+        mapNodeStateToFinalGradientIndex[nodeStatePtr] = gradientFinalNodeIndex;
+        if (indexCluster == 0) {
+          auto& inputNode = context->getRef<InputNodeInternal>(nodeState.nodeIndex);
+          if (!inputNode.isFrozen()) {
+            inputNodeChangers[inputNode.getPublicIndex()] = gradientFinalNodeIndex;
+          }
         }
       }
     }
-  } while (indexCluster != 0);
+    --indexCluster;
+  }
   gradientGraph.traverse();
   return std::make_tuple(gradientGraphIndex, inputNodeChangers);
 }
@@ -389,10 +393,16 @@ utils::Index GraphInternal::createWeightChangingGraph(
       context->getRef<GraphInternal>(weightChangingGraphIndex);
   auto learningRateLoaderIndex =
       context->create<loaders::internal::ConstantLoaderInternal>(
-          context, context->getNextPublicIndex(), -0.1,
-          (std::string("LearningRateLoaderIndex_") +
+          context, context->getNextPublicIndex(), -0.01,
+          (std::string("LearningRateLoader_") +
            std::to_string(context->getNextPublicIndex()))
               .data()); // TODO give runtime args to graph
+  auto dummyLoader =
+      context->create<loaders::internal::DummyLoaderInternal>(
+          context, context->getNextPublicIndex(),
+          (std::string("DummyLoader_") +
+              std::to_string(context->getNextPublicIndex()))
+              .data());
   auto multiplyOperation =
       context->create<operation::internal::MulOperationInternal>(
           context, context->getNextPublicIndex(),
@@ -400,7 +410,7 @@ utils::Index GraphInternal::createWeightChangingGraph(
            std::to_string(context->getNextPublicIndex()))
               .data());
   auto addOperation =
-      context->create<operation::internal::MulOperationInternal>(
+      context->create<operation::internal::AddOperationInternal>(
           context, context->getNextPublicIndex(),
           (std::string("AddOperation_") +
            std::to_string(context->getNextPublicIndex()))
@@ -415,61 +425,65 @@ utils::Index GraphInternal::createWeightChangingGraph(
         context->getRef<internal::AbstractNodeInternal>(gradientFinalNodeIndex);
     auto& gradientShape = gradientFinalNode.getTensorPtr()->getShape();
     auto gradientDataType = gradientFinalNode.getTensorPtr()->getDataType();
-    auto learningRateHolderNode = context->create<InputNodeInternal>(
+    auto dummyNodeIndex = context->create<InputNodeInternal>(context, context->getNextPublicIndex(), gradientShape, gradientDataType, true, dummyLoader, (std::string("DummyNodeGradValueHolder_") +
+        std::to_string(context->getNextPublicIndex()))
+        .data());
+    auto& dummyNode = context->getRef<AbstractNodeInternal>(dummyNodeIndex);
+    dummyNode.setTensorIndex(gradientFinalNode.getTensorIndex());
+    auto learningRateHolderNodeIndex = context->create<InputNodeInternal>(
         context, context->getNextPublicIndex(), gradientShape, gradientDataType,
         true, learningRateLoaderIndex,
         (std::string("LearningRateHolderNode_") +
          std::to_string(context->getNextPublicIndex()))
             .data());
+    weightChangingGraph.mInputNodeIndexes.emplace_back(dummyNodeIndex);
+    weightChangingGraph.mInputNodeIndexes.emplace_back(learningRateHolderNodeIndex);
     auto multiplyNodeIndex = context->create<NodeInternal>(
         context, context->getNextPublicIndex(), multiplyOperation,
         (std::string("LearningRateMultiplyNode_") +
          std::to_string(context->getNextPublicIndex()))
             .data());
-    weightChangingGraph.connect(gradientFinalNodeIndex, multiplyNodeIndex,
+    weightChangingGraph.connect(dummyNodeIndex, multiplyNodeIndex,
                                 operation::MulOperation::LEFT);
-    weightChangingGraph.connect(learningRateHolderNode, multiplyNodeIndex,
+    weightChangingGraph.connect(learningRateHolderNodeIndex, multiplyNodeIndex,
                                 operation::MulOperation::RIGHT);
-    auto sourceGraphInputNodeCopyLoader =
-        context->create<loaders::internal::CopyLoaderInternal>(
-            context, context->getNextPublicIndex(),
-            sourceGraphInputNode.getTensorIndex(),
-            (std::string("SourceInputNodeCopierLoaderIndex_") +
-             std::to_string(context->getNextPublicIndex()))
-                .data());
-    auto sourceGraphInputNodeCopiedHolder = context->create<InputNodeInternal>(
+    auto sourceGraphInputNodeHolderIndex = context->create<InputNodeInternal>(
         context, context->getNextPublicIndex(), gradientShape, gradientDataType,
-        true, sourceGraphInputNodeCopyLoader,
-        (std::string("CopiedSourceHolderNode_") +
+        true, dummyLoader,
+        (std::string("SourceHolderNode_") +
          std::to_string(context->getNextPublicIndex()))
             .data());
-    auto resultNodeIndex = context->create<NodeInternal>(
+    auto& sourceGraphInputNodeHolder = context->getRef<AbstractNodeInternal>(sourceGraphInputNodeHolderIndex);
+    sourceGraphInputNodeHolder.setTensorIndex(sourceGraphInputNode.getTensorIndex());
+    weightChangingGraph.mInputNodeIndexes.emplace_back(sourceGraphInputNodeHolderIndex);
+    auto addNodeIndex = context->create<NodeInternal>(
         context, context->getNextPublicIndex(), addOperation,
-        (std::string("InputTensorChangeNode_") +
-         std::to_string(context->getNextPublicIndex()))
+        (std::string("SourceNodeChanger_") +
+            std::to_string(context->getNextPublicIndex()))
             .data());
-    auto& resultNode = context->getRef<NodeInternal>(resultNodeIndex);
-    resultNode.setTensorIndex(sourceGraphInputNode.getTensorIndex());
-    weightChangingGraph.connect(multiplyNodeIndex, resultNodeIndex,
+    auto& addNode = context->getRef<NodeInternal>(addNodeIndex);
+    addNode.setTensorIndex(sourceGraphInputNode.getTensorIndex());
+    weightChangingGraph.connect(multiplyNodeIndex, addNodeIndex,
                                 operation::AddOperation::LEFT);
-    weightChangingGraph.connect(sourceGraphInputNodeCopiedHolder,
-                                resultNodeIndex,
+    weightChangingGraph.connect(sourceGraphInputNodeHolderIndex,
+                                addNodeIndex,
                                 operation::AddOperation::RIGHT);
-    weightChangingGraph.mInputNodeIndexes.emplace_back(gradientFinalNodeIndex);
-    weightChangingGraph.mInputNodeIndexes.emplace_back(learningRateHolderNode);
-    weightChangingGraph.mInputNodeIndexes.emplace_back(
-        sourceGraphInputNodeCopiedHolder);
   }
   weightChangingGraph.traverse();
   return weightChangingGraphIndex;
 }
 
-std::tuple<utils::Index, utils::Index> GraphInternal::getGradient() {
+std::tuple<utils::Index, utils::Index> GraphInternal::getGradient(utils::Index targetNodeIndex) {
   traverse();
-  auto [gradientCalculatingGraphIndex, mapInputNodes] = createGradientGraph();
+  auto [gradientCalculatingGraphIndex, mapInputNodes] = createGradientGraph(targetNodeIndex);
+
+
   auto weightChangingGraphIndex = createWeightChangingGraph(mapInputNodes);
   return std::make_tuple(gradientCalculatingGraphIndex,
                          weightChangingGraphIndex);
+
+//  return std::make_tuple(gradientCalculatingGraphIndex,
+//                         0);
 }
 
 } // namespace athena::core::internal

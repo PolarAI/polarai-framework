@@ -53,7 +53,7 @@ public:
    */
   [[nodiscard]] utils::StringView getName() const;
 
-  std::tuple<Graph, Graph> getGradient();
+  std::tuple<Graph, Graph> getGradient(utils::Index targetNodeIndex);
 
   const Traversal& traverse();
 
@@ -62,16 +62,19 @@ private:
 
   internal::GraphInternal* getGraphInternal();
 };
+} // namespace athena::core
 
-template <> struct ATH_CORE_EXPORT Wrapper<Graph> { using PublicType = Graph; };
+namespace athena {
+template <> struct ATH_CORE_EXPORT Wrapper<core::Graph> { using PublicType = core::Graph; };
 
-template <> struct Returner<Graph> {
-  static typename Wrapper<Graph>::PublicType
-  returner(utils::SharedPtr<internal::ContextInternal> internal,
+template <> struct Returner<core::Graph> {
+  static typename Wrapper<core::Graph>::PublicType
+  returner(utils::SharedPtr<core::internal::ContextInternal> internal,
            utils::Index lastIndex) {
-    return Graph(std::move(internal), lastIndex);
+    return core::Graph(std::move(internal), lastIndex);
   }
 };
-} // namespace athena::core
+}
+
 
 #endif // ATHENA_GRAPH_H

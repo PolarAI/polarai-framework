@@ -23,9 +23,14 @@ MemcpyLoaderInternal::MemcpyLoaderInternal(
                                              std::move(name)),
       mSource(source), mLen(len) {}
 void MemcpyLoaderInternal::load(core::Accessor<float>& acc){
+  //std::cout << "MemcpyLoader: Loading to " << acc.getRawPtr() << "; Size: " << mLen << "; Source: " << mSource << std::endl;
   std::memcpy(acc.getRawPtr(), mSource, mLen);
 }
-void MemcpyLoaderInternal::load(core::Accessor<double>& acc){
-  std::memcpy(acc.getRawPtr(), mSource, mLen);
+//void MemcpyLoaderInternal::load(core::Accessor<double>& acc){
+//  std::memcpy(acc.getRawPtr(), mSource, mLen);
+//}
+void MemcpyLoaderInternal::setPointer(void* source, size_t size) {
+  mSource = source;
+  mLen = size;
 }
 } // namespace athena::loaders::internal

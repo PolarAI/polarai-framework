@@ -23,20 +23,16 @@ class ATH_LOADERS_EXPORT ConstantLoaderInternal
 public:
   ConstantLoaderInternal(
       utils::WeakPtr<core::internal::ContextInternal> context,
-      utils::Index publicIndex, double value,
-      utils::String name = utils::String(""));
-  ConstantLoaderInternal(
-      utils::WeakPtr<core::internal::ContextInternal> context,
       utils::Index publicIndex, float value,
       utils::String name = utils::String(""));
 
   void load(core::Accessor<float>&) override;
-  void load(core::Accessor<double>&) override;
+  //void load(core::Accessor<double>&) override;
+
+  void setConstant(float constant);
 
 protected:
-  // fixme std::variant?
   float mFloatValue;
-  double mDoubleValue;
 };
 } // namespace athena::loaders::internal
 

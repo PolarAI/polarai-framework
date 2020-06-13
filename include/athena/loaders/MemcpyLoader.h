@@ -17,15 +17,40 @@
 
 #include <athena/core/loader/AbstractLoader.h>
 #include <athena/loaders/internal/MemcpyLoaderInternal.h>
+#include <athena/core/Wrapper.h>
+#include <athena/core/PublicEntity.h>
+
 
 namespace athena::loaders {
 namespace internal {
 class MemcpyLoaderInternal;
 }
-class ATH_LOADERS_EXPORT MemcpyLoader {
+class ATH_LOADERS_EXPORT MemcpyLoader : public core::PublicEntity {
 public:
   using InternalType = internal::MemcpyLoaderInternal;
+
+  MemcpyLoader(utils::SharedPtr<core::internal::ContextInternal> context,
+    utils::Index publicIndex);
+
+  void setPointer(void* source, size_t size);
+
+private:
+  const internal::MemcpyLoaderInternal* internal() const;
+
+  internal::MemcpyLoaderInternal* internal();
 };
 } // namespace athena::loaders
+
+namespace athena {
+template <> struct ATH_CORE_EXPORT Wrapper<loaders::MemcpyLoader> { using PublicType = loaders::MemcpyLoader; };
+
+template <> struct Returner<loaders::MemcpyLoader> {
+  static typename Wrapper<loaders::MemcpyLoader>::PublicType
+  returner(utils::SharedPtr<core::internal::ContextInternal> internal,
+           utils::Index lastIndex) {
+    return loaders::MemcpyLoader(std::move(internal), lastIndex);
+  }
+};
+}
 
 #endif // ATHENA_MEMCPYLOADER_H

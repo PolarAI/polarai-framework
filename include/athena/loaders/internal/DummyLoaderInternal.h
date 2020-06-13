@@ -11,26 +11,24 @@
  * the License.
  */
 
-#ifndef ATHENA_COPYLOADERINTERNAL_H
-#define ATHENA_COPYLOADERINTERNAL_H
+#ifndef ATHENA_DUMMYLOADERINTERNAL_H
+#define ATHENA_DUMMYLOADERINTERNAL_H
 
 #include <athena/core/loader/internal/AbstractLoaderInternal.h>
 #include <athena/loaders/loaders_export.h>
 
 namespace athena::loaders::internal {
-class ATH_LOADERS_EXPORT CopyLoaderInternal
+class ATH_LOADERS_EXPORT DummyLoaderInternal
     : public core::internal::AbstractLoaderInternal {
 public:
-  CopyLoaderInternal(utils::WeakPtr<core::internal::ContextInternal> context,
-                     utils::Index publicIndex, utils::Index sourceTensor,
-                     utils::String name = utils::String(""));
+  DummyLoaderInternal(
+      utils::WeakPtr<core::internal::ContextInternal> context,
+      utils::Index publicIndex,
+      utils::String name = utils::String(""));
 
-  void load(core::Accessor<float>&) override{};
-  void load(core::Accessor<double>&) override{};
-
-protected:
-  utils::Index mSourceTensor;
+  void load(core::Accessor<float>&) override;
+  //void load(core::Accessor<double>&) override;
 };
 } // namespace athena::loaders::internal
 
-#endif // ATHENA_COPYLOADERINTERNAL_H
+#endif // ATHENA_DUMMYLOADERINTERNAL_H

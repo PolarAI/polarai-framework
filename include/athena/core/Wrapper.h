@@ -20,14 +20,14 @@
 #include <athena/utils/Pointer.h>
 #include <iostream>
 
-namespace athena::core {
+namespace athena {
 template <typename Type> struct ATH_CORE_EXPORT Wrapper {
   using PublicType = utils::Index;
 };
 
 template <typename Type> struct Returner {
   static typename Wrapper<Type>::PublicType
-  returner(utils::SharedPtr<internal::ContextInternal> internal,
+  returner(utils::SharedPtr<core::internal::ContextInternal> internal,
            utils::Index lastIndex) {
     return lastIndex;
   }

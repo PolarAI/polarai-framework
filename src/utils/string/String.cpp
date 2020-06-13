@@ -17,16 +17,13 @@
 #include <iostream>
 
 namespace athena::utils {
-String::String() : mSize(0), mData(nullptr), mAllocator(Allocator()) {}
+String::String() : mSize(0), mAllocator(Allocator()), mData(nullptr) {}
 
 String::String(const char* const string, Allocator allocator)
     : mSize(strlen(string)),
+      mAllocator(std::move(allocator)),
       mData(reinterpret_cast<const char*>(
-          allocator.allocateBytes((mSize + 1) * sizeof(char)))),
-      mAllocator(std::move(allocator)) {
-//  std::cout << "Creating string: " << static_cast<const void*>(mData) <<
-//  std::endl;
-// std::cout << "Data: " << static_cast<const void*>(mData) << std::endl;
+                mAllocator.allocateBytes((mSize + 1) * sizeof(char)))) {
 #ifdef DEBUG
   if (mData == nullptr) {
     FatalError(ATH_ASSERT, "Memory allocation for string ", this,
@@ -34,6 +31,11 @@ String::String(const char* const string, Allocator allocator)
   }
 #endif
   memcpy((void*)mData, string, (mSize + 1) * sizeof(char));
+}
+
+String::String(const String& rhs) : mSize(rhs.mSize), mAllocator(rhs.mAllocator),
+                                    mData(reinterpret_cast<const char*>(mAllocator.allocateBytes((mSize + 1) * sizeof(char)))) {
+  memcpy((void*)mData, rhs.mData, (mSize + 1) * sizeof(char));
 }
 
 String::String(String&& rhs) noexcept

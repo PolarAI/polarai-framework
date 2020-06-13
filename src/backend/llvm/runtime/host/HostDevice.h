@@ -49,8 +49,6 @@ public:
 
   void addModule(ProgramDesc) override {}
   void linkModules() override {}
-
-  void consumeEvent(Event*) override {}
 };
 } // namespace athena::backend::llvm
 

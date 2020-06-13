@@ -41,22 +41,6 @@ endif ()
 
 add_subdirectory(runtime/driver)
 
-add_custom_target(ath_llvm_rt_images
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/images.hpp)
-
-if (TARGET kernels_spirv)
-    add_dependencies(ath_llvm_rt_images kernels_spirv)
-    get_target_property(__binary kernels_spirv BINARY_FILE)
-    list(APPEND IMAGE_BINARIES ${__binary})
-endif()
-
-string(REPLACE ";" " " IMAGE_BINARIES_STR ${IMAGE_BINARIES})
-
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/images.hpp 
-    COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/utils/kernels/bin2c.py
-    --header ${CMAKE_CURRENT_BINARY_DIR}/images.hpp
-    ${IMAGE_BINARIES_STR})
-
 add_athena_library(${ATH_BACKEND_LLVM} STATIC
         ATH_BACKEND_LLVM # export name
         backend/llvm/llvm_export.h
@@ -65,10 +49,6 @@ add_athena_library(${ATH_BACKEND_LLVM} STATIC
         allocators/LayerAllocator.cpp
         ImageManager.cpp
         CodeGen.cpp)
-
-# FIXME this isn't always true
-target_compile_definitions(${ATH_BACKEND_LLVM} PRIVATE -DHAS_SPIRV=1)
-add_dependencies(${ATH_BACKEND_LLVM} ath_llvm_rt_images)
 
 target_include_directories(${ATH_BACKEND_LLVM} PRIVATE 
                           ${LLVM_INCLUDE_DIRS}
@@ -88,14 +68,6 @@ llvm_map_components_to_libnames(llvm_libs
         AllTargetsDescs
         AllTargetsInfos
         lto)
-
-if (APPLE)
-    set(WHOLE_ARCHIVE -Wl,-all_load)
-    set(NOWHOLE_ARCHIVE)
-elseif (UNIX)
-    set(WHOLE_ARCHIVE -Wl,--whole-archive)
-    set(NOWHOLE_ARCHIVE -Wl,--no-whole-archive)
-endif ()
 
 target_link_libraries(${ATH_BACKEND_LLVM} PRIVATE
         ${llvm_libs}

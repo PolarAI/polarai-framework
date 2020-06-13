@@ -95,6 +95,11 @@ void LayerAllocator::allocate(const core::internal::TensorInternal& tensor) {
 void LayerAllocator::allocate(const MemoryRecord& record) {
   if (mRAMAllocator->isAllocated(record))
     return;
+  for (auto& [_, allocatorPtr] : mDeviceAllocators) {
+    if (allocatorPtr->isAllocated(record)) {
+      return;
+    }
+  }
 
   mRAMAllocator->allocate(record);
   mLocks.insert({record, std::list<LockDescriptor>()});
@@ -157,12 +162,10 @@ void LayerAllocator::lock(const core::internal::TensorInternal& tensor,
 }
 void LayerAllocator::lock(const MemoryRecord& record, LockType type) {
   std::scoped_lock lock{mMutex};
-
   if (type == core::internal::LockType::READ_WRITE && !mLocks[record].empty()) {
     new FatalError(
         ATH_BAD_ACCESS,
-        "Attempt get READ_WRITE lock for tensor that is already locked: ",
-        record.virtualAddress);
+        "Attempt get READ_WRITE lock for tensor with virtual address ", record.virtualAddress, " that is already locked. ");
   }
 
   if (!mRAMAllocator->isAllocated(record)) {
@@ -190,7 +193,6 @@ void LayerAllocator::release(const core::internal::TensorInternal& tensor) {
 }
 void LayerAllocator::release(const MemoryRecord& record) {
   std::scoped_lock lock{mMutex};
-
   auto it = std::find_if(mLocks[record].begin(), mLocks[record].end(),
                          [&](const LockDescriptor& desc) {
                            return desc.domain == MemoryDomain::RAM;

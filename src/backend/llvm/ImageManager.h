@@ -16,4 +16,5 @@
 struct ProgramDesc;
 namespace athena::backend::llvm {
 auto getOpenCLSPIRVProgram() -> ProgramDesc;
+auto getOpenCLTextProgram() -> ProgramDesc;
 }

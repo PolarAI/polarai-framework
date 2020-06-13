@@ -45,9 +45,6 @@ protected:
           LLVM::LLVMType::getVoidTy(llvmDialect), args, false);
       builder.create<mlir::LLVM::LLVMFuncOp>(builder.getUnknownLoc(),
                                              "ath_allocate", funcTy);
-      args.push_back(voidPtrTy); // Event
-      funcTy = LLVM::LLVMType::getFunctionTy(
-          LLVM::LLVMType::getVoidTy(llvmDialect), args, false);
       builder.create<mlir::LLVM::LLVMFuncOp>(builder.getUnknownLoc(),
                                              "ath_release", funcTy);
     }

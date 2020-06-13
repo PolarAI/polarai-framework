@@ -26,7 +26,9 @@ public:
                      utils::String name = utils::String(""));
 
   void load(core::Accessor<float>&) override;
-  void load(core::Accessor<double>&) override;
+  //void load(core::Accessor<double>&) override;
+
+  void setPointer(void* source, size_t size);
 
 protected:
   void* mSource;

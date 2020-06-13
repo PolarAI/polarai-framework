@@ -11,7 +11,8 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "images.hpp"
+// #include "images.hpp"
+#include "runtime/opencl/kernels.h"
 #include "ImageManager.h"
 
 #include <athena/backend/llvm/runtime/ProgramDesc.h>
@@ -24,6 +25,13 @@ auto getOpenCLSPIRVProgram() -> ProgramDesc {
   prog.length = kernels_spirv.size();
   prog.data = reinterpret_cast<const char*>(kernels_spirv.data());
 #endif
+  return prog;
+}
+auto getOpenCLTextProgram() -> ProgramDesc {
+  ProgramDesc prog;
+  prog.type = ProgramDesc::TEXT;
+  prog.length = textKernels.size();
+  prog.data = textKernels.data();
   return prog;
 }
 }

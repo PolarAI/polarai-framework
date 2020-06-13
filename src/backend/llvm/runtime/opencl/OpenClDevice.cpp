@@ -22,6 +22,7 @@
 namespace athena::backend::llvm {
 auto OpenCLDevice::launch(BackendAllocator& allocator, LaunchCommand& cmd,
                           Event* event) -> Event* {
+
   auto oclEvent = static_cast<OpenCLEvent*>(event);
 
   cl_int err;
@@ -57,28 +58,31 @@ auto OpenCLDevice::launch(BackendAllocator& allocator, LaunchCommand& cmd,
   // todo check errors.
   err = clEnqueueNDRangeKernel(mQueue->getNativeQueue(), kernel, cmd.workDim,
                          nullptr, // global offset
-                         cmd.globalSize, nullptr,
+                         cmd.globalSize, cmd.globalSize,    // TODO second argument to nullptr
                          evtCount, // num events in wait list
                          evt,      // event list
                          &outEvent  // event
   );
 
 
+  // FIXME hacky hack to avoid early memory freeing.
+  clWaitForEvents(1, &outEvent);
+
   if (err != CL_SUCCESS) {
     std::terminate();
   }
 
-  return new OpenCLEvent(this, outEvent);
+  return new OpenCLEvent(outEvent);
 }
 
 void OpenCLDevice::addModule(ProgramDesc prog) {
   cl_program program;
-  cl_int err;
+  cl_int err = CL_SUCCESS;
   switch (prog.type) {
   case ProgramDesc::ProgramType::TEXT:
     // fixme check errors
     program = clCreateProgramWithSource(mContext, 1, &prog.data, &prog.length,
-                                        nullptr);
+                                        &err);
     break;
   case ProgramDesc::ProgramType::BINARY:
     program = clCreateProgramWithBinary(
@@ -119,10 +123,5 @@ void OpenCLDevice::linkModules() {
     std::terminate();
   }
   setLinkedProgram(prog);
-}
-
-void OpenCLDevice::consumeEvent(Event* evt) {
-  auto concrete = static_cast<OpenCLEvent*>(evt);
-  delete concrete;
 }
 } // namespace athena::backend::llvm

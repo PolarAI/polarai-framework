@@ -32,7 +32,7 @@ public:
                          utils::String name = utils::String(""));
 
   virtual void load(Accessor<float>&) = 0;
-  virtual void load(Accessor<double>&) = 0;
+  //virtual void load(Accessor<double>&) = 0;
 
 protected:
   utils::String mName;

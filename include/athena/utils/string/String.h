@@ -24,7 +24,7 @@ class ATH_UTILS_EXPORT String {
 public:
   String();
   String(const char* string, Allocator allocator = Allocator());
-  String(const String&) = default;
+  String(const String&);
   String(String&&) noexcept;
   ~String();
   [[nodiscard]] const char* getString() const;
@@ -32,8 +32,8 @@ public:
 
 private:
   size_t mSize;
-  const char* mData;
   Allocator mAllocator;
+  const char* mData;
 };
 } // namespace athena::utils
 

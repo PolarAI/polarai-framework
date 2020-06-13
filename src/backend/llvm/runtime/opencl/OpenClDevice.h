@@ -18,7 +18,6 @@
 #include "OpenClQueue.h"
 
 #include <athena/backend/llvm/runtime/Device.h>
-#include <athena/backend/llvm/runtime/runtime_export.h>
 
 #ifdef __APPLE__
 #include <OpenCL/cl.h>
@@ -26,10 +25,8 @@
 #include <CL/cl.h>
 #endif
 
-#include <string>
-
 namespace athena::backend::llvm {
-class ATH_RT_LLVM_EXPORT OpenCLDevice : public Device {
+class OpenCLDevice : public Device {
 public:
   explicit OpenCLDevice(cl_device_id id) : mClDeviceId(id) {
     size_t strLength;
@@ -106,8 +103,6 @@ public:
 
   void addModule(ProgramDesc prog) override;
   void linkModules() override;
-
-  void consumeEvent(Event*) override;
 
 private:
   cl_device_id mClDeviceId;
