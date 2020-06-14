@@ -15,14 +15,15 @@
 #include "mlir/Pass/Pass.h"
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Target/LLVMIR/ModuleTranslation.h"
+#include "llvm/ExecutionEngine/JITEventListener.h"
+#include "llvm/ExecutionEngine/JITLink/JITLinkMemoryManager.h"
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
+#include "llvm/ExecutionEngine/Orc/RTDyldObjectLinkingLayer.h"
+#include "llvm/ExecutionEngine/SectionMemoryManager.h"
+#include "llvm/Support/FileSystem.h"
 #include "llvm/Support/InitLLVM.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
-#include "llvm/ExecutionEngine/Orc/RTDyldObjectLinkingLayer.h"
-#include "llvm/ExecutionEngine/SectionMemoryManager.h"
-#include "llvm/ExecutionEngine/JITEventListener.h"
-#include "llvm/ExecutionEngine/JITLink/JITLinkMemoryManager.h"
 
 using namespace ::llvm;
 using namespace ::llvm::orc;
@@ -32,6 +33,11 @@ ExitOnError ExitOnErr;
 namespace athena::backend::llvm {
 AthenaJIT::AthenaJIT(std::unique_ptr<::llvm::orc::LLJIT> jit)
     : mJITInstance(std::move(jit)), mMlirPassManager(&mContext) {
+#ifdef DEBUG
+  auto ec = ::llvm::sys::fs::getPotentiallyUniqueTempFileName("graph", "mlir",
+                                                              mTempFileGraph);
+  // todo log ec
+#endif
   setupMlirPassManager();
 };
 
@@ -97,6 +103,13 @@ auto AthenaJIT::lookupSymbol(::llvm::StringRef symbolName)
   return ExitOnErr(mJITInstance->lookupLinkerMangled(symbolName)).getAddress();
 }
 void AthenaJIT::setupMlirPassManager() {
+#ifdef DEBUG
+  if (!mTempFileGraph.empty()) {
+    mlir::OpPrintingFlags opPrintingFlags;
+    mMlirPassManager.addPass(mlir::createLocationSnapshotPass(
+        opPrintingFlags, ::llvm::StringRef(mTempFileGraph.data())));
+  }
+#endif
   mMlirPassManager.addPass(mlir::createCanonicalizerPass());
   mMlirPassManager.addPass(mlir::createGraphRelationDestructorPass());
   mMlirPassManager.addPass(mlir::createLowerGraphToRuntimePass());
@@ -107,6 +120,15 @@ void AthenaJIT::setupMlirPassManager() {
   mMlirPassManager.addPass(mlir::createLowerRuntimeToLLVMPass());
 }
 void AthenaJIT::compileModule() {
+#ifdef DEBUG
+  if (mTempFileGraph.empty()) {
+    std::error_code err;
+    ::llvm::raw_fd_ostream out(::llvm::StringRef(mTempFileGraph.data()), err);
+    if (!err) {
+      mInternalModule->print(out);
+    }
+  }
+#endif
   auto res = mMlirPassManager.run(*mInternalModule);
   if (mlir::failed(res)) {
     // todo throw a real error.

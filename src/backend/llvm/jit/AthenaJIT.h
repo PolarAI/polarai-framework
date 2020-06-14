@@ -1,6 +1,7 @@
 #include <llvm/ExecutionEngine/Orc/LLJIT.h>
 #include <mlir/IR/Module.h>
 #include <mlir/Pass/PassManager.h>
+#include <llvm/Support/FileSystem.h>
 
 namespace athena::backend::llvm {
 class AthenaJIT {
@@ -23,5 +24,8 @@ private:
   mlir::PassManager mMlirPassManager;
   mlir::OwningModuleRef mInternalModule;
   std::unique_ptr<::llvm::orc::LLJIT> mJITInstance;
+#ifdef DEBUG
+  ::llvm::SmallVector<char, 128> mTempFileGraph;
+#endif
 };
 } // namespace athena::backend::llvm
