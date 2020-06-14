@@ -1,3 +1,5 @@
+add_subdirectory(ComputeToSPIRV)
+
 add_mlir_conversion_library(MLIRAthenaConversion
         GraphToRuntimePass.cpp
         ArgInfo.cpp
