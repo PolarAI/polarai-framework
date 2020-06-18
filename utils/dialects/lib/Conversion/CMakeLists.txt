@@ -18,4 +18,9 @@ add_mlir_conversion_library(MLIRAthenaConversion
         MLIRAthenaGraph
         MLIRAthenaRuntime
         MLIRTransforms
+        MLIRLLVMIR
+        MLIRLLVMIRTransforms
+        MLIRStandardToLLVM
+        MLIRTargetLLVMIR
+        MLIRTargetLLVMIRModuleTranslation
 )

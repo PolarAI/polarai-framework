@@ -10,7 +10,7 @@ add_mlir_dialect_library(MLIRCompute
         LINK_LIBS PUBLIC
         MLIREDSC
         MLIRIR
-        MLIRSideEffects
+        MLIRSideEffectInterfaces
         MLIRStandardOps
         MLIRSupport
         MLIRTransformUtils

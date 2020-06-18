@@ -13,5 +13,6 @@ add_mlir_dialect_library(MLIRAthenaRuntime
 target_link_libraries(MLIRAthenaRuntime PUBLIC
      MLIRIR
      MLIRCallInterfaces
+     MLIRSideEffectInterfaces
      MLIRControlFlowInterfaces)
 

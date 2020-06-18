@@ -16,7 +16,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: 
-      image: athenaml/ubuntu:2020053112494563b9c7
+      image: polarai/devenv:202006171854150b1ca1
       volumes:
         - ${{ github.workspace }}:${{ github.workspace }}
     strategy:
