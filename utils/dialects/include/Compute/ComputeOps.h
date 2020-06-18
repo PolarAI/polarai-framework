@@ -20,7 +20,7 @@
 #include "mlir/IR/StandardTypes.h"
 #include "mlir/Interfaces/CallInterfaces.h"
 #include "mlir/Interfaces/ControlFlowInterfaces.h"
-#include "mlir/Interfaces/SideEffects.h"
+#include "mlir/Interfaces/SideEffectInterfaces.h"
 
 namespace mlir::compute {
 #define GET_OP_CLASSES

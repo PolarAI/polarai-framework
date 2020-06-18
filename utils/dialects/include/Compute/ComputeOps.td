@@ -16,7 +16,7 @@ include "mlir/IR/OpAsmInterface.td"
 include "mlir/Interfaces/CallInterfaces.td"
 include "mlir/IR/SymbolInterfaces.td"
 include "mlir/Interfaces/ControlFlowInterfaces.td"
-include "mlir/Interfaces/SideEffects.td"
+include "mlir/Interfaces/SideEffectInterfaces.td"
 
 def Compute_ModuleOp : Compute_Op<"module", [IsolatedFromAbove, SymbolTable, Symbol,
                                              SingleBlockImplicitTerminator<"ModuleEndOp">]> {

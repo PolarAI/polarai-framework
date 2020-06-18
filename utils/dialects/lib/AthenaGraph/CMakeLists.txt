@@ -13,4 +13,7 @@ add_mlir_dialect_library(MLIRAthenaGraph
         )
 
 target_link_libraries(MLIRAthenaGraph PUBLIC
-                      MLIRIR MLIRCallInterfaces MLIRControlFlowInterfaces)
+                      MLIRIR
+                      MLIRCallInterfaces 
+                      MLIRSideEffectInterfaces
+                      MLIRControlFlowInterfaces)
