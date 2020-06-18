@@ -75,10 +75,12 @@ struct BuiltinConversionPattern : public AthenaGraphConversionPattern<OpT> {
     SmallVector<int64_t, 3> local(tensorType.getRank());
     auto localSize = rewriter.getI64ArrayAttr(local);
 
+    auto module = op->getParentOfType<ModuleOp>();
+    auto kernelsModule = module.lookupSymbol("kernels");
     // FIXME this pattern is incorrect if node performs more than one
     //       computation.
     auto launchOp = rewriter.create<ath_rt::LaunchOp>(
-        op->getLoc(), resTypes, device, blockingEvent,
+        op->getLoc(), resTypes, device, blockingEvent, kernelsModule,
         concreteOp.getKernelName(), globalSize, localSize, operands);
     rewriter.replaceOp(op, launchOp.getResult(0));
     return success();

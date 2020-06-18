@@ -13,7 +13,7 @@
 
 #include <mlir/IR/OpDefinition.h>
 
-namespace mlir::ath_graph {
+namespace mlir::compute {
 #include "Compute/ComputeInterfaces.h.inc"
 }
 

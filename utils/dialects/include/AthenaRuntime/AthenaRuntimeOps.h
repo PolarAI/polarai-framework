@@ -14,16 +14,18 @@
 #ifndef ATHENA_ATHENARUNTIMEOPS_H
 #define ATHENA_ATHENARUNTIMEOPS_H
 
+#include "Compute/ComputeInterfaces.h"
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/FunctionSupport.h"
-#include "mlir/IR/OpImplementation.h"
 #include "mlir/IR/OpDefinition.h"
+#include "mlir/IR/OpImplementation.h"
 #include "mlir/IR/StandardTypes.h"
 #include "mlir/Interfaces/CallInterfaces.h"
 #include "mlir/Interfaces/ControlFlowInterfaces.h"
 #include "mlir/Interfaces/SideEffectInterfaces.h"
 
 namespace mlir::ath_rt {
+using namespace compute;
 #define GET_OP_CLASSES
 #include "AthenaRuntime/AthenaRuntimeOps.h.inc"
 } // namespace mlir::ath_rt
