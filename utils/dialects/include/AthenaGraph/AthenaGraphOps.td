@@ -241,6 +241,7 @@ def AthenaGraph_AddOp : AthenaGraph_Op<"add", [ComputationalOpInterface]> {
     llvm::StringRef getKernelName() {
       return "fadd";
     }
+    void produceKernel() {}
   }];
 }
 
@@ -262,6 +263,7 @@ def AthenaGraph_CopyOp : AthenaGraph_Op<"copy", [ComputationalOpInterface]> {
     llvm::StringRef getKernelName() {
       return "fcopy";
     }
+    void produceKernel() {}
   }];
 }
 
@@ -285,6 +287,7 @@ def AthenaGraph_DivideOp : AthenaGraph_Op<"divide", [ComputationalOpInterface]> 
     llvm::StringRef getKernelName() {
       return "fdivide";
     }
+    void produceKernel() {}
   }];
 }
 
@@ -308,6 +311,7 @@ def AthenaGraph_LogLossOp : AthenaGraph_Op<"logloss", [ComputationalOpInterface]
     llvm::StringRef getKernelName() {
       return "flogloss";
     }
+    void produceKernel() {}
   }];
 }
 
@@ -335,6 +339,7 @@ def AthenaGraph_MatMulOp : AthenaGraph_Op<"matmul", [ComputationalOpInterface]> 
     llvm::StringRef getKernelName() {
       return "fmatmul";
     }
+    void produceKernel() {}
   }];
 }
 
@@ -358,6 +363,7 @@ def AthenaGraph_MulOp : AthenaGraph_Op<"mul", [ComputationalOpInterface]> {
     llvm::StringRef getKernelName() {
       return "fmul";
     }
+    void produceKernel() {}
   }];
 }
 
@@ -382,6 +388,7 @@ def AthenaGraph_MulConcatOp : AthenaGraph_Op<"mulconcat", [ComputationalOpInterf
     llvm::StringRef getKernelName() {
       return "fmulconcat";
     }
+    void produceKernel() {}
   }];
 }
 
@@ -404,6 +411,7 @@ def AthenaGraph_SigmoidOp : AthenaGraph_Op<"sigmoid", [ComputationalOpInterface]
     llvm::StringRef getKernelName() {
       return "fsigmoid";
     }
+    void produceKernel() {}
   }];
 }
 
@@ -440,6 +448,7 @@ def AthenaGraph_FillOp : AthenaGraph_Op<"fill", [ComputationalOpInterface]> {
     llvm::StringRef getKernelName() {
       return "ffill";
     }
+    void produceKernel() {}
   }];
 }
 

@@ -8,18 +8,28 @@ include "mlir/IR/SymbolInterfaces.td"
 include "mlir/Interfaces/CallInterfaces.td"
 include "mlir/Interfaces/ControlFlowInterfaces.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
+include "Compute/ComputeInterfaces.td"
 
-def AthenaRuntime_LaunchOp : AthenaRuntime_Op<"launch"> {
+def AthenaRuntime_LaunchOp : AthenaRuntime_Op<"launch", [LaunchInterface]> {
   let summary = "Launches kernel on a specific device";
   let description = [{ TBD }];
 
   let arguments = (ins AthenaRuntime_DeviceType:$device, 
                        AthenaRuntime_EventType:$blocking_event,
+                       SymbolRefAttr:$module,
                        StrAttr:$kernel, I64ArrayAttr:$global_size,
                        I64ArrayAttr:$local_size,
                        Variadic<AnyType>:$operands);
   let results = (outs AnyTensor:$out_tensor,
                       AthenaRuntime_EventType:$out_event);
+  let extraClassDeclaration = [{
+    llvm::StringRef getKernelName() {
+      return kernel();
+    }
+    SymbolRefAttr getModule() {
+      return module();
+    }
+  }];
 }
 
 def AthenaRuntime_DeviceSelectOp : AthenaRuntime_Op<"select_device", 
