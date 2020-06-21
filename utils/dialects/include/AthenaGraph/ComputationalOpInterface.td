@@ -14,7 +14,7 @@ def ComputationalOpInterface : OpInterface<"ComputationalOpInterface"> {
       return "dummy";
     }]>,
     InterfaceMethod<"Produces Compute kernel to calculate operation",
-    "void", "produceKernel", (ins), [{}], [{}]>
+    "void", "produceKernel", (ins "OpBuilder&":$builder), [{}], [{}]>
   ];
 }
 

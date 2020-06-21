@@ -77,10 +77,11 @@ struct BuiltinConversionPattern : public AthenaGraphConversionPattern<OpT> {
 
     auto module = op->getParentOfType<ModuleOp>();
     auto kernelsModule = module.lookupSymbol("kernels");
+    auto kernModuleAttr = rewriter.getSymbolRefAttr(kernelsModule);
     // FIXME this pattern is incorrect if node performs more than one
     //       computation.
     auto launchOp = rewriter.create<ath_rt::LaunchOp>(
-        op->getLoc(), resTypes, device, blockingEvent, kernelsModule,
+        op->getLoc(), resTypes, device, blockingEvent, kernModuleAttr,
         concreteOp.getKernelName(), globalSize, localSize, operands);
     rewriter.replaceOp(op, launchOp.getResult(0));
     return success();

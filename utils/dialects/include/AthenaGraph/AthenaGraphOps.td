@@ -241,7 +241,7 @@ def AthenaGraph_AddOp : AthenaGraph_Op<"add", [ComputationalOpInterface]> {
     llvm::StringRef getKernelName() {
       return "fadd";
     }
-    void produceKernel() {}
+    void produceKernel(OpBuilder&);
   }];
 }
 
@@ -263,7 +263,7 @@ def AthenaGraph_CopyOp : AthenaGraph_Op<"copy", [ComputationalOpInterface]> {
     llvm::StringRef getKernelName() {
       return "fcopy";
     }
-    void produceKernel() {}
+    void produceKernel(OpBuilder&) {}
   }];
 }
 
@@ -287,7 +287,7 @@ def AthenaGraph_DivideOp : AthenaGraph_Op<"divide", [ComputationalOpInterface]> 
     llvm::StringRef getKernelName() {
       return "fdivide";
     }
-    void produceKernel() {}
+    void produceKernel(OpBuilder&) {}
   }];
 }
 
@@ -311,7 +311,7 @@ def AthenaGraph_LogLossOp : AthenaGraph_Op<"logloss", [ComputationalOpInterface]
     llvm::StringRef getKernelName() {
       return "flogloss";
     }
-    void produceKernel() {}
+    void produceKernel(OpBuilder&) {}
   }];
 }
 
@@ -339,7 +339,7 @@ def AthenaGraph_MatMulOp : AthenaGraph_Op<"matmul", [ComputationalOpInterface]> 
     llvm::StringRef getKernelName() {
       return "fmatmul";
     }
-    void produceKernel() {}
+    void produceKernel(OpBuilder&) {}
   }];
 }
 
@@ -363,7 +363,7 @@ def AthenaGraph_MulOp : AthenaGraph_Op<"mul", [ComputationalOpInterface]> {
     llvm::StringRef getKernelName() {
       return "fmul";
     }
-    void produceKernel() {}
+    void produceKernel(OpBuilder&) {}
   }];
 }
 
@@ -388,7 +388,7 @@ def AthenaGraph_MulConcatOp : AthenaGraph_Op<"mulconcat", [ComputationalOpInterf
     llvm::StringRef getKernelName() {
       return "fmulconcat";
     }
-    void produceKernel() {}
+    void produceKernel(OpBuilder&) {}
   }];
 }
 
@@ -411,12 +411,12 @@ def AthenaGraph_SigmoidOp : AthenaGraph_Op<"sigmoid", [ComputationalOpInterface]
     llvm::StringRef getKernelName() {
       return "fsigmoid";
     }
-    void produceKernel() {}
+    void produceKernel(OpBuilder&) {}
   }];
 }
 
 
-def AthenaGraph_TransposeOp : AthenaGraph_Op<"transpose", [Computational]> {
+def AthenaGraph_TransposeOp : AthenaGraph_Op<"transpose", [ComputationalOpInterface]> {
   let summary = "Matrix transposition operation";
   let description = [{ TBD }];
 
@@ -429,6 +429,12 @@ def AthenaGraph_TransposeOp : AthenaGraph_Op<"transpose", [Computational]> {
     result.addOperands(out);
   result.types.push_back(out.getType());
   }]>];
+  let extraClassDeclaration = [{
+    llvm::StringRef getKernelName() {
+      return "ftranspose";
+    }
+    void produceKernel(OpBuilder&) {}
+  }];
 }
 
 def AthenaGraph_FillOp : AthenaGraph_Op<"fill", [ComputationalOpInterface]> {
@@ -448,7 +454,7 @@ def AthenaGraph_FillOp : AthenaGraph_Op<"fill", [ComputationalOpInterface]> {
     llvm::StringRef getKernelName() {
       return "ffill";
     }
-    void produceKernel() {}
+    void produceKernel(OpBuilder&) {}
   }];
 }
 

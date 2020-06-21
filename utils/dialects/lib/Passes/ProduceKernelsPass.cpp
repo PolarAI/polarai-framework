@@ -24,25 +24,25 @@ using namespace mlir;
 
 namespace {
 class ProduceKernelsPass
-    : public PassWrapper<ProduceKernelsPass, OperationPass<FuncOp>> {
+    : public PassWrapper<ProduceKernelsPass, OperationPass<ModuleOp>> {
 
 protected:
   void runOnOperation() override {
-    auto func = getOperation();
-
-    auto module = func.getParentOfType<ModuleOp>();
+    auto module = getOperation();
     auto kernelsModule = module.lookupSymbol<compute::ModuleOp>("kernels");
 
-    func.walk([&](ath_graph::ComputationalOpInterface op) {
+    module.walk([&](ath_graph::ComputationalOpInterface op) {
       if (!kernelsModule.lookupSymbol(op.getKernelName())) {
-        op.produceKernel();
+        OpBuilder builder(module);
+        builder.setInsertionPointToStart(kernelsModule.getBody());
+        op.produceKernel(builder);
       }
     });
   }
 };
 } // namespace
 namespace mlir {
-auto createProduceKernelsPass() -> std::unique_ptr<OperationPass<FuncOp>> {
+auto createProduceKernelsPass() -> std::unique_ptr<OperationPass<ModuleOp>> {
   return std::make_unique<ProduceKernelsPass>();
 }
 } // namespace mlir

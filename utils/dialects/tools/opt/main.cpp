@@ -13,6 +13,7 @@
 
 #include "AthenaGraph/AthenaGraphDialect.h"
 #include "AthenaRuntime/AthenaRuntimeDialect.h"
+#include "Compute/ComputeDialect.h"
 #include "Conversion/GraphToRuntimePass.h"
 #include "Conversion/RuntimeToLLVM.h"
 #include "Passes/Passes.h"
@@ -71,6 +72,7 @@ int main(int argc, char** argv) {
 
   mlir::registerDialect<mlir::ath_graph::AthenaGraphDialect>();
   mlir::registerDialect<mlir::ath_rt::AthenaRuntimeDialect>();
+  mlir::registerDialect<mlir::compute::ComputeDialect>();
   mlir::registerPass("convert-graph-to-runtime",
                      "Converts Athena Graph to Runtime calls",
                      mlir::createLowerGraphToRuntimePass);
@@ -86,6 +88,9 @@ int main(int argc, char** argv) {
   mlir::registerPass("legalize-barriers",
                      "Adds event arguments to Runtime barriers",
                      mlir::createBarrierLegalizerPass);
+  mlir::registerPass("produce-kernels",
+                     "Produces Compute kernels from Graph ops",
+                     mlir::createProduceKernelsPass);
 
   llvm::InitLLVM y(argc, argv);
 
