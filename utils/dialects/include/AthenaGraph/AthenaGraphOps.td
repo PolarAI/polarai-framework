@@ -263,7 +263,7 @@ def AthenaGraph_CopyOp : AthenaGraph_Op<"copy", [ComputationalOpInterface]> {
     llvm::StringRef getKernelName() {
       return "fcopy";
     }
-    void produceKernel(OpBuilder&) {}
+    void produceKernel(OpBuilder&);
   }];
 }
 
@@ -287,7 +287,7 @@ def AthenaGraph_DivideOp : AthenaGraph_Op<"divide", [ComputationalOpInterface]> 
     llvm::StringRef getKernelName() {
       return "fdivide";
     }
-    void produceKernel(OpBuilder&) {}
+    void produceKernel(OpBuilder&);
   }];
 }
 
@@ -311,7 +311,7 @@ def AthenaGraph_LogLossOp : AthenaGraph_Op<"logloss", [ComputationalOpInterface]
     llvm::StringRef getKernelName() {
       return "flogloss";
     }
-    void produceKernel(OpBuilder&) {}
+    void produceKernel(OpBuilder&);
   }];
 }
 

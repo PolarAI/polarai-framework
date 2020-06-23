@@ -3,6 +3,9 @@ add_mlir_dialect_library(MLIRAthenaGraph
         AthenaGraphOps.cpp
         ComputationalOpInterface.cpp
         kernels/AddOp.cpp
+        kernels/CopyOp.cpp
+        kernels/DivideOp.cpp
+        kernels/LogLossOp.cpp
 
         ADDITIONAL_HEADER_DIRS
         ${PROJECT_SOURCE_DIR}/include
