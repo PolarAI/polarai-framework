@@ -7,6 +7,10 @@ add_mlir_dialect_library(MLIRAthenaGraph
         kernels/DivideOp.cpp
         kernels/LogLossOp.cpp
         kernels/MulOp.cpp
+        kernels/MulConcatOp.cpp
+        kernels/FillOp.cpp
+        kernels/MatMulOp.cpp
+        kernels/SigmoidOp.cpp
 
         ADDITIONAL_HEADER_DIRS
         ${PROJECT_SOURCE_DIR}/include

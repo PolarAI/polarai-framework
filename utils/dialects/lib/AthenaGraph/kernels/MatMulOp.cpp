@@ -19,7 +19,7 @@
 #include "mlir/IR/Builders.h"
 
 namespace mlir::ath_graph {
-void MatMulConcatOp::produceKernel(OpBuilder& builder) {
+void MatMulOp::produceKernel(OpBuilder& builder) {
   auto eltType = out()
                      .getType()
                      .cast<RankedTensorType>()
@@ -39,17 +39,77 @@ void MatMulConcatOp::produceKernel(OpBuilder& builder) {
   auto n = builder.create<compute::GlobalIdOp>(
       builder.getUnknownLoc(), builder.getIndexType(), builder.getIndexAttr(1));
 
-  mlir::Value K;
+  size_t kDim;
+  if (false) {
+    // if (transpose_left()) {
+    kDim = 0;
+  } else {
+    kDim = 1;
+  }
 
-  auto zero = builder.create<ConstantFloatOp>(builder.getUnknownLoc(),
-                                              APFloat(0.), eltType);
-  auto grad = builder.create<LoadOp>(builder.getUnknownLoc(),
-                                     kernel.getArgument(0), idx.getResult());
-  auto localDeriv = builder.create<LoadOp>(
-      builder.getUnknownLoc(), kernel.getArgument(1), idx.getResult());
-  auto res = builder.create<MulFOp>(builder.getUnknownLoc(), grad, localDeriv);
-  builder.create<StoreOp>(builder.getUnknownLoc(), res, kernel.getArgument(2),
-                          idx.getResult());
+  mlir::Value K = builder.create<DimOp>(builder.getUnknownLoc(),
+                                        kernel.getArgument(0), kDim);
+
+  auto zero = builder.create<ConstantIntOp>(builder.getUnknownLoc(), 0,
+                                            builder.getIndexType());
+  auto one = builder.create<ConstantIntOp>(builder.getUnknownLoc(), 1,
+                                           builder.getIndexType());
+
+  builder.create<scf::ForOp>(
+      builder.getUnknownLoc(), zero, K, one,
+      ValueRange{kernel.getArgument(0), kernel.getArgument(1),
+                 kernel.getArgument(2)},
+      [this](OpBuilder& bld, Location loc, Value idx, ValueRange args) {
+        mlir::Value leftRow, leftCol, rightRow, rightCol;
+
+        if (false) {
+          // if (transpose_left()) {
+          leftRow = idx;
+          leftCol = bld.create<compute::GlobalIdOp>(
+              bld.getUnknownLoc(), bld.getIndexType(), bld.getIndexAttr(0));
+        } else {
+          leftCol = idx;
+          leftRow = bld.create<compute::GlobalIdOp>(
+              bld.getUnknownLoc(), bld.getIndexType(), bld.getIndexAttr(0));
+        }
+
+        if (false) {
+          // if (transpose_right()) {
+          rightCol = idx;
+          rightRow = bld.create<compute::GlobalIdOp>(
+              bld.getUnknownLoc(), bld.getIndexType(), bld.getIndexAttr(1));
+
+        } else {
+          rightRow = idx;
+          rightCol = bld.create<compute::GlobalIdOp>(
+              bld.getUnknownLoc(), bld.getIndexType(), bld.getIndexAttr(1));
+        }
+
+        mlir::Value leftVal = bld.create<LoadOp>(bld.getUnknownLoc(), args[0],
+                                                 ValueRange{leftRow, leftCol});
+        mlir::Value rightVal = bld.create<LoadOp>(
+            bld.getUnknownLoc(), args[1], ValueRange{rightRow, rightCol});
+
+        mlir::Value dim0 = bld.create<compute::GlobalIdOp>(bld.getUnknownLoc(),
+                                                           bld.getIndexType(),
+                                                           bld.getIndexAttr(0))
+                               .getResult();
+        mlir::Value dim1 = bld.create<compute::GlobalIdOp>(bld.getUnknownLoc(),
+                                                           bld.getIndexType(),
+                                                           bld.getIndexAttr(1))
+                               .getResult();
+
+        mlir::Value outVal = bld.create<LoadOp>(bld.getUnknownLoc(), args[2],
+                                                ValueRange{dim0, dim1});
+
+        mlir::Value mul =
+            bld.create<MulFOp>(bld.getUnknownLoc(), leftVal, rightVal);
+        mlir::Value sum = bld.create<AddFOp>(bld.getUnknownLoc(), mul, outVal);
+
+        bld.create<StoreOp>(bld.getUnknownLoc(), sum, args[2],
+                            ValueRange{dim0, dim1});
+      });
+
   builder.create<compute::ReturnOp>(builder.getUnknownLoc());
 }
 } // namespace mlir::ath_graph

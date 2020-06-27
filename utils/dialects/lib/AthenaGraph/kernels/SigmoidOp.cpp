@@ -32,8 +32,11 @@ void SigmoidOp::produceKernel(OpBuilder& builder) {
                                                 getKernelName(), funcType);
   OpBuilder::InsertionGuard guard{builder};
   builder.setInsertionPointToStart(&kernel.getBody().front());
-  auto idx = builder.create<compute::GlobalIdOp>(
-      builder.getUnknownLoc(), builder.getIndexType(), builder.getIndexAttr(0));
+  auto idx = builder
+                 .create<compute::GlobalIdOp>(builder.getUnknownLoc(),
+                                              builder.getIndexType(),
+                                              builder.getIndexAttr(0))
+                 .getResult();
 
   auto in = builder.create<LoadOp>(builder.getUnknownLoc(),
                                    kernel.getArgument(0), idx);
@@ -46,9 +49,8 @@ void SigmoidOp::produceKernel(OpBuilder& builder) {
   auto res = builder.create<DivFOp>(builder.getUnknownLoc(), one, sum);
 
   builder.create<StoreOp>(builder.getUnknownLoc(), res, kernel.getArgument(1),
-                          idx.getResult());
+                          idx);
 
   builder.create<compute::ReturnOp>(builder.getUnknownLoc());
 }
 } // namespace mlir::ath_graph
-

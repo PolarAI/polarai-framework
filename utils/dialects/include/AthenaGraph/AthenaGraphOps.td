@@ -339,7 +339,7 @@ def AthenaGraph_MatMulOp : AthenaGraph_Op<"matmul", [ComputationalOpInterface]> 
     llvm::StringRef getKernelName() {
       return "fmatmul";
     }
-    void produceKernel(OpBuilder&) {}
+    void produceKernel(OpBuilder&);
   }];
 }
 
