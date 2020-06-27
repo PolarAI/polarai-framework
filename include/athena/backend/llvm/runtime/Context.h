@@ -11,14 +11,20 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_API_H
-#define ATHENA_API_H
+#ifndef ATHENA_RT_CONTEXT_H
+#define ATHENA_RT_CONTEXT_H
 
-#include <athena/backend/llvm/runtime/Context.h>
+#include <athena/backend/llvm/runtime/Device.h>
 
-extern "C" {
-athena::backend::llvm::Context* initContext();
-void closeContext(athena::backend::llvm::Context*);
+#include <memory>
+
+namespace athena::backend::llvm {
+class Context {
+public:
+  virtual ~Context() = default;
+  virtual std::vector<std::shared_ptr<Device>>& getDevices() = 0;
 };
+}
 
-#endif // ATHENA_API_H
+#endif // ATHENA_RT_CONTEXT_H
+

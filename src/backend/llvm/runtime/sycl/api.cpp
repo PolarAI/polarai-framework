@@ -11,36 +11,21 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "SYCLDevice.h"
+#include "SYCLContext.h"
 
 #include <athena/backend/llvm/runtime/api.h>
 #include <athena/backend/llvm/runtime/runtime_export.h>
 
 using namespace athena::backend::llvm;
-using namespace cl::sycl;
 
 extern "C" {
-ATH_RT_LLVM_EXPORT DeviceContainer getAvailableDevices() {
-  auto allDevices = device::get_devices(cl::sycl::info::device_type::all);
-  auto* syclDevices = new Device*[allDevices.size()];
 
-  #ifdef USES_COMPUTECPP
-  if (allDevices.size() > 1) {
-    allDevices.erase(allDevices.begin()); // remove host device
-  }
-  #endif
-
-  int i = 0;
-  for (const auto& device : allDevices) {
-    syclDevices[i++] = new SYCLDevice(device);
-  }
-
-  DeviceContainer deviceContainer{syclDevices, allDevices.size()};
-  return deviceContainer;
+ATH_RT_LLVM_EXPORT Context* initContext() {
+  return new SYCLContext();
 }
-ATH_RT_LLVM_EXPORT void consumeDevice(Device* dev) { delete dev; }
 
-ATH_RT_LLVM_EXPORT void consumeContainer(DeviceContainer cont) {
-  delete[] cont.devices;
+ATH_RT_LLVM_EXPORT void closeContext(Context* ctx) {
+  delete ctx;
 }
+
 }

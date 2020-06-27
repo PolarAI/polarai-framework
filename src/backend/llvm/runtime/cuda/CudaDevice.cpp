@@ -11,14 +11,16 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_API_H
-#define ATHENA_API_H
+#include "CudaDevice.h"
 
-#include <athena/backend/llvm/runtime/Context.h>
+namespace athena::backend::llvm {
+CudaDevice::CudaDevice(CUdevice device) : mDevice(device) {
+  char name[100];
+  cuDeviceGetName(name, 100, mDevice);
+  mDeviceName = std::string(name);
+}
 
-extern "C" {
-athena::backend::llvm::Context* initContext();
-void closeContext(athena::backend::llvm::Context*);
-};
-
-#endif // ATHENA_API_H
+std::string CudaDevice::getDeviceName() const {
+  return mDeviceName;
+}
+}

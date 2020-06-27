@@ -11,14 +11,22 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_API_H
-#define ATHENA_API_H
+#include "CudaContext.h"
 
-#include <athena/backend/llvm/runtime/Context.h>
+#include <athena/backend/llvm/runtime/api.h>
+#include <athena/backend/llvm/runtime/runtime_export.h>
+
+using namespace athena::backend::llvm;
 
 extern "C" {
-athena::backend::llvm::Context* initContext();
-void closeContext(athena::backend::llvm::Context*);
-};
 
-#endif // ATHENA_API_H
+ATH_RT_LLVM_EXPORT Context* initContext() {
+  return new CudaContext();
+}
+
+ATH_RT_LLVM_EXPORT void closeContext(Context* ctx) {
+  delete ctx;
+}
+
+}
+

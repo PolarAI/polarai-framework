@@ -5,6 +5,7 @@
 
 constexpr static auto HasOpenCL = @ATH_HAS_OPENCL@;
 constexpr static auto HasSYCL = @ATH_HAS_SYCL@;
+constexpr static auto HasCUDA = @POLAR_HAS_CUDA@;
 
 inline std::vector<std::string> getListOfLibraries() {
   std::vector<std::string> libraries;
@@ -13,7 +14,12 @@ inline std::vector<std::string> getListOfLibraries() {
     // fixme find a better way to extract libnames
     libraries.emplace_back("lib@ATH_RT_LLVM_SYCL@.so");
   }
-  if constexpr (HasOpenCL) {
+  if constexpr (HasCUDA) {
+    // fixme find a better way to extract libnames
+    libraries.emplace_back("lib@POLAR_RT_LLVM_CUDA@.so");
+  }
+  // temporarily disable OpenCL
+  if constexpr (/*HasOpenCL*/ false) {
     // fixme find a better way to extract libnames
     libraries.emplace_back("lib@ATH_RT_LLVM_OCL@.so");
   }

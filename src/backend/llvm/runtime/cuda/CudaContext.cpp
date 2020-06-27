@@ -11,14 +11,31 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_API_H
-#define ATHENA_API_H
+#include "CudaContext.h"
+#include "CudaDevice.h"
 
-#include <athena/backend/llvm/runtime/Context.h>
+#include <cuda.h>
 
-extern "C" {
-athena::backend::llvm::Context* initContext();
-void closeContext(athena::backend::llvm::Context*);
-};
+namespace athena::backend::llvm {
+CudaContext::CudaContext() {
+  CUresult err = cuInit(0);
 
-#endif // ATHENA_API_H
+  if (err != CUDA_SUCCESS) {
+    std::terminate(); // fixme handle errors
+  }
+
+  int deviceCount;
+  cuDeviceGetCount(&deviceCount);
+
+  mDevices.reserve(deviceCount);
+
+  for (int i = 0; i < deviceCount; i++) {
+    CUdevice device;
+    cuDeviceGet(&device, i);
+    mDevices.push_back(std::make_shared<CudaDevice>(device));
+  }
+}
+std::vector<std::shared_ptr<Device>>& CudaContext::getDevices() {
+  return mDevices;
+}
+}

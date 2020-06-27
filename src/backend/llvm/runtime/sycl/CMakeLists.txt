@@ -10,4 +10,5 @@ add_athena_sycl_library(${ATH_RT_LLVM_SYCL} MODULE
         BufferAllocator.cpp
         SYCLDevice.cpp
         SYCLEvent.cpp
+        SYCLContext.cpp
   )

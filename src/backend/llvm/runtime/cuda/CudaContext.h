@@ -11,14 +11,17 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_API_H
-#define ATHENA_API_H
+#pragma once
 
 #include <athena/backend/llvm/runtime/Context.h>
 
-extern "C" {
-athena::backend::llvm::Context* initContext();
-void closeContext(athena::backend::llvm::Context*);
-};
+namespace athena::backend::llvm {
+class CudaContext : public Context {
+public:
+  CudaContext();
+  std::vector<std::shared_ptr<Device>>& getDevices() override;
 
-#endif // ATHENA_API_H
+private:
+  std::vector<std::shared_ptr<Device>> mDevices;
+};
+}

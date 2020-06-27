@@ -52,6 +52,14 @@ else()
   set(ATH_HAS_SYCL "false" CACHE STRING "" FORCE)
 endif()
 
+find_package(CUDAToolkit)
+if (CUDAToolkit_FOUND)
+  add_subdirectory(runtime/cuda)
+  add_dependencies(${ATH_BACKEND_LLVM} ${POLAR_RT_LLVM_CUDA})
+else()
+  set(POLAR_HAS_CUDA "false" CACHE STRING "" FORCE)
+endif()
+
 add_subdirectory(runtime/driver)
 
 target_include_directories(${ATH_BACKEND_LLVM} PRIVATE 

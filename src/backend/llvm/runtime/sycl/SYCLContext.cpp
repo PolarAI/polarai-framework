@@ -11,14 +11,31 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_API_H
-#define ATHENA_API_H
+#include "SYCLContext.h"
+#include "SYCLDevice.h"
 
-#include <athena/backend/llvm/runtime/Context.h>
+#include <CL/sycl.hpp>
 
-extern "C" {
-athena::backend::llvm::Context* initContext();
-void closeContext(athena::backend::llvm::Context*);
-};
+using namespace cl::sycl;
 
-#endif // ATHENA_API_H
+namespace athena::backend::llvm {
+SYCLContext::SYCLContext() {
+  auto allDevices = device::get_devices(cl::sycl::info::device_type::all);
+
+  #ifdef USES_COMPUTECPP
+  if (allDevices.size() > 1) {
+    allDevices.erase(allDevices.begin()); // remove host device
+  }
+  #endif
+
+  mDevices.reserve(allDevices.size());
+
+  for (auto& dev : allDevices) {
+    mDevices.push_back(std::make_shared<SYCLDevice>(dev));
+  }
+}
+std::vector<std::shared_ptr<Device>>& SYCLContext::getDevices() {
+  return mDevices;
+}
+}
+
