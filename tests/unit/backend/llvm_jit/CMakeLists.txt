@@ -36,10 +36,10 @@ target_link_libraries(TestUnitJITRunnable PRIVATE
                       ${conversion_libs}
                       MLIRIR
                       MLIRPass
-                      MLIRAthenaGraph
-                      MLIRAthenaRuntime
-                      MLIRAthenaPasses
-                      MLIRAthenaConversion
+                      MLIRPolarGraph
+                      MLIRPolarRuntime
+                      MLIRPolarPasses
+                      MLIRPolarConversion
                       AthenaDep::googletest)
 target_include_directories(TestUnitJITRunnable PRIVATE
                            ${LLVM_INCLUDE_DIRS}

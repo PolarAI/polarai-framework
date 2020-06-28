@@ -1,7 +1,7 @@
 #include "AthenaJIT.h"
 
-#include "AthenaGraph/AthenaGraphDialect.h"
-#include "AthenaRuntime/AthenaRuntimeDialect.h"
+#include "PolarGraph/PolarGraphDialect.h"
+#include "PolarRuntime/PolarRuntimeDialect.h"
 #include "Conversion/GraphToRuntimePass.h"
 #include "Conversion/RuntimeToLLVM.h"
 #include "Passes/Passes.h"

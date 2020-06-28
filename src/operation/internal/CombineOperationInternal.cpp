@@ -63,11 +63,11 @@ core::internal::GenValue CombineOperationInternal::gen(
 
   lockTensors(generator, argMap, resultMap);
 
-  GenValue res = generator.callBuiltin<builtin::Add>(a, scaleA, b, scaleB, out);
+  generator.callBuiltin<builtin::Add>(a, scaleA, b, scaleB, out);
 
   releaseTensors(generator, argMap, resultMap);
 
-  return res;
+  return out;
 }
 
 std::tuple<utils::Index, std::vector<core::internal::Edge>,

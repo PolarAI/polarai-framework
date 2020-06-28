@@ -88,49 +88,49 @@ template <> struct builtin_functor<builtin::Return> {
 
 template <> struct builtin_functor<builtin::Add> {
   using type =
-      std::function<GenValue(GenValue, GenValue, GenValue, GenValue, GenValue)>;
+      std::function<void(GenValue, GenValue, GenValue, GenValue, GenValue)>;
 };
 
 template <> struct builtin_functor<builtin::Copy> {
-  using type = std::function<GenValue(GenValue, GenValue)>;
+  using type = std::function<void(GenValue, GenValue)>;
 };
 
 template <> struct builtin_functor<builtin::Divide> {
-  using type = std::function<GenValue(GenValue, GenValue, GenValue)>;
+  using type = std::function<void(GenValue, GenValue, GenValue)>;
 };
 
 template <> struct builtin_functor<builtin::LogLoss> {
-  using type = std::function<GenValue(GenValue, GenValue, GenValue)>;
+  using type = std::function<void(GenValue, GenValue, GenValue)>;
 };
 
 template <> struct builtin_functor<builtin::MatMul> {
   using type =
-  std::function<GenValue(GenValue, GenValue, GenValue, bool, bool)>;
+  std::function<void(GenValue, GenValue, GenValue, bool, bool)>;
 };
 
 template <> struct builtin_functor<builtin::Mul> {
-  using type = std::function<GenValue(GenValue, GenValue, GenValue)>;
+  using type = std::function<void(GenValue, GenValue, GenValue)>;
 };
 
 template <> struct builtin_functor<builtin::MulConcat> {
-  using type = std::function<GenValue(GenValue, GenValue, GenValue)>;
+  using type = std::function<void(GenValue, GenValue, GenValue)>;
 };
 
 
 template <> struct builtin_functor<builtin::Sigmoid> {
-  using type = std::function<GenValue(GenValue, GenValue)>;
+  using type = std::function<void(GenValue, GenValue)>;
 };
 
 template <> struct builtin_functor<builtin::Fill> {
-  using type = std::function<GenValue(GenValue, GenValue)>;
+  using type = std::function<void(GenValue, GenValue)>;
 };
 
 template <> struct builtin_functor<builtin::Slice> {
-  using type = std::function<GenValue(GenValue, GenValue)>;
+  using type = std::function<void(GenValue, GenValue)>;
 };
 
 template <> struct builtin_functor<builtin::Transpose> {
-  using type = std::function<GenValue(GenValue, GenValue)>;
+  using type = std::function<void(GenValue, GenValue)>;
 };
 
 template <builtin B>

@@ -2,8 +2,8 @@
 
 #include "../../../../src/backend/llvm/jit/AthenaJIT.h"
 
-#include "AthenaGraph/AthenaGraphDialect.h"
-#include "AthenaRuntime/AthenaRuntimeDialect.h"
+#include "PolarGraph/PolarGraphDialect.h"
+#include "PolarRuntime/PolarRuntimeDialect.h"
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/InitAllDialects.h"
@@ -78,8 +78,8 @@ TEST(JITTest, CompilesIRCorrectly) {
   mlir::registerAllDialects();
   mlir::registerAllPasses();
 
-  mlir::registerDialect<mlir::ath_graph::AthenaGraphDialect>();
-  mlir::registerDialect<mlir::ath_rt::AthenaRuntimeDialect>();
+  mlir::registerDialect<mlir::polar_graph::PolarGraphDialect>();
+  mlir::registerDialect<mlir::polar_rt::PolarRuntimeDialect>();
 
   ::llvm::InitializeNativeTarget();
   ::llvm::InitializeNativeTargetAsmPrinter();

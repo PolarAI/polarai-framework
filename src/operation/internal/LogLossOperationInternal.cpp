@@ -63,10 +63,10 @@ core::internal::GenValue LogLossOperationInternal::gen(
 
   lockTensors(generator, argMap, resultMap);
 
-  GenValue res = generator.callBuiltin<builtin::LogLoss>(predicted, groundTruth, out);
+  generator.callBuiltin<builtin::LogLoss>(predicted, groundTruth, out);
 
   releaseTensors(generator, argMap, resultMap);
-  return res;
+  return out;
 }
 
 std::tuple<utils::Index, std::vector<core::internal::Edge>,

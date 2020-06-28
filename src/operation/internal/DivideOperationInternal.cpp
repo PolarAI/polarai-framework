@@ -62,12 +62,11 @@ core::internal::GenValue DivideOperationInternal::gen(
 
   lockTensors(generator, argMap, resultMap);
 
-  GenValue res =
-      generator.callBuiltin<builtin::Divide>(numerator, denominator, out);
+  generator.callBuiltin<builtin::Divide>(numerator, denominator, out);
 
   releaseTensors(generator, argMap, resultMap);
 
-  return res;
+  return out;
 }
 
 std::tuple<utils::Index, std::vector<core::internal::Edge>,

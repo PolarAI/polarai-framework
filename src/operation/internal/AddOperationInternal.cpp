@@ -44,6 +44,8 @@ core::internal::GenValue AddOperationInternal::gen(
     const std::vector<core::internal::TensorInternal*>& tensors,
     const core::internal::TensorInternal* resultTensor,
     core::internal::GenNode parentNode) const {
+  generator.setInsertionPoint(parentNode);
+
   std::unordered_map<utils::Index, GenValue> argMap;
   GenValue a = parentNode.getOperand(mapMarkToLocalTensorIndex.at(AddOperation::LEFT));
   argMap[tensors.at(mapMarkToLocalTensorIndex.at(AddOperation::LEFT))->getPublicIndex()] = a;
@@ -54,7 +56,6 @@ core::internal::GenValue AddOperationInternal::gen(
   GenValue out = parentNode.getResult();
   resultMap[resultTensor->getPublicIndex()] = out;
 
-  generator.setInsertionPoint(parentNode);
 
   // TODO support other data types
   // TODO take scale values from operation
@@ -63,10 +64,10 @@ core::internal::GenValue AddOperationInternal::gen(
 
   lockTensors(generator, argMap, resultMap);
 
-  GenValue res = generator.callBuiltin<builtin::Add>(a, scaleA, b, scaleB, out);
+  generator.callBuiltin<builtin::Add>(a, scaleA, b, scaleB, out);
 
   releaseTensors(generator, argMap, resultMap);
-  return res;
+  return out;
 }
 
 std::tuple<utils::Index, std::vector<core::internal::Edge>,

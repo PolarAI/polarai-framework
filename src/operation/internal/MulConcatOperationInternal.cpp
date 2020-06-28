@@ -66,12 +66,11 @@ core::internal::GenValue MulConcatOperationInternal::gen(
 
   lockTensors(generator, argMap, resultMap);
 
-  GenValue res =
-      generator.callBuiltin<builtin::MulConcat>(gradient, localDerivative, out);
+  generator.callBuiltin<builtin::MulConcat>(gradient, localDerivative, out);
 
   releaseTensors(generator, argMap, resultMap);
 
-  return res;
+  return out;
 }
 
 std::tuple<utils::Index, std::vector<core::internal::Edge>,

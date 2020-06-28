@@ -11,7 +11,7 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include <AthenaGraph/AthenaGraphOps.h>
+#include <PolarGraph/PolarGraphOps.h>
 #include <athena/backend/llvm/CodeGen.h>
 #include <athena/core/Generator.h>
 #include <athena/core/internal/GenBuiltins.h>
@@ -45,8 +45,8 @@ struct MlirValueImpl : internal::GenValueImplBase {
 };
 
 struct MlirNodeImpl : internal::GenNodeImplBase {
-  mlir::ath_graph::NodeOp node;
-  MlirNodeImpl(mlir::ath_graph::NodeOp node) : node(node) {}
+  mlir::polar_graph::NodeOp node;
+  MlirNodeImpl(mlir::polar_graph::NodeOp node) : node(node) {}
   auto getOperand(size_t i) -> GenValue override {
     mlir::Value op = node.getArgument(i);
     return GenValue(std::make_shared<MlirValueImpl>(op));
@@ -62,8 +62,8 @@ struct MlirNodeImpl : internal::GenNodeImplBase {
 };
 
 struct MlirGraphImpl : internal::GenGraphImplBase {
-  mlir::ath_graph::GraphOp graph;
-  MlirGraphImpl(mlir::ath_graph::GraphOp graph) : graph(graph) {}
+  mlir::polar_graph::GraphOp graph;
+  MlirGraphImpl(mlir::polar_graph::GraphOp graph) : graph(graph) {}
 };
 
 struct MlirInsPointImpl : internal::GenInsPointImplBase {
@@ -169,14 +169,14 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
                                              {getTensorType(builder, out)});
         }
 
-        auto node = builder.create<mlir::ath_graph::NodeOp>(
+        auto node = builder.create<mlir::polar_graph::NodeOp>(
             builder.getUnknownLoc(), name, nodeType, nodeId, clusterId);
         mlir::OpBuilder::InsertionGuard guard{builder};
         builder.setInsertionPointToStart(&node.getBody().front());
 
         if (out.getVirtualAddress() != 0) {
           auto tensorType = getTensorType(builder, out);
-          builder.create<mlir::ath_graph::CreateTensorOp>(
+          builder.create<mlir::polar_graph::CreateTensorOp>(
               builder.getUnknownLoc(), out.getVirtualAddress(), tensorType);
         }
 
@@ -187,7 +187,7 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
   std::function<GenGraph(std::string_view, size_t)> graphFunctor =
       [&](std::string_view name, size_t graphId) {
         // fixme set graph ID
-        auto graph = builder.create<mlir::ath_graph::GraphOp>(
+        auto graph = builder.create<mlir::polar_graph::GraphOp>(
             builder.getUnknownLoc(), name);
         return GenGraph{std::make_shared<MlirGraphImpl>(graph)};
       };
@@ -234,8 +234,8 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
   builtin_functor_t<builtin::Alloc> allocFunctor =
       [&](GenValue tensor) -> GenValue {
     auto tensorVal = tensor.value<MlirValueImpl>().value;
-    builder.create<mlir::ath_graph::AllocOp>(builder.getUnknownLoc(),
-                                             tensorVal);
+    builder.create<mlir::polar_graph::AllocOp>(builder.getUnknownLoc(),
+                                               tensorVal);
 
     return GenValue{nullptr};
   };
@@ -251,8 +251,8 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
       mlirLockType = builder.getStringAttr("read_write");
     }
 
-    builder.create<mlir::ath_graph::LockOp>(builder.getUnknownLoc(),
-                                            mlirLockType, tensorVal);
+    builder.create<mlir::polar_graph::LockOp>(builder.getUnknownLoc(),
+                                              mlirLockType, tensorVal);
     return GenValue{nullptr};
   };
   generator.registerFunctor<builtin::Lock>(lockFunctor);
@@ -260,16 +260,16 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
   builtin_functor_t<builtin::Release> releaseFunctor = [&](GenValue tensor) {
     auto tensorVal = tensor.value<MlirValueImpl>().value;
 
-    builder.create<mlir::ath_graph::ReleaseOp>(builder.getUnknownLoc(),
-                                               tensorVal);
+    builder.create<mlir::polar_graph::ReleaseOp>(builder.getUnknownLoc(),
+                                                 tensorVal);
 
     return GenValue{nullptr};
   };
   generator.registerFunctor<builtin::Release>(releaseFunctor);
 
   builtin_functor_t<builtin::Barrier> barrierBuiltin = [&](uint64_t clusterId) {
-    builder.create<mlir::ath_graph::BarrierOp>(builder.getUnknownLoc(),
-                                               builder.getIndexAttr(clusterId));
+    builder.create<mlir::polar_graph::BarrierOp>(
+        builder.getUnknownLoc(), builder.getIndexAttr(clusterId));
   };
   generator.registerFunctor<builtin::Barrier>(barrierBuiltin);
 
@@ -277,8 +277,8 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
       [&](GenValue destTensor) {
         auto tensorVal = destTensor.value<MlirValueImpl>().value;
 
-        builder.create<mlir::ath_graph::InvokeLoaderOp>(builder.getUnknownLoc(),
-                                                        tensorVal);
+        builder.create<mlir::polar_graph::InvokeLoaderOp>(
+            builder.getUnknownLoc(), tensorVal);
 
         return GenValue{nullptr};
       };
@@ -295,7 +295,7 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
           nodeOperands.push_back(val);
         }
 
-        auto evalRes = builder.create<mlir::ath_graph::EvalOp>(
+        auto evalRes = builder.create<mlir::polar_graph::EvalOp>(
             builder.getUnknownLoc(), mlirNode, nodeOperands);
 
         if (evalRes.getNumResults() == 1) {
@@ -310,10 +310,10 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
       [&](std::optional<GenValue> out) {
         if (out) {
           auto outVal = out.value().value<MlirValueImpl>().value;
-          builder.create<mlir::ath_graph::ReturnOp>(builder.getUnknownLoc(),
-                                                    outVal);
+          builder.create<mlir::polar_graph::ReturnOp>(builder.getUnknownLoc(),
+                                                      outVal);
         } else {
-          builder.create<mlir::ath_graph::ReturnOp>(builder.getUnknownLoc());
+          builder.create<mlir::polar_graph::ReturnOp>(builder.getUnknownLoc());
         }
       };
   generator.registerFunctor<builtin::Return>(retFunctor);
@@ -327,10 +327,8 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
     auto scaleBVal = scaleB.value<MlirValueImpl>().value;
     auto outVal = out.value<MlirValueImpl>().value;
 
-    auto res = builder.create<mlir::ath_graph::AddOp>(
+    builder.create<mlir::polar_graph::AddOp>(
         builder.getUnknownLoc(), aVal, scaleAVal, bVal, scaleBVal, outVal);
-
-    return GenValue{std::make_unique<MlirValueImpl>(res)};
   };
   generator.registerFunctor<builtin::Add>(addFunctor);
 
@@ -339,10 +337,8 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
     auto inputVal = input.value<MlirValueImpl>().value;
     auto outVal = out.value<MlirValueImpl>().value;
 
-    auto res = builder.create<mlir::ath_graph::CopyOp>(builder.getUnknownLoc(),
-                                                       inputVal, outVal);
-
-    return GenValue{std::make_unique<MlirValueImpl>(res)};
+    builder.create<mlir::polar_graph::CopyOp>(builder.getUnknownLoc(), inputVal,
+                                              outVal);
   };
   generator.registerFunctor<builtin::Copy>(copyFunctor);
 
@@ -352,10 +348,8 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
         auto denominatorVal = denominator.value<MlirValueImpl>().value;
         auto outVal = out.value<MlirValueImpl>().value;
 
-        auto res = builder.create<mlir::ath_graph::DivideOp>(
+        builder.create<mlir::polar_graph::DivideOp>(
             builder.getUnknownLoc(), numeratorVal, denominatorVal, outVal);
-
-        return GenValue{std::make_unique<MlirValueImpl>(res)};
       };
   generator.registerFunctor<builtin::Divide>(divideFunctor);
 
@@ -365,10 +359,8 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
         auto groundTruthVal = groundTruth.value<MlirValueImpl>().value;
         auto outVal = out.value<MlirValueImpl>().value;
 
-        auto res = builder.create<mlir::ath_graph::LogLossOp>(
+        builder.create<mlir::polar_graph::LogLossOp>(
             builder.getUnknownLoc(), predictedVal, groundTruthVal, outVal);
-
-        return GenValue{std::make_unique<MlirValueImpl>(res)};
       };
   generator.registerFunctor<builtin::LogLoss>(logLossFunctor);
 
@@ -379,11 +371,9 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
         auto rightVal = right.value<MlirValueImpl>().value;
         auto outVal = out.value<MlirValueImpl>().value;
 
-        auto res = builder.create<mlir::ath_graph::MatMulOp>(
-            builder.getUnknownLoc(), outVal.getType(), leftVal, rightVal,
-            outVal, transpLeft, transpRight);
-
-        return GenValue{std::make_unique<MlirValueImpl>(res)};
+        builder.create<mlir::polar_graph::MatMulOp>(builder.getUnknownLoc(),
+                                                    leftVal, rightVal, outVal,
+                                                    transpLeft, transpRight);
       };
   generator.registerFunctor<builtin::MatMul>(matmulFunctor);
 
@@ -393,9 +383,8 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
     auto bVal = b.value<MlirValueImpl>().value;
     auto outVal = out.value<MlirValueImpl>().value;
 
-    auto res = builder.create<mlir::ath_graph::MulOp>(builder.getUnknownLoc(),
-                                                      aVal, bVal, outVal);
-    return GenValue{std::make_unique<MlirValueImpl>(res)};
+    builder.create<mlir::polar_graph::MulOp>(builder.getUnknownLoc(), aVal,
+                                             bVal, outVal);
   };
   generator.registerFunctor<builtin::Mul>(mulFunctor);
 
@@ -405,9 +394,8 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
         auto localDerivativeVal = localDerivative.value<MlirValueImpl>().value;
         auto outVal = out.value<MlirValueImpl>().value;
 
-        auto res = builder.create<mlir::ath_graph::MulConcatOp>(
+        builder.create<mlir::polar_graph::MulConcatOp>(
             builder.getUnknownLoc(), gradientVal, localDerivativeVal, outVal);
-        return GenValue{std::make_unique<MlirValueImpl>(res)};
       };
   generator.registerFunctor<builtin::MulConcat>(mulConcatFunctor);
 
@@ -416,10 +404,8 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
     auto inputVal = input.value<MlirValueImpl>().value;
     auto outVal = out.value<MlirValueImpl>().value;
 
-    auto res = builder.create<mlir::ath_graph::SigmoidOp>(
-        builder.getUnknownLoc(), inputVal, outVal);
-
-    return GenValue{std::make_unique<MlirValueImpl>(res)};
+    builder.create<mlir::polar_graph::SigmoidOp>(builder.getUnknownLoc(),
+                                                 inputVal, outVal);
   };
   generator.registerFunctor<builtin::Sigmoid>(sigmoidFunctor);
 
@@ -428,10 +414,8 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
     auto patternVal = pattern.value<MlirValueImpl>().value;
     auto outVal = out.value<MlirValueImpl>().value;
 
-    auto res = builder.create<mlir::ath_graph::FillOp>(builder.getUnknownLoc(),
-                                                       patternVal, outVal);
-
-    return GenValue{std::make_unique<MlirValueImpl>(res)};
+    builder.create<mlir::polar_graph::FillOp>(builder.getUnknownLoc(),
+                                              patternVal, outVal);
   };
   generator.registerFunctor<builtin::Fill>(fillFunctor);
 
@@ -440,9 +424,8 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
     auto indexVal = index.value<MlirValueImpl>().value;
     auto outVal = tensor.value<MlirValueImpl>().value;
 
-    auto res = builder.create<mlir::ath_graph::SliceOp>(builder.getUnknownLoc(),
-                                                        indexVal, outVal);
-    return GenValue{std::make_shared<MlirValueImpl>(res.getResult())};
+    builder.create<mlir::polar_graph::SliceOp>(builder.getUnknownLoc(),
+                                               indexVal, outVal);
   };
   generator.registerFunctor<builtin::Slice>(sliceFunctor);
 
@@ -451,9 +434,8 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
     auto tensorVal = tensor.value<MlirValueImpl>().value;
     auto outVal = out.value<MlirValueImpl>().value;
 
-    auto res = builder.create<mlir::ath_graph::TransposeOp>(
-        builder.getUnknownLoc(), tensorVal, outVal);
-    return GenValue{std::make_unique<MlirValueImpl>(res)};
+    builder.create<mlir::polar_graph::TransposeOp>(builder.getUnknownLoc(),
+                                                   tensorVal, outVal);
   };
   generator.registerFunctor<builtin::Transpose>(transposeFunctor);
 }

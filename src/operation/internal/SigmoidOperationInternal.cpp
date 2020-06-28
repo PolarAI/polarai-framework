@@ -58,11 +58,11 @@ core::internal::GenValue SigmoidOperationInternal::gen(
 
   lockTensors(generator, argMap, resultMap);
 
-  GenValue res = generator.callBuiltin<builtin::Sigmoid>(input, out);
+  generator.callBuiltin<builtin::Sigmoid>(input, out);
 
   releaseTensors(generator, argMap, resultMap);
 
-  return res;
+  return out;
 }
 
 std::tuple<utils::Index, std::vector<core::internal::Edge>,

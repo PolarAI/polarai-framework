@@ -65,11 +65,11 @@ core::internal::GenValue MatMulOperationInternal::gen(
 
   lockTensors(generator, argMap, resultMap);
 
-  GenValue res = generator.callBuiltin<builtin::MatMul>(left, right, out, mIsLeftTranspose, mIsRightTranspose);
+  generator.callBuiltin<builtin::MatMul>(left, right, out, mIsLeftTranspose, mIsRightTranspose);
 
   releaseTensors(generator, argMap, resultMap);
 
-  return res;
+  return out;
 }
 
 std::tuple<utils::Index, std::vector<core::internal::Edge>,

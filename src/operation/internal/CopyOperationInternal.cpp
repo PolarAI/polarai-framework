@@ -22,8 +22,7 @@ namespace athena::operation::internal {
 CopyOperationInternal::CopyOperationInternal(
     utils::WeakPtr<core::internal::ContextInternal> context,
     utils::Index publicNodeIndex, utils::String name)
-    : OperationInternal(std::move(context), publicNodeIndex,
-                                        std::move(name)) {}
+    : OperationInternal(std::move(context), publicNodeIndex, std::move(name)) {}
 
 utils::Index CopyOperationInternal::createResultTensor(
     utils::SharedPtr<core::internal::ContextInternal> context,
@@ -43,6 +42,8 @@ core::internal::GenValue CopyOperationInternal::gen(
     const std::vector<core::internal::TensorInternal*>& tensors,
     const core::internal::TensorInternal* resultTensor,
     GenNode parentNode) const {
+  generator.setInsertionPoint(parentNode);
+
   std::unordered_map<utils::Index, GenValue> argMap;
   GenValue input = parentNode.getOperand(0);
   argMap[tensors.at(0)->getPublicIndex()] = input;
@@ -51,23 +52,22 @@ core::internal::GenValue CopyOperationInternal::gen(
   GenValue out = parentNode.getResult();
   resultMap[resultTensor->getPublicIndex()] = out;
 
-  generator.setInsertionPoint(parentNode);
-
   lockTensors(generator, argMap, resultMap);
 
-  GenValue res = generator.callBuiltin<builtin::Copy>(input, out);
+  generator.callBuiltin<builtin::Copy>(input, out);
 
   releaseTensors(generator, argMap, resultMap);
-  return res;
+  return out;
 }
 
 std::tuple<utils::Index, std::vector<core::internal::Edge>,
            std::vector<utils::Index>>
 CopyOperationInternal::genDerivative(
-    const core::NodeState* inputNodeState, const core::NodeState* currentNodeState, size_t indexOfOutputDependence,
+    const core::NodeState* inputNodeState,
+    const core::NodeState* currentNodeState, size_t indexOfOutputDependence,
     utils::Index gradientGraphFinalNodeIndex) const {
   // TODO
-    return {};
+  return {};
 }
 
 size_t CopyOperationInternal::getOperandsCount() const { return 1; }

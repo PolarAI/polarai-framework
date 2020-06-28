@@ -44,6 +44,8 @@ core::internal::GenValue MulOperationInternal::gen(
     const std::vector<core::internal::TensorInternal*>& tensors,
     const core::internal::TensorInternal* resultTensor,
     core::internal::GenNode parentNode) const {
+  generator.setInsertionPoint(parentNode);
+
   std::unordered_map<utils::Index, GenValue> argMap;
   GenValue a = parentNode.getOperand(mapMarkToLocalTensorIndex.at(MulOperation::LEFT));
   argMap[tensors.at(mapMarkToLocalTensorIndex.at(MulOperation::LEFT))->getPublicIndex()] = a;
@@ -54,15 +56,13 @@ core::internal::GenValue MulOperationInternal::gen(
   GenValue out = parentNode.getResult();
   resultMap[resultTensor->getPublicIndex()] = out;
 
-  generator.setInsertionPoint(parentNode);
-
   lockTensors(generator, argMap, resultMap);
 
-  GenValue res = generator.callBuiltin<builtin::Mul>(a, b, out);
+  generator.callBuiltin<builtin::Mul>(a, b, out);
 
   releaseTensors(generator, argMap, resultMap);
 
-  return res;
+  return out;
 }
 
 std::tuple<utils::Index, std::vector<core::internal::Edge>,
