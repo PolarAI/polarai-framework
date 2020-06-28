@@ -20,7 +20,7 @@ using namespace cl::sycl;
 
 namespace athena::backend::llvm {
 SYCLContext::SYCLContext() {
-  auto allDevices = device::get_devices(cl::sycl::info::device_type::all);
+  auto allDevices = device::get_devices(cl::sycl::info::device_type::host);
 
   #ifdef USES_COMPUTECPP
   if (allDevices.size() > 1) {

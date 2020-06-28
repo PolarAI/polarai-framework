@@ -56,8 +56,7 @@ struct BuiltinConversionPattern : public PolarGraphConversionPattern<OpT> {
     auto device = rewriter.create<polar_rt::DeviceSelectOp>(
         op->getLoc(), deviceType, nodeIdAttr);
 
-    SmallVector<mlir::Type, 2> resTypes;
-    resTypes.push_back(operands.back().getType());
+    SmallVector<mlir::Type, 1> resTypes;
     resTypes.push_back(polar_rt::EventType::get(op->getContext()));
 
     // todo correctly deploy events

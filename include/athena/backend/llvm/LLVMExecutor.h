@@ -56,10 +56,12 @@ public:
   void execute(std::string_view name, void* userData);
 
 private:
-  std::shared_ptr<AthenaJIT> mJITCompiler{nullptr};
-  std::shared_ptr<BackendAllocator> mAllocator;
+  // Driver must come first to ensure proper shutdown
   std::shared_ptr<RuntimeDriver> mRuntimeDriver;
   std::vector<Device*> mDevices;
+
+  std::shared_ptr<AthenaJIT> mJITCompiler{nullptr};
+  std::shared_ptr<BackendAllocator> mAllocator;
 };
 } // namespace athena::backend::llvm
 
