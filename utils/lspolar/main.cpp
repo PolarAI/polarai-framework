@@ -8,6 +8,8 @@ static std::string providerToString(DeviceProvider provider) {
   switch (provider) {
   case DeviceProvider::CUDA:
     return "CUDA";
+  case DeviceProvider::HIP:
+    return "HIP";
   case DeviceProvider::SYCL:
     return "SYCL";
   case DeviceProvider::OpenCL:
