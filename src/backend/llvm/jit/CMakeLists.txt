@@ -28,10 +28,10 @@ get_property(conversion_libs GLOBAL PROPERTY MLIR_CONVERSION_LIBS)
 target_link_libraries(${AthenaJitTarget} PUBLIC
                       ${llvm_libs}
                       MLIRIR
-                      MLIRAthenaGraph
-                      MLIRAthenaRuntime
-                      MLIRAthenaConversion
-                      MLIRAthenaPasses
+                      MLIRPolarGraph
+                      MLIRPolarRuntime
+                      MLIRPolarConversion
+                      MLIRPolarPasses
                       ${dialect_libs}
                       ${conversion_libs}
                       )                       

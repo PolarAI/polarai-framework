@@ -1,5 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
+// Copyright (c) 2020 Polar. All rights reserved.
 // https://getathena.ml
 //
 // Licensed under MIT license.
@@ -11,9 +11,9 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "AthenaRuntime/AthenaRuntimeDialect.h"
-#include "AthenaRuntime/AthenaRuntimeOps.h"
 #include "Passes/Passes.h"
+#include "PolarRuntime/PolarRuntimeDialect.h"
+#include "PolarRuntime/PolarRuntimeOps.h"
 
 #include "mlir/Analysis/SliceAnalysis.h"
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
@@ -30,7 +30,7 @@ static void getChildren(Operation* op, llvm::SetVector<Operation*>& children) {
   }
   Value res = op->getResult(0);
   for (auto u : res.getUsers()) {
-    if (llvm::isa<ath_rt::LaunchOp>(u)) {
+    if (llvm::isa<polar_rt::LaunchFuncOp>(u)) {
       children.insert(u);
       getChildren(u, children);
     }
@@ -44,7 +44,7 @@ protected:
   void runOnOperation() override {
     auto func = getOperation();
 
-    func.walk([&](ath_rt::ReleaseOp op) {
+    func.walk([&](polar_rt::ReleaseOp op) {
       auto* tensor = op.tensor().getDefiningOp();
       llvm::SetVector<Operation*> children;
       getChildren(tensor, children);
@@ -55,7 +55,8 @@ protected:
 
       auto sortedTensors = mlir::topologicalSort(children);
 
-      auto lastLaunch = llvm::cast<ath_rt::LaunchOp>(sortedTensors.back());
+      auto lastLaunch =
+          llvm::cast<polar_rt::LaunchFuncOp>(sortedTensors.back());
       op.eventMutable().append(lastLaunch.out_event());
     });
   }

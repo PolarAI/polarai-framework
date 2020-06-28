@@ -11,15 +11,15 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "AthenaGraph/AthenaGraphOps.h"
-#include "AthenaGraph/AthenaGraphDialect.h"
+#include "PolarGraph/PolarGraphOps.h"
+#include "PolarGraph/PolarGraphDialect.h"
 
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/FunctionImplementation.h"
 #include "mlir/IR/OpImplementation.h"
 #include "mlir/IR/StandardTypes.h"
 
-namespace mlir::ath_graph {
+namespace mlir::polar_graph {
 
 void NodeOp::build(OpBuilder& builder, OperationState& result, StringRef name,
                    FunctionType type, size_t nodeId, size_t clusterId,
@@ -178,5 +178,5 @@ void CreateTensorOp::build(OpBuilder& builder, OperationState& result,
 }
 
 #define GET_OP_CLASSES
-#include "AthenaGraph/AthenaGraphOps.cpp.inc"
-} // namespace mlir::ath_graph
+#include "PolarGraph/PolarGraphOps.cpp.inc"
+} // namespace mlir::polar_graph

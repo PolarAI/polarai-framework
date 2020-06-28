@@ -11,9 +11,16 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "AthenaGraph/ComputationalOpInterface.h"
+#include "PolarGraph/PolarGraphDialect.h"
+#include "PolarGraph/PolarGraphOps.h"
 
 using namespace mlir;
-using namespace mlir::ath_graph;
+using namespace mlir::polar_graph;
 
-#include "AthenaGraph/ComputationalOpInterface.cpp.inc"
+PolarGraphDialect::PolarGraphDialect(mlir::MLIRContext* context)
+    : Dialect(getDialectNamespace(), context) {
+  addOperations<
+#define GET_OP_LIST
+#include "PolarGraph/PolarGraphOps.cpp.inc"
+      >();
+}

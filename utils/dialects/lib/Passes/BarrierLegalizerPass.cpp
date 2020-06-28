@@ -1,5 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
+// Copyright (c) 2020 Polar. All rights reserved.
 // https://getathena.ml
 //
 // Licensed under MIT license.
@@ -11,8 +11,8 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "AthenaRuntime/AthenaRuntimeDialect.h"
-#include "AthenaRuntime/AthenaRuntimeOps.h"
+#include "PolarRuntime/PolarRuntimeDialect.h"
+#include "PolarRuntime/PolarRuntimeOps.h"
 #include "Passes/Passes.h"
 
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
@@ -30,7 +30,7 @@ protected:
     auto func = getOperation();
     auto module = func.getParentOfType<ModuleOp>();
 
-    func.walk([&](ath_rt::BarrierOp barrier) {
+    func.walk([&](polar_rt::BarrierOp barrier) {
       // todo replace with constant or function call
       auto clusterId = barrier.getAttrOfType<IntegerAttr>("cluster_id");
 
@@ -46,7 +46,7 @@ protected:
 
       OpBuilder builder(module);
       builder.setInsertionPointAfter(barrier);
-      builder.create<ath_rt::BarrierOp>(barrier.getLoc(), dependants);
+      builder.create<polar_rt::BarrierOp>(barrier.getLoc(), dependants);
       barrier.erase();
     });
   }

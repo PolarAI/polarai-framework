@@ -1,5 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
+// Copyright (c) 2020 Polar. All rights reserved.
 // https://getathena.ml
 //
 // Licensed under MIT license.
@@ -11,11 +11,11 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "AthenaGraph/AthenaGraphDialect.h"
-#include "AthenaRuntime/AthenaRuntimeDialect.h"
 #include "Conversion/GraphToRuntimePass.h"
 #include "Conversion/RuntimeToLLVM.h"
 #include "Passes/Passes.h"
+#include "PolarGraph/PolarGraphDialect.h"
+#include "PolarRuntime/PolarRuntimeDialect.h"
 
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/MLIRContext.h"
@@ -69,16 +69,16 @@ int main(int argc, char** argv) {
   mlir::registerAllDialects();
   mlir::registerAllPasses();
 
-  mlir::registerDialect<mlir::ath_graph::AthenaGraphDialect>();
-  mlir::registerDialect<mlir::ath_rt::AthenaRuntimeDialect>();
+  mlir::registerDialect<mlir::polar_graph::PolarGraphDialect>();
+  mlir::registerDialect<mlir::polar_rt::PolarRuntimeDialect>();
   mlir::registerPass("convert-graph-to-runtime",
-                     "Converts Athena Graph to Runtime calls",
+                     "Converts Polar Graph to Runtime calls",
                      mlir::createLowerGraphToRuntimePass);
   mlir::registerPass("convert-runtime-to-llvm",
-                     "Converts Athena Graph to Runtime calls",
+                     "Converts Polar Graph to Runtime calls",
                      mlir::createLowerRuntimeToLLVMPass);
   mlir::registerPass("deploy-default-functions",
-                     "Adds definitions of default Athena functions",
+                     "Adds definitions of default Polar functions",
                      mlir::createDeployDefaultFunctionsPass);
   mlir::registerPass("destroy-graph-relations",
                      "Removes explicit dependencies between Graph nodes",

@@ -1,6 +1,6 @@
-add_mlir_dialect_library(MLIRAthenaGraph
-        AthenaGraphDialect.cpp
-        AthenaGraphOps.cpp
+add_mlir_dialect_library(MLIRPolarGraph
+        PolarGraphDialect.cpp
+        PolarGraphOps.cpp
         ComputationalOpInterface.cpp
         PeepholePatterns.cpp
 
@@ -9,11 +9,11 @@ add_mlir_dialect_library(MLIRAthenaGraph
         ${PROJECT_BINARY_DIR}/include
 
         DEPENDS
-        MLIRAthenaGraphOpsIncGen
+        MLIRPolarGraphOpsIncGen
         MLIRComputationalOpInterfaceIncGen
         )
 
-target_link_libraries(MLIRAthenaGraph PUBLIC
+target_link_libraries(MLIRPolarGraph PUBLIC
                       MLIRIR
                       MLIRCallInterfaces 
                       MLIRSideEffectInterfaces

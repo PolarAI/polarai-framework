@@ -11,25 +11,26 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "AthenaRuntime/AthenaRuntimeDialect.h"
-#include "AthenaRuntime/AthenaRuntimeOps.h"
+#include "PolarRuntime/PolarRuntimeDialect.h"
+#include "PolarRuntime/PolarRuntimeOps.h"
 
-#include "mlir/IR/StandardTypes.h"
 #include "mlir/IR/DialectImplementation.h"
+#include "mlir/IR/StandardTypes.h"
 
 using namespace mlir;
-using namespace mlir::ath_rt;
+using namespace mlir::polar_rt;
 
-AthenaRuntimeDialect::AthenaRuntimeDialect(mlir::MLIRContext* context)
+PolarRuntimeDialect::PolarRuntimeDialect(mlir::MLIRContext* context)
     : Dialect(getDialectNamespace(), context) {
   addTypes<DeviceType, EventType, GraphHandleType>();
   addOperations<
 #define GET_OP_LIST
-#include "AthenaRuntime/AthenaRuntimeOps.cpp.inc"
+#include "PolarRuntime/PolarRuntimeOps.cpp.inc"
       >();
 }
 
-mlir::Type AthenaRuntimeDialect::parseType(mlir::DialectAsmParser& parser) const {
+mlir::Type
+PolarRuntimeDialect::parseType(mlir::DialectAsmParser& parser) const {
   if (!parser.parseOptionalKeyword("device")) {
     return DeviceType::get(getContext());
   } else if (!parser.parseOptionalKeyword("event")) {
@@ -41,8 +42,8 @@ mlir::Type AthenaRuntimeDialect::parseType(mlir::DialectAsmParser& parser) const
   }
 }
 
-void AthenaRuntimeDialect::printType(mlir::Type type,
-                                     mlir::DialectAsmPrinter& printer) const {
+void PolarRuntimeDialect::printType(mlir::Type type,
+                                    mlir::DialectAsmPrinter& printer) const {
   if (type.isa<DeviceType>()) {
     printer << "device";
   } else if (type.isa<EventType>()) {

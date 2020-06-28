@@ -11,25 +11,21 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include <AthenaRuntime/AthenaRuntimeDialect.h>
-#include <AthenaRuntime/AthenaRuntimeOps.h>
+#ifndef POLAR_POLARRUNTIMEOPS_H
+#define POLAR_POLARRUNTIMEOPS_H
 
-#include "mlir/IR/Builders.h"
+#include "mlir/IR/Dialect.h"
+#include "mlir/IR/FunctionSupport.h"
+#include "mlir/IR/OpDefinition.h"
 #include "mlir/IR/OpImplementation.h"
 #include "mlir/IR/StandardTypes.h"
+#include "mlir/Interfaces/CallInterfaces.h"
+#include "mlir/Interfaces/ControlFlowInterfaces.h"
+#include "mlir/Interfaces/SideEffectInterfaces.h"
 
-namespace mlir::ath_rt {
-
-void ScopeOp::build(OpBuilder& builder, OperationState& result, Value size) {
-  result.addOperands(size);
-
-  Region* bodyRegion = result.addRegion();
-  auto* body = new Block();
-  body->addArgument(IndexType::get(builder.getContext()));
-  bodyRegion->push_back(body);
-  ensureTerminator(*bodyRegion, builder, result.location);
-}
-
+namespace mlir::polar_rt {
 #define GET_OP_CLASSES
-#include "AthenaRuntime/AthenaRuntimeOps.cpp.inc"
-} // namespace mlir::ath_rt
+#include "PolarRuntime/PolarRuntimeOps.h.inc"
+} // namespace mlir::polar_rt
+
+#endif // POLAR_POLARRUNTIMEOPS_H

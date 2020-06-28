@@ -1,16 +1,16 @@
-add_mlir_dialect_library(MLIRAthenaRuntime
-        AthenaRuntimeDialect.cpp
-        AthenaRuntimeOps.cpp
+add_mlir_dialect_library(MLIRPolarRuntime
+        PolarRuntimeDialect.cpp
+        PolarRuntimeOps.cpp
 
         ADDITIONAL_HEADER_DIRS
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_BINARY_DIR}/include
 
         DEPENDS
-        MLIRAthenaRuntimeOpsIncGen
+        MLIRPolarRuntimeOpsIncGen
         )
 
-target_link_libraries(MLIRAthenaRuntime PUBLIC
+target_link_libraries(MLIRPolarRuntime PUBLIC
      MLIRIR
      MLIRCallInterfaces
      MLIRSideEffectInterfaces

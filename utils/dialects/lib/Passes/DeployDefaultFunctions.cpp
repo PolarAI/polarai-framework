@@ -1,5 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
+// Copyright (c) 2020 Polar. All rights reserved.
 // https://getathena.ml
 //
 // Licensed under MIT license.

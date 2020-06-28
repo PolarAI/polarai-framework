@@ -54,7 +54,7 @@ llvm_config.with_environment('PATH', config.llvm_tools_dir, append_path=True)
 
 tool_dirs = [config.athena_tools_dir, config.llvm_tools_dir]
 tools = [
-    'athena-opt'
+    'polar-opt'
 ]
 
 llvm_config.add_tool_substitutions(tools, tool_dirs)

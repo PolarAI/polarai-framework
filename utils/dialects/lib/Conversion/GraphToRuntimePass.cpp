@@ -1,5 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
+// Copyright (c) 2020 Polar. All rights reserved.
 // https://getathena.ml
 //
 // Licensed under MIT license.
@@ -13,10 +13,10 @@
 
 #include "Conversion/GraphToRuntimePass.h"
 
-#include "AthenaGraph/AthenaGraphDialect.h"
-#include "AthenaGraph/AthenaGraphOps.h"
-#include "AthenaRuntime/AthenaRuntimeDialect.h"
-#include "AthenaRuntime/AthenaRuntimeOps.h"
+#include "PolarGraph/PolarGraphDialect.h"
+#include "PolarGraph/PolarGraphOps.h"
+#include "PolarRuntime/PolarRuntimeDialect.h"
+#include "PolarRuntime/PolarRuntimeOps.h"
 
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "mlir/IR/Attributes.h"
@@ -32,16 +32,16 @@ using namespace mlir;
 
 namespace {
 template <typename OpT>
-class AthenaGraphConversionPattern : public ConversionPattern {
+class PolarGraphConversionPattern : public ConversionPattern {
 public:
-  AthenaGraphConversionPattern(MLIRContext* context,
-                               PatternBenefit patternBenefit = 1)
+  PolarGraphConversionPattern(MLIRContext* context,
+                              PatternBenefit patternBenefit = 1)
       : ConversionPattern(OpT::getOperationName(), patternBenefit, context) {}
 };
 
 template <typename OpT>
-struct BuiltinConversionPattern : public AthenaGraphConversionPattern<OpT> {
-  using AthenaGraphConversionPattern<OpT>::AthenaGraphConversionPattern;
+struct BuiltinConversionPattern : public PolarGraphConversionPattern<OpT> {
+  using PolarGraphConversionPattern<OpT>::PolarGraphConversionPattern;
 
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
@@ -50,56 +50,62 @@ struct BuiltinConversionPattern : public AthenaGraphConversionPattern<OpT> {
     FuncOp node = concreteOp.template getParentOfType<FuncOp>();
 
     auto nodeIdAttr = node.getAttrOfType<mlir::IntegerAttr>(
-        ath_graph::NodeOp::getNodeIdAttrName());
-    auto deviceType = ath_rt::DeviceType::get(op->getContext());
+        polar_graph::NodeOp::getNodeIdAttrName());
+    auto deviceType = polar_rt::DeviceType::get(op->getContext());
 
-    auto device = rewriter.create<ath_rt::DeviceSelectOp>(
+    auto device = rewriter.create<polar_rt::DeviceSelectOp>(
         op->getLoc(), deviceType, nodeIdAttr);
 
     SmallVector<mlir::Type, 2> resTypes;
     resTypes.push_back(operands.back().getType());
-    resTypes.push_back(ath_rt::EventType::get(op->getContext()));
+    resTypes.push_back(polar_rt::EventType::get(op->getContext()));
 
-    auto definingOp = operands.back().getDefiningOp();
+    // todo correctly deploy events
+    // auto definingOp = operands.back().getDefiningOp();
     mlir::Value blockingEvent;
-    if (llvm::isa<ath_rt::LaunchOp>(definingOp)) {
-      blockingEvent = llvm::cast<ath_rt::LaunchOp>(definingOp).getResult(1);
-    } else {
-      blockingEvent =
-          rewriter.create<ath_rt::NullEventOp>(op->getLoc(), resTypes.back());
-    }
+    // if (llvm::isa<polar_rt::LaunchOp>(definingOp)) {
+    // blockingEvent = llvm::cast<polar_rt::LaunchOp>(definingOp).getResult(1);
+    // } else {
+    blockingEvent =
+        rewriter.create<polar_rt::NullEventOp>(op->getLoc(), resTypes.back());
+    // }
 
     RankedTensorType tensorType =
-        concreteOp.getResult().getType().template cast<RankedTensorType>();
+        concreteOp.out().getType().template cast<RankedTensorType>();
     auto globalSize = rewriter.getI64ArrayAttr(tensorType.getShape());
     SmallVector<int64_t, 3> local(tensorType.getRank());
     auto localSize = rewriter.getI64ArrayAttr(local);
 
     // FIXME this pattern is incorrect if node performs more than one
     //       computation.
-    auto launchOp = rewriter.create<ath_rt::LaunchOp>(
-        op->getLoc(), resTypes, device, blockingEvent,
-        concreteOp.getKernelName(), globalSize, localSize, operands);
-    rewriter.replaceOp(op, launchOp.getResult(0));
+    rewriter.replaceOpWithNewOp<polar_rt::LaunchFuncOp>(
+        op, resTypes, device, blockingEvent, concreteOp.getKernelName(),
+        globalSize, localSize, operands);
     return success();
   }
 };
 
 struct GraphReturnConversionPattern
-    : public AthenaGraphConversionPattern<ath_graph::ReturnOp> {
-  using AthenaGraphConversionPattern<
-      ath_graph::ReturnOp>::AthenaGraphConversionPattern;
+    : public PolarGraphConversionPattern<polar_graph::ReturnOp> {
+  using PolarGraphConversionPattern<
+      polar_graph::ReturnOp>::PolarGraphConversionPattern;
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
     mlir::Value retVal;
-    auto definingOp = operands.front().getDefiningOp();
-    if (llvm::isa<ath_rt::LaunchOp>(definingOp)) {
-      auto launchOp = llvm::cast<ath_rt::LaunchOp>(definingOp);
-      retVal = launchOp.getResult(1);
+    auto users = operands.front().getUsers();
+    std::vector<Operation*> launches;
+    std::copy_if(
+        users.begin(), users.end(), std::back_inserter(launches),
+        [](Operation* op) { return llvm::isa<polar_rt::LaunchFuncOp>(op); });
+
+    // fixme may be incorrect
+    if (!launches.empty()) {
+      auto launchOp = llvm::cast<polar_rt::LaunchFuncOp>(launches.back());
+      retVal = launchOp.getResult();
     } else {
-      retVal = rewriter.create<ath_rt::NullEventOp>(
-          op->getLoc(), ath_rt::EventType::get(op->getContext()));
+      retVal = rewriter.create<polar_rt::NullEventOp>(
+          op->getLoc(), polar_rt::EventType::get(op->getContext()));
     }
     rewriter.replaceOpWithNewOp<ReturnOp>(op, ValueRange{retVal});
 
@@ -108,83 +114,83 @@ struct GraphReturnConversionPattern
 };
 
 struct AllocOpConversionPattern
-    : public AthenaGraphConversionPattern<ath_graph::AllocOp> {
-  using AthenaGraphConversionPattern<
-      ath_graph::AllocOp>::AthenaGraphConversionPattern;
+    : public PolarGraphConversionPattern<polar_graph::AllocOp> {
+  using PolarGraphConversionPattern<
+      polar_graph::AllocOp>::PolarGraphConversionPattern;
 
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
 
-    auto concreteOp = llvm::cast<ath_graph::AllocOp>(op);
+    auto concreteOp = llvm::cast<polar_graph::AllocOp>(op);
     auto node = concreteOp.template getParentOfType<FuncOp>();
 
     auto nodeIdAttr = node.getAttrOfType<mlir::IntegerAttr>(
-        ath_graph::NodeOp::getNodeIdAttrName());
-    auto deviceType = ath_rt::DeviceType::get(op->getContext());
+        polar_graph::NodeOp::getNodeIdAttrName());
+    auto deviceType = polar_rt::DeviceType::get(op->getContext());
 
-    auto device = rewriter.create<ath_rt::DeviceSelectOp>(
+    auto device = rewriter.create<polar_rt::DeviceSelectOp>(
         op->getLoc(), deviceType, nodeIdAttr);
-    rewriter.replaceOpWithNewOp<ath_rt::AllocOp>(op, device, operands[0]);
+    rewriter.replaceOpWithNewOp<polar_rt::AllocOp>(op, device, operands[0]);
 
     return success();
   }
 };
 
 struct ReleaseOpConversionPattern
-    : public AthenaGraphConversionPattern<ath_graph::ReleaseOp> {
-  using AthenaGraphConversionPattern<
-      ath_graph::ReleaseOp>::AthenaGraphConversionPattern;
+    : public PolarGraphConversionPattern<polar_graph::ReleaseOp> {
+  using PolarGraphConversionPattern<
+      polar_graph::ReleaseOp>::PolarGraphConversionPattern;
 
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
 
-    auto concreteOp = llvm::cast<ath_graph::ReleaseOp>(op);
+    auto concreteOp = llvm::cast<polar_graph::ReleaseOp>(op);
     auto node = concreteOp.getParentOfType<FuncOp>();
 
     auto nodeIdAttr = node.getAttrOfType<mlir::IntegerAttr>(
-        ath_graph::NodeOp::getNodeIdAttrName());
-    auto deviceType = ath_rt::DeviceType::get(op->getContext());
+        polar_graph::NodeOp::getNodeIdAttrName());
+    auto deviceType = polar_rt::DeviceType::get(op->getContext());
 
-    auto device = rewriter.create<ath_rt::DeviceSelectOp>(
+    auto device = rewriter.create<polar_rt::DeviceSelectOp>(
         op->getLoc(), deviceType, nodeIdAttr);
-    rewriter.replaceOpWithNewOp<ath_rt::ReleaseOp>(op, device, operands[0],
-                                                   ValueRange{});
+    rewriter.replaceOpWithNewOp<polar_rt::ReleaseOp>(op, device, operands[0],
+                                                     ValueRange{});
 
     return success();
   }
 };
 
 struct LockOpConversionPattern
-    : public AthenaGraphConversionPattern<ath_graph::LockOp> {
-  using AthenaGraphConversionPattern<
-      ath_graph::LockOp>::AthenaGraphConversionPattern;
+    : public PolarGraphConversionPattern<polar_graph::LockOp> {
+  using PolarGraphConversionPattern<
+      polar_graph::LockOp>::PolarGraphConversionPattern;
 
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
 
-    auto concreteOp = llvm::cast<ath_graph::LockOp>(op);
+    auto concreteOp = llvm::cast<polar_graph::LockOp>(op);
     auto node = concreteOp.getParentOfType<FuncOp>();
 
     auto nodeIdAttr = node.getAttrOfType<mlir::IntegerAttr>(
-        ath_graph::NodeOp::getNodeIdAttrName());
-    auto deviceType = ath_rt::DeviceType::get(op->getContext());
+        polar_graph::NodeOp::getNodeIdAttrName());
+    auto deviceType = polar_rt::DeviceType::get(op->getContext());
 
-    auto device = rewriter.create<ath_rt::DeviceSelectOp>(
+    auto device = rewriter.create<polar_rt::DeviceSelectOp>(
         op->getLoc(), deviceType, nodeIdAttr);
-    rewriter.replaceOpWithNewOp<ath_rt::LockOp>(op, device, operands[0],
-                                                concreteOp.lock_type());
+    rewriter.replaceOpWithNewOp<polar_rt::LockOp>(op, device, operands[0],
+                                                  concreteOp.lock_type());
 
     return success();
   }
 };
 
 struct GraphTerminatorConversionPattern
-    : public AthenaGraphConversionPattern<ath_graph::GraphTerminatorOp> {
-  using AthenaGraphConversionPattern<
-      ath_graph::GraphTerminatorOp>::AthenaGraphConversionPattern;
+    : public PolarGraphConversionPattern<polar_graph::GraphTerminatorOp> {
+  using PolarGraphConversionPattern<
+      polar_graph::GraphTerminatorOp>::PolarGraphConversionPattern;
 
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
@@ -196,13 +202,13 @@ struct GraphTerminatorConversionPattern
 };
 
 struct NodeOpConversionPattern
-    : public AthenaGraphConversionPattern<ath_graph::NodeOp> {
-  using AthenaGraphConversionPattern<
-      ath_graph::NodeOp>::AthenaGraphConversionPattern;
+    : public PolarGraphConversionPattern<polar_graph::NodeOp> {
+  using PolarGraphConversionPattern<
+      polar_graph::NodeOp>::PolarGraphConversionPattern;
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
-    auto node = llvm::cast<ath_graph::NodeOp>(op);
+    auto node = llvm::cast<polar_graph::NodeOp>(op);
 
     auto allAttrs = node.getAttrs();
     SmallVector<mlir::NamedAttribute, 4> newAttrs(allAttrs.begin(),
@@ -216,8 +222,8 @@ struct NodeOpConversionPattern
     newAttrs.erase(rem, newAttrs.end());
 
     auto funcType = rewriter.getFunctionType(
-        {ath_rt::GraphHandleType::get(op->getContext())},
-        {ath_rt::EventType::get(op->getContext())});
+        {polar_rt::GraphHandleType::get(op->getContext())},
+        {polar_rt::EventType::get(op->getContext())});
     auto func = rewriter.create<FuncOp>(node.getLoc(), node.getName(), funcType,
                                         newAttrs);
 
@@ -234,13 +240,13 @@ struct NodeOpConversionPattern
 };
 
 struct GraphOpConversionPattern
-    : public AthenaGraphConversionPattern<ath_graph::GraphOp> {
-  using AthenaGraphConversionPattern<
-      ath_graph::GraphOp>::AthenaGraphConversionPattern;
+    : public PolarGraphConversionPattern<polar_graph::GraphOp> {
+  using PolarGraphConversionPattern<
+      polar_graph::GraphOp>::PolarGraphConversionPattern;
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
-    auto graph = llvm::cast<ath_graph::GraphOp>(op);
+    auto graph = llvm::cast<polar_graph::GraphOp>(op);
 
     auto allAttrs = graph.getAttrs();
     SmallVector<mlir::NamedAttribute, 4> newAttrs(allAttrs.begin(),
@@ -253,7 +259,7 @@ struct GraphOpConversionPattern
 
     newAttrs.erase(rem, newAttrs.end());
     auto funcType = rewriter.getFunctionType(
-        {ath_rt::GraphHandleType::get(op->getContext())}, {});
+        {polar_rt::GraphHandleType::get(op->getContext())}, {});
     auto func = rewriter.create<FuncOp>(graph.getLoc(), graph.getName(),
                                         funcType, newAttrs);
 
@@ -270,14 +276,14 @@ struct GraphOpConversionPattern
 };
 
 struct EvalOpConversionPattern
-    : public AthenaGraphConversionPattern<ath_graph::EvalOp> {
-  using AthenaGraphConversionPattern<
-      ath_graph::EvalOp>::AthenaGraphConversionPattern;
+    : public PolarGraphConversionPattern<polar_graph::EvalOp> {
+  using PolarGraphConversionPattern<
+      polar_graph::EvalOp>::PolarGraphConversionPattern;
 
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
-    auto evalOp = llvm::cast<ath_graph::EvalOp>(op);
+    auto evalOp = llvm::cast<polar_graph::EvalOp>(op);
     auto module = evalOp.getParentOfType<ModuleOp>();
     auto nodeFunc = module.lookupSymbol<FuncOp>(evalOp.node());
     auto parentFunc = evalOp.getParentOfType<FuncOp>();
@@ -290,19 +296,19 @@ struct EvalOpConversionPattern
 };
 
 struct BarrierConversionPattern
-    : AthenaGraphConversionPattern<ath_graph::BarrierOp> {
-  using AthenaGraphConversionPattern<
-      ath_graph::BarrierOp>::AthenaGraphConversionPattern;
+    : PolarGraphConversionPattern<polar_graph::BarrierOp> {
+  using PolarGraphConversionPattern<
+      polar_graph::BarrierOp>::PolarGraphConversionPattern;
 
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
-    auto barrierOp = llvm::cast<ath_graph::BarrierOp>(op);
+    auto barrierOp = llvm::cast<polar_graph::BarrierOp>(op);
 
     auto attr = barrierOp.clusterIdAttr();
 
     auto newBarrier =
-        rewriter.create<ath_rt::BarrierOp>(op->getLoc(), ValueRange{});
+        rewriter.create<polar_rt::BarrierOp>(op->getLoc(), ValueRange{});
     newBarrier.setAttr("cluster_id", attr); // fixme refactor name
     rewriter.eraseOp(op);
 
@@ -322,27 +328,27 @@ protected:
     target.addLegalOp<FuncOp>();
     target.addLegalOp<ReturnOp>();
     target.addLegalDialect<StandardOpsDialect>();
-    target.addLegalDialect<ath_rt::AthenaRuntimeDialect>();
-    target.addLegalDialect<ath_graph::AthenaGraphDialect>();
+    target.addLegalDialect<polar_rt::PolarRuntimeDialect>();
+    target.addLegalDialect<polar_graph::PolarGraphDialect>();
 
-    target.addIllegalOp<ath_graph::EvalOp>();
-    target.addIllegalOp<ath_graph::NodeOp>();
-    target.addIllegalOp<ath_graph::ReturnOp>();
-    target.addIllegalOp<ath_graph::GraphTerminatorOp>();
-    target.addIllegalOp<ath_graph::GraphOp>();
-    target.addIllegalOp<ath_graph::BarrierOp>();
-    target.addIllegalOp<ath_graph::AllocOp>();
-    target.addIllegalOp<ath_graph::ReleaseOp>();
-    target.addIllegalOp<ath_graph::LockOp>();
-    target.addIllegalOp<ath_graph::AddOp>();
-    target.addIllegalOp<ath_graph::DivideOp>();
-    target.addIllegalOp<ath_graph::LogLossOp>();
-    target.addIllegalOp<ath_graph::MulOp>();
-    target.addIllegalOp<ath_graph::MulConcatOp>();
-    target.addIllegalOp<ath_graph::MatMulOp>();
-    target.addIllegalOp<ath_graph::SigmoidOp>();
-    target.addIllegalOp<ath_graph::TransposeOp>();
-    target.addIllegalOp<ath_graph::FillOp>();
+    target.addIllegalOp<polar_graph::EvalOp>();
+    target.addIllegalOp<polar_graph::NodeOp>();
+    target.addIllegalOp<polar_graph::ReturnOp>();
+    target.addIllegalOp<polar_graph::GraphTerminatorOp>();
+    target.addIllegalOp<polar_graph::GraphOp>();
+    target.addIllegalOp<polar_graph::BarrierOp>();
+    target.addIllegalOp<polar_graph::AllocOp>();
+    target.addIllegalOp<polar_graph::ReleaseOp>();
+    target.addIllegalOp<polar_graph::LockOp>();
+    target.addIllegalOp<polar_graph::AddOp>();
+    target.addIllegalOp<polar_graph::DivideOp>();
+    target.addIllegalOp<polar_graph::LogLossOp>();
+    target.addIllegalOp<polar_graph::MulOp>();
+    target.addIllegalOp<polar_graph::MulConcatOp>();
+    target.addIllegalOp<polar_graph::MatMulOp>();
+    target.addIllegalOp<polar_graph::SigmoidOp>();
+    target.addIllegalOp<polar_graph::TransposeOp>();
+    target.addIllegalOp<polar_graph::FillOp>();
 
     if (failed(applyPartialConversion(getOperation(), target, patterns))) {
       signalPassFailure();
@@ -366,15 +372,15 @@ void populateGraphToRuntimeConversionPatterns(
       AllocOpConversionPattern,
       LockOpConversionPattern,
       ReleaseOpConversionPattern,
-      BuiltinConversionPattern<ath_graph::AddOp>,
-      BuiltinConversionPattern<ath_graph::DivideOp>,
-      BuiltinConversionPattern<ath_graph::LogLossOp>,
-      BuiltinConversionPattern<ath_graph::MulOp>,
-      BuiltinConversionPattern<ath_graph::MulConcatOp>,
-      BuiltinConversionPattern<ath_graph::MatMulOp>,
-      BuiltinConversionPattern<ath_graph::SigmoidOp>,
-      BuiltinConversionPattern<ath_graph::FillOp>,
-      BuiltinConversionPattern<ath_graph::TransposeOp>
+      BuiltinConversionPattern<polar_graph::AddOp>,
+      BuiltinConversionPattern<polar_graph::DivideOp>,
+      BuiltinConversionPattern<polar_graph::LogLossOp>,
+      BuiltinConversionPattern<polar_graph::MulOp>,
+      BuiltinConversionPattern<polar_graph::MulConcatOp>,
+      BuiltinConversionPattern<polar_graph::MatMulOp>,
+      BuiltinConversionPattern<polar_graph::SigmoidOp>,
+      BuiltinConversionPattern<polar_graph::FillOp>,
+      BuiltinConversionPattern<polar_graph::TransposeOp>
       // clang-format on
       >(ctx);
 }

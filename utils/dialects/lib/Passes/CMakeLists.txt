@@ -1,4 +1,4 @@
-add_mlir_conversion_library(MLIRAthenaPasses
+add_mlir_conversion_library(MLIRPolarPasses
         RelationDestructorPass.cpp
         DeployDefaultFunctions.cpp
         BarrierLegalizerPass.cpp
@@ -10,13 +10,13 @@ add_mlir_conversion_library(MLIRAthenaPasses
         ${PROJECT_BINARY_DIR}/include
 
         DEPENDS
-        MLIRAthenaGraph
+        MLIRPolarGraph
         )
 
-target_link_libraries(MLIRAthenaPasses
+target_link_libraries(MLIRPolarPasses
         PUBLIC
         MLIRIR
         MLIRPass
-        MLIRAthenaGraph
+        MLIRPolarGraph
         MLIRTransforms
         )

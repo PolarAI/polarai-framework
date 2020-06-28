@@ -1,17 +1,17 @@
-#ifndef ATHENA_GRAPH_OPS
-#define ATHENA_GRAPH_OPS
+#ifndef POLAR_GRAPH_OPS
+#define POLAR_GRAPH_OPS
 
-include "AthenaGraphDialect.td"
+include "PolarGraphDialect.td"
 include "mlir/IR/OpAsmInterface.td"
 include "mlir/IR/SymbolInterfaces.td"
 include "mlir/Interfaces/CallInterfaces.td"
 include "mlir/Interfaces/ControlFlowInterfaces.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 
-def AthenaGraph_NodeOp : AthenaGraph_Op<"node", [AutomaticAllocationScope,
-                                                 FunctionLike, 
-                                                 IsolatedFromAbove, Symbol]> {
-  let summary = "Athena Graph Node";
+def NodeOp : PolarGraph_Op<"node", [AutomaticAllocationScope,
+                                    FunctionLike, 
+                                    IsolatedFromAbove, Symbol]> {
+  let summary = "Polar Graph Node";
   // todo extend description with samples when dialect is formed.
   let description = [{
     Defines a sequence of operations required to complete node execution. 
@@ -46,11 +46,11 @@ def AthenaGraph_NodeOp : AthenaGraph_Op<"node", [AutomaticAllocationScope,
   // let parser = [{ return parseNodeOp(parser, result); }];
 }
 
-def AthenaGraph_GraphOp : AthenaGraph_Op<"graph", 
+def GraphOp : PolarGraph_Op<"graph", 
                           [AutomaticAllocationScope, FunctionLike, 
                           IsolatedFromAbove, Symbol,
                           SingleBlockImplicitTerminator<"GraphTerminatorOp">]> {
-  let summary = "Athena Graph operation";
+  let summary = "Polar Graph operation";
   // todo extend description with samples when dialect is formed.
   let description = [{
   TBD
@@ -72,10 +72,8 @@ def AthenaGraph_GraphOp : AthenaGraph_Op<"graph",
   }];
 }
 
-def AthenaGraph_ReturnOp : AthenaGraph_Op<"return", [NoSideEffect, 
-                                                     HasParent<"NodeOp">,
-                                                     Terminator
-                                                     /*ReturnLike*/]> {
+def ReturnOp : PolarGraph_Op<"return", [NoSideEffect, HasParent<"NodeOp">,
+                                        Terminator, ReturnLike]> {
   let summary = "return operation";
   let description = [{
     Returns result of Athena Graph Node computation.
@@ -89,7 +87,7 @@ def AthenaGraph_ReturnOp : AthenaGraph_Op<"return", [NoSideEffect,
   let assemblyFormat = "attr-dict ($operands^ `:` type($operands))?";
 }
 
-def AthenaGraph_GraphTerminatorOp : AthenaGraph_Op<"graph_terminator", 
+def GraphTerminatorOp : PolarGraph_Op<"graph_terminator", 
                                     [Terminator, HasParent<"GraphOp">, 
                                     NoSideEffect]> {
   let summary = "graph terminator operation";
@@ -98,7 +96,7 @@ def AthenaGraph_GraphTerminatorOp : AthenaGraph_Op<"graph_terminator",
   }];
 }
 
-def AthenaGraph_EvalOp : AthenaGraph_Op<"eval", [CallOpInterface]> {
+def EvalOp : PolarGraph_Op<"eval", [CallOpInterface]> {
   let summary = "Evaluate graph node";
   let description = [{ TBD }];
 
@@ -133,7 +131,7 @@ def AthenaGraph_EvalOp : AthenaGraph_Op<"eval", [CallOpInterface]> {
   }];
 }
 
-def AthenaGraph_SliceOp : AthenaGraph_Op<"slice", [NoSideEffect]> {
+def SliceOp : PolarGraph_Op<"slice", [NoSideEffect]> {
   let summary = "Get sub-tensor by first dimension offset";
   let description = [{ TBD }];
 
@@ -145,8 +143,7 @@ def AthenaGraph_SliceOp : AthenaGraph_Op<"slice", [NoSideEffect]> {
   let skipDefaultBuilders = 1;
 }
 
-def AthenaGraph_CreateTensorOp : AthenaGraph_Op<"create_tensor", 
-                                                [NoSideEffect]> {
+def CreateTensorOp : PolarGraph_Op<"create_tensor", [NoSideEffect]> {
   let summary = "Get tensor by virtual address";
   let description = [{ TBD }];
 
@@ -163,14 +160,14 @@ def AthenaGraph_CreateTensorOp : AthenaGraph_Op<"create_tensor",
   }];
 }
 
-def AthenaGraph_AllocOp : AthenaGraph_Op<"alloc"> {
+def AllocOp : PolarGraph_Op<"alloc"> {
   let summary = "Allocates memory for tensor";
   let description = [{}];
 
   let arguments = (ins AnyTensor:$target);
 }
 
-def AthenaGraph_LockOp : AthenaGraph_Op<"lock"> {
+def LockOp : PolarGraph_Op<"lock"> {
   let summary = "Locks data on device";
   let description = [{
     Athena LLVM backend Allocators explicitly manage memory both on host and 
@@ -186,7 +183,7 @@ def AthenaGraph_LockOp : AthenaGraph_Op<"lock"> {
   let arguments = (ins StrAttr:$lock_type, AnyTensor:$locked_tensor);
 }
 
-def AthenaGraph_ReleaseOp : AthenaGraph_Op<"release"> {
+def ReleaseOp : PolarGraph_Op<"release"> {
   let summary = "Releases data";
   let description = [{
     Notifies Athena LLVM backend Allocator, that tensor is no longer in use and
@@ -196,7 +193,7 @@ def AthenaGraph_ReleaseOp : AthenaGraph_Op<"release"> {
   let arguments = (ins AnyTensor:$tensor);
 }
 
-def AthenaGraph_InvokeLoaderOp : AthenaGraph_Op<"invoke_loader"> {
+def InvokeLoaderOp : PolarGraph_Op<"invoke_loader"> {
   let summary = "Invokes loader";
   let description = [{
     One way of getting data into tensor is invoking a loader routine. Users are
@@ -208,7 +205,7 @@ def AthenaGraph_InvokeLoaderOp : AthenaGraph_Op<"invoke_loader"> {
 
 }
 
-def AthenaGraph_BarrierOp : AthenaGraph_Op<"barrier", [IsolatedFromAbove]> {
+def BarrierOp : PolarGraph_Op<"barrier", [IsolatedFromAbove]> {
   let summary = "Blocks execution of the subsequent nodes";
   let description = [{ TBD }];
 
@@ -219,13 +216,13 @@ def AthenaGraph_BarrierOp : AthenaGraph_Op<"barrier", [IsolatedFromAbove]> {
 // Athena Graph builtins
 //===----------------------------------------------------------------------===//
 
-def AthenaGraph_AddOp : AthenaGraph_Op<"add", [ComputationalOpInterface]> {
+def AddOp : PolarGraph_Op<"add", [ComputationalOpInterface]> {
   let summary = "Element-wise addition operation";
   let description = [{ TBD }];
 
   let arguments = (ins AnyTensor:$a, AnyType:$scaleA, AnyTensor:$b,
                        AnyType:$scaleB, AnyTensor:$out);
-  let results = (outs AnyTensor);
+  let skipDefaultBuilders = 1;
   let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
                             "Value a, Value scaleA, Value b, Value scaleB, "
                             "Value out", [{
@@ -234,7 +231,6 @@ def AthenaGraph_AddOp : AthenaGraph_Op<"add", [ComputationalOpInterface]> {
     result.addOperands(b);
     result.addOperands(scaleB);
     result.addOperands(out);
-    result.types.push_back(out.getType());
   }]>];
   let extraClassDeclaration = [{
     llvm::StringRef getKernelName() {
@@ -243,17 +239,16 @@ def AthenaGraph_AddOp : AthenaGraph_Op<"add", [ComputationalOpInterface]> {
   }];
 }
 
-def AthenaGraph_CopyOp : AthenaGraph_Op<"copy", [ComputationalOpInterface]> {
+def CopyOp : PolarGraph_Op<"copy", [ComputationalOpInterface]> {
   let summary = "Element-wise copy operation";
   let description = [{ TBD }];
 
   let arguments = (ins AnyTensor:$input, AnyTensor:$out);
-  let results = (outs AnyTensor);
+  let skipDefaultBuilders = 1;
   let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
                             "Value input, Value out", [{
     result.addOperands(input);
     result.addOperands(out);
-    result.types.push_back(out.getType());
   }]>];
   let extraClassDeclaration = [{
     llvm::StringRef getKernelName() {
@@ -262,19 +257,18 @@ def AthenaGraph_CopyOp : AthenaGraph_Op<"copy", [ComputationalOpInterface]> {
   }];
 }
 
-def AthenaGraph_DivideOp : AthenaGraph_Op<"divide", [ComputationalOpInterface]> {
+def DivideOp : PolarGraph_Op<"divide", [ComputationalOpInterface]> {
   let summary = "Element-wise division operation";
   let description = [{ TBD }];
 
   let arguments = (ins AnyTensor:$numerator, AnyTensor:$denominator, 
                    AnyTensor:$out);
-  let results = (outs AnyTensor);
+  let skipDefaultBuilders = 1;
   let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
                             "Value numerator, Value denominator, Value out", [{
     result.addOperands(numerator);
     result.addOperands(denominator);
     result.addOperands(out);
-    result.types.push_back(out.getType());
   }]>];
   let extraClassDeclaration = [{
     llvm::StringRef getKernelName() {
@@ -283,19 +277,18 @@ def AthenaGraph_DivideOp : AthenaGraph_Op<"divide", [ComputationalOpInterface]> 
   }];
 }
 
-def AthenaGraph_LogLossOp : AthenaGraph_Op<"logloss", [ComputationalOpInterface]> {
+def LogLossOp : PolarGraph_Op<"logloss", [ComputationalOpInterface]> {
   let summary = "Element-wise logistic loss operation";
   let description = [{ TBD }];
 
   let arguments = (ins AnyTensor:$predicted, AnyTensor:$groundTruth, 
                    AnyTensor:$out);
-  let results = (outs AnyTensor);
+  let skipDefaultBuilders = 1;
   let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
                             "Value predicted, Value groundTruth, Value out", [{
     result.addOperands(predicted);
     result.addOperands(groundTruth);
     result.addOperands(out);
-    result.types.push_back(out.getType());
   }]>];
   let extraClassDeclaration = [{
     llvm::StringRef getKernelName() {
@@ -304,24 +297,23 @@ def AthenaGraph_LogLossOp : AthenaGraph_Op<"logloss", [ComputationalOpInterface]
   }];
 }
 
-def AthenaGraph_MatMulOp : AthenaGraph_Op<"matmul", [ComputationalOpInterface]> {
+def MatMulOp : PolarGraph_Op<"matmul", [ComputationalOpInterface]> {
   let summary = "Matrix-matrix multiplication operation";
   let description = [{ TBD }];
 
   let arguments = (ins AnyTensor:$left, AnyTensor:$right, AnyTensor:$out, 
                    BoolAttr:$transpose_left, BoolAttr:$transpose_right);
-  let results = (outs AnyTensor);
+  let skipDefaultBuilders = 1;
   let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
                             "Value left, Value right, Value out, "
                             "bool transpLeft, bool transpRight", [{
-  result.addOperands(left);
-  result.addOperands(right);
-  result.addOperands(out);
-  auto transposeLeftAttr = builder.getBoolAttr(transpLeft);
-  auto transposeRightAttr = builder.getBoolAttr(transpRight);
-  result.addAttribute("transpose_left", transposeLeftAttr);
-  result.addAttribute("transpose_right", transposeRightAttr);
-  result.types.push_back(out.getType());
+    result.addOperands(left);
+    result.addOperands(right);
+    result.addOperands(out);
+    auto transposeLeftAttr = builder.getBoolAttr(transpLeft);
+    auto transposeRightAttr = builder.getBoolAttr(transpRight);
+    result.addAttribute("transpose_left", transposeLeftAttr);
+    result.addAttribute("transpose_right", transposeRightAttr);
   }]>];
   let extraClassDeclaration = [{
     llvm::StringRef getKernelName() {
@@ -338,18 +330,17 @@ def AthenaGraph_MatMulOp : AthenaGraph_Op<"matmul", [ComputationalOpInterface]> 
   }];
 }
 
-def AthenaGraph_MulOp : AthenaGraph_Op<"mul", [ComputationalOpInterface]> {
+def MulOp : PolarGraph_Op<"mul", [ComputationalOpInterface]> {
   let summary = "Element-wise multiplication operation";
   let description = [{ TBD }];
 
   let arguments = (ins AnyTensor:$a, AnyTensor:$b, AnyTensor:$out);
-  let results = (outs AnyTensor);
+  let skipDefaultBuilders = 1;
   let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
                             "Value a, Value b, Value out", [{
     result.addOperands(a);
     result.addOperands(b);
     result.addOperands(out);
-    result.types.push_back(out.getType());
   }]>];
   let extraClassDeclaration = [{
     llvm::StringRef getKernelName() {
@@ -358,20 +349,19 @@ def AthenaGraph_MulOp : AthenaGraph_Op<"mul", [ComputationalOpInterface]> {
   }];
 }
 
-def AthenaGraph_MulConcatOp : AthenaGraph_Op<"mulconcat", [ComputationalOpInterface]> {
+def MulConcatOp : PolarGraph_Op<"mulconcat", [ComputationalOpInterface]> {
   let summary = "Element-wise multiplication operation";
   let description = [{ TBD }];
 
   let arguments = (ins AnyTensor:$gradient, AnyTensor:$localDerivative,
                    AnyTensor:$out);
-  let results = (outs AnyTensor);
+  let skipDefaultBuilders = 1;
   let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
                             "Value gradient, Value localDerivative, Value out", 
                             [{
     result.addOperands(gradient);
     result.addOperands(localDerivative);
     result.addOperands(out);
-    result.types.push_back(out.getType());
   }]>];
   let extraClassDeclaration = [{
     llvm::StringRef getKernelName() {
@@ -380,17 +370,16 @@ def AthenaGraph_MulConcatOp : AthenaGraph_Op<"mulconcat", [ComputationalOpInterf
   }];
 }
 
-def AthenaGraph_SigmoidOp : AthenaGraph_Op<"sigmoid", [ComputationalOpInterface]> {
+def SigmoidOp : PolarGraph_Op<"sigmoid", [ComputationalOpInterface]> {
   let summary = "Element-wise sigmoid operation";
   let description = [{ TBD }];
 
   let arguments = (ins AnyTensor:$input, AnyTensor:$out);
-  let results = (outs AnyTensor);
+  let skipDefaultBuilders = 1;
   let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
                             "Value input, Value out", [{
     result.addOperands(input);
     result.addOperands(out);
-    result.types.push_back(out.getType());
   }]>];
   let extraClassDeclaration = [{
     llvm::StringRef getKernelName() {
@@ -400,33 +389,31 @@ def AthenaGraph_SigmoidOp : AthenaGraph_Op<"sigmoid", [ComputationalOpInterface]
 }
 
 
-def AthenaGraph_TransposeOp : AthenaGraph_Op<"transpose", [Computational]> {
+def TransposeOp : PolarGraph_Op<"transpose", [Computational]> {
   let summary = "Matrix transposition operation";
   let description = [{ TBD }];
 
   let hasCanonicalizer = 1;
 
-  let arguments = (ins AnyTensor:$a, AnyTensor:$size, AnyTensor:$res);
-  let results = (outs AnyTensor);
+  let arguments = (ins AnyTensor:$a, AnyTensor:$out);
+  let skipDefaultBuilders = 1;
   let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
                             "Value a, Value out", [{
     result.addOperands(a);
     result.addOperands(out);
-  result.types.push_back(out.getType());
   }]>];
 }
 
-def AthenaGraph_FillOp : AthenaGraph_Op<"fill", [ComputationalOpInterface]> {
+def FillOp : PolarGraph_Op<"fill", [ComputationalOpInterface]> {
   let summary = "Fills tensor with value";
   let description = [{ TBD }];
 
   let arguments = (ins AnyType:$pattern, AnyTensor:$out);
-  let results = (outs AnyTensor);
+  let skipDefaultBuilders = 1;
   let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
                             "Value pattern, Value out", [{
     result.addOperands(pattern);
     result.addOperands(out);
-    result.types.push_back(out.getType());
   }]>];
   let extraClassDeclaration = [{
     llvm::StringRef getKernelName() {

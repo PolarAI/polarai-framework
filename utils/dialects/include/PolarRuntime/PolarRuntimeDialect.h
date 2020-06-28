@@ -11,8 +11,8 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_ATHENARUNTIMEDIALECT_H
-#define ATHENA_ATHENARUNTIMEDIALECT_H
+#ifndef POLAR_POLARRUNTIMEDIALECT_H
+#define POLAR_POLARRUNTIMEDIALECT_H
 
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/StandardTypes.h"
@@ -20,7 +20,7 @@
 #include "mlir/IR/Types.h"
 #include "mlir/Parser.h"
 
-namespace mlir::ath_rt {
+namespace mlir::polar_rt {
 
 namespace RuntimeTypes {
 enum Types {
@@ -56,14 +56,16 @@ class GraphHandleType : public Type::TypeBase<GraphHandleType, Type> {
 public:
   using Base::Base;
 
-  static bool kindof(unsigned kind) { return kind == RuntimeTypes::GraphHandle; }
+  static bool kindof(unsigned kind) {
+    return kind == RuntimeTypes::GraphHandle;
+  }
 
   static GraphHandleType get(MLIRContext* context) {
     return Base::get(context, RuntimeTypes::GraphHandle);
   }
 };
 
-#include "AthenaRuntime/AthenaRuntimeOpsDialect.h.inc"
-} // namespace mlir::ath_graph
+#include "PolarRuntime/PolarRuntimeOpsDialect.h.inc"
+} // namespace mlir::polar_rt
 
-#endif // ATHENA_RUNTIMEDIALECT_H
+#endif // POLAR_POLARRUNTIMEDIALECT_H

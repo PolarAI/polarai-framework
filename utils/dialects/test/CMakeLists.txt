@@ -7,13 +7,13 @@ configure_lit_site_cfg(
 
 set(ATHENA_OPT_TEST_DEPENDS
         FileCheck count not
-        athena-opt
+        polar-opt
         )
 
-add_lit_testsuite(check-athena-opt "Running the athena-opt regression tests"
+add_lit_testsuite(check-polar-dialects "Running the polar-opt regression tests"
         ${CMAKE_CURRENT_BINARY_DIR}
         DEPENDS ${ATHENA_OPT_TEST_DEPENDS}
         )
-set_target_properties(check-athena-opt PROPERTIES FOLDER "Tests")
+set_target_properties(check-polar-dialects PROPERTIES FOLDER "Tests")
 
 add_lit_testsuites(ATHENA_OPT ${CMAKE_CURRENT_SOURCE_DIR} DEPENDS ${ATHENA_OPT_TEST_DEPENDS})

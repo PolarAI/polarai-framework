@@ -1,5 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
+// Copyright (c) 2020 Polar. All rights reserved.
 // https://getathena.ml
 //
 // Licensed under MIT license.
@@ -15,10 +15,10 @@
 #include "../utils/LaunchCommand.h"
 #include "../utils/TensorInfo.h"
 #include "ArgInfo.h"
-#include "AthenaGraph/AthenaGraphDialect.h"
-#include "AthenaGraph/AthenaGraphOps.h"
-#include "AthenaRuntime/AthenaRuntimeDialect.h"
-#include "AthenaRuntime/AthenaRuntimeOps.h"
+#include "PolarGraph/PolarGraphDialect.h"
+#include "PolarGraph/PolarGraphOps.h"
+#include "PolarRuntime/PolarRuntimeDialect.h"
+#include "PolarRuntime/PolarRuntimeOps.h"
 
 #include "mlir/Conversion/StandardToLLVM/ConvertStandardToLLVM.h"
 #include "mlir/Conversion/StandardToLLVM/ConvertStandardToLLVMPass.h"
@@ -129,10 +129,10 @@ static auto createArray(LLVM::LLVMType type, uint32_t size,
 
 namespace {
 template <typename OpT>
-class AthenaRuntimeConversionPattern : public ConversionPattern {
+class PolarRuntimeConversionPattern : public ConversionPattern {
 public:
-  AthenaRuntimeConversionPattern(LLVMTypeConverter& typeConverter,
-                                 PatternBenefit patternBenefit = 1)
+  PolarRuntimeConversionPattern(LLVMTypeConverter& typeConverter,
+                                PatternBenefit patternBenefit = 1)
       : ConversionPattern(OpT::getOperationName(), patternBenefit,
                           &typeConverter.getContext()),
         mTypeConverter(typeConverter) {}
@@ -141,16 +141,16 @@ protected:
   LLVMTypeConverter& mTypeConverter;
 };
 
-/// Converts `ath_graph.create_tensor` to a set of commands that allocate and
+/// Converts `polar_graph.create_tensor` to a set of commands that allocate and
 /// fill TensorLite structure.
 struct CreateTensorOpLoweringPattern
-    : public AthenaRuntimeConversionPattern<ath_graph::CreateTensorOp> {
-  using AthenaRuntimeConversionPattern<
-      ath_graph::CreateTensorOp>::AthenaRuntimeConversionPattern;
+    : public PolarRuntimeConversionPattern<polar_graph::CreateTensorOp> {
+  using PolarRuntimeConversionPattern<
+      polar_graph::CreateTensorOp>::PolarRuntimeConversionPattern;
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
-    auto concreteOp = llvm::cast<ath_graph::CreateTensorOp>(op);
+    auto concreteOp = llvm::cast<polar_graph::CreateTensorOp>(op);
     auto tensorType = concreteOp.getType().cast<RankedTensorType>();
     auto* llvmDialect =
         op->getContext()->getRegisteredDialect<LLVM::LLVMDialect>();
@@ -187,14 +187,14 @@ struct CreateTensorOpLoweringPattern
 };
 
 struct AllocOpLoweringPattern
-    : AthenaRuntimeConversionPattern<ath_rt::AllocOp> {
+    : PolarRuntimeConversionPattern<polar_rt::AllocOp> {
 
-  using AthenaRuntimeConversionPattern<
-      ath_rt::AllocOp>::AthenaRuntimeConversionPattern;
+  using PolarRuntimeConversionPattern<
+      polar_rt::AllocOp>::PolarRuntimeConversionPattern;
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
-    auto concreteOp = llvm::cast<ath_rt::AllocOp>(op);
+    auto concreteOp = llvm::cast<polar_rt::AllocOp>(op);
     auto module = op->getParentOfType<ModuleOp>();
     auto parentFunc = op->getParentOfType<LLVM::LLVMFuncOp>();
 
@@ -211,14 +211,14 @@ struct AllocOpLoweringPattern
   }
 };
 
-struct LockOpLoweringPattern : AthenaRuntimeConversionPattern<ath_rt::LockOp> {
+struct LockOpLoweringPattern : PolarRuntimeConversionPattern<polar_rt::LockOp> {
 
-  using AthenaRuntimeConversionPattern<
-      ath_rt::LockOp>::AthenaRuntimeConversionPattern;
+  using PolarRuntimeConversionPattern<
+      polar_rt::LockOp>::PolarRuntimeConversionPattern;
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
-    auto concreteOp = llvm::cast<ath_rt::LockOp>(op);
+    auto concreteOp = llvm::cast<polar_rt::LockOp>(op);
     auto module = op->getParentOfType<ModuleOp>();
     auto* llvmDialect =
         op->getContext()->getRegisteredDialect<LLVM::LLVMDialect>();
@@ -242,14 +242,14 @@ struct LockOpLoweringPattern : AthenaRuntimeConversionPattern<ath_rt::LockOp> {
 };
 
 struct ReleaseOpLoweringPattern
-    : AthenaRuntimeConversionPattern<ath_rt::ReleaseOp> {
+    : PolarRuntimeConversionPattern<polar_rt::ReleaseOp> {
 
-  using AthenaRuntimeConversionPattern<
-      ath_rt::ReleaseOp>::AthenaRuntimeConversionPattern;
+  using PolarRuntimeConversionPattern<
+      polar_rt::ReleaseOp>::PolarRuntimeConversionPattern;
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
-    auto concreteOp = llvm::cast<ath_rt::ReleaseOp>(op);
+    auto concreteOp = llvm::cast<polar_rt::ReleaseOp>(op);
     auto module = op->getParentOfType<ModuleOp>();
     auto* llvmDialect =
         op->getContext()->getRegisteredDialect<LLVM::LLVMDialect>();
@@ -277,14 +277,14 @@ struct ReleaseOpLoweringPattern
 };
 
 struct BarrierOpLoweringPattern
-    : AthenaRuntimeConversionPattern<ath_rt::BarrierOp> {
+    : PolarRuntimeConversionPattern<polar_rt::BarrierOp> {
 
-  using AthenaRuntimeConversionPattern<
-      ath_rt::BarrierOp>::AthenaRuntimeConversionPattern;
+  using PolarRuntimeConversionPattern<
+      polar_rt::BarrierOp>::PolarRuntimeConversionPattern;
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
-    auto concreteOp = llvm::cast<ath_rt::BarrierOp>(op);
+    auto concreteOp = llvm::cast<polar_rt::BarrierOp>(op);
     auto module = op->getParentOfType<ModuleOp>();
     auto* llvmDialect =
         op->getContext()->getRegisteredDialect<LLVM::LLVMDialect>();
@@ -315,10 +315,10 @@ struct BarrierOpLoweringPattern
 };
 
 struct NullEventOpLoweringPattern
-    : AthenaRuntimeConversionPattern<ath_rt::NullEventOp> {
+    : PolarRuntimeConversionPattern<polar_rt::NullEventOp> {
 
-  using AthenaRuntimeConversionPattern<
-      ath_rt::NullEventOp>::AthenaRuntimeConversionPattern;
+  using PolarRuntimeConversionPattern<
+      polar_rt::NullEventOp>::PolarRuntimeConversionPattern;
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
@@ -332,14 +332,14 @@ struct NullEventOpLoweringPattern
 };
 
 struct DeviceSelectOpLoweringPattern
-    : AthenaRuntimeConversionPattern<ath_rt::DeviceSelectOp> {
+    : PolarRuntimeConversionPattern<polar_rt::DeviceSelectOp> {
 
-  using AthenaRuntimeConversionPattern<
-      ath_rt::DeviceSelectOp>::AthenaRuntimeConversionPattern;
+  using PolarRuntimeConversionPattern<
+      polar_rt::DeviceSelectOp>::PolarRuntimeConversionPattern;
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
-    auto concreteOp = llvm::cast<ath_rt::DeviceSelectOp>(op);
+    auto concreteOp = llvm::cast<polar_rt::DeviceSelectOp>(op);
     auto module = op->getParentOfType<ModuleOp>();
     auto* llvmDialect =
         op->getContext()->getRegisteredDialect<LLVM::LLVMDialect>();
@@ -361,14 +361,14 @@ struct DeviceSelectOpLoweringPattern
 };
 
 struct InvokeLoaderOpLoweringPattern
-    : AthenaRuntimeConversionPattern<ath_graph::InvokeLoaderOp> {
-  using AthenaRuntimeConversionPattern<
-      ath_graph::InvokeLoaderOp>::AthenaRuntimeConversionPattern;
+    : PolarRuntimeConversionPattern<polar_graph::InvokeLoaderOp> {
+  using PolarRuntimeConversionPattern<
+      polar_graph::InvokeLoaderOp>::PolarRuntimeConversionPattern;
 
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                   ConversionPatternRewriter& rewriter) const override {
-    auto concreteOp = llvm::cast<ath_graph::InvokeLoaderOp>(op);
+    auto concreteOp = llvm::cast<polar_graph::InvokeLoaderOp>(op);
     auto module = op->getParentOfType<ModuleOp>();
     auto* llvmDialect =
         op->getContext()->getRegisteredDialect<LLVM::LLVMDialect>();
@@ -379,7 +379,7 @@ struct InvokeLoaderOpLoweringPattern
     auto callee = module.lookupSymbol<LLVM::LLVMFuncOp>("ath_load");
     auto nodeId = createUInt64Constant(
         *concreteOp
-             .getAttrOfType<IntegerAttr>(ath_graph::NodeOp::getNodeIdAttrName())
+             .getAttrOfType<IntegerAttr>(polar_graph::NodeOp::getNodeIdAttrName())
              .getValue()
              .getRawData(),
         llvmDialect, rewriter, op->getLoc());
@@ -392,20 +392,20 @@ struct InvokeLoaderOpLoweringPattern
   }
 };
 
-struct LaunchOpLoweringPattern
-    : AthenaRuntimeConversionPattern<ath_rt::LaunchOp> {
-  using AthenaRuntimeConversionPattern<
-      ath_rt::LaunchOp>::AthenaRuntimeConversionPattern;
+struct LaunchFuncOpLoweringPattern
+    : PolarRuntimeConversionPattern<polar_rt::LaunchFuncOp> {
+  using PolarRuntimeConversionPattern<
+      polar_rt::LaunchFuncOp>::PolarRuntimeConversionPattern;
 
   auto matchAndRewrite(Operation* op, ArrayRef<Value> operands,
                        ConversionPatternRewriter& rewriter) const
       -> LogicalResult override {
-    auto concreteOp = llvm::cast<ath_rt::LaunchOp>(op);
+    auto concreteOp = llvm::cast<polar_rt::LaunchFuncOp>(op);
     auto module = op->getParentOfType<ModuleOp>();
     auto* llvmDialect =
         op->getContext()->getRegisteredDialect<LLVM::LLVMDialect>();
 
-    concreteOp.getResult(0).replaceAllUsesWith(operands.back());
+    // concreteOp.getResult(0).replaceAllUsesWith(operands.back());
 
     auto argsArray = createArray(getArgDescType(llvmDialect),
                                  operands.size() - 2, rewriter, op->getLoc());
@@ -547,7 +547,7 @@ struct LaunchOpLoweringPattern
     auto result = rewriter.create<LLVM::CallOp>(
         op->getLoc(), launchFunc,
         ValueRange{graphHandle, operands[0], operands[1], launchCommand});
-    concreteOp.getResult(1).replaceAllUsesWith(result.getResult(0));
+    concreteOp.getResult().replaceAllUsesWith(result.getResult(0));
     rewriter.eraseOp(concreteOp);
 
     return success();
@@ -560,13 +560,13 @@ class RuntimeToLLVM
     OwningRewritePatternList patterns;
     LLVMTypeConverter typeConverter(&getContext());
     auto* llvmDialect = getContext().getRegisteredDialect<LLVM::LLVMDialect>();
-    typeConverter.addConversion([llvmDialect](ath_rt::DeviceType) {
+    typeConverter.addConversion([llvmDialect](polar_rt::DeviceType) {
       return getVoidPtrType(llvmDialect);
     });
-    typeConverter.addConversion([llvmDialect](ath_rt::EventType) {
+    typeConverter.addConversion([llvmDialect](polar_rt::EventType) {
       return getVoidPtrType(llvmDialect);
     });
-    typeConverter.addConversion([llvmDialect](ath_rt::GraphHandleType) {
+    typeConverter.addConversion([llvmDialect](polar_rt::GraphHandleType) {
       return getVoidPtrType(llvmDialect);
     });
     populateStdToLLVMConversionPatterns(typeConverter, patterns);
@@ -596,7 +596,7 @@ void populateRuntimeToLLVMConversionPatterns(
       NullEventOpLoweringPattern,
       DeviceSelectOpLoweringPattern,
       InvokeLoaderOpLoweringPattern,
-      LaunchOpLoweringPattern
+      LaunchFuncOpLoweringPattern
       // clang-format on
       >(typeConverter);
 }

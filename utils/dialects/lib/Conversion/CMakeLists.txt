@@ -1,6 +1,6 @@
 add_subdirectory(ComputeToSPIRV)
 
-add_mlir_conversion_library(MLIRAthenaConversion
+add_mlir_conversion_library(MLIRPolarConversion
         GraphToRuntimePass.cpp
         ArgInfo.cpp
         RuntimeToLLVM.cpp
@@ -9,14 +9,11 @@ add_mlir_conversion_library(MLIRAthenaConversion
         ${PROJECT_SOURCE_DIR}/include/
         ${PROJECT_BINARY_DIR}/include
 
-        DEPENDS
-        MLIRAthenaGraph
-
         LINK_LIBS PUBLIC
         MLIRIR
         MLIRPass
-        MLIRAthenaGraph
-        MLIRAthenaRuntime
+        MLIRPolarGraph
+        MLIRPolarRuntime
         MLIRTransforms
         MLIRLLVMIR
         MLIRLLVMIRTransforms

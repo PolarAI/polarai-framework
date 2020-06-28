@@ -11,7 +11,7 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "AthenaGraph/AthenaGraphOps.h"
+#include "PolarGraph/PolarGraphOps.h"
 
 #include "mlir/IR/Matchers.h"
 #include "mlir/IR/PatternMatch.h"
@@ -20,17 +20,17 @@ using namespace mlir;
 
 namespace {
 struct DoubleTransposePattern
-    : public OpRewritePattern<ath_graph::TransposeOp> {
+    : public OpRewritePattern<polar_graph::TransposeOp> {
   DoubleTransposePattern(mlir::MLIRContext* context)
-      : OpRewritePattern<ath_graph::TransposeOp>(context, /*benefit=*/1) {}
+      : OpRewritePattern<polar_graph::TransposeOp>(context, /*benefit=*/1) {}
 
   mlir::LogicalResult
-  matchAndRewrite(ath_graph::TransposeOp op,
+  matchAndRewrite(polar_graph::TransposeOp op,
                   mlir::PatternRewriter& rewriter) const override {
     // Look through the input of the current transpose.
     mlir::Value transposeInput = op.getOperand(0);
-    ath_graph::TransposeOp transposeInputOp =
-        llvm::dyn_cast<ath_graph::TransposeOp>(transposeInput.getDefiningOp());
+    polar_graph::TransposeOp transposeInputOp =
+        llvm::dyn_cast<polar_graph::TransposeOp>(transposeInput.getDefiningOp());
 
     // Input defined by another transpose? If not, no match.
     if (!transposeInputOp)
@@ -43,7 +43,7 @@ struct DoubleTransposePattern
 };
 } // namespace
 
-void ath_graph::TransposeOp::getCanonicalizationPatterns(
+void polar_graph::TransposeOp::getCanonicalizationPatterns(
     OwningRewritePatternList& results, MLIRContext* context) {
   results.insert<DoubleTransposePattern>(context);
 }

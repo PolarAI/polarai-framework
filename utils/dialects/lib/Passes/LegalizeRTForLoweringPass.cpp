@@ -1,5 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
+// Copyright (c) 2020 Polar. All rights reserved.
 // https://getathena.ml
 //
 // Licensed under MIT license.
@@ -11,8 +11,8 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "AthenaGraph/AthenaGraphDialect.h"
-#include "AthenaGraph/AthenaGraphOps.h"
+#include "PolarGraph/PolarGraphDialect.h"
+#include "PolarGraph/PolarGraphOps.h"
 #include "Passes/Passes.h"
 
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
@@ -31,7 +31,7 @@ protected:
     auto func = getOperation();
 
     // fixme use more stable attr naming.
-    func.walk([&](ath_graph::InvokeLoaderOp op) {
+    func.walk([&](polar_graph::InvokeLoaderOp op) {
       op.setAttr("node_id", func.getAttr("node_id"));
     });
   }

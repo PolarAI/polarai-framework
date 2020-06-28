@@ -1,3 +1,3 @@
-add_subdirectory(AthenaGraph)
-add_subdirectory(AthenaRuntime)
+add_subdirectory(PolarGraph)
+add_subdirectory(PolarRuntime)
 add_subdirectory(Compute)

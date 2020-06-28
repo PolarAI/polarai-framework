@@ -113,7 +113,7 @@ target_link_libraries(${ATH_BACKEND_LLVM} PRIVATE
         ${AthenaJitTarget}
         MLIRIR
         MLIRStandardOps
-        MLIRAthenaGraph
+        MLIRPolarGraph
         ${ATH_RT_LLVM_SUPPORT_OBJ}
         ${ATH_RT_LLVM_DRIVER}
         )

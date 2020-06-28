@@ -11,8 +11,14 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include <mlir/IR/OpDefinition.h>
+#ifndef POLAR_POLARGRAPHDIALECT_H
+#define POLAR_POLARGRAPHDIALECT_H
 
-namespace mlir::ath_graph {
-#include "AthenaGraph/ComputationalOpInterface.h.inc"
-}
+#include <mlir/IR/Dialect.h>
+
+namespace mlir::polar_graph {
+
+#include "PolarGraph/PolarGraphOpsDialect.h.inc"
+} // namespace mlir::polar_graph
+
+#endif // POLAR_POLARGRAPHDIALECT_H

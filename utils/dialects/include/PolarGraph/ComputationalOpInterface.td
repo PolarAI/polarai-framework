@@ -1,5 +1,5 @@
-#ifndef ATHENA_COMPUTATIONAL_OP_INTERFACE
-#define ATHENA_COMPUTATIONAL_OP_INTERFACE
+#ifndef POLAR_COMPUTATIONAL_OP_INTERFACE
+#define POLAR_COMPUTATIONAL_OP_INTERFACE
 
 include "mlir/IR/OpBase.td"
 
@@ -18,4 +18,4 @@ def ComputationalOpInterface : OpInterface<"ComputationalOpInterface"> {
 
 def Computational : DeclareOpInterfaceMethods<ComputationalOpInterface>;
 
-#endif // ATHENA_COMPUTATIONAL_OP_INTERFACE
+#endif // POLAR_COMPUTATIONAL_OP_INTERFACE
