@@ -28,7 +28,7 @@ def build(args):
         options.append("-DCMAKE_INSTALL_PREFIX=" + args.install_dir)
 
     if "" != args.external_lit:
-        options.append("-DLLVM_EXTERNAL_LIT" + args.external_lit)
+        options.append("-DLLVM_EXTERNAL_LIT=" + args.external_lit)
 
     if not os.path.exists(args.destination):
         os.mkdir(args.destination)
