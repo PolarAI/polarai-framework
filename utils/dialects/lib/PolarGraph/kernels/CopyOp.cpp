@@ -20,10 +20,6 @@
 
 namespace mlir::polar_graph {
 void CopyOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
-  auto memrefTy = args.back().getType().cast<MemRefType>();
-  auto zero = builder.create<ConstantIntOp>(builder.getUnknownLoc(), 0,
-                                            builder.getIndexType());
-
   builder.create<linalg::CopyOp>(builder.getUnknownLoc(), args[0], args[1]);
 }
 } // namespace mlir::polar_graph

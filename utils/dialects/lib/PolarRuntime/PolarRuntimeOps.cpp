@@ -26,6 +26,7 @@ void ApplyOp::build(OpBuilder& builder, OperationState& result,
   result.addOperands(device);
   result.addOperands(event);
   result.addOperands(operands);
+  result.types.push_back(EventType::get(builder.getContext()));
   result.addAttribute("kernel_name", builder.getStringAttr(kernelName));
 
   SmallVector<Type, 5> blockArgTypes;
