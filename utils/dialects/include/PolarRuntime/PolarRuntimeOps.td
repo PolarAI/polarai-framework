@@ -25,8 +25,8 @@ def ApplyOp : PolarRuntime_Op<"apply"> {
   let skipDefaultBuilders = 1;
 
   let builders = [
-    OpBuilder<"OpBuilder& builder, OperationState& result, "
-              "StringRef kernelName, ValueRange operands">
+    OpBuilder<"OpBuilder& builder, OperationState& result, Value device, "
+              "Value event, StringRef kernelName, ValueRange operands">
   ];
 }
 

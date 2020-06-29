@@ -77,9 +77,13 @@ struct BuiltinConversionPattern : public PolarGraphConversionPattern<OpT> {
 
     // FIXME this pattern is incorrect if node performs more than one
     //       computation.
-    rewriter.replaceOpWithNewOp<polar_rt::LaunchFuncOp>(
-        op, resTypes, device, blockingEvent, concreteOp.getKernelName(),
-        globalSize, localSize, operands);
+    auto applyOp = rewriter.create<polar_rt::ApplyOp>(
+        op->getLoc(), device, blockingEvent, concreteOp.getKernelName(),
+        operands);
+    OpBuilder builder(op->getContext());
+    builder.setInsertionPointToStart(&applyOp.body().front());
+    concreteOp.produceKernel(builder, applyOp.body().front().getArguments());
+    rewriter.eraseOp(op);
     return success();
   }
 };

@@ -21,7 +21,10 @@
 namespace mlir::polar_rt {
 
 void ApplyOp::build(OpBuilder& builder, OperationState& result,
+                    Value device, Value event,
                     StringRef kernelName, ValueRange operands) {
+  result.addOperands(device);
+  result.addOperands(event);
   result.addOperands(operands);
   result.addAttribute("kernel_name", builder.getStringAttr(kernelName));
 
