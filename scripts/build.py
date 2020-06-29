@@ -27,6 +27,9 @@ def build(args):
     if "" != args.install_dir:
         options.append("-DCMAKE_INSTALL_PREFIX=" + args.install_dir)
 
+    if "" != args.external_lit:
+        options.append("-DLLVM_EXTERNAL_LIT" + args.external_lit)
+
     if not os.path.exists(args.destination):
         os.mkdir(args.destination)
 
@@ -63,6 +66,7 @@ def main():
     parser.add_argument("--use-ldd", action='store_true', help="Use LLVM ldd linker")
     parser.add_argument("--no-build", action='store_true', help="Do not perform actual build")
     parser.add_argument("--install-dir", type=str, default="", help="Installation path")
+    parser.add_argument("--external-lit", type=str, default="", help="External LLVM Integrated Test tool path")
 
     args = parser.parse_args()
 

@@ -132,6 +132,7 @@ void AthenaJIT::compileModule() {
     }
   }
 #endif
+  mInternalModule->dump();
   auto res = mMlirPassManager.run(*mInternalModule);
   if (mlir::failed(res)) {
     // todo throw a real error.

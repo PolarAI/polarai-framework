@@ -35,6 +35,7 @@ jobs:
           mkdir -p build_${{ matrix.build_type }}
           mkdir -p install_${{ matrix.build_type }}
           python3 ./scripts/build.py \
+          --external-lit="/usr/local/bin/lit"
           --install-dir="${{ github.workspace }}/install_${{ matrix.build_type }}" \
           --build-type="${{ matrix.build_type }}" \
           ${{ github.workspace }}/build_${{ matrix.build_type }} \
@@ -49,3 +50,4 @@ jobs:
         run: |
           cd build_${{ matrix.build_type }}
           ctest -VV -T Test
+          cmake --build . --target check-polar-dialects
