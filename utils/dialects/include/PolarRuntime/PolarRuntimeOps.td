@@ -21,8 +21,7 @@ def LaunchFuncOp : PolarRuntime_Op<"launch_func"> {
   let results = (outs PolarRuntime_EventType:$out_event);
 }
 
-def DeviceSelectOp : PolarRuntime_Op<"select_device", 
-                                     [ConstantLike, NoSideEffect]> {
+def DeviceSelectOp : PolarRuntime_Op<"select_device", [NoSideEffect]> {
   let summary = "Selects device for specified node";
   let description = [{ TBD }];
 
