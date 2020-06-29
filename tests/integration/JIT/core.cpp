@@ -47,7 +47,7 @@ using namespace athena::backend::llvm;
 namespace {
 const float eps = 1e-5;
 
-TEST(JITIntegration, AddOperationSample) {
+TEST(JITIntegration, DISABLED_AddOperationSample) {
   Context context;
 
   auto graph = context.create<Graph>("mainGraph");
@@ -121,7 +121,7 @@ std::vector<T> combineOperation(T alpha, const std::vector<T>& left, T beta,
   return res;
 }
 
-TEST(JITIntegration, CombineOperationSample) {
+TEST(JITIntegration, DISABLED_CombineOperationSample) {
   Context context;
 
   auto graph = context.create<Graph>("mainGraph");
@@ -196,7 +196,7 @@ std::vector<T> divideOperation(const std::vector<T>& numerator,
   return res;
 }
 
-TEST(JITIntegration, DivideOperationSample) {
+TEST(JITIntegration, DISABLED_DivideOperationSample) {
   Context context;
 
   auto graph = context.create<Graph>("mainGraph");
@@ -272,7 +272,7 @@ std::vector<T> logLossOperation(const std::vector<T>& prediction,
   return res;
 }
 
-TEST(JITIntegration, LogLossOperationSample) {
+TEST(JITIntegration, DISABLED_LogLossOperationSample) {
   Context context;
 
   auto graph = context.create<Graph>("mainGraph");
@@ -347,7 +347,7 @@ std::vector<T> mulOperation(const std::vector<T>& left,
   return res;
 }
 
-TEST(JITIntegration, MulOperationSample) {
+TEST(JITIntegration, DISABLED_MulOperationSample) {
   Context context;
 
   auto graph = context.create<Graph>("mainGraph");
@@ -448,7 +448,7 @@ matMulOperation(const bool leftTranspose, const bool rightTranspose, uint64_t m,
   return res;
 }
 
-TEST(JITIntegration, MatMulNNOperationSample) {
+TEST(JITIntegration, DISABLED_MatMulNNOperationSample) {
   Context context;
 
   auto graph = context.create<Graph>("mainGraph");
@@ -515,7 +515,7 @@ TEST(JITIntegration, MatMulNNOperationSample) {
   allocator.release(record);
 }
 
-TEST(JITIntegration, MatMulNNSquareOperationSample) {
+TEST(JITIntegration, DISABLED_MatMulNNSquareOperationSample) {
   Context context;
 
   auto graph = context.create<Graph>("mainGraph");
@@ -582,7 +582,7 @@ TEST(JITIntegration, MatMulNNSquareOperationSample) {
   allocator.release(record);
 }
 
-TEST(JITIntegration, MatMulNNRectOperationSample) {
+TEST(JITIntegration, DISABLED_MatMulNNRectOperationSample) {
   Context context;
 
   auto graph = context.create<Graph>("mainGraph");
