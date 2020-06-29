@@ -3,6 +3,13 @@ add_mlir_dialect_library(MLIRPolarGraph
         PolarGraphOps.cpp
         ComputationalOpInterface.cpp
         PeepholePatterns.cpp
+        kernels/AddOp.cpp
+        kernels/CopyOp.cpp
+        kernels/DivideOp.cpp
+        kernels/MatMulOp.cpp
+        kernels/MulConcatOp.cpp
+        kernels/MulOp.cpp
+        kernels/SigmoidOp.cpp
 
         ADDITIONAL_HEADER_DIRS
         ${PROJECT_SOURCE_DIR}/include

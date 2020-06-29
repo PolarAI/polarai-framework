@@ -12,7 +12,10 @@ def ComputationalOpInterface : OpInterface<"ComputationalOpInterface"> {
     InterfaceMethod<"Get kernel name based on operation name and operands",
     "llvm::StringRef", "getKernelName", (ins), [{}], [{
       return "dummy";
-    }]>
+    }]>,
+    InterfaceMethod<"Produces Compute kernel to calculate operation",
+      "void", "produceKernel", (ins "OpBuilder&":$builder,
+      "Block::BlockArgListType":$args), [{}], [{}]>
   ];
 }
 
