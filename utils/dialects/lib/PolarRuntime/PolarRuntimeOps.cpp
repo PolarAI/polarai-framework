@@ -20,6 +20,62 @@
 
 namespace mlir::polar_rt {
 
+void ApplyOp::build(OpBuilder& builder, OperationState& result,
+                    StringRef kernelName, ValueRange operands) {
+  result.addOperands(operands);
+  result.addAttribute("kernel_name", builder.getStringAttr(kernelName));
+
+  SmallVector<Type, 5> blockArgTypes;
+  for (auto op : operands) {
+    auto type = op.getType();
+    if (type.isa<RankedTensorType>()) {
+      auto tensorTy = type.cast<RankedTensorType>();
+      SmallVector<long, 3> dims(tensorTy.getRank(), -1);
+      blockArgTypes.push_back(MemRefType::get(dims, tensorTy.getElementType()));
+    } else {
+      blockArgTypes.push_back(type);
+    }
+  }
+
+  auto* body = new Block;
+  body->addArguments(blockArgTypes);
+
+  Region* kernelRegion = result.addRegion();
+  kernelRegion->push_back(body);
+
+  OpBuilder::InsertionGuard guard{builder};
+  builder.setInsertionPointToStart(body);
+  builder.create<TerminatorOp>(builder.getUnknownLoc());
+}
+
+void LaunchOp::build(OpBuilder& builder, OperationState& result,
+                     StringRef kernelName, ValueRange operands,
+                     ArrayRef<int64_t> globalSize,
+                     ArrayRef<int64_t> localSize) {
+  result.addOperands(operands);
+  result.addAttribute("kernel_name", builder.getStringAttr(kernelName));
+  result.addAttribute("global_size", builder.getI64ArrayAttr(globalSize));
+  result.addAttribute("local_size", builder.getI64ArrayAttr(localSize));
+
+  SmallVector<Type, 5> blockArgTypes;
+  for (auto op : operands) {
+    auto type = op.getType();
+    if (type.isa<RankedTensorType>()) {
+      auto tensorTy = type.cast<RankedTensorType>();
+      SmallVector<long, 3> dims(tensorTy.getRank(), -1);
+      blockArgTypes.push_back(MemRefType::get(dims, tensorTy.getElementType()));
+    } else {
+      blockArgTypes.push_back(type);
+    }
+  }
+
+  auto* body = new Block;
+  body->addArguments(blockArgTypes);
+
+  Region* kernelRegion = result.addRegion();
+  kernelRegion->push_back(body);
+}
+
 void ScopeOp::build(OpBuilder& builder, OperationState& result, Value size) {
   result.addOperands(size);
 
