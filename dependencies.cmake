@@ -40,6 +40,6 @@ set(EFFCEE_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
 AthenaAddDependency(
         TARGET_NAME effcee
         GIT_URL https://github.com/google/effcee.git
-        GIT_TAG main
+        GIT_TAG v2018.1
         INCLUDE_PATH .
 )

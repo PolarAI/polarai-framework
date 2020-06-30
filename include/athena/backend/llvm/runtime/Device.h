@@ -32,7 +32,7 @@ class Device;
 class Event;
 class BackendAllocator;
 
-enum class DeviceProvider { CUDA, HIP, SYCL, OpenCL, VULKAN, HOST };
+enum class DeviceProvider { CUDA, HIP, SYCL, OpenCL, VULKAN, METAL, HOST };
 
 enum class DeviceKind { CPU, GPU, FPGA, OTHER_ACCELERATOR, HOST };
 

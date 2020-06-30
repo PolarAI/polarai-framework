@@ -14,7 +14,7 @@
 #ifndef ATHENA_INDEX_H
 #define ATHENA_INDEX_H
 
-#include <cstdint>
+#include <cstddef>
 
 namespace athena::utils {
 using Index = std::size_t;

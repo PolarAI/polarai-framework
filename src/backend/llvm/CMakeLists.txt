@@ -78,6 +78,7 @@ if (UNIX AND NOT APPLE)
     set(POLAR_HAS_HIP "false" CACHE STRING "" FORCE)
   #endif()
 endif()
+  set(POLAR_HAS_HIP "false" CACHE STRING "" FORCE)
 
 find_package(Vulkan)
 if (Vulkan_FOUND)
@@ -87,6 +88,13 @@ else()
   set(POLAR_HAS_VULKAN "false" CACHE STRING "" FORCE)
 endif()
   set(POLAR_HAS_VULKAN "false" CACHE STRING "" FORCE)
+
+if (APPLE)
+  add_subdirectory(runtime/metal)
+  add_dependencies(${ATH_BACKEND_LLVM} ${POLAR_RT_LLVM_METAL})
+else()
+  set(POLAR_HAS_METAL "false" CACHE STRING "" FORCE)
+endif()
 
 add_subdirectory(runtime/driver)
 

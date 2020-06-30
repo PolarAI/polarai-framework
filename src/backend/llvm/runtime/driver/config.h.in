@@ -8,6 +8,7 @@ constexpr static auto HasSYCL = @ATH_HAS_SYCL@;
 constexpr static auto HasCUDA = @POLAR_HAS_CUDA@;
 constexpr static auto HasHIP = @POLAR_HAS_HIP@;
 constexpr static auto HasVulkan = @POLAR_HAS_VULKAN@;
+constexpr static auto HasMetal = @POLAR_HAS_METAL@;
 
 inline std::vector<std::string> getListOfLibraries() {
   std::vector<std::string> libraries;
@@ -27,6 +28,10 @@ inline std::vector<std::string> getListOfLibraries() {
   if constexpr (HasVulkan) {
     // fixme find a better way to extract libnames
     libraries.emplace_back("lib@POLAR_RT_LLVM_VULKAN@.so");
+  }
+  if constexpr (HasMetal) {
+    // fixme find a better way to extract libnames
+    libraries.emplace_back("lib@POLAR_RT_LLVM_METAL@.dylib");
   }
   // temporarily disable OpenCL
   if constexpr (/*HasOpenCL*/ false) {
