@@ -22,6 +22,7 @@
 #include "mlir/Dialect/SCF/SCF.h"
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "mlir/IR/BlockAndValueMapping.h"
+#include "mlir/IR/Dominance.h"
 #include "mlir/IR/Module.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Transforms/DialectConversion.h"
@@ -37,6 +38,7 @@ protected:
     auto module = getOperation();
 
     module.walk([&module](polar_rt::LaunchOp launchOp) {
+      DominanceInfo dominance(launchOp.getParentOfType<FuncOp>());
       OpBuilder builder(launchOp.getContext());
 
       auto parentNode = launchOp.getParentOfType<FuncOp>();
@@ -54,19 +56,23 @@ protected:
           FunctionType::get(argTypes, {}, launchOp.getContext());
       auto kernelAttr = builder.getNamedAttr(
           compute::FuncOp::getKernelAttributeName(), builder.getBoolAttr(true));
-      auto kernel = builder.create<compute::FuncOp>(launchOp.getLoc(), kernelName.str(),
-                                      funcType, ArrayRef{kernelAttr});
+      auto kernel = builder.create<compute::FuncOp>(
+          launchOp.getLoc(), kernelName.str(), funcType, ArrayRef{kernelAttr});
       builder.setInsertionPointToStart(&kernel.body().front());
 
       BlockAndValueMapping mapping;
 
       for (int i = 0; i < launchOp.body().front().getNumArguments(); i++) {
         mapping.map(launchOp.body().front().getArgument(i),
-                    launchOp.body().front().getArgument(i));
+                    kernel.body().front().getArgument(i));
       }
 
       for (auto& op : launchOp.body().front().without_terminator()) {
         for (auto operand : op.getOperands()) {
+          if (dominance.dominates(operand, launchOp)) {
+            auto clone = builder.clone(*operand.getDefiningOp(), mapping);
+            mapping.map(operand, clone->getResult(0));
+          }
         }
         auto clone = builder.clone(op, mapping);
         if (clone->getNumResults()) {
@@ -78,18 +84,16 @@ protected:
 
       builder.create<compute::ReturnOp>(kernel.getLoc());
 
-      // auto& body = launchOp.body().front();
+      builder.setInsertionPointAfter(launchOp);
 
-      // SmallVector<Type, 5> blockArgTypes;
-      // for (auto type : launchOp.body().front().getArgumentTypes()) {
-      //   blockArgTypes.push_back(type);
-      // }
+      auto launchFuncOp = builder.create<polar_rt::LaunchFuncOp>(
+          launchOp.getLoc(), builder.getSymbolRefAttr(kernel),
+          launchOp.kernel_name(), launchOp.getOperands(),
+          launchOp.global_offset(), launchOp.global_size(),
+          launchOp.local_size());
 
-      // OpBuilder bodyBuilder(launchOp.getContext());
-      // bodyBuilder.setInsertionPointToStart(&launchOp.body().front());
-
-      // launchOp.replaceAllUsesWith(launchOp.getResult());
-      // launchOp.erase();
+      launchOp.replaceAllUsesWith(launchFuncOp.getResult());
+      launchOp.erase();
     });
   }
 };

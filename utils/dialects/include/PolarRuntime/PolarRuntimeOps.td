@@ -61,10 +61,22 @@ def LaunchFuncOp : PolarRuntime_Op<"launch_func"> {
 
   let arguments = (ins PolarRuntime_DeviceType:$device, 
                        PolarRuntime_EventType:$blocking_event,
-                       StrAttr:$kernel, I64ArrayAttr:$global_size,
+                       FlatSymbolRefAttr:$kernel,
+                       StrAttr:$native_kernel,
+                       I64ArrayAttr:$global_offset, 
+                       I64ArrayAttr:$global_size,
                        I64ArrayAttr:$local_size,
                        Variadic<AnyType>:$operands);
   let results = (outs PolarRuntime_EventType:$out_event);
+
+  let skipDefaultBuilders = 1;
+  let builders = [
+    OpBuilder<"OpBuilder& builder, OperationState& result, "
+              "SymbolRefAttr kernel, "
+              "StringRef nativeKernel, ValueRange operands, "
+              "ArrayAttr globalOffset, ArrayAttr globalSize, "
+              "ArrayAttr localSize">
+  ];
 }
 
 def DeviceSelectOp : PolarRuntime_Op<"select_device", [NoSideEffect]> {
