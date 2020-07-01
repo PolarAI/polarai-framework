@@ -21,6 +21,7 @@ namespace mlir::polar_graph {
 void SigmoidOp::produceKernel(OpBuilder& builder,
                               Block::BlockArgListType args) {
   auto memrefTy = args.back().getType().cast<MemRefType>();
+  auto tensorTy = out().getType().cast<RankedTensorType>();
   auto zero = builder.create<ConstantIndexOp>(builder.getUnknownLoc(), 0);
 
   SmallVector<Value, 3> lbs(memrefTy.getRank(), zero);
@@ -28,7 +29,8 @@ void SigmoidOp::produceKernel(OpBuilder& builder,
   SmallVector<int64_t, 3> steps(memrefTy.getRank(), 1);
 
   for (int i = 0; i < memrefTy.getRank(); i++) {
-    auto dim = builder.create<DimOp>(builder.getUnknownLoc(), args.back(), i);
+    auto dim = builder.create<ConstantIndexOp>(builder.getUnknownLoc(),
+                                               tensorTy.getDimSize(i));
     ubs.push_back(dim);
   }
 
