@@ -54,29 +54,25 @@ void ApplyOp::build(OpBuilder& builder, OperationState& result,
 
 void LaunchOp::build(OpBuilder& builder, OperationState& result,
                      StringRef kernelName, ValueRange operands,
+                     ArrayRef<Type> blockArgTypes,
+                     ArrayRef<int64_t> globalOffset,
                      ArrayRef<int64_t> globalSize,
                      ArrayRef<int64_t> localSize) {
   result.addOperands(operands);
   result.addAttribute("kernel_name", builder.getStringAttr(kernelName));
+  result.addAttribute("global_offset", builder.getI64ArrayAttr(globalOffset));
   result.addAttribute("global_size", builder.getI64ArrayAttr(globalSize));
   result.addAttribute("local_size", builder.getI64ArrayAttr(localSize));
-
-  SmallVector<Type, 5> blockArgTypes;
-  for (auto op : operands) {
-    auto type = op.getType();
-    if (type.isa<RankedTensorType>()) {
-      auto tensorTy = type.cast<RankedTensorType>();
-      SmallVector<long, 3> dims(tensorTy.getRank(), -1);
-      blockArgTypes.push_back(MemRefType::get(dims, tensorTy.getElementType()));
-    } else {
-      blockArgTypes.push_back(type);
-    }
-  }
+  result.types.push_back(EventType::get(builder.getContext()));
 
   auto* body = new Block;
   body->addArguments(blockArgTypes);
 
   Region* kernelRegion = result.addRegion();
+
+  OpBuilder::InsertionGuard guard{builder};
+  builder.setInsertionPointToStart(body);
+  builder.create<TerminatorOp>(builder.getUnknownLoc());
   kernelRegion->push_back(body);
 }
 

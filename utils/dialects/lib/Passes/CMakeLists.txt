@@ -4,6 +4,9 @@ add_mlir_conversion_library(MLIRPolarPasses
         BarrierLegalizerPass.cpp
         LegalizeRTForLoweringPass.cpp
         ReleaseDependencyPass.cpp
+        RuntimeShapeInferencePass.cpp
+        KernelMaterializerPass.cpp
+        KernelOutliningPass.cpp
 
         ADDITIONAL_HEADER_DIRS
         ${PROJECT_SOURCE_DIR}/include/

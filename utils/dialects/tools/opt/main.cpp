@@ -16,6 +16,7 @@
 #include "Passes/Passes.h"
 #include "PolarGraph/PolarGraphDialect.h"
 #include "PolarRuntime/PolarRuntimeDialect.h"
+#include "Compute/ComputeDialect.h"
 
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/MLIRContext.h"
@@ -71,6 +72,7 @@ int main(int argc, char** argv) {
 
   mlir::registerDialect<mlir::polar_graph::PolarGraphDialect>();
   mlir::registerDialect<mlir::polar_rt::PolarRuntimeDialect>();
+  mlir::registerDialect<mlir::compute::ComputeDialect>();
   mlir::registerPass("convert-graph-to-runtime",
                      "Converts Polar Graph to Runtime calls",
                      mlir::createLowerGraphToRuntimePass);
@@ -89,6 +91,14 @@ int main(int argc, char** argv) {
   mlir::registerPass("mem-release-dependency",
                      "Adds event arguments to Runtime barriers",
                      mlir::createReleaseDependencyPass);
+  mlir::registerPass("rt-shape-inference", "Infer kernel MemRef shapes",
+                     mlir::createRuntimeShapeInferencePass);
+  mlir::registerPass("materialize-kernels",
+                     "Convert operations to compute kernels",
+                     mlir::createKernelMaterializerPass);
+  mlir::registerPass("outline-kernels",
+                     "Outline compute kernels",
+                     mlir::createKernelOutliningPass);
 
   llvm::InitLLVM y(argc, argv);
 

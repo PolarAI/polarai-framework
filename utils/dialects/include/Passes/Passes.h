@@ -17,6 +17,9 @@
 #include <memory>
 
 namespace mlir {
+namespace polar_rt {
+class ApplyOp;
+}
 class ModuleOp;
 class FuncOp;
 template <typename OpT> class OperationPass;
@@ -26,6 +29,10 @@ std::unique_ptr<OperationPass<ModuleOp>> createGraphRelationDestructorPass();
 std::unique_ptr<OperationPass<FuncOp>> createBarrierLegalizerPass();
 std::unique_ptr<OperationPass<FuncOp>> createLegalizeRTForLoweringPass();
 auto createReleaseDependencyPass() -> std::unique_ptr<OperationPass<FuncOp>>;
+auto createRuntimeShapeInferencePass()
+    -> std::unique_ptr<OperationPass<FuncOp>>;
+auto createKernelMaterializerPass() -> std::unique_ptr<OperationPass<FuncOp>>;
+auto createKernelOutliningPass() -> std::unique_ptr<OperationPass<ModuleOp>>;
 } // namespace mlir
 
 #endif // ATHENA_PASSES_H

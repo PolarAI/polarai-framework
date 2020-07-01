@@ -38,7 +38,8 @@ def LaunchOp : PolarRuntime_Op<"launch"> {
   let arguments = (ins PolarRuntime_DeviceType:$device, 
                        PolarRuntime_EventType:$blocking_event,
                        Variadic<AnyType>:$operands, StrAttr:$kernel_name,
-                       I64ArrayAttr:$global_size, I64ArrayAttr:$local_size);
+                       I64ArrayAttr:$global_offset, I64ArrayAttr:$global_size,
+                       I64ArrayAttr:$local_size);
   let results = (outs PolarRuntime_EventType:$out_event);
 
   let skipDefaultBuilders = 1;
@@ -46,7 +47,9 @@ def LaunchOp : PolarRuntime_Op<"launch"> {
   let builders = [
     OpBuilder<"OpBuilder& builder, OperationState& result, "
               "StringRef kernelName, ValueRange operands, "
-              "ArrayRef<int64_t> globalSize, ArrayRef<int64_t> localSize">
+              "ArrayRef<Type> blockArgTypes, "
+              "ArrayRef<int64_t> globalOffset, ArrayRef<int64_t> globalSize, "
+              "ArrayRef<int64_t> localSize">
   ];
 }
 
