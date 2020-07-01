@@ -57,6 +57,25 @@ protected:
       auto kernel = builder.create<compute::FuncOp>(launchOp.getLoc(), kernelName.str(),
                                       funcType, ArrayRef{kernelAttr});
       builder.setInsertionPointToStart(&kernel.body().front());
+
+      BlockAndValueMapping mapping;
+
+      for (int i = 0; i < launchOp.body().front().getNumArguments(); i++) {
+        mapping.map(launchOp.body().front().getArgument(i),
+                    launchOp.body().front().getArgument(i));
+      }
+
+      for (auto& op : launchOp.body().front().without_terminator()) {
+        for (auto operand : op.getOperands()) {
+        }
+        auto clone = builder.clone(op, mapping);
+        if (clone->getNumResults()) {
+          for (auto res : llvm::enumerate(clone->getResults())) {
+            mapping.map(op.getResult(res.index()), res.value());
+          }
+        }
+      }
+
       builder.create<compute::ReturnOp>(kernel.getLoc());
 
       // auto& body = launchOp.body().front();
@@ -68,20 +87,6 @@ protected:
 
       // OpBuilder bodyBuilder(launchOp.getContext());
       // bodyBuilder.setInsertionPointToStart(&launchOp.body().front());
-      // BlockAndValueMapping mapping;
-
-      // for (int i = 0; i < launchOp.body().front().getNumArguments(); i++) {
-      //   mapping.map(launchOp.body().front().getArgument(i),
-      //               launchOp.body().front().getArgument(i));
-      // }
-      // for (auto& op : launchOp.body().front().without_terminator()) {
-      //   auto clone = bodyBuilder.clone(op, mapping);
-      //   if (clone->getNumResults()) {
-      //     for (auto res : llvm::enumerate(clone->getResults())) {
-      //       mapping.map(op.getResult(res.index()), res.value());
-      //     }
-      //   }
-      // }
 
       // launchOp.replaceAllUsesWith(launchOp.getResult());
       // launchOp.erase();
