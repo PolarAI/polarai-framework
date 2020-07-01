@@ -7,5 +7,5 @@ module {
   // CHECK: llvm.func @ath_device_select(!llvm<"i8*">, !llvm.i64) -> !llvm<"i8*">
   // CHECK: llvm.func @ath_load(!llvm<"i8*">, !llvm.i64, !llvm<"{ i64, i32, i64, i64* }*">)
   // CHECK: llvm.func @ath_barrier(!llvm.i64, !llvm<"i8**">)
-  // CHECK: llvm.func @ath_launch(!llvm<"i8*">, !llvm<"i8*">, !llvm<"i8*">, !llvm<"{ i8*, i64, { i64, i8*, i32 }*, i64, i64*, i64* }*">) -> !llvm<"i8*">
+  // CHECK: llvm.func @ath_launch(!llvm<"i8*">, !llvm<"i8*">, !llvm<"i8*">, !llvm<"{ i8*, i64, { i64, i8*, i32 }*, i64, i64*, i64*, i64*, i8* }*">) -> !llvm<"i8*">
 }

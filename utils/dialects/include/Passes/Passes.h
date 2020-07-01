@@ -17,9 +17,6 @@
 #include <memory>
 
 namespace mlir {
-namespace polar_rt {
-class ApplyOp;
-}
 class ModuleOp;
 class FuncOp;
 template <typename OpT> class OperationPass;
