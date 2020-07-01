@@ -30,8 +30,10 @@ struct LaunchCommand {
   uint64_t argsCount;
   ArgDesc* args;
   uint64_t workDim;
+  uint64_t* globalOffset;
   uint64_t* globalSize;
   uint64_t* localSize;
+  const char* nativeKernelName;
 };
 
 #endif // ATHENA_LAUNCHCOMMAND_H

@@ -1,10 +1,11 @@
 #include "AthenaJIT.h"
 
-#include "PolarGraph/PolarGraphDialect.h"
-#include "PolarRuntime/PolarRuntimeDialect.h"
+#include "Compute/ComputeOps.h"
 #include "Conversion/GraphToRuntimePass.h"
 #include "Conversion/RuntimeToLLVM.h"
 #include "Passes/Passes.h"
+#include "PolarGraph/PolarGraphDialect.h"
+#include "PolarRuntime/PolarRuntimeDialect.h"
 
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 #include "mlir/IR/Builders.h"
@@ -83,6 +84,8 @@ void AthenaJIT::addModule(const mlir::OwningModuleRef& ref) {
   if (!mInternalModule) {
     mInternalModule = mlir::OwningModuleRef(
         builder.create<mlir::ModuleOp>(builder.getUnknownLoc()));
+    builder.setInsertionPointToStart(mInternalModule->getBody());
+    builder.create<mlir::compute::ModuleOp>(builder.getUnknownLoc(), "kernels");
   }
 
   builder.setInsertionPointToStart(mInternalModule->getBody());
@@ -115,10 +118,16 @@ void AthenaJIT::setupMlirPassManager() {
   mMlirPassManager.addPass(mlir::createLowerGraphToRuntimePass());
   mMlirPassManager.addPass(mlir::createCanonicalizerPass());
   mMlirPassManager.addPass(mlir::createCSEPass());
+  mMlirPassManager.addPass(mlir::createLowerAffinePass());
   auto& funcOpt = mMlirPassManager.nest<mlir::FuncOp>();
+  funcOpt.addPass(mlir::createRuntimeShapeInferencePass());
+  funcOpt.addPass(mlir::createCanonicalizerPass());
+  funcOpt.addPass(mlir::createKernelMaterializerPass());
+  funcOpt.addPass(mlir::createCanonicalizerPass());
   funcOpt.addPass(mlir::createBarrierLegalizerPass());
   funcOpt.addPass(mlir::createLegalizeRTForLoweringPass());
   funcOpt.addPass(mlir::createReleaseDependencyPass());
+  mMlirPassManager.addPass(mlir::createKernelOutliningPass());
   mMlirPassManager.addPass(mlir::createDeployDefaultFunctionsPass());
   mMlirPassManager.addPass(mlir::createLowerRuntimeToLLVMPass());
 }
@@ -132,7 +141,6 @@ void AthenaJIT::compileModule() {
     }
   }
 #endif
-  mInternalModule->dump();
   auto res = mMlirPassManager.run(*mInternalModule);
   if (mlir::failed(res)) {
     // todo throw a real error.

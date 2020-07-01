@@ -1,5 +1,19 @@
+// RUN: polar-opt --outline-kernels %s | FileCheck %s
+
 module {
   "compute.module"() ( {
+    // CHECK: "compute.func"() ( {
+    // CHECK-NEXT: ^bb0(%arg0: memref<2x2xf32>, %arg1: f32, %arg2: memref<2x2xf32>, %arg3: f32, %arg4: memref<2x2xf32>):  // no predecessors
+    // CHECK-NEXT: %0 = "compute.global_id"() {dim = 0 : index} : () -> index
+    // CHECK-NEXT: %1 = "compute.global_id"() {dim = 1 : index} : () -> index
+    // CHECK-NEXT: %2 = load %arg0[%0, %1] : memref<2x2xf32>
+    // CHECK-NEXT: %3 = load %arg2[%0, %1] : memref<2x2xf32>
+    // CHECK-NEXT: %4 = mulf %2, %arg1 : f32
+    // CHECK-NEXT: %5 = mulf %3, %arg3 : f32
+    // CHECK-NEXT: %6 = addf %4, %5 : f32
+    // CHECK-NEXT: store %6, %arg4[%0, %1] : memref<2x2xf32>
+    // CHECK-NEXT: "compute.return"() : () -> ()
+    // CHECK-NEXT: }) {kernel = true, sym_name = "add_fadd", type = (memref<2x2xf32>, f32, memref<2x2xf32>, f32, memref<2x2xf32>) -> ()} : () -> ()
     compute.module_end
   }) {sym_name = "kernels"} : () -> ()
   func @inp1(%arg0: !polar_rt.graph_handle) -> !polar_rt.event attributes {cluster_id = 0 : index, node_id = 4 : index} {
@@ -36,6 +50,7 @@ module {
     "polar_rt.lock"(%3, %0) {lock_type = "read"} : (!polar_rt.device, tensor<2x2xf32>) -> ()
     "polar_rt.lock"(%3, %1) {lock_type = "read"} : (!polar_rt.device, tensor<2x2xf32>) -> ()
     %4 = "polar_rt.null_event"() : () -> !polar_rt.event
+    // CHECK: %5 = "polar_rt.launch_func"(%3, %4, %1, %cst, %0, %cst, %2) {global_offset = [0, 0], global_size = [2, 2], kernel = @add_fadd, local_size = [0, 0, 0], native_kernel = "fadd"} : (!polar_rt.device, !polar_rt.event, tensor<2x2xf32>, f32, tensor<2x2xf32>, f32, tensor<2x2xf32>) -> !polar_rt.event
     %5 = "polar_rt.launch"(%3, %4, %1, %cst, %0, %cst, %2) ( {
     ^bb0(%arg1: memref<2x2xf32>, %arg2: f32, %arg3: memref<2x2xf32>, %arg4: f32, %arg5: memref<2x2xf32>):  // no predecessors
       %6 = "compute.global_id"() {dim = 0 : index} : () -> index

@@ -15,6 +15,7 @@
 #include "../utils/LaunchCommand.h"
 #include "../utils/TensorInfo.h"
 #include "ArgInfo.h"
+#include "Compute/ComputeOps.h"
 #include "PolarGraph/PolarGraphDialect.h"
 #include "PolarGraph/PolarGraphOps.h"
 #include "PolarRuntime/PolarRuntimeDialect.h"
@@ -377,12 +378,13 @@ struct InvokeLoaderOpLoweringPattern
     auto graphHandle = parentFunc.getArgument(0);
 
     auto callee = module.lookupSymbol<LLVM::LLVMFuncOp>("ath_load");
-    auto nodeId = createUInt64Constant(
-        *concreteOp
-             .getAttrOfType<IntegerAttr>(polar_graph::NodeOp::getNodeIdAttrName())
-             .getValue()
-             .getRawData(),
-        llvmDialect, rewriter, op->getLoc());
+    auto nodeId =
+        createUInt64Constant(*concreteOp
+                                  .getAttrOfType<IntegerAttr>(
+                                      polar_graph::NodeOp::getNodeIdAttrName())
+                                  .getValue()
+                                  .getRawData(),
+                             llvmDialect, rewriter, op->getLoc());
 
     rewriter.create<LLVM::CallOp>(op->getLoc(), callee,
                                   ValueRange{graphHandle, nodeId, operands[0]});
@@ -404,8 +406,6 @@ struct LaunchFuncOpLoweringPattern
     auto module = op->getParentOfType<ModuleOp>();
     auto* llvmDialect =
         op->getContext()->getRegisteredDialect<LLVM::LLVMDialect>();
-
-    // concreteOp.getResult(0).replaceAllUsesWith(operands.back());
 
     auto argsArray = createArray(getArgDescType(llvmDialect),
                                  operands.size() - 2, rewriter, op->getLoc());
@@ -490,6 +490,7 @@ struct LaunchFuncOpLoweringPattern
     auto kerNamePtr = rewriter.create<LLVM::BitcastOp>(
         op->getLoc(), LLVM::LLVMType::getInt8Ty(llvmDialect).getPointerTo(),
         kerNameGlobalAddr);
+
     setStructFieldTo(launchCommand, getLaunchCommandType(llvmDialect),
                      kerNamePtr, 0, rewriter, op->getLoc());
 
@@ -510,6 +511,21 @@ struct LaunchFuncOpLoweringPattern
                      3, rewriter, op->getLoc());
 
     // Set global size
+    auto globalOffset =
+        createArray(LLVM::LLVMType::getInt64Ty(llvmDialect),
+                    concreteOp.global_offset().size(), rewriter, op->getLoc());
+    for (auto s : llvm::enumerate(concreteOp.global_offset())) {
+      auto intAttr = s.value().cast<IntegerAttr>();
+
+      auto size = createUInt64Constant(*intAttr.getValue().getRawData(),
+                                       llvmDialect, rewriter, op->getLoc());
+
+      setArrayEltTo(globalOffset, size, s.index(), rewriter, op->getLoc());
+    }
+    setStructFieldTo(launchCommand, getLaunchCommandType(llvmDialect),
+                     globalOffset, 4, rewriter, op->getLoc());
+
+    // Set global size
     auto globalSize =
         createArray(LLVM::LLVMType::getInt64Ty(llvmDialect),
                     concreteOp.global_size().size(), rewriter, op->getLoc());
@@ -522,7 +538,7 @@ struct LaunchFuncOpLoweringPattern
       setArrayEltTo(globalSize, size, s.index(), rewriter, op->getLoc());
     }
     setStructFieldTo(launchCommand, getLaunchCommandType(llvmDialect),
-                     globalSize, 4, rewriter, op->getLoc());
+                     globalSize, 5, rewriter, op->getLoc());
 
     // Set local size
     auto localSize =
@@ -537,7 +553,41 @@ struct LaunchFuncOpLoweringPattern
       setArrayEltTo(localSize, size, s.index(), rewriter, op->getLoc());
     }
     setStructFieldTo(launchCommand, getLaunchCommandType(llvmDialect),
-                     localSize, 5, rewriter, op->getLoc());
+                     localSize, 6, rewriter, op->getLoc());
+
+    // Set kernel name
+    auto nativeKernelNameStr = concreteOp.native_kernel();
+
+    Operation* nativeGlobalString =
+        op->getParentOfType<ModuleOp>().lookupSymbol(nativeKernelNameStr);
+    LLVM::GlobalOp nativeKernelNameVal;
+    if (nativeGlobalString) {
+      kernelNameVal = llvm::cast<LLVM::GlobalOp>(nativeGlobalString);
+    } else {
+      OpBuilder builder(module);
+      builder.setInsertionPointToStart(module.getBody());
+      // todo add small string optimization for null-terminated strings.
+      auto stringType =
+          LLVM::LLVMType::getArrayTy(LLVM::LLVMType::getInt8Ty(llvmDialect),
+                                     nativeKernelNameStr.size() + 1);
+      char* strData = new char[nativeKernelNameStr.size() + 1];
+      strcpy(strData, nativeKernelNameStr.data());
+      strData[nativeKernelNameStr.size()] = '\00';
+      auto kernelNameAttr = builder.getStringAttr(
+          llvm::StringRef(strData, nativeKernelNameStr.size() + 1));
+      delete[] strData;
+      nativeKernelNameVal = builder.create<LLVM::GlobalOp>(
+          builder.getUnknownLoc(), stringType, /*isConstant*/ true,
+          LLVM::Linkage::Private, nativeKernelNameStr, kernelNameAttr);
+    }
+    auto nkerNameGlobalAddr =
+        rewriter.create<LLVM::AddressOfOp>(op->getLoc(), nativeKernelNameVal);
+    auto nkerNamePtr = rewriter.create<LLVM::BitcastOp>(
+        op->getLoc(), LLVM::LLVMType::getInt8Ty(llvmDialect).getPointerTo(),
+        nkerNameGlobalAddr);
+
+    setStructFieldTo(launchCommand, getLaunchCommandType(llvmDialect),
+                     nkerNamePtr, 7, rewriter, op->getLoc());
 
     auto launchFunc = module.lookupSymbol<LLVM::LLVMFuncOp>("ath_launch");
 
@@ -549,6 +599,20 @@ struct LaunchFuncOpLoweringPattern
         ValueRange{graphHandle, operands[0], operands[1], launchCommand});
     concreteOp.getResult().replaceAllUsesWith(result.getResult(0));
     rewriter.eraseOp(concreteOp);
+
+    return success();
+  }
+};
+
+struct ModuleOpLoweringPattern
+    : PolarRuntimeConversionPattern<compute::ModuleOp> {
+  using PolarRuntimeConversionPattern<
+      compute::ModuleOp>::PolarRuntimeConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(Operation* op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter& rewriter) const override {
+    rewriter.eraseOp(op);
 
     return success();
   }
@@ -596,6 +660,7 @@ void populateRuntimeToLLVMConversionPatterns(
       NullEventOpLoweringPattern,
       DeviceSelectOpLoweringPattern,
       InvokeLoaderOpLoweringPattern,
+      ModuleOpLoweringPattern,
       LaunchFuncOpLoweringPattern
       // clang-format on
       >(typeConverter);

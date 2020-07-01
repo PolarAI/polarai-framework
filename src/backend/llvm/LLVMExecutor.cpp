@@ -18,8 +18,9 @@
 #include "runtime/driver/RuntimeDriver.h"
 #include "runtime/host/HostDevice.h"
 
-#include "PolarGraph/PolarGraphDialect.h"
-#include "PolarRuntime/PolarRuntimeDialect.h"
+#include <PolarGraph/PolarGraphDialect.h>
+#include <PolarRuntime/PolarRuntimeDialect.h>
+#include <Compute/ComputeDialect.h>
 #include <athena/backend/llvm/CodeGen.h>
 #include <athena/backend/llvm/LLVMExecutor.h>
 #include <athena/backend/llvm/runtime/GraphHandle.h>
@@ -103,6 +104,7 @@ LLVMExecutor::LLVMExecutor() {
 
   mlir::registerDialect<mlir::polar_graph::PolarGraphDialect>();
   mlir::registerDialect<mlir::polar_rt::PolarRuntimeDialect>();
+  mlir::registerDialect<mlir::compute::ComputeDialect>();
 
   ::llvm::InitializeNativeTarget();
   ::llvm::InitializeNativeTargetAsmPrinter();

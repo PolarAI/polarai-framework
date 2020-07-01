@@ -22,4 +22,5 @@ target_link_libraries(MLIRPolarPasses
         MLIRPass
         MLIRPolarGraph
         MLIRTransforms
+        MLIRCompute
         )

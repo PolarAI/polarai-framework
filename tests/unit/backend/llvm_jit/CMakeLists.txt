@@ -39,6 +39,7 @@ target_link_libraries(TestUnitJITRunnable PRIVATE
                       MLIRPolarGraph
                       MLIRPolarRuntime
                       MLIRPolarPasses
+                      MLIRCompute
                       MLIRPolarConversion
                       AthenaDep::googletest)
 target_include_directories(TestUnitJITRunnable PRIVATE
