@@ -1,6 +1,6 @@
 {
   "name": "Athena Dev Env",
-	"image": "polarai/devenv:202006171854150b1ca1",
+	"image": "polarai/devenv:202006301814080b1ca1",
 	"extensions": [
 		"ms-vscode.cmake-tools",
 		"jakob-erzar.llvm-tablegen",

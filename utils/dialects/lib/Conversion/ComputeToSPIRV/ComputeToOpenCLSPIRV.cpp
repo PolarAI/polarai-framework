@@ -144,8 +144,7 @@ void ComputeToOpenCLSPIRVPass::runOnOperation() {
   populateStandardToSPIRVPatterns(context, typeConverter, patterns);
   populateComputeToOpenCLSPIRVPatterns(context, typeConverter, patterns);
 
-  if (failed(applyFullConversion(computeModules, *target, patterns,
-                                 &typeConverter))) {
+  if (failed(applyFullConversion(computeModules, *target, patterns))) {
     return signalPassFailure();
   }
 }

@@ -12,7 +12,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "PolarGraph/PolarGraphOps.h"
-#include "utils.h"
 
 #include "mlir/Dialect/Linalg/IR/LinalgOps.h"
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
@@ -37,7 +36,7 @@ void MatMulOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
   } else {
     right = args[1];
   }
-  builder.create<linalg::MatmulOp>(builder.getUnknownLoc(), left, right,
-                                   args[2]);
+  builder.create<linalg::MatmulOp>(builder.getUnknownLoc(), TypeRange{memrefTy},
+                                   ValueRange{left, right, args[2]});
 }
 } // namespace mlir::polar_graph

@@ -12,7 +12,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "PolarGraph/PolarGraphOps.h"
-#include "utils.h"
 
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
