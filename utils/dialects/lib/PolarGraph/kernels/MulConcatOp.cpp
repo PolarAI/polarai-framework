@@ -34,7 +34,13 @@ void MulConcatOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args
   }
 
   auto bodyBuilder = [args](OpBuilder& builder, Location loc, ValueRange idx) {
-    // todo unsupported
+    auto gradient =
+        builder.create<AffineLoadOp>(builder.getUnknownLoc(), args[0]);
+    auto localDerivative =
+        builder.create<AffineLoadOp>(builder.getUnknownLoc(), args[1], idx);
+    auto mul = builder.create<MulFOp>(builder.getUnknownLoc(), gradient,
+                                      localDerivative);
+    builder.create<AffineStoreOp>(builder.getUnknownLoc(), mul, args[2], idx);
   };
   buildAffineLoopNest(builder, builder.getUnknownLoc(), lbs, ubs, steps,
                       bodyBuilder);
