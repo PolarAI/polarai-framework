@@ -108,8 +108,8 @@ public:
 
   Event* launch(BackendAllocator&, LaunchCommand&, Event*) override;
 
-  void addModule(ProgramDesc prog) override;
-  void linkModules() override;
+  void
+  selectBinary(std::vector<std::shared_ptr<ProgramDesc>>& programs) override{};
 
 private:
   cl_device_id mClDeviceId;

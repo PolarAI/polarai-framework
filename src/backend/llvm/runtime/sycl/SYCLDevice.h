@@ -130,11 +130,10 @@ public:
 
   auto launch(BackendAllocator&, LaunchCommand&, Event*) -> Event* override;
 
-  // todo deprecate these methods
-  void addModule(ProgramDesc prog) override;
-  void linkModules() override;
-
   void consumeEvent(Event*) override;
+
+  void
+  selectBinary(std::vector<std::shared_ptr<ProgramDesc>>& programs) override {};
 
 private:
   using KernelFuncT = std::function<Event*(SYCLDevice*, BackendAllocator&,

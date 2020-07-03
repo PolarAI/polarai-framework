@@ -13,25 +13,22 @@
 
 #include "CudaContext.h"
 #include "CudaDevice.h"
+#include "utils.hpp"
 
 #include <cuda.h>
 
 namespace athena::backend::llvm {
 CudaContext::CudaContext() {
-  CUresult err = cuInit(0);
-
-  if (err != CUDA_SUCCESS) {
-    std::terminate(); // fixme handle errors
-  }
+  check(cuInit(0));
 
   int deviceCount;
-  cuDeviceGetCount(&deviceCount);
+  check(cuDeviceGetCount(&deviceCount));
 
   mDevices.reserve(deviceCount);
 
   for (int i = 0; i < deviceCount; i++) {
     CUdevice device;
-    cuDeviceGet(&device, i);
+    check(cuDeviceGet(&device, i));
     mDevices.push_back(std::make_shared<CudaDevice>(device));
   }
 }

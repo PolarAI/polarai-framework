@@ -18,7 +18,8 @@
 #include "mlir/IR/Builders.h"
 
 namespace mlir::polar_graph {
-void MulConcatOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
+void MulConcatOp::produceKernel(OpBuilder& builder,
+                                Block::BlockArgListType args) {
   auto memrefTy = args.back().getType().cast<MemRefType>();
   auto tensorTy = out().getType().cast<RankedTensorType>();
   auto zero = builder.create<ConstantIndexOp>(builder.getUnknownLoc(), 0);
@@ -33,9 +34,10 @@ void MulConcatOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args
     ubs.push_back(dim);
   }
 
-  auto bodyBuilder = [args](OpBuilder& builder, Location loc, ValueRange idx) {
-    auto gradient =
-        builder.create<AffineLoadOp>(builder.getUnknownLoc(), args[0]);
+  auto bodyBuilder = [args, &zero](OpBuilder& builder, Location loc,
+                                  ValueRange idx) {
+    auto gradient = builder.create<AffineLoadOp>(
+        builder.getUnknownLoc(), args[0], ValueRange{zero, zero});
     auto localDerivative =
         builder.create<AffineLoadOp>(builder.getUnknownLoc(), args[1], idx);
     auto mul = builder.create<MulFOp>(builder.getUnknownLoc(), gradient,

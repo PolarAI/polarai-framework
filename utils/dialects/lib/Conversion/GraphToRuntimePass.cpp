@@ -69,12 +69,6 @@ struct BuiltinConversionPattern : public PolarGraphConversionPattern<OpT> {
         rewriter.create<polar_rt::NullEventOp>(op->getLoc(), resTypes.back());
     // }
 
-    RankedTensorType tensorType =
-        concreteOp.out().getType().template cast<RankedTensorType>();
-    auto globalSize = rewriter.getI64ArrayAttr(tensorType.getShape());
-    SmallVector<int64_t, 3> local(tensorType.getRank());
-    auto localSize = rewriter.getI64ArrayAttr(local);
-
     // FIXME this pattern is incorrect if node performs more than one
     //       computation.
     auto applyOp = rewriter.create<polar_rt::ApplyOp>(

@@ -65,10 +65,10 @@ public:
 
   virtual Event* launch(BackendAllocator&, LaunchCommand&, Event*) = 0;
 
-  virtual void addModule(ProgramDesc) = 0;
-  virtual void linkModules() = 0;
-
   virtual void consumeEvent(Event*) = 0;
+
+  virtual void
+  selectBinary(std::vector<std::shared_ptr<ProgramDesc>>& programs) = 0;
 };
 } // namespace athena::backend::llvm
 

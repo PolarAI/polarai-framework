@@ -49,9 +49,6 @@ auto SYCLDevice::launch(BackendAllocator& allocator, LaunchCommand& cmd,
   return nullptr;
 }
 
-void SYCLDevice::addModule(ProgramDesc) {}
-void SYCLDevice::linkModules() {}
-
 void SYCLDevice::consumeEvent(Event* evt) {
   evt->wait();
   delete evt;

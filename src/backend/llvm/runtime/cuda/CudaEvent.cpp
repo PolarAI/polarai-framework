@@ -11,27 +11,23 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-// #include "images.hpp"
-#include "runtime/opencl/kernels.h"
-#include "ImageManager.h"
+#include "CudaEvent.h"
 
-#include <athena/backend/llvm/runtime/ProgramDesc.h>
+#include <utility>
 
 namespace athena::backend::llvm {
-auto getOpenCLSPIRVProgram() -> ProgramDesc {
-  ProgramDesc prog;
-#ifdef HAS_SPIRV
-  prog.type = ProgramDesc::SPIRV;
-  prog.length = kernels_spirv.size();
-  prog.data = reinterpret_cast<const char*>(kernels_spirv.data());
-#endif
-  return prog;
+CudaEvent::CudaEvent(CudaDevice* device, CUevent evt)
+    : mEvent(evt), mDevice(device) {}
+
+void CudaEvent::wait() {
+  // todo is thread safety required here?
+  cuCtxSetCurrent(mDevice->getDeviceContext());
+  check(cuEventSynchronize(mEvent));
+  for (auto& cb : mCallbacks) {
+    cb();
+  }
+  mCallbacks.clear();
 }
-auto getOpenCLTextProgram() -> ProgramDesc {
-  ProgramDesc prog;
-  prog.type = ProgramDesc::TEXT;
-  prog.length = textKernels.size();
-  prog.data = textKernels.data();
-  return prog;
-}
-}
+auto CudaEvent::getDevice() -> Device* { return mDevice; };
+CudaEvent::~CudaEvent() { cuEventDestroy(mEvent); }
+} // namespace athena::backend::llvm

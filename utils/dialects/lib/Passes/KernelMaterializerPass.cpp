@@ -11,14 +11,13 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "Compute/ComputeDialect.h"
-#include "Compute/ComputeOps.h"
 #include "Passes/Passes.h"
 #include "PolarRuntime/PolarRuntimeDialect.h"
 #include "PolarRuntime/PolarRuntimeOps.h"
 
 #include "mlir/Conversion/AffineToStandard/AffineToStandard.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
+#include "mlir/Dialect/GPU/GPUDialect.h"
 #include "mlir/Dialect/SCF/SCF.h"
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "mlir/IR/BlockAndValueMapping.h"
@@ -26,10 +25,24 @@
 #include "mlir/Pass/Pass.h"
 #include "mlir/Transforms/DialectConversion.h"
 #include "mlir/Transforms/LoopUtils.h"
+#include "llvm/Support/ErrorHandling.h"
 
 using namespace mlir;
 
 namespace {
+
+StringAttr idToGridDim(OpBuilder& builder, int64_t id) {
+  switch (id) {
+  case 0:
+    return builder.getStringAttr("x");
+  case 1:
+    return builder.getStringAttr("y");
+  case 2:
+    return builder.getStringAttr("z");
+  default:
+    llvm_unreachable("Incorrect id");
+  }
+}
 class KernelMaterializerPass
     : public PassWrapper<KernelMaterializerPass, OperationPass<FuncOp>> {
 protected:
@@ -66,7 +79,6 @@ protected:
 
         if (!llvm::isa<ConstantIndexOp>(lbOp) &&
             !llvm::isa<ConstantIndexOp>(ubOp)) {
-          llvm::errs() << "Crap\n";
           return;
         }
 
@@ -89,10 +101,22 @@ protected:
       bodyBuilder.setInsertionPointToStart(&launchOp.body().front());
       BlockAndValueMapping mapping;
       for (auto& loop : llvm::enumerate(loopNest)) {
-        auto dim = bodyBuilder.create<compute::GlobalIdOp>(
+        auto dim = bodyBuilder.create<gpu::BlockDimOp>(
             loop.value().getLoc(), bodyBuilder.getIndexType(),
-            bodyBuilder.getIndexAttr(loop.index()));
-        mapping.map(loop.value().getInductionVar(), dim);
+            idToGridDim(bodyBuilder, loop.index()));
+        auto blockId = bodyBuilder.create<gpu::BlockIdOp>(
+            loop.value().getLoc(), bodyBuilder.getIndexType(),
+            idToGridDim(bodyBuilder, loop.index()));
+        auto threadId = bodyBuilder.create<gpu::ThreadIdOp>(
+            loop.value().getLoc(), bodyBuilder.getIndexType(),
+            idToGridDim(bodyBuilder, loop.index()));
+
+        auto mul =
+            bodyBuilder.create<MulIOp>(loop.value().getLoc(), dim, blockId);
+        auto sum =
+            bodyBuilder.create<AddIOp>(loop.value().getLoc(), mul, threadId);
+
+        mapping.map(loop.value().getInductionVar(), sum);
       }
 
       for (int i = 0; i < launchOp.body().front().getNumArguments(); i++) {

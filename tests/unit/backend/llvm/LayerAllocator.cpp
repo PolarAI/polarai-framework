@@ -49,9 +49,9 @@ public:
   Event* launch(BackendAllocator&, LaunchCommand&, Event*) override {
     return nullptr;
   };
-  void addModule(ProgramDesc) override{};
-  void linkModules() override{};
   void consumeEvent(Event*) override {}
+  void
+  selectBinary(std::vector<std::shared_ptr<ProgramDesc>>& programs) override{};
 };
 
 TEST(LLVMBackend, LayerAllocatorSimple) {

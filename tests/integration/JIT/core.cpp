@@ -47,7 +47,7 @@ using namespace athena::backend::llvm;
 namespace {
 const float eps = 1e-5;
 
-TEST(JITIntegration, DISABLED_AddOperationSample) {
+TEST(JITIntegration, AddOperationSample) {
   Context context;
 
   auto graph = context.create<Graph>("mainGraph");

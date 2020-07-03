@@ -20,6 +20,7 @@
 namespace mlir::polar_graph {
 void MatMulOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
   auto memrefTy = args.back().getType().cast<MemRefType>();
+  auto tensorTy = out().getType().cast<RankedTensorType>();
   auto zero = builder.create<ConstantIndexOp>(builder.getUnknownLoc(), 0);
 
   SmallVector<Value, 3> lbs(memrefTy.getRank(), zero);
@@ -28,12 +29,17 @@ void MatMulOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
 
   for (int i = 0; i < memrefTy.getRank(); i++) {
     auto dim = builder.create<ConstantIndexOp>(builder.getUnknownLoc(),
-                                               memrefTy.getDimSize(i));
+                                               tensorTy.getDimSize(i));
     ubs.push_back(dim);
   }
 
-  auto bodyBuilder = [args, this, memrefTy](OpBuilder& builder, Location loc,
+  auto bodyBuilder = [args, this, tensorTy](OpBuilder& builder, Location loc,
                                             ValueRange idx) {
+    auto leftTensorTy = left().getType().cast<RankedTensorType>();
+    auto fzero = builder.create<ConstantFloatOp>(
+        loc, APFloat(.0f), tensorTy.getElementType().cast<FloatType>());
+    builder.create<AffineStoreOp>(loc, fzero, args[2], idx);
+
     size_t kDim;
     if (transpose_left()) {
       kDim = 0;
@@ -41,9 +47,7 @@ void MatMulOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
       kDim = 1;
     }
     auto innerLoop =
-        builder.create<AffineForOp>(loc, 0, memrefTy.getDimSize(kDim), 1);
-
-    builder.setInsertionPointToStart(innerLoop.getBody());
+        builder.create<AffineForOp>(loc, 0, leftTensorTy.getDimSize(kDim), 1);
 
     mlir::Value kIdx = innerLoop.getInductionVar();
     mlir::Value leftRow, leftCol, rightRow, rightCol;
@@ -63,6 +67,8 @@ void MatMulOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
       rightRow = kIdx;
       rightCol = idx[1];
     }
+
+    builder.setInsertionPointToStart(innerLoop.getBody());
 
     mlir::Value leftVal = builder.create<AffineLoadOp>(
         loc, args[0], ValueRange{leftRow, leftCol});

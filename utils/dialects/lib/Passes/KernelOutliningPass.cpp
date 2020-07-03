@@ -11,14 +11,13 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "Compute/ComputeDialect.h"
-#include "Compute/ComputeOps.h"
 #include "Passes/Passes.h"
 #include "PolarRuntime/PolarRuntimeDialect.h"
 #include "PolarRuntime/PolarRuntimeOps.h"
 
 #include "mlir/Conversion/AffineToStandard/AffineToStandard.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
+#include "mlir/Dialect/GPU/GPUDialect.h"
 #include "mlir/Dialect/SCF/SCF.h"
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "mlir/IR/BlockAndValueMapping.h"
@@ -42,7 +41,7 @@ protected:
       OpBuilder builder(launchOp.getContext());
 
       auto parentNode = launchOp.getParentOfType<FuncOp>();
-      auto kernelsModule = module.lookupSymbol<compute::ModuleOp>("kernels");
+      auto kernelsModule = module.lookupSymbol<gpu::GPUModuleOp>("kernels");
 
       builder.setInsertionPointToStart(&kernelsModule.body().front());
 
@@ -54,10 +53,10 @@ protected:
       }
       FunctionType funcType =
           FunctionType::get(argTypes, {}, launchOp.getContext());
-      auto kernelAttr = builder.getNamedAttr(
-          compute::FuncOp::getKernelAttributeName(), builder.getBoolAttr(true));
-      auto kernel = builder.create<compute::FuncOp>(
-          launchOp.getLoc(), kernelName.str(), funcType, ArrayRef{kernelAttr});
+      auto kernel = builder.create<gpu::GPUFuncOp>(launchOp.getLoc(),
+                                                   kernelName.str(), funcType);
+      kernel.setAttr(gpu::GPUDialect::getKernelFuncAttrName(),
+                     builder.getUnitAttr());
       builder.setInsertionPointToStart(&kernel.body().front());
 
       BlockAndValueMapping mapping;
@@ -82,7 +81,7 @@ protected:
         }
       }
 
-      builder.create<compute::ReturnOp>(kernel.getLoc());
+      builder.create<gpu::ReturnOp>(kernel.getLoc());
 
       builder.setInsertionPointAfter(launchOp);
 

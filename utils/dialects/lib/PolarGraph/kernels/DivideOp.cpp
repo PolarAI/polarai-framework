@@ -39,7 +39,7 @@ void DivideOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
 
     auto res = builder.create<DivFOp>(loc, a, b);
 
-    builder.create<AffineStoreOp>(loc, res, args[3], idx);
+    builder.create<AffineStoreOp>(loc, res, args[2], idx);
   };
   buildAffineLoopNest(builder, builder.getUnknownLoc(), lbs, ubs, steps,
                       bodyBuilder);

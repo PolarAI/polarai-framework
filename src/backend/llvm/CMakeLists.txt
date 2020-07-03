@@ -41,7 +41,6 @@ add_athena_library(${ATH_BACKEND_LLVM} STATIC
         LLVMExecutor.cpp
         GraphPartitionPlanner.cpp
         allocators/LayerAllocator.cpp
-        ImageManager.cpp
         CodeGen.cpp)
 
 if (ATHENA_ENABLE_EXPERIMENTAL_SYCL)

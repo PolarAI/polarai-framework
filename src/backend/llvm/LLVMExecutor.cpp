@@ -18,9 +18,9 @@
 #include "runtime/driver/RuntimeDriver.h"
 #include "runtime/host/HostDevice.h"
 
+#include <Compute/ComputeDialect.h>
 #include <PolarGraph/PolarGraphDialect.h>
 #include <PolarRuntime/PolarRuntimeDialect.h>
-#include <Compute/ComputeDialect.h>
 #include <athena/backend/llvm/CodeGen.h>
 #include <athena/backend/llvm/LLVMExecutor.h>
 #include <athena/backend/llvm/runtime/GraphHandle.h>
@@ -106,8 +106,10 @@ LLVMExecutor::LLVMExecutor() {
   mlir::registerDialect<mlir::polar_rt::PolarRuntimeDialect>();
   mlir::registerDialect<mlir::compute::ComputeDialect>();
 
-  ::llvm::InitializeNativeTarget();
-  ::llvm::InitializeNativeTargetAsmPrinter();
+  ::llvm::InitializeAllTargets();
+  ::llvm::InitializeAllTargetMCs();
+  ::llvm::InitializeAllAsmPrinters();
+  ::llvm::InitializeAllAsmParsers();
 
 #ifdef DEBUG
   mJITCompiler = AthenaJIT::createWithDebugging();
@@ -122,13 +124,10 @@ LLVMExecutor::LLVMExecutor() {
   mAllocator = std::make_shared<LayerAllocator>();
   mRuntimeDriver = std::make_shared<RuntimeDriver>();
 
-  // for (auto dev : mRuntimeDriver->getDeviceList()) {
-  // fixme use multiple devices
-  auto dev = mRuntimeDriver->getDeviceList().front();
-  dev->addModule(getOpenCLTextProgram());
-  dev->linkModules();
-  mAllocator->registerDevice(*dev);
-  // }
+  for (auto& dev : mRuntimeDriver->getDeviceList()) {
+    mAllocator->registerDevice(*dev);
+    mJITCompiler->registerDevice(dev);
+  }
 }
 
 void LLVMExecutor::addModule(std::string_view module) {

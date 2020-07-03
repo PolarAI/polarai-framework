@@ -7,6 +7,7 @@ add_mlir_conversion_library(MLIRPolarPasses
         RuntimeShapeInferencePass.cpp
         KernelMaterializerPass.cpp
         KernelOutliningPass.cpp
+        SaveKernelPass.cpp
 
         ADDITIONAL_HEADER_DIRS
         ${PROJECT_SOURCE_DIR}/include/

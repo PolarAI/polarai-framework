@@ -35,4 +35,5 @@ target_link_libraries(${AthenaJitTarget} PUBLIC
                       MLIRCompute
                       ${dialect_libs}
                       ${conversion_libs}
+                      MLIRTargetNVVMIR
                       )                       

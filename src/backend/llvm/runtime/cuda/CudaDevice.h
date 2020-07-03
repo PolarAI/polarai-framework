@@ -11,6 +11,9 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
+#pragma once
+
+#include "CudaAllocator.h"
 #include <athena/backend/llvm/runtime/Device.h>
 
 #include <cuda.h>
@@ -20,20 +23,27 @@ namespace athena::backend::llvm {
 class CudaDevice : public Device {
 public:
   CudaDevice(CUdevice device);
-  auto getProvider() const -> DeviceProvider override {
+
+  ~CudaDevice() override;
+
+  [[nodiscard]] auto getProvider() const -> DeviceProvider override {
     return DeviceProvider::CUDA;
   }
-  auto getKind() const -> DeviceKind override { return DeviceKind::GPU; }
-  std::string getDeviceName() const override;
-  bool isPartitionSupported(PartitionDomain domain) override { return false; }
-  bool hasAllocator() override { return false; }
+  [[nodiscard]] auto getKind() const -> DeviceKind override {
+    return DeviceKind::GPU;
+  }
+  [[nodiscard]] auto getDeviceName() const -> std::string override;
+  auto isPartitionSupported(PartitionDomain domain) -> bool override {
+    return false;
+  }
+  auto hasAllocator() -> bool override { return true; }
 
-  std::vector<std::shared_ptr<Device>>
-  partition(PartitionDomain domain) override {
+  auto partition(PartitionDomain domain)
+      -> std::vector<std::shared_ptr<Device>> override {
     return std::vector<std::shared_ptr<Device>>{};
   };
-  std::shared_ptr<AllocatorLayerBase> getAllocator() override {
-    return nullptr;
+  auto getAllocator() -> std::shared_ptr<AllocatorLayerBase> override {
+    return mAllocator;
   };
 
   bool operator==(const Device& device) const override {
@@ -41,23 +51,45 @@ public:
   };
 
   void copyToHost(const core::internal::TensorInternal& tensor,
-                  void* dest) const override{};
-  void copyToHost(MemoryRecord record, void* dest) const override{};
+                  void* dest) const override {
+    MemoryRecord record{tensor.getVirtualAddress(),
+                        tensor.getShapeView().getTotalSize() *
+                            core::sizeOfDataType(tensor.getDataType())};
+    copyToHost(record, dest);
+  };
+  void copyToHost(MemoryRecord record, void* dest) const override {
+    auto* buf = reinterpret_cast<CUdeviceptr*>(mAllocator->getPtr(record));
+    cuCtxSetCurrent(mDeviceContext);
+    check(cuMemcpyDtoH(dest, *buf, record.allocationSize));
+  };
   void copyToDevice(const core::internal::TensorInternal& tensor,
-                    void* src) const override{};
-  void copyToDevice(MemoryRecord record, void* src) const override{};
-
-  Event* launch(BackendAllocator&, LaunchCommand&, Event*) override {
-    return nullptr;
+                    void* src) const override {
+    MemoryRecord record{tensor.getVirtualAddress(),
+                        tensor.getShapeView().getTotalSize() *
+                            core::sizeOfDataType(tensor.getDataType())};
+    copyToDevice(tensor, src);
+  };
+  void copyToDevice(MemoryRecord record, void* src) const override {
+    auto* buf = reinterpret_cast<CUdeviceptr*>(mAllocator->getPtr(record));
+    cuCtxSetCurrent(mDeviceContext);
+    check(cuMemcpyHtoD(*buf, src, record.allocationSize));
   };
 
-  void addModule(ProgramDesc) override{};
-  void linkModules() override{};
+  auto launch(BackendAllocator&, LaunchCommand&, Event*) -> Event* override;
 
-  void consumeEvent(Event*) override{};
+  void consumeEvent(Event* evt) override;
+
+  void
+  selectBinary(std::vector<std::shared_ptr<ProgramDesc>>& programs) override;
+
+  auto getDeviceContext() -> CUcontext { return mDeviceContext; }
 
 private:
   CUdevice mDevice;
+  CUcontext mDeviceContext;
+  CUstream mStream;
+  CUmodule mMainModule;
   std::string mDeviceName;
+  std::shared_ptr<AllocatorLayerBase> mAllocator;
 };
 } // namespace athena::backend::llvm

@@ -23,6 +23,7 @@
 
 #include "mlir/Conversion/StandardToLLVM/ConvertStandardToLLVM.h"
 #include "mlir/Conversion/StandardToLLVM/ConvertStandardToLLVMPass.h"
+#include "mlir/Dialect/GPU/GPUDialect.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "mlir/IR/Attributes.h"
@@ -605,9 +606,9 @@ struct LaunchFuncOpLoweringPattern
 };
 
 struct ModuleOpLoweringPattern
-    : PolarRuntimeConversionPattern<compute::ModuleOp> {
+    : PolarRuntimeConversionPattern<gpu::GPUModuleOp> {
   using PolarRuntimeConversionPattern<
-      compute::ModuleOp>::PolarRuntimeConversionPattern;
+      gpu::GPUModuleOp>::PolarRuntimeConversionPattern;
 
   LogicalResult
   matchAndRewrite(Operation* op, ArrayRef<Value> operands,
