@@ -13,30 +13,71 @@
 
 #include "PolarGraph/PolarGraphOps.h"
 
-#include "mlir/Dialect/Linalg/IR/LinalgOps.h"
+#include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "mlir/IR/Builders.h"
 
 namespace mlir::polar_graph {
 void MatMulOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
   auto memrefTy = args.back().getType().cast<MemRefType>();
+  auto zero = builder.create<ConstantIndexOp>(builder.getUnknownLoc(), 0);
 
-  Value left, right;
-  if (transpose_left()) {
-    left = builder.create<linalg::TransposeOp>(
-        builder.getUnknownLoc(), args[0],
-        AffineMapAttr::get(builder.getMultiDimIdentityMap(memrefTy.getRank())));
-  } else {
-    left = args[0];
+  SmallVector<Value, 3> lbs(memrefTy.getRank(), zero);
+  SmallVector<Value, 3> ubs;
+  SmallVector<int64_t, 3> steps(memrefTy.getRank(), 1);
+
+  for (int i = 0; i < memrefTy.getRank(); i++) {
+    auto dim = builder.create<ConstantIndexOp>(builder.getUnknownLoc(),
+                                               memrefTy.getDimSize(i));
+    ubs.push_back(dim);
   }
-  if (transpose_right()) {
-    right = builder.create<linalg::TransposeOp>(
-        builder.getUnknownLoc(), args[1],
-        AffineMapAttr::get(builder.getMultiDimIdentityMap(memrefTy.getRank())));
-  } else {
-    right = args[1];
-  }
-  builder.create<linalg::MatmulOp>(builder.getUnknownLoc(), TypeRange{memrefTy},
-                                   ValueRange{left, right, args[2]});
+
+  auto bodyBuilder = [args, this, memrefTy](OpBuilder& builder, Location loc,
+                                            ValueRange idx) {
+    size_t kDim;
+    if (transpose_left()) {
+      kDim = 0;
+    } else {
+      kDim = 1;
+    }
+    auto innerLoop =
+        builder.create<AffineForOp>(loc, 0, memrefTy.getDimSize(kDim), 1);
+
+    builder.setInsertionPointToStart(innerLoop.getBody());
+
+    mlir::Value kIdx = innerLoop.getInductionVar();
+    mlir::Value leftRow, leftCol, rightRow, rightCol;
+
+    if (transpose_left()) {
+      leftRow = kIdx;
+      leftCol = idx[0];
+    } else {
+      leftCol = kIdx;
+      leftRow = idx[0];
+    }
+
+    if (transpose_right()) {
+      rightCol = kIdx;
+      rightRow = idx[1];
+    } else {
+      rightRow = kIdx;
+      rightCol = idx[1];
+    }
+
+    mlir::Value leftVal = builder.create<AffineLoadOp>(
+        loc, args[0], ValueRange{leftRow, leftCol});
+    mlir::Value rightVal = builder.create<AffineLoadOp>(
+        loc, args[1], ValueRange{rightRow, rightCol});
+
+    mlir::Value outVal = builder.create<AffineLoadOp>(loc, args[2], idx);
+
+    mlir::Value mul = builder.create<MulFOp>(loc, leftVal, rightVal);
+    mlir::Value sum =
+        builder.create<AddFOp>(builder.getUnknownLoc(), mul, outVal);
+
+    builder.create<AffineStoreOp>(loc, sum, args[2], idx);
+  };
+  buildAffineLoopNest(builder, builder.getUnknownLoc(), lbs, ubs, steps,
+                      bodyBuilder);
 }
 } // namespace mlir::polar_graph

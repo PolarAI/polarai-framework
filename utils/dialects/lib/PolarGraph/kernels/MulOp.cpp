@@ -20,7 +20,6 @@
 namespace mlir::polar_graph {
 void MulOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
   auto memrefTy = args.back().getType().cast<MemRefType>();
-  auto tensorTy = out().getType().cast<RankedTensorType>();
   auto zero = builder.create<ConstantIndexOp>(builder.getUnknownLoc(), 0);
 
   SmallVector<Value, 3> lbs(memrefTy.getRank(), zero);
@@ -29,7 +28,7 @@ void MulOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
 
   for (int i = 0; i < memrefTy.getRank(); i++) {
     auto dim = builder.create<ConstantIndexOp>(builder.getUnknownLoc(),
-                                               tensorTy.getDimSize(i));
+                                               memrefTy.getDimSize(i));
     ubs.push_back(dim);
   }
 
