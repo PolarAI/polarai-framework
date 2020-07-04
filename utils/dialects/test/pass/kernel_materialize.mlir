@@ -45,14 +45,22 @@ module {
         %c1_2 = constant 1 : index
         // CHECK-NOT: scf.for
         scf.for %arg7 = %c0_0 to %c2_1 step %c1_2 {
-          // CHECK: %6 = "compute.global_id"() {dim = 0 : index} : () -> index
-          // CHECK-NEXT:  %7 = "compute.global_id"() {dim = 1 : index} : () -> index
-          // CHECK-NEXT: %8 = load %arg1[%6, %7] : memref<2x2xf32>
-          // CHECK-NEXT: %9 = load %arg3[%6, %7] : memref<2x2xf32>
-          // CHECK-NEXT: %10 = mulf %8, %arg2 : f32
-          // CHECK-NEXT: %11 = mulf %9, %arg4 : f32
-          // CHECK-NEXT: %12 = addf %10, %11 : f32
-          // CHECK-NEXT: store %12, %arg5[%6, %7] : memref<2x2xf32>
+          // CHECK: %6 = "gpu.block_dim"() {dimension = "x"} : () -> index
+          // CHECK-NEXT: %7 = "gpu.block_id"() {dimension = "x"} : () -> index
+          // CHECK-NEXT: %8 = "gpu.thread_id"() {dimension = "x"} : () -> index
+          // CHECK-NEXT: %9 = muli %6, %7 : index
+          // CHECK-NEXT: %10 = addi %9, %8 : index
+          // CHECK-NEXT: %11 = "gpu.block_dim"() {dimension = "y"} : () -> index
+          // CHECK-NEXT: %12 = "gpu.block_id"() {dimension = "y"} : () -> index
+          // CHECK-NEXT: %13 = "gpu.thread_id"() {dimension = "y"} : () -> index
+          // CHECK-NEXT: %14 = muli %11, %12 : index
+          // CHECK-NEXT: %15 = addi %14, %13 : index
+          // CHECK-NEXT: %16 = load %arg1[%10, %15] : memref<2x2xf32>
+          // CHECK-NEXT: %17 = load %arg3[%10, %15] : memref<2x2xf32>
+          // CHECK-NEXT: %18 = mulf %16, %arg2 : f32
+          // CHECK-NEXT: %19 = mulf %17, %arg4 : f32
+          // CHECK-NEXT: %20 = addf %18, %19 : f32
+          // CHECK-NEXT: store %20, %arg5[%10, %15] : memref<2x2xf32>
           %6 = load %arg1[%arg6, %arg7] : memref<2x2xf32>
           %7 = load %arg3[%arg6, %arg7] : memref<2x2xf32>
           %8 = mulf %6, %arg2 : f32
