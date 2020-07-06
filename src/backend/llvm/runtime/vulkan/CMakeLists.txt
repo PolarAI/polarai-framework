@@ -8,6 +8,7 @@ add_athena_library(${POLAR_RT_LLVM_VULKAN} SHARED
         api.cpp
         VulkanContext.cpp
         VulkanDevice.cpp
+        VulkanEvent.cpp
   )
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")

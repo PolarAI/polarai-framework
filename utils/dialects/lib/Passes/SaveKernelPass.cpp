@@ -89,6 +89,8 @@ protected:
       module.walk([&](spirv::FuncOp func) {
         fillKernels(func, desc);
       });
+
+      mCallback(desc);
     });
   }
 
