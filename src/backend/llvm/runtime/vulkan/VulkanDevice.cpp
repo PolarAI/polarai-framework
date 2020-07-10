@@ -105,7 +105,8 @@ Event* VulkanDevice::launch(BackendAllocator& allocator, LaunchCommand& cmd,
     blockingEvent->wait();
   }
 
-  std::vector<VkDescriptorSetLayoutBinding> bindings;
+  // Create DescriptorSetLayout
+  std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
 
   for (int i = 0; i < cmd.argsCount; i++) {
     VkDescriptorSetLayoutBinding descriptorSetLayoutBinding = {};
@@ -114,45 +115,91 @@ Event* VulkanDevice::launch(BackendAllocator& allocator, LaunchCommand& cmd,
         VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     descriptorSetLayoutBinding.descriptorCount = 1;
     descriptorSetLayoutBinding.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-    bindings.push_back(descriptorSetLayoutBinding);
+    descriptorSetLayoutBindings.push_back(descriptorSetLayoutBinding);
   }
 
+  // Create descriptor set layout
+  // WARNING: all descriptor sets must be of the same type!
+  VkDescriptorSetLayout descriptorSetLayout = {};
   VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {};
+
   descriptorSetLayoutCreateInfo.sType =
       VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-  descriptorSetLayoutCreateInfo.bindingCount = bindings.size();
-  descriptorSetLayoutCreateInfo.pBindings = bindings.data();
 
-  VkDescriptorSetLayout layout;
-  check(vkCreateDescriptorSetLayout(mDevice, &descriptorSetLayoutCreateInfo,
-                                    nullptr, &layout));
+  descriptorSetLayoutCreateInfo.bindingCount =
+      descriptorSetLayoutBindings.size();
+  descriptorSetLayoutCreateInfo.pBindings = descriptorSetLayoutBindings.data();
 
+  check(vkCreateDescriptorSetLayout(mDevice, &descriptorSetLayoutCreateInfo, 0,
+                                    &descriptorSetLayout));
+
+  // Create pipeline layout
+  VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
+  pipelineLayoutCreateInfo.sType =
+      VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+  pipelineLayoutCreateInfo.pNext = nullptr;
+  pipelineLayoutCreateInfo.flags = 0;
+  pipelineLayoutCreateInfo.setLayoutCount = 1;
+  pipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
+  pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
+  pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
+  VkPipelineLayout pipelineLayout;
+  check(vkCreatePipelineLayout(mDevice, &pipelineLayoutCreateInfo, 0,
+                               &pipelineLayout));
+
+  // Create compute pipeline
+  VkPipelineShaderStageCreateInfo stageInfo = {};
+  stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+  stageInfo.pNext = nullptr;
+  stageInfo.flags = 0;
+  stageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+  stageInfo.module = mShaderModule;
+  stageInfo.pName = cmd.kernelName;
+  stageInfo.pSpecializationInfo = nullptr;
+
+  VkComputePipelineCreateInfo computePipelineCreateInfo = {};
+  computePipelineCreateInfo.sType =
+      VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+  computePipelineCreateInfo.pNext = nullptr;
+  computePipelineCreateInfo.flags = 0;
+  computePipelineCreateInfo.stage = stageInfo;
+  computePipelineCreateInfo.layout = pipelineLayout;
+  computePipelineCreateInfo.basePipelineHandle = nullptr;
+  computePipelineCreateInfo.basePipelineIndex = 0;
+  VkPipeline pipeline;
+  check(vkCreateComputePipelines(mDevice, 0, 1, &computePipelineCreateInfo, 0,
+                                 &pipeline));
+
+  // Create descriptor pool
   VkDescriptorPoolSize descriptorPoolSize = {};
   descriptorPoolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-  descriptorPoolSize.descriptorCount = bindings.size();
+  descriptorPoolSize.descriptorCount = descriptorSetLayoutBindings.size();
 
   VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
   descriptorPoolCreateInfo.sType =
       VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+  descriptorPoolCreateInfo.pNext = nullptr;
+  descriptorPoolCreateInfo.flags = 0;
   descriptorPoolCreateInfo.maxSets = 1;
   descriptorPoolCreateInfo.poolSizeCount = 1;
   descriptorPoolCreateInfo.pPoolSizes = &descriptorPoolSize;
-
   VkDescriptorPool descriptorPool;
-  check(vkCreateDescriptorPool(mDevice, &descriptorPoolCreateInfo, nullptr,
+  check(vkCreateDescriptorPool(mDevice, &descriptorPoolCreateInfo, 0,
                                &descriptorPool));
 
+  // Allocate descriptor sets
   VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = {};
+  VkDescriptorSet descriptorSet;
   descriptorSetAllocateInfo.sType =
       VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+  descriptorSetAllocateInfo.pNext = nullptr;
   descriptorSetAllocateInfo.descriptorPool = descriptorPool;
   descriptorSetAllocateInfo.descriptorSetCount = 1;
-  descriptorSetAllocateInfo.pSetLayouts = &layout;
-
-  VkDescriptorSet descriptorSet;
+  descriptorSetAllocateInfo.pSetLayouts = &descriptorSetLayout;
   check(vkAllocateDescriptorSets(mDevice, &descriptorSetAllocateInfo,
                                  &descriptorSet));
 
+  // Set write descriptors
   for (int i = 0; i < cmd.argsCount; i++) {
     VkDescriptorBufferInfo info = {};
     if (cmd.args[i].type == ArgDesc::TENSOR) {
@@ -174,69 +221,49 @@ Event* VulkanDevice::launch(BackendAllocator& allocator, LaunchCommand& cmd,
     }
     VkWriteDescriptorSet writeDescriptorSet = {};
     writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    writeDescriptorSet.dstSet = descriptorSet; // write to this descriptor set.
-    writeDescriptorSet.dstBinding = i; // write to the first, and only binding.
-    writeDescriptorSet.descriptorCount = 1; // update a single descriptor.
-    writeDescriptorSet.descriptorType =
-        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; // storage buffer.
+    writeDescriptorSet.dstSet = descriptorSet;
+    writeDescriptorSet.dstBinding = i;
+    writeDescriptorSet.descriptorCount = 1;
+    writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     writeDescriptorSet.pBufferInfo = &info;
 
     vkUpdateDescriptorSets(mDevice, 1, &writeDescriptorSet, 0, nullptr);
   }
-  VkPipelineShaderStageCreateInfo shaderStageCreateInfo = {};
-  shaderStageCreateInfo.sType =
-      VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-  shaderStageCreateInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-  shaderStageCreateInfo.module = mShaderModule;
-  shaderStageCreateInfo.pName = cmd.kernelName;
 
-  VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
-  pipelineLayoutCreateInfo.sType =
-      VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-  pipelineLayoutCreateInfo.setLayoutCount = 1;
-  pipelineLayoutCreateInfo.pSetLayouts = &layout;
-
-  VkPipelineLayout pipelineLayout;
-  check(vkCreatePipelineLayout(mDevice, &pipelineLayoutCreateInfo, nullptr,
-                               &pipelineLayout));
-
-  VkComputePipelineCreateInfo pipelineCreateInfo = {};
-  pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
-  pipelineCreateInfo.stage = shaderStageCreateInfo;
-  pipelineCreateInfo.layout = pipelineLayout;
-
-  VkPipeline pipeline;
-  check(vkCreateComputePipelines(mDevice, VK_NULL_HANDLE, 1,
-                                 &pipelineCreateInfo, nullptr, &pipeline));
-
+  // Create command pool
   VkCommandPoolCreateInfo commandPoolCreateInfo = {};
   commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+  commandPoolCreateInfo.pNext = nullptr;
   commandPoolCreateInfo.flags = 0;
-
-  VkCommandPool commandPool;
   commandPoolCreateInfo.queueFamilyIndex = mQueueFamilyIndex;
-  check(vkCreateCommandPool(mDevice, &commandPoolCreateInfo, nullptr,
-                            &commandPool));
+  VkCommandPool commandPool;
+  check(vkCreateCommandPool(mDevice, &commandPoolCreateInfo,
+                            /*pAllocator=*/nullptr, &commandPool));
 
+  // Create compute command buffer
   VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
   commandBufferAllocateInfo.sType =
       VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+  commandBufferAllocateInfo.pNext = nullptr;
   commandBufferAllocateInfo.commandPool = commandPool;
-
   commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
   commandBufferAllocateInfo.commandBufferCount = 1;
+
   VkCommandBuffer commandBuffer;
   check(vkAllocateCommandBuffers(mDevice, &commandBufferAllocateInfo,
                                  &commandBuffer));
 
-  VkCommandBufferBeginInfo beginInfo = {};
-  beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-  beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-  check(vkBeginCommandBuffer(commandBuffer, &beginInfo));
+  VkCommandBufferBeginInfo commandBufferBeginInfo = {};
+  commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  commandBufferBeginInfo.pNext = nullptr;
+  commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+  commandBufferBeginInfo.pInheritanceInfo = nullptr;
+
+  check(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
 
   vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
   vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE,
-                          pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+                          pipelineLayout, 0, 1, &descriptorSet, 0, 0);
 
   auto& kernelDesc = mSpvModule->kernels[cmd.kernelName];
   size_t groupsX = kernelDesc.globalX / kernelDesc.localX;
@@ -247,8 +274,14 @@ Event* VulkanDevice::launch(BackendAllocator& allocator, LaunchCommand& cmd,
 
   VkSubmitInfo submitInfo = {};
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+  submitInfo.pNext = nullptr;
+  submitInfo.waitSemaphoreCount = 0;
+  submitInfo.pWaitSemaphores = 0;
+  submitInfo.pWaitDstStageMask = 0;
   submitInfo.commandBufferCount = 1;
   submitInfo.pCommandBuffers = &commandBuffer;
+  submitInfo.signalSemaphoreCount = 0;
+  submitInfo.pSignalSemaphores = nullptr;
 
   VkFence fence;
   VkFenceCreateInfo fenceCreateInfo = {};
@@ -258,6 +291,7 @@ Event* VulkanDevice::launch(BackendAllocator& allocator, LaunchCommand& cmd,
 
   check(vkQueueSubmit(mQueue, 1, &submitInfo, fence));
 
+  // check(vkWaitForFences(mDevice, 1, &fence, VK_TRUE, 10000000000000));
   return new VulkanEvent(this, fence);
 }
 } // namespace athena::backend::llvm

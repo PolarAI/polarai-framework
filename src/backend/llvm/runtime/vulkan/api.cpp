@@ -16,17 +16,13 @@
 #include <athena/backend/llvm/runtime/api.h>
 #include <athena/backend/llvm/runtime/runtime_export.h>
 
-#include <volk.h>
+#include <vulkan/vulkan.h>
 
 using namespace athena::backend::llvm;
 
 extern "C" {
 
 ATH_RT_LLVM_EXPORT auto initContext() -> Context* {
-  auto initRes = volkInitialize();
-  if (initRes != VK_SUCCESS) {
-    return nullptr; // todo return empty context
-  }
   VkApplicationInfo applicationInfo = {};
   applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   applicationInfo.pNext = nullptr;
@@ -48,7 +44,6 @@ ATH_RT_LLVM_EXPORT auto initContext() -> Context* {
 
   VkInstance instance{VK_NULL_HANDLE};
   vkCreateInstance(&instanceCreateInfo, nullptr, &instance);
-  volkLoadInstance(instance);
   return new VulkanContext(instance);
 }
 

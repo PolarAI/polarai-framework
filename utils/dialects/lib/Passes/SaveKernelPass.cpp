@@ -55,7 +55,7 @@ protected:
       kernel.globalZ = gsArr[2].template cast<IntegerAttr>().getInt();
 
       auto ls = func.template getAttrOfType<ArrayAttr>("local_size");
-      auto lsArr = gs.getValue();
+      auto lsArr = ls.getValue();
       kernel.localX = lsArr[0].template cast<IntegerAttr>().getInt();
       kernel.localY = lsArr[1].template cast<IntegerAttr>().getInt();
       kernel.localZ = lsArr[2].template cast<IntegerAttr>().getInt();

@@ -17,7 +17,7 @@
 #include <athena/backend/llvm/runtime/Event.h>
 #include <athena/backend/llvm/runtime/runtime_export.h>
 
-#include <volk.h>
+#include <vulkan/vulkan.h>
 
 namespace athena::backend::llvm {
 class ATH_RT_LLVM_EXPORT VulkanEvent final : public Event {

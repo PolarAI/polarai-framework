@@ -19,7 +19,7 @@
 #include <athena/backend/llvm/runtime/Event.h>
 
 #include <string>
-#include <volk.h>
+#include <vulkan/vulkan.h>
 
 namespace athena::backend::llvm {
 class VulkanDevice : public Device {

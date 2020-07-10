@@ -15,7 +15,7 @@
 
 #include <athena/backend/llvm/runtime/Context.h>
 
-#include <volk.h>
+#include <vulkan/vulkan.h>
 
 namespace athena::backend::llvm {
 class VulkanContext : public Context {

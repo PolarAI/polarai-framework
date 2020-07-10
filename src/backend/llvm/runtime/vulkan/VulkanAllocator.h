@@ -18,7 +18,7 @@
 #include <athena/backend/llvm/MemoryRecord.h>
 #include <athena/utils/error/FatalError.h>
 
-#include <volk.h>
+#include <vulkan/vulkan.h>
 
 #include <unordered_map>
 #include <unordered_set>
