@@ -14,6 +14,7 @@
 #include "DynamicLibrary.h"
 
 #include <dlfcn.h>
+#include <string>
 
 namespace athena::backend::llvm {
 std::unique_ptr<DynamicLibrary>
@@ -25,6 +26,10 @@ DynamicLibrary::create(std::string_view libName) {
 
 void* DynamicLibrary::lookup(std::string_view symbolName) {
   return dlsym(mHandle, symbolName.data());
+}
+
+auto DynamicLibrary::getLastError() -> std::string {
+  return std::string(dlerror());
 }
 
 DynamicLibrary::~DynamicLibrary() { dlclose(mHandle); }

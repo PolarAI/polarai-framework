@@ -72,7 +72,7 @@ void LLVMExecutor::evaluate(Graph& graph) {
 
   GraphHandle handle;
   handle.allocator = mAllocator;
-  handle.devices.push_back(mRuntimeDriver->getDeviceList().front());
+  handle.devices.push_back(mDevices.front());
   // fixme host device must be loaded through runtime driver
   handle.devices.emplace_back(new HostDevice());
 
@@ -98,7 +98,8 @@ void LLVMExecutor::evaluate(Graph& graph) {
   evaluateFunction(&handle);
 }
 
-LLVMExecutor::LLVMExecutor() {
+LLVMExecutor::LLVMExecutor(bool enableDebugOutput, FilterFunctionT filter)
+    : mFilter(std::move(filter)) {
   mlir::registerAllDialects();
   mlir::registerAllPasses();
 
@@ -122,9 +123,16 @@ LLVMExecutor::LLVMExecutor() {
   }
 
   mAllocator = std::make_shared<LayerAllocator>();
-  mRuntimeDriver = std::make_shared<RuntimeDriver>();
+  mRuntimeDriver = std::make_shared<RuntimeDriver>(enableDebugOutput);
 
-  for (auto& dev : mRuntimeDriver->getDeviceList()) {
+  std::copy_if(mRuntimeDriver->getDeviceList().begin(),
+               mRuntimeDriver->getDeviceList().end(),
+               std::back_inserter(mDevices), mFilter);
+  
+  for (auto& dev : mDevices) {
+    if (enableDebugOutput) {
+      std::clog << "Registering " << dev->getDeviceName() << '\n';
+    }
     mAllocator->registerDevice(*dev);
     mJITCompiler->registerDevice(dev);
   }
