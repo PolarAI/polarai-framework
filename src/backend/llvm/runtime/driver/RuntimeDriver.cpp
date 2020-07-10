@@ -17,16 +17,25 @@
 
 #include <athena/backend/llvm/runtime/Device.h>
 
-
 #include <iostream>
 #include <string>
 
 namespace athena::backend::llvm {
-RuntimeDriver::RuntimeDriver() {
+RuntimeDriver::RuntimeDriver(bool debugOutput) {
   auto libraries = getListOfLibraries();
 
   for (const auto& lib : libraries) {
     auto dynLib = DynamicLibrary::create(lib);
+
+    if (!dynLib->isValid()) {
+      if (debugOutput) {
+        std::clog << "Failed to load " << lib << '\n';
+        std::clog << dynLib->getLastError();
+      }
+      continue;
+    } else if (debugOutput) {
+      std::clog << "Successfully loaded " << lib << '\n';
+    }
 
     void* initCtxPtr = dynLib->lookup("initContext");
     auto initCtxFunc = reinterpret_cast<Context* (*)()>(initCtxPtr);
@@ -36,7 +45,7 @@ RuntimeDriver::RuntimeDriver() {
     Context* ctx = initCtxFunc();
     mContexts.emplace_back(ctx,
                            [closeCtxFunc](Context* ctx) { closeCtxFunc(ctx); });
-    auto &newDevs = ctx->getDevices();
+    auto& newDevs = ctx->getDevices();
     mDevices.insert(mDevices.end(), newDevs.begin(), newDevs.end());
 
     mLibs.push_back(std::move(dynLib));

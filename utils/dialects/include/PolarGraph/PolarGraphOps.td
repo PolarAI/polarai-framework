@@ -236,6 +236,7 @@ def AddOp : PolarGraph_Op<"add", [ComputationalOpInterface]> {
     llvm::StringRef getKernelName() {
       return "fadd";
     }
+    void produceKernel(OpBuilder&, Block::BlockArgListType);
   }];
 }
 
@@ -254,6 +255,7 @@ def CopyOp : PolarGraph_Op<"copy", [ComputationalOpInterface]> {
     llvm::StringRef getKernelName() {
       return "fcopy";
     }
+    void produceKernel(OpBuilder&, Block::BlockArgListType);
   }];
 }
 
@@ -274,6 +276,7 @@ def DivideOp : PolarGraph_Op<"divide", [ComputationalOpInterface]> {
     llvm::StringRef getKernelName() {
       return "fdivide";
     }
+    void produceKernel(OpBuilder&, Block::BlockArgListType);
   }];
 }
 
@@ -294,6 +297,7 @@ def LogLossOp : PolarGraph_Op<"logloss", [ComputationalOpInterface]> {
     llvm::StringRef getKernelName() {
       return "flogloss";
     }
+    void produceKernel(OpBuilder&, Block::BlockArgListType) {}
   }];
 }
 
@@ -327,6 +331,7 @@ def MatMulOp : PolarGraph_Op<"matmul", [ComputationalOpInterface]> {
         return "fmatmul_f_f";
       }
     }
+    void produceKernel(OpBuilder&, Block::BlockArgListType);
   }];
 }
 
@@ -346,6 +351,7 @@ def MulOp : PolarGraph_Op<"mul", [ComputationalOpInterface]> {
     llvm::StringRef getKernelName() {
       return "fmul";
     }
+    void produceKernel(OpBuilder&, Block::BlockArgListType);
   }];
 }
 
@@ -367,6 +373,7 @@ def MulConcatOp : PolarGraph_Op<"mulconcat", [ComputationalOpInterface]> {
     llvm::StringRef getKernelName() {
       return "fmulconcat";
     }
+    void produceKernel(OpBuilder&, Block::BlockArgListType);
   }];
 }
 
@@ -385,11 +392,12 @@ def SigmoidOp : PolarGraph_Op<"sigmoid", [ComputationalOpInterface]> {
     llvm::StringRef getKernelName() {
       return "fsigmoid";
     }
+    void produceKernel(OpBuilder&, Block::BlockArgListType);
   }];
 }
 
 
-def TransposeOp : PolarGraph_Op<"transpose", [Computational]> {
+def TransposeOp : PolarGraph_Op<"transpose", [ComputationalOpInterface]> {
   let summary = "Matrix transposition operation";
   let description = [{ TBD }];
 
@@ -402,6 +410,13 @@ def TransposeOp : PolarGraph_Op<"transpose", [Computational]> {
     result.addOperands(a);
     result.addOperands(out);
   }]>];
+
+  let extraClassDeclaration = [{
+    llvm::StringRef getKernelName() {
+      return "ftranspose";
+    }
+    void produceKernel(OpBuilder&, Block::BlockArgListType) {}
+  }];
 }
 
 def FillOp : PolarGraph_Op<"fill", [ComputationalOpInterface]> {
@@ -419,6 +434,7 @@ def FillOp : PolarGraph_Op<"fill", [ComputationalOpInterface]> {
     llvm::StringRef getKernelName() {
       return "ffill";
     }
+    void produceKernel(OpBuilder&, Block::BlockArgListType) {}
   }];
 }
 

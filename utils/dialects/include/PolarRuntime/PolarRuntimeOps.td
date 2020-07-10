@@ -9,16 +9,69 @@ include "mlir/Interfaces/CallInterfaces.td"
 include "mlir/Interfaces/ControlFlowInterfaces.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 
+def ApplyOp : PolarRuntime_Op<"apply"> {
+  let summary = "Apply transformation to tensors";
+  let description = [{
+    `polar_rt.apply` applies affine transformations to argument tensors.
+    Computation can be offloaded to accelerator device.
+  }];
+
+  let regions = (region AnyRegion:$body);
+  let arguments = (ins PolarRuntime_DeviceType:$device, 
+                       PolarRuntime_EventType:$blocking_event,
+                       Variadic<AnyType>:$operands, StrAttr:$kernel_name);
+  let results = (outs PolarRuntime_EventType:$out_event);
+              
+  let skipDefaultBuilders = 1;
+
+  let builders = [
+    OpBuilder<"OpBuilder& builder, OperationState& result, Value device, "
+              "Value event, StringRef kernelName, ValueRange operands">
+  ];
+}
+
+def LaunchOp : PolarRuntime_Op<"launch"> {
+  let summary = "Launches inlined kernel on a specific device";
+  let description = [{ TBD }];
+
+  let regions = (region AnyRegion:$body);
+  let arguments = (ins PolarRuntime_DeviceType:$device, 
+                       PolarRuntime_EventType:$blocking_event,
+                       Variadic<AnyType>:$operands, StrAttr:$kernel_name,
+                       I64ArrayAttr:$global_offset, I64ArrayAttr:$global_size,
+                       I64ArrayAttr:$local_size);
+  let results = (outs PolarRuntime_EventType:$out_event);
+
+  let skipDefaultBuilders = 1;
+
+  let builders = [
+    OpBuilder<"OpBuilder& builder, OperationState& result, "
+              "StringRef kernelName, ValueRange operands, "
+              "ArrayRef<Type> blockArgTypes, "
+              "ArrayRef<int64_t> globalOffset, ArrayRef<int64_t> globalSize, "
+              "ArrayRef<int64_t> localSize">
+  ];
+}
+
+def TerminatorOp : PolarRuntime_Op<"terminator", [NoSideEffect, Terminator]> {}
+
 def LaunchFuncOp : PolarRuntime_Op<"launch_func"> {
   let summary = "Launches kernel on a specific device";
   let description = [{ TBD }];
 
   let arguments = (ins PolarRuntime_DeviceType:$device, 
                        PolarRuntime_EventType:$blocking_event,
-                       StrAttr:$kernel, I64ArrayAttr:$global_size,
-                       I64ArrayAttr:$local_size,
+                       FlatSymbolRefAttr:$kernel,
+                       StrAttr:$native_kernel,
                        Variadic<AnyType>:$operands);
   let results = (outs PolarRuntime_EventType:$out_event);
+
+  let skipDefaultBuilders = 1;
+  let builders = [
+    OpBuilder<"OpBuilder& builder, OperationState& result, "
+              "SymbolRefAttr kernel, "
+              "StringRef nativeKernel, ValueRange operands">
+  ];
 }
 
 def DeviceSelectOp : PolarRuntime_Op<"select_device", [NoSideEffect]> {

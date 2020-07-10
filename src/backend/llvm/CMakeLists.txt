@@ -41,7 +41,6 @@ add_athena_library(${ATH_BACKEND_LLVM} STATIC
         LLVMExecutor.cpp
         GraphPartitionPlanner.cpp
         allocators/LayerAllocator.cpp
-        ImageManager.cpp
         CodeGen.cpp)
 
 if (ATHENA_ENABLE_EXPERIMENTAL_SYCL)
@@ -87,7 +86,6 @@ if (Vulkan_FOUND)
 else()
   set(POLAR_HAS_VULKAN "false" CACHE STRING "" FORCE)
 endif()
-  set(POLAR_HAS_VULKAN "false" CACHE STRING "" FORCE)
 
 if (APPLE)
   add_subdirectory(runtime/metal)

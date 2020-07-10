@@ -40,17 +40,14 @@ auto SYCLDevice::launch(BackendAllocator& allocator, LaunchCommand& cmd,
     //  non-blocking call. In future runtimes will need a unified event system.
     dependency->wait();
   }
-  if (mKernelMap.count(cmd.kernelName)) {
-    return mKernelMap.at(cmd.kernelName)(this, allocator, cmd, dependency);
+  if (mKernelMap.count(cmd.nativeKernelName)) {
+    return mKernelMap.at(cmd.nativeKernelName)(this, allocator, cmd, dependency);
   }
 
   // todo implement interoperability kernel launch
   throw std::runtime_error("Not implemented");
   return nullptr;
 }
-
-void SYCLDevice::addModule(ProgramDesc) {}
-void SYCLDevice::linkModules() {}
 
 void SYCLDevice::consumeEvent(Event* evt) {
   evt->wait();

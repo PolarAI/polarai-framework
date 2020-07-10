@@ -15,12 +15,18 @@
 
 #include <memory>
 #include <string_view>
+#include <string>
 
 namespace athena::backend::llvm {
 class DynamicLibrary {
 public:
-  static std::unique_ptr<DynamicLibrary> create(std::string_view libName);
-  void* lookup(std::string_view symbolName);
+  static auto create(std::string_view libName)
+      -> std::unique_ptr<DynamicLibrary>;
+  auto lookup(std::string_view symbolName) -> void*;
+
+  auto isValid() -> bool { return mHandle != nullptr; }
+
+  auto getLastError() -> std::string;
 
   ~DynamicLibrary();
 

@@ -16,10 +16,10 @@
 
 #include <athena/backend/llvm/BackendAllocator.h>
 #include <athena/backend/llvm/llvm_export.h>
+#include <athena/backend/llvm/runtime/Device.h>
 #include <athena/core/graph/Traversal.h>
 #include <athena/core/internal/Executor.h>
 #include <athena/core/loader/internal/TensorAllocator.h>
-#include <athena/backend/llvm/runtime/Device.h>
 
 namespace athena::backend::llvm {
 
@@ -27,13 +27,20 @@ namespace athena::backend::llvm {
 class AthenaJIT;
 class RuntimeDriver;
 
+/// Default device filter. Selects all devices.
+constexpr auto DefaultDeviceFilter = [](std::shared_ptr<Device>&) {
+  return true;
+};
+
 /**
  * Execute Graph with LLVM-based backend
  */
 class ATH_BACKEND_LLVM_EXPORT LLVMExecutor
     : public athena::core::internal::Executor {
 public:
-  LLVMExecutor();
+  using FilterFunctionT = std::function<bool(std::shared_ptr<Device>&)>;
+  LLVMExecutor(bool enableDebugOutput = false,
+               FilterFunctionT filter = DefaultDeviceFilter);
 
   /// Adds Graph to compilable module.
   ///
@@ -56,9 +63,10 @@ public:
   void execute(std::string_view name, void* userData);
 
 private:
+  FilterFunctionT mFilter;
   // Driver must come first to ensure proper shutdown
   std::shared_ptr<RuntimeDriver> mRuntimeDriver;
-  std::vector<Device*> mDevices;
+  std::vector<std::shared_ptr<Device>> mDevices;
 
   std::shared_ptr<AthenaJIT> mJITCompiler{nullptr};
   std::shared_ptr<BackendAllocator> mAllocator;

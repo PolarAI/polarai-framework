@@ -51,10 +51,10 @@ public:
     return nullptr;
   };
 
-  void addModule(ProgramDesc) override{};
-  void linkModules() override{};
-
   void consumeEvent(Event*) override{};
+
+  void
+  selectBinary(std::vector<std::shared_ptr<ProgramDesc>>& programs) override {};
 
 private:
   hipDevice_t mDevice;

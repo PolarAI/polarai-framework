@@ -1,12 +1,17 @@
 #include "AthenaJIT.h"
+#include <athena/backend/llvm/runtime/Device.h>
 
-#include "PolarGraph/PolarGraphDialect.h"
-#include "PolarRuntime/PolarRuntimeDialect.h"
+#include "Compute/ComputeOps.h"
 #include "Conversion/GraphToRuntimePass.h"
 #include "Conversion/RuntimeToLLVM.h"
 #include "Passes/Passes.h"
+#include "PolarGraph/PolarGraphDialect.h"
+#include "PolarRuntime/PolarRuntimeDialect.h"
 
+#include "mlir/Dialect/GPU/GPUDialect.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
+#include "mlir/Dialect/SPIRV/SPIRVOps.h"
+#include "mlir/Dialect/SPIRV/TargetAndABI.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/MLIRContext.h"
@@ -15,6 +20,7 @@
 #include "mlir/Pass/Pass.h"
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Target/LLVMIR/ModuleTranslation.h"
+#include "mlir/Target/NVVMIR.h"
 #include "llvm/ExecutionEngine/JITEventListener.h"
 #include "llvm/ExecutionEngine/JITLink/JITLinkMemoryManager.h"
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
@@ -29,6 +35,11 @@ using namespace ::llvm;
 using namespace ::llvm::orc;
 
 ExitOnError ExitOnErr;
+
+static mlir::OwnedBlob processPtx(const std::string& data, mlir::Location,
+                                  StringRef) {
+  return std::make_unique<std::vector<char>>(data.begin(), data.end());
+}
 
 namespace athena::backend::llvm {
 AthenaJIT::AthenaJIT(std::unique_ptr<::llvm::orc::LLJIT> jit)
@@ -83,6 +94,18 @@ void AthenaJIT::addModule(const mlir::OwningModuleRef& ref) {
   if (!mInternalModule) {
     mInternalModule = mlir::OwningModuleRef(
         builder.create<mlir::ModuleOp>(builder.getUnknownLoc()));
+    builder.setInsertionPointToStart(mInternalModule->getBody());
+    builder.create<mlir::gpu::GPUModuleOp>(builder.getUnknownLoc(), "kernels");
+    mInternalModule->setAttr(
+        mlir::gpu::GPUDialect::getContainerModuleAttrName(),
+        builder.getUnitAttr());
+    auto vercap = mlir::spirv::VerCapExtAttr::get(
+        mlir::spirv::Version::V_1_0, {mlir::spirv::Capability::Shader},
+        {mlir::spirv::Extension::SPV_KHR_storage_buffer_storage_class},
+        &mContext);
+    auto limits = mlir::spirv::getDefaultResourceLimits(&mContext);
+    auto targetEnv = mlir::spirv::TargetEnvAttr::get(vercap, limits);
+    mInternalModule->setAttr("spv.target_env", targetEnv);
   }
 
   builder.setInsertionPointToStart(mInternalModule->getBody());
@@ -103,6 +126,9 @@ auto AthenaJIT::lookupSymbol(::llvm::StringRef symbolName)
   return ExitOnErr(mJITInstance->lookupLinkerMangled(symbolName)).getAddress();
 }
 void AthenaJIT::setupMlirPassManager() {
+  auto saveKernelCallback = [&](ProgramDesc prog) {
+    mCompiledPrograms.push_back(std::make_shared<ProgramDesc>(prog));
+  };
 #ifdef DEBUG
   if (!mTempFileGraph.empty()) {
     mlir::OpPrintingFlags opPrintingFlags;
@@ -115,10 +141,32 @@ void AthenaJIT::setupMlirPassManager() {
   mMlirPassManager.addPass(mlir::createLowerGraphToRuntimePass());
   mMlirPassManager.addPass(mlir::createCanonicalizerPass());
   mMlirPassManager.addPass(mlir::createCSEPass());
+  mMlirPassManager.addPass(mlir::createLowerAffinePass());
   auto& funcOpt = mMlirPassManager.nest<mlir::FuncOp>();
+  funcOpt.addPass(mlir::createRuntimeShapeInferencePass());
+  funcOpt.addPass(mlir::createCanonicalizerPass());
+  funcOpt.addPass(mlir::createKernelMaterializerPass());
+  funcOpt.addPass(mlir::createCanonicalizerPass());
   funcOpt.addPass(mlir::createBarrierLegalizerPass());
   funcOpt.addPass(mlir::createLegalizeRTForLoweringPass());
   funcOpt.addPass(mlir::createReleaseDependencyPass());
+  mMlirPassManager.addPass(mlir::createKernelOutliningPass());
+  mMlirPassManager.addPass(mlir::createLegalizeStdOpsForSPIRVLoweringPass());
+  mMlirPassManager.addPass(
+      mlir::spirv::createDecorateSPIRVCompositeTypeLayoutPass());
+  mMlirPassManager.addPass(mlir::createConvertGPUToSPIRVPass());
+  mMlirPassManager.addPass(mlir::createLowerToCFGPass());
+  auto& spvModulePM = mMlirPassManager.nest<mlir::spirv::ModuleOp>();
+  spvModulePM.addPass(mlir::spirv::createLowerABIAttributesPass());
+  spvModulePM.addPass(
+      mlir::spirv::createUpdateVersionCapabilityExtensionPass());
+  auto& kernelPm = mMlirPassManager.nest<mlir::gpu::GPUModuleOp>();
+  kernelPm.addPass(mlir::createStripDebugInfoPass());
+  kernelPm.addPass(mlir::createLowerGpuOpsToNVVMOpsPass());
+  kernelPm.addPass(createConvertGPUKernelToBlobPass(
+      mlir::translateModuleToNVVMIR, processPtx, "nvptx64-nvidia-cuda", "sm_35",
+      "+ptx60", "nvvm.ptx"));
+  mMlirPassManager.addPass(mlir::createSaveKernelPass(saveKernelCallback));
   mMlirPassManager.addPass(mlir::createDeployDefaultFunctionsPass());
   mMlirPassManager.addPass(mlir::createLowerRuntimeToLLVMPass());
 }
@@ -132,7 +180,6 @@ void AthenaJIT::compileModule() {
     }
   }
 #endif
-  mInternalModule->dump();
   auto res = mMlirPassManager.run(*mInternalModule);
   if (mlir::failed(res)) {
     // todo throw a real error.
@@ -152,5 +199,14 @@ void AthenaJIT::compileModule() {
     // todo throw a real error.
     llvm_unreachable("Unexpected error");
   }
+
+  for (auto& device : mRegisteredDevices) {
+    device->selectBinary(mCompiledPrograms);
+  }
 }
+
+void AthenaJIT::registerDevice(std::shared_ptr<Device> dev) {
+  mRegisteredDevices.push_back(std::move(dev));
+}
+void AthenaJIT::resetDevices() { mRegisteredDevices.clear(); }
 } // namespace athena::backend::llvm

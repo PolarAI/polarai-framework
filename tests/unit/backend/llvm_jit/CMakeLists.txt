@@ -39,7 +39,10 @@ target_link_libraries(TestUnitJITRunnable PRIVATE
                       MLIRPolarGraph
                       MLIRPolarRuntime
                       MLIRPolarPasses
+                      MLIRCompute
                       MLIRPolarConversion
+                      MLIRTargetNVVMIR
+                      ${ATH_UTILS}
                       AthenaDep::googletest)
 target_include_directories(TestUnitJITRunnable PRIVATE
                            ${LLVM_INCLUDE_DIRS}

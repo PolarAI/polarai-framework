@@ -69,17 +69,14 @@ struct BuiltinConversionPattern : public PolarGraphConversionPattern<OpT> {
         rewriter.create<polar_rt::NullEventOp>(op->getLoc(), resTypes.back());
     // }
 
-    RankedTensorType tensorType =
-        concreteOp.out().getType().template cast<RankedTensorType>();
-    auto globalSize = rewriter.getI64ArrayAttr(tensorType.getShape());
-    SmallVector<int64_t, 3> local(tensorType.getRank());
-    auto localSize = rewriter.getI64ArrayAttr(local);
-
     // FIXME this pattern is incorrect if node performs more than one
     //       computation.
-    rewriter.create<polar_rt::LaunchFuncOp>(
-        op->getLoc(), resTypes, device, blockingEvent,
-        concreteOp.getKernelName(), globalSize, localSize, operands);
+    auto applyOp = rewriter.create<polar_rt::ApplyOp>(
+        op->getLoc(), device, blockingEvent, concreteOp.getKernelName(),
+        operands);
+    OpBuilder builder(op->getContext());
+    builder.setInsertionPointToStart(&applyOp.body().front());
+    concreteOp.produceKernel(builder, applyOp.body().front().getArguments());
     rewriter.eraseOp(op);
     return success();
   }

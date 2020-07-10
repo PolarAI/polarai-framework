@@ -16,14 +16,27 @@
 #ifndef ATHENA_PROGRAMDESC_H
 #define ATHENA_PROGRAMDESC_H
 
-#include <stddef.h>
+#include <map>
+#include <string>
+#include <vector>
 
-struct ProgramDesc {
-  enum ProgramType { SPIRV, BINARY, TEXT };
-
-  ProgramType type;
-  size_t length;
-  const char* data;
+namespace athena::backend::llvm {
+struct KernelDesc {
+  size_t globalX;
+  size_t globalY;
+  size_t globalZ;
+  size_t localX;
+  size_t localY;
+  size_t localZ;
 };
+struct ProgramDesc {
+  enum class Type { PTX, SPIRV_SHADER };
+
+  Type type;
+  std::string target;
+  std::vector<char> data;
+  std::map<std::string, KernelDesc> kernels;
+};
+} // namespace athena::backend::llvm
 
 #endif // ATHENA_PROGRAMDESC_H

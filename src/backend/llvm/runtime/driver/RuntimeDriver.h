@@ -21,7 +21,7 @@
 namespace athena::backend::llvm {
 class RuntimeDriver {
 public:
-  RuntimeDriver();
+  RuntimeDriver(bool enableDebugOutput);
   auto getDeviceList() -> std::vector<std::shared_ptr<Device>>& {
     return mDevices;
   };

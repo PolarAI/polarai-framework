@@ -8,6 +8,7 @@ add_athena_library(${POLAR_RT_LLVM_VULKAN} SHARED
         api.cpp
         VulkanContext.cpp
         VulkanDevice.cpp
+        VulkanEvent.cpp
   )
 
 target_link_libraries(${POLAR_RT_LLVM_VULKAN} PRIVATE Vulkan::Vulkan)

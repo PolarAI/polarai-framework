@@ -32,6 +32,8 @@ target_link_libraries(${AthenaJitTarget} PUBLIC
                       MLIRPolarRuntime
                       MLIRPolarConversion
                       MLIRPolarPasses
+                      MLIRCompute
                       ${dialect_libs}
                       ${conversion_libs}
+                      MLIRTargetNVVMIR
                       )                       

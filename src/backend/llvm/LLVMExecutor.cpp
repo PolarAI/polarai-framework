@@ -18,8 +18,9 @@
 #include "runtime/driver/RuntimeDriver.h"
 #include "runtime/host/HostDevice.h"
 
-#include "PolarGraph/PolarGraphDialect.h"
-#include "PolarRuntime/PolarRuntimeDialect.h"
+#include <Compute/ComputeDialect.h>
+#include <PolarGraph/PolarGraphDialect.h>
+#include <PolarRuntime/PolarRuntimeDialect.h>
 #include <athena/backend/llvm/CodeGen.h>
 #include <athena/backend/llvm/LLVMExecutor.h>
 #include <athena/backend/llvm/runtime/GraphHandle.h>
@@ -71,7 +72,7 @@ void LLVMExecutor::evaluate(Graph& graph) {
 
   GraphHandle handle;
   handle.allocator = mAllocator;
-  handle.devices.push_back(mRuntimeDriver->getDeviceList().front());
+  handle.devices.push_back(mDevices.front());
   // fixme host device must be loaded through runtime driver
   handle.devices.emplace_back(new HostDevice());
 
@@ -97,15 +98,19 @@ void LLVMExecutor::evaluate(Graph& graph) {
   evaluateFunction(&handle);
 }
 
-LLVMExecutor::LLVMExecutor() {
+LLVMExecutor::LLVMExecutor(bool enableDebugOutput, FilterFunctionT filter)
+    : mFilter(std::move(filter)) {
   mlir::registerAllDialects();
   mlir::registerAllPasses();
 
   mlir::registerDialect<mlir::polar_graph::PolarGraphDialect>();
   mlir::registerDialect<mlir::polar_rt::PolarRuntimeDialect>();
+  mlir::registerDialect<mlir::compute::ComputeDialect>();
 
-  ::llvm::InitializeNativeTarget();
-  ::llvm::InitializeNativeTargetAsmPrinter();
+  ::llvm::InitializeAllTargets();
+  ::llvm::InitializeAllTargetMCs();
+  ::llvm::InitializeAllAsmPrinters();
+  ::llvm::InitializeAllAsmParsers();
 
 #ifdef DEBUG
   mJITCompiler = AthenaJIT::createWithDebugging();
@@ -118,15 +123,19 @@ LLVMExecutor::LLVMExecutor() {
   }
 
   mAllocator = std::make_shared<LayerAllocator>();
-  mRuntimeDriver = std::make_shared<RuntimeDriver>();
+  mRuntimeDriver = std::make_shared<RuntimeDriver>(enableDebugOutput);
 
-  // for (auto dev : mRuntimeDriver->getDeviceList()) {
-  // fixme use multiple devices
-  auto dev = mRuntimeDriver->getDeviceList().front();
-  dev->addModule(getOpenCLTextProgram());
-  dev->linkModules();
-  mAllocator->registerDevice(*dev);
-  // }
+  std::copy_if(mRuntimeDriver->getDeviceList().begin(),
+               mRuntimeDriver->getDeviceList().end(),
+               std::back_inserter(mDevices), mFilter);
+  
+  for (auto& dev : mDevices) {
+    if (enableDebugOutput) {
+      std::clog << "Registering " << dev->getDeviceName() << '\n';
+    }
+    mAllocator->registerDevice(*dev);
+    mJITCompiler->registerDevice(dev);
+  }
 }
 
 void LLVMExecutor::addModule(std::string_view module) {
@@ -154,6 +163,6 @@ void LLVMExecutor::setAllocator(std::shared_ptr<BackendAllocator>& allocator) {
 }
 
 std::vector<std::shared_ptr<Device>>& LLVMExecutor::getDevices() {
-  return mRuntimeDriver->getDeviceList();
+  return mDevices;
 }
 } // namespace athena::backend::llvm

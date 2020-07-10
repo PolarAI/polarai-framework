@@ -34,6 +34,7 @@ static std::string providerToString(DeviceProvider provider) {
   case DeviceProvider::HOST:
     return "Host";
   }
+  return "Unknown";
 }
 
 static std::string kindToString(DeviceKind kind) {
@@ -49,10 +50,11 @@ static std::string kindToString(DeviceKind kind) {
   case DeviceKind::HOST:
     return "Host";
   }
+  return "Unknown";
 }
 
 int main() {
-  athena::backend::llvm::RuntimeDriver driver;
+  athena::backend::llvm::RuntimeDriver driver(/*debugOutput*/ true);
   auto devices = driver.getDeviceList();
 
   std::cout << "Total device count: " << devices.size() << "\n\n";

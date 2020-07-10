@@ -8,6 +8,7 @@ add_athena_library(${POLAR_RT_LLVM_CUDA} MODULE
         api.cpp
         CudaContext.cpp
         CudaDevice.cpp
+        CudaEvent.cpp
   )
 
 target_link_libraries(${POLAR_RT_LLVM_CUDA} PRIVATE CUDA::cuda_driver)
