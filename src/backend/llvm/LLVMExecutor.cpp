@@ -163,6 +163,6 @@ void LLVMExecutor::setAllocator(std::shared_ptr<BackendAllocator>& allocator) {
 }
 
 std::vector<std::shared_ptr<Device>>& LLVMExecutor::getDevices() {
-  return mRuntimeDriver->getDeviceList();
+  return mDevices;
 }
 } // namespace athena::backend::llvm
