@@ -20,6 +20,7 @@
 #include <string_view>
 #include <tuple>
 #include <vector>
+#include <optional>
 
 namespace athena::core::internal {
 enum class builtin {

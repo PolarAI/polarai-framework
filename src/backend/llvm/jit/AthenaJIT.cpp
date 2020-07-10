@@ -123,7 +123,7 @@ auto AthenaJIT::lookupSymbol(::llvm::StringRef symbolName)
     mInternalModule = nullptr;
   }
 
-  return ExitOnErr(mJITInstance->lookupLinkerMangled(symbolName)).getAddress();
+  return ExitOnErr(mJITInstance->lookup(symbolName)).getAddress();
 }
 void AthenaJIT::setupMlirPassManager() {
   auto saveKernelCallback = [&](ProgramDesc prog) {

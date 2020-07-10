@@ -11,6 +11,9 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
+#pragma once
+
+#include "MetalAllocator.h"
 #include <athena/backend/llvm/runtime/Device.h>
 
 #import <Metal/Metal.h>
@@ -26,38 +29,49 @@ public:
   auto getKind() const -> DeviceKind override { return DeviceKind::GPU; }
   std::string getDeviceName() const override { return mDeviceName; };
   bool isPartitionSupported(PartitionDomain domain) override { return false; }
-  bool hasAllocator() override { return false; }
+  bool hasAllocator() override { return true; }
 
   std::vector<std::shared_ptr<Device>>
   partition(PartitionDomain domain) override {
     return std::vector<std::shared_ptr<Device>>{};
   };
   std::shared_ptr<AllocatorLayerBase> getAllocator() override {
-    return nullptr;
+    return mAllocator;
   };
 
-  bool operator==(const Device& device) const override {
+  bool operator==(const Device &device) const override {
     return mDeviceName == device.getDeviceName();
   };
 
-  void copyToHost(const core::internal::TensorInternal& tensor,
-                  void* dest) const override{};
-  void copyToHost(MemoryRecord record, void* dest) const override{};
-  void copyToDevice(const core::internal::TensorInternal& tensor,
-                    void* src) const override{};
-  void copyToDevice(MemoryRecord record, void* src) const override{};
+  void copyToHost(const core::internal::TensorInternal &tensor,
+                  void *dest) const override{};
+  void copyToHost(MemoryRecord record, void *dest) const override {
+    auto buf = *static_cast<id<MTLBuffer>*>(mAllocator->getPtr(record));
 
-  Event* launch(BackendAllocator&, LaunchCommand&, Event*) override {
-    return nullptr;
+    void *sharedPtr = buf.contents;
+    std::memcpy(dest, sharedPtr, record.allocationSize);
+  };
+  void copyToDevice(const core::internal::TensorInternal &tensor,
+                    void *src) const override{};
+  void copyToDevice(MemoryRecord record, void *src) const override {
+    id<MTLBuffer> buf =
+        *static_cast<id<MTLBuffer> *>(mAllocator->getPtr(record));
+    void *sharedPtr = buf.contents;
+    std::memcpy(sharedPtr, src, record.allocationSize);
   };
 
-  void consumeEvent(Event*) override{};
+  Event *launch(BackendAllocator &, LaunchCommand &, Event *) override;
+
+  void consumeEvent(Event *) override{};
 
   void
-  selectBinary(std::vector<std::shared_ptr<ProgramDesc>>& programs) override{};
+  selectBinary(std::vector<std::shared_ptr<ProgramDesc>> &programs) override;
 
 private:
   id<MTLDevice> mDevice;
+  std::shared_ptr<MetalAllocator> mAllocator;
   std::string mDeviceName;
+  std::shared_ptr<ProgramDesc> mProgram;
+  id<MTLLibrary> mLibrary;
 };
 } // namespace athena::backend::llvm

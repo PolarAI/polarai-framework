@@ -34,7 +34,7 @@ void ApplyOp::build(OpBuilder& builder, OperationState& result,
     auto type = op.getType();
     if (type.isa<RankedTensorType>()) {
       auto tensorTy = type.cast<RankedTensorType>();
-      SmallVector<long, 3> dims(tensorTy.getRank(), -1);
+      SmallVector<int64_t, 3> dims(tensorTy.getRank(), -1);
       blockArgTypes.push_back(MemRefType::get(dims, tensorTy.getElementType()));
     } else {
       blockArgTypes.push_back(type);

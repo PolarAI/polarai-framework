@@ -38,7 +38,7 @@ public:
 
 private:
   T* mData;
-  std::vector<uint64_t> mShape;
+  std::vector<size_t> mShape;
 
   auto linearIndex(std::initializer_list<size_t> idx) -> size_t {
     std::vector<size_t> unwrappedIdx{idx};

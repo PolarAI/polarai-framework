@@ -15,13 +15,27 @@
 #define ATHENA_DATATYPE_H
 
 #include <athena/core/core_export.h>
+#include <athena/utils/error/FatalError.h>
 
 #include <cstddef>
 
 namespace athena::core {
 enum class DataType : int { UNDEFINED = 0, DOUBLE = 1, FLOAT = 2, HALF = 3 };
 
-ATH_CORE_EXPORT size_t sizeOfDataType(const DataType& dataType);
+inline size_t sizeOfDataType(const DataType& dataType) {
+  switch (dataType) {
+  case DataType::DOUBLE:
+    return 8ULL;
+  case DataType::FLOAT:
+    return 4ULL;
+  case DataType::HALF:
+    return 2ULL;
+  default:
+    utils::FatalError(utils::ATH_FATAL_OTHER,
+                      "Size for dataType is not defined");
+    return 0;
+  }
+}
 } // namespace athena::core
 
 #endif // ATHENA_DATATYPE_H

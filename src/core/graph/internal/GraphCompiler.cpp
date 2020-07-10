@@ -16,6 +16,8 @@
 #include <athena/core/node/internal/NodeInternal.h>
 #include <athena/utils/STLExtras.h>
 
+#include <map>
+
 namespace athena::core::internal {
 void GraphCompiler::compile(Graph& graph, Generator& generator) {
   auto& traversal = graph.traverse();

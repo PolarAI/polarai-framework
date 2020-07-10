@@ -420,8 +420,8 @@ matMulOperation(const bool leftTranspose, const bool rightTranspose, uint64_t m,
   std::vector<T> res(m * n);
   for (uint64_t indexRow = 0; indexRow < m; ++indexRow) {
     for (uint64_t indexColumn = 0; indexColumn < n; ++indexColumn) {
-      ulong leftIncrement = 0;
-      ulong leftInd = 0;
+      unsigned long leftIncrement = 0;
+      unsigned long leftInd = 0;
       if (leftTranspose == false) { // Not transposed
         leftIncrement = 1;
         leftInd = indexRow * k;
@@ -429,8 +429,8 @@ matMulOperation(const bool leftTranspose, const bool rightTranspose, uint64_t m,
         leftIncrement = m;
         leftInd = indexRow;
       }
-      ulong rightIncrement = 0;
-      ulong rightInd = 0;
+      unsigned long rightIncrement = 0;
+      unsigned long rightInd = 0;
       if (rightTranspose == false) { // Not transposed
         rightIncrement = n;
         rightInd = indexColumn;
