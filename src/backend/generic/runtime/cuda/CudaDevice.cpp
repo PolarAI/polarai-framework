@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,19 +10,19 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "CudaDevice.h"
-#include "../utils/utils.h"
-#include "CudaEvent.h"
+#include "CudaDevice.hpp"
+#include "../utils/utils.hpp"
+#include "CudaEvent.hpp"
 #include "utils.hpp"
 
-#include <athena/backend/llvm/BackendAllocator.h>
-#include <athena/backend/llvm/runtime/LaunchCommand.h>
+#include <polarai/backend/generic/BackendAllocator.hpp>
+#include <polarai/backend/generic/runtime/LaunchCommand.h>
 
 #include <array>
 #include <fstream>
 #include <vector>
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 CudaDevice::CudaDevice(CUdevice device) : mDevice(device) {
   std::array<char, 100> name;
   check(cuDeviceGetName(name.data(), 100, mDevice));
@@ -117,4 +116,4 @@ CudaDevice::~CudaDevice() {
   cuModuleUnload(mMainModule);
   cuCtxDestroy(mDeviceContext);
 }
-} // namespace athena::backend::llvm
+} // namespace polarai::backend::generic

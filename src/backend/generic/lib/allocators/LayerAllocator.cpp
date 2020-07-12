@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,14 +10,14 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "LayerAllocator.h"
-#include <athena/utils/error/FatalError.h>
+#include "LayerAllocator.hpp"
+#include <polarai/utils/error/FatalError.hpp>
 
 #include <mutex>
 
-using namespace athena::utils;
+using namespace polarai::utils;
 
-namespace athena::backend::llvm {
+namespace polarai::backend::llvm {
 void LayerAllocator::allocate(const core::internal::TensorInternal& tensor,
                               Device& device) {
   MemoryRecord record{tensor.getVirtualAddress(),
@@ -284,4 +283,4 @@ void LayerAllocator::release(const MemoryRecord& record, Device& device) {
     mLocks[record].erase(it);
   }
 }
-} // namespace athena::backend::llvm
+} // namespace polarai::backend::llvm

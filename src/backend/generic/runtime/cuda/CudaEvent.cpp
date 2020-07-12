@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,11 +10,11 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "CudaEvent.h"
+#include "CudaEvent.hpp"
 
 #include <utility>
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 CudaEvent::CudaEvent(CudaDevice* device, CUevent evt)
     : mEvent(evt), mDevice(device) {}
 
@@ -30,4 +29,4 @@ void CudaEvent::wait() {
 }
 auto CudaEvent::getDevice() -> Device* { return mDevice; };
 CudaEvent::~CudaEvent() { cuEventDestroy(mEvent); }
-} // namespace athena::backend::llvm
+} // namespace polarai::backend::generic

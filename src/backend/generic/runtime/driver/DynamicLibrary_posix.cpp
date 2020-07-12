@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,12 +10,12 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "DynamicLibrary.h"
+#include "DynamicLibrary.hpp"
 
 #include <dlfcn.h>
 #include <string>
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 std::unique_ptr<DynamicLibrary>
 DynamicLibrary::create(std::string_view libName) {
   void* libHandle = dlopen(libName.data(), RTLD_LAZY | RTLD_LOCAL);
@@ -33,4 +32,4 @@ auto DynamicLibrary::getLastError() -> std::string {
 }
 
 DynamicLibrary::~DynamicLibrary() { dlclose(mHandle); }
-} // namespace athena::backend::llvm
+} // namespace polarai::backend::llvm

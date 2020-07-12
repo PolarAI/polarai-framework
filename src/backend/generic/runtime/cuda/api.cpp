@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,12 +10,12 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "CudaContext.h"
+#include "CudaContext.hpp"
 
-#include <athena/backend/llvm/runtime/api.h>
 #include <polar_rt_cuda_export.h>
+#include <polarai/backend/generic/runtime/api.h>
 
-using namespace athena::backend::llvm;
+using namespace polarai::backend::generic;
 
 extern "C" {
 

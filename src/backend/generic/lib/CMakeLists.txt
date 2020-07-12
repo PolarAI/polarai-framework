@@ -27,7 +27,7 @@ message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 add_subdirectory(jit)
 
 add_polar_library(polar_backend_generic SHARED
-        LLVMExecutor.cpp
+        GenericExecutor.cpp
         GraphPartitionPlanner.cpp
         allocators/LayerAllocator.cpp
         CodeGen.cpp)

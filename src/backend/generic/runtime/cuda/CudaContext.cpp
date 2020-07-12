@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,13 +10,13 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "CudaContext.h"
-#include "CudaDevice.h"
+#include "CudaContext.hpp"
+#include "CudaDevice.hpp"
 #include "utils.hpp"
 
 #include <cuda.h>
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 CudaContext::CudaContext() {
   check(cuInit(0));
 

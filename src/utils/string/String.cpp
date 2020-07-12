@@ -1,29 +1,28 @@
-/*
- * Copyright (c) 2019 Athena. All rights reserved.
- * https://getathena.ml
- *
- * Licensed under MIT license.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2020 PolarAI. All rights reserved.
+//
+// Licensed under MIT license.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+//===----------------------------------------------------------------------===//
 
-#include "athena/utils/string/String.h"
-#include "athena/utils/error/FatalError.h"
+#include <polarai/utils/error/FatalError.hpp>
+#include <polarai/utils/string/String.hpp>
+
 #include <cstring>
 #include <iostream>
 
-namespace athena::utils {
+namespace polarai::utils {
 String::String() : mSize(0), mAllocator(Allocator()), mData(nullptr) {}
 
 String::String(const char* const string, Allocator allocator)
-    : mSize(strlen(string)),
-      mAllocator(std::move(allocator)),
+    : mSize(strlen(string)), mAllocator(std::move(allocator)),
       mData(reinterpret_cast<const char*>(
-                mAllocator.allocateBytes((mSize + 1) * sizeof(char)))) {
+          mAllocator.allocateBytes((mSize + 1) * sizeof(char)))) {
 #ifdef DEBUG
   if (mData == nullptr) {
     FatalError(ATH_ASSERT, "Memory allocation for string ", this,
@@ -33,8 +32,10 @@ String::String(const char* const string, Allocator allocator)
   memcpy((void*)mData, string, (mSize + 1) * sizeof(char));
 }
 
-String::String(const String& rhs) : mSize(rhs.mSize), mAllocator(rhs.mAllocator),
-                                    mData(reinterpret_cast<const char*>(mAllocator.allocateBytes((mSize + 1) * sizeof(char)))) {
+String::String(const String& rhs)
+    : mSize(rhs.mSize), mAllocator(rhs.mAllocator),
+      mData(reinterpret_cast<const char*>(
+          mAllocator.allocateBytes((mSize + 1) * sizeof(char)))) {
   memcpy((void*)mData, rhs.mData, (mSize + 1) * sizeof(char));
 }
 
@@ -43,19 +44,9 @@ String::String(String&& rhs) noexcept
       mAllocator(std::move(rhs.mAllocator)) {
   rhs.mSize = 0;
   rhs.mData = nullptr;
-  //  std::cout << "Moving string: " << static_cast<const void*>(mData) <<
-  //  std::endl;
 }
 
 String::~String() {
-//  std::cout << "Deleting string: " << static_cast<const void*>(mData) <<
-//  std::endl;
-#ifdef DEBUG
-  if (mData != nullptr && mSize != strlen(mData)) {
-    //    FatalError(ATH_ASSERT, "Size of string ", this, " isn't equal to
-    //    actual size.");
-  }
-#endif
   if (mData == nullptr) {
     return;
   }
@@ -82,4 +73,4 @@ size_t String::getSize() const {
 #endif
   return mSize;
 }
-} // namespace athena::utils
+} // namespace polarai::utils

@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 Polar. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -12,11 +11,11 @@
 //===----------------------------------------------------------------------===//
 
 #include <PolarGraph/PolarGraphOps.h>
-#include <athena/backend/llvm/CodeGen.h>
-#include <athena/core/Generator.h>
-#include <athena/core/internal/GenBuiltins.h>
-#include <athena/core/tensor/DataType.h>
-#include <athena/core/tensor/internal/TensorInternal.h>
+#include <polarai/backend/generic/CodeGen.hpp>
+#include <polarai/core/Generator.hpp>
+#include <polarai/core/internal/GenBuiltins.hpp>
+#include <polarai/core/tensor/DataType.hpp>
+#include <polarai/core/tensor/internal/TensorInternal.hpp>
 
 #include <llvm/ADT/APFloat.h>
 #include <llvm/ADT/SmallVector.h>
@@ -36,8 +35,8 @@
 #include <variant>
 #include <vector>
 
-using namespace athena::core;
-using namespace athena::core::internal;
+using namespace polarai::core;
+using namespace polarai::core::internal;
 
 struct MlirValueImpl : internal::GenValueImplBase {
   mlir::Value value;
@@ -91,8 +90,8 @@ static auto getTensorType(mlir::OpBuilder& builder,
   return mlir::RankedTensorType::get(shape, dataType);
 }
 
-namespace athena::backend::llvm {
-void populateCodeGenPatterns(athena::core::internal::Generator& generator,
+namespace polarai::backend::generic {
+void populateCodeGenPatterns(polarai::core::internal::Generator& generator,
                              mlir::OpBuilder& builder) {
 
   //===--------------------------------------------------------------------===//
@@ -439,4 +438,4 @@ void populateCodeGenPatterns(athena::core::internal::Generator& generator,
   };
   generator.registerFunctor<builtin::Transpose>(transposeFunctor);
 }
-} // namespace athena::backend::llvm
+} // namespace polarai::backend::llvm
