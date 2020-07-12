@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,16 +10,16 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "RuntimeDriver.h"
-#include "DynamicLibrary.h"
+#include "RuntimeDriver.hpp"
+#include "DynamicLibrary.hpp"
 #include "config.h"
 
-#include <athena/backend/llvm/runtime/Device.h>
+#include <polarai/backend/generic/runtime/Device.hpp>
 
 #include <iostream>
 #include <string>
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 RuntimeDriver::RuntimeDriver(bool debugOutput) {
   auto libraries = getListOfLibraries();
 
@@ -52,4 +51,4 @@ RuntimeDriver::RuntimeDriver(bool debugOutput) {
   }
 }
 
-} // namespace athena::backend::llvm
+} // namespace polarai::backend::generic

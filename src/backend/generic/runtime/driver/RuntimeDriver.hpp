@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -13,13 +12,13 @@
 
 #pragma once
 
-#include "DynamicLibrary.h"
+#include "DynamicLibrary.hpp"
 
-#include <athena/backend/llvm/runtime/Device.h>
-#include <athena/backend/llvm/runtime/Context.h>
+#include <polarai/backend/generic/runtime/Device.hpp>
+#include <polarai/backend/generic/runtime/Context.hpp>
 #include <polar_generic_be_driver_export.h>
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 class POLAR_GENERIC_BE_DRIVER_EXPORT RuntimeDriver {
 public:
   RuntimeDriver(bool enableDebugOutput);
@@ -32,4 +31,4 @@ private:
   std::vector<std::shared_ptr<Device>> mDevices;
   std::vector<std::shared_ptr<Context>> mContexts;
 };
-} // namespace athena::backend::llvm
+} // namespace polarai::backend::llvm
