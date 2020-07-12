@@ -1,13 +1,9 @@
-add_athena_executable(lspolar main.cpp)
+include_directories(${PROJECT_BINARY_DIR}/src/utils)
+add_polar_executable(lspolar main.cpp)
 
 target_include_directories(lspolar PRIVATE 
-                          ${PROJECT_SOURCE_DIR}/src/backend/llvm/runtime/driver)
-if (APPLE)
-    set(WHOLE_ARCHIVE -Wl,-all_load)
-    set(NOWHOLE_ARCHIVE)
-elseif (UNIX)
-    set(WHOLE_ARCHIVE -Wl,--whole-archive)
-    set(NOWHOLE_ARCHIVE -Wl,--no-whole-archive)
-endif ()
-target_link_libraries(lspolar PRIVATE ${ATH_RT_LLVM_DRIVER} 
-                      ${WHOLE_ARCHIVE} ${ATH_UTILS} ${NOWHOLE_ARCHIVE})
+                          ${PROJECT_SOURCE_DIR}/src/backend/generic/runtime/driver)
+
+target_link_libraries(lspolar PRIVATE PolarAI::generic_backend_driver)
+get_property(AVAILABLE_RT GLOBAL PROPERTY POLAR_AVAILABLE_RUNTIMES)
+add_dependencies(lspolar ${AVAILABLE_RT})

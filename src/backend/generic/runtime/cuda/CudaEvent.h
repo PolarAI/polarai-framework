@@ -15,7 +15,6 @@
 
 #include "CudaDevice.h"
 #include <athena/backend/llvm/runtime/Event.h>
-#include <athena/backend/llvm/runtime/runtime_export.h>
 
 #include <cuda.h>
 
@@ -23,7 +22,7 @@
 
 namespace athena::backend::llvm {
 class CudaDevice;
-class ATH_RT_LLVM_EXPORT CudaEvent final : public Event {
+class CudaEvent final : public Event {
 public:
   explicit CudaEvent(CudaDevice* device, CUevent evt);
   ~CudaEvent() override;

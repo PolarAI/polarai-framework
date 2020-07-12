@@ -17,9 +17,10 @@
 
 #include <athena/backend/llvm/runtime/Device.h>
 #include <athena/backend/llvm/runtime/Context.h>
+#include <polar_generic_be_driver_export.h>
 
 namespace athena::backend::llvm {
-class RuntimeDriver {
+class POLAR_GENERIC_BE_DRIVER_EXPORT RuntimeDriver {
 public:
   RuntimeDriver(bool enableDebugOutput);
   auto getDeviceList() -> std::vector<std::shared_ptr<Device>>& {

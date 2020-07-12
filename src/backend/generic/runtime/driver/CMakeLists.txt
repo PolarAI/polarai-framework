@@ -4,6 +4,8 @@ add_polar_library(polar_generic_be_driver STATIC
   DynamicLibrary_posix.cpp
   RuntimeDriver.cpp)
 add_library(PolarAI::generic_backend_driver ALIAS polar_generic_be_driver)
+target_include_directories(polar_generic_be_driver PUBLIC 
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
 target_include_directories(polar_generic_be_driver PRIVATE 
                            ${CMAKE_CURRENT_BINARY_DIR})

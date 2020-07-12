@@ -25,7 +25,7 @@ function(add_polar_library target_name modifier)
     add_coverage(${target_name})
 endfunction()
 
-function(add_athena_executable target_name)
+function(add_polar_executable target_name)
     set(source_list ${ARGN})
     add_executable(${target_name} ${modifier} ${source_list})
     polar_disable_rtti(${target_name})

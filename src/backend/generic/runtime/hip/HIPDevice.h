@@ -40,11 +40,7 @@ public:
     return mDeviceName == device.getDeviceName();
   };
 
-  void copyToHost(const core::internal::TensorInternal& tensor,
-                  void* dest) const override{};
   void copyToHost(MemoryRecord record, void* dest) const override{};
-  void copyToDevice(const core::internal::TensorInternal& tensor,
-                    void* src) const override{};
   void copyToDevice(MemoryRecord record, void* src) const override{};
 
   Event* launch(BackendAllocator&, LaunchCommand&, Event*) override {

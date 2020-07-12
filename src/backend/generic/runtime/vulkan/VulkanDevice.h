@@ -45,8 +45,6 @@ public:
     return mDeviceName == device.getDeviceName();
   };
 
-  void copyToHost(const core::internal::TensorInternal& tensor,
-                  void* dest) const override{};
   void copyToHost(MemoryRecord record, void* dest) const override {
     void* hostPtr;
     auto* buf = reinterpret_cast<VulkanAllocator::MemDescriptor*>(
@@ -56,8 +54,6 @@ public:
     memcpy(dest, hostPtr, record.allocationSize);
     vkUnmapMemory(mDevice, buf->memory);
   };
-  void copyToDevice(const core::internal::TensorInternal& tensor,
-                    void* src) const override{};
   void copyToDevice(MemoryRecord record, void* src) const override {
     void* hostPtr;
     auto* buf = reinterpret_cast<VulkanAllocator::MemDescriptor*>(

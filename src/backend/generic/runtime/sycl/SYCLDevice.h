@@ -78,13 +78,6 @@ public:
     // fixme it must compare device ids.
     return mDeviceName == device.getDeviceName();
   }
-  void copyToHost(const core::internal::TensorInternal& tensor,
-                  void* dest) const override {
-    MemoryRecord record{tensor.getVirtualAddress(),
-                        tensor.getShapeView().getTotalSize() *
-                            core::sizeOfDataType(tensor.getDataType())};
-    copyToHost(record, dest);
-  }
   void copyToHost(MemoryRecord record, void* dest) const override {
     using namespace cl::sycl;
     if (mUsesUSM) {
@@ -100,13 +93,6 @@ public:
       });
       evt.wait();
     }
-  }
-  void copyToDevice(const core::internal::TensorInternal& tensor,
-                    void* src) const override {
-    MemoryRecord record{tensor.getVirtualAddress(),
-                        tensor.getShapeView().getTotalSize() *
-                            core::sizeOfDataType(tensor.getDataType())};
-    copyToDevice(record, src);
   }
   void copyToDevice(MemoryRecord record, void* src) const override {
     using namespace cl::sycl;

@@ -43,16 +43,12 @@ public:
     return mDeviceName == device.getDeviceName();
   };
 
-  void copyToHost(const core::internal::TensorInternal &tensor,
-                  void *dest) const override{};
   void copyToHost(MemoryRecord record, void *dest) const override {
     auto buf = *static_cast<id<MTLBuffer>*>(mAllocator->getPtr(record));
 
     void *sharedPtr = buf.contents;
     std::memcpy(dest, sharedPtr, record.allocationSize);
   };
-  void copyToDevice(const core::internal::TensorInternal &tensor,
-                    void *src) const override{};
   void copyToDevice(MemoryRecord record, void *src) const override {
     id<MTLBuffer> buf =
         *static_cast<id<MTLBuffer> *>(mAllocator->getPtr(record));

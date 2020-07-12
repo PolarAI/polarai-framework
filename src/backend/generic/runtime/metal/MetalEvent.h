@@ -14,7 +14,6 @@
 #pragma once
 
 #include <athena/backend/llvm/runtime/Event.h>
-#include <athena/backend/llvm/runtime/runtime_export.h>
 
 #import "Metal/Metal.h"
 
@@ -23,7 +22,7 @@
 
 namespace athena::backend::llvm {
 class MetalDevice;
-class ATH_RT_LLVM_EXPORT MetalEvent : public Event {
+class MetalEvent : public Event {
 public:
   explicit MetalEvent(MetalDevice* device, id<MTLCommandBuffer> cmdBuf);
   ~MetalEvent() override;

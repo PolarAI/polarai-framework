@@ -15,12 +15,14 @@ include_directories(${PROJECT_BINARY_DIR}/src/io)
 include_directories(${PROJECT_BINARY_DIR}/src/loaders)
 include_directories(${PROJECT_BINARY_DIR}/src/operation)
 include_directories(${PROJECT_BINARY_DIR}/src/utils)
-add_subdirectory(backend)
 add_subdirectory(core)
 add_subdirectory(operation)
 add_subdirectory(loaders)
 add_subdirectory(io)
 add_subdirectory(utils)
+
+# Backends should go after core stuff
+add_subdirectory(backend)
 
 add_polar_library(polarai SHARED
         $<TARGET_OBJECTS:PolarAI::core>

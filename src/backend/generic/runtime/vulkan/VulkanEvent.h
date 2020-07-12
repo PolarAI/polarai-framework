@@ -15,12 +15,11 @@
 
 #include "VulkanDevice.h"
 #include <athena/backend/llvm/runtime/Event.h>
-#include <athena/backend/llvm/runtime/runtime_export.h>
 
 #include <vulkan/vulkan.h>
 
 namespace athena::backend::llvm {
-class ATH_RT_LLVM_EXPORT VulkanEvent final : public Event {
+class VulkanEvent final : public Event {
 public:
   VulkanEvent(VulkanDevice* device, VkFence fence);
   ~VulkanEvent() override;

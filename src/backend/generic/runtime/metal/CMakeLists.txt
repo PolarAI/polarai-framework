@@ -27,5 +27,17 @@ target_link_libraries(polar_rt_metal PRIVATE
         spirv-cross-msl
         spirv-cross-util
         spirv-cross-core
-        ${ATH_UTILS}
+        PolarAI::utils
+        )
+
+set_property(GLOBAL APPEND PROPERTY POLAR_AVAILABLE_RUNTIMES polar_rt_metal)
+
+install(TARGETS polar_rt_metal EXPORT PolarAIConfig
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT PolarAI_Runtime
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT PolarAI_Runtime
+        NAMELINK_COMPONENT PolarAI_Development
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT PolarAI_Development
         )

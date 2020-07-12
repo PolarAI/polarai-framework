@@ -50,24 +50,10 @@ public:
     return mDeviceName == device.getDeviceName();
   };
 
-  void copyToHost(const core::internal::TensorInternal& tensor,
-                  void* dest) const override {
-    MemoryRecord record{tensor.getVirtualAddress(),
-                        tensor.getShapeView().getTotalSize() *
-                            core::sizeOfDataType(tensor.getDataType())};
-    copyToHost(record, dest);
-  };
   void copyToHost(MemoryRecord record, void* dest) const override {
     auto* buf = reinterpret_cast<CUdeviceptr*>(mAllocator->getPtr(record));
     cuCtxSetCurrent(mDeviceContext);
     check(cuMemcpyDtoH(dest, *buf, record.allocationSize));
-  };
-  void copyToDevice(const core::internal::TensorInternal& tensor,
-                    void* src) const override {
-    MemoryRecord record{tensor.getVirtualAddress(),
-                        tensor.getShapeView().getTotalSize() *
-                            core::sizeOfDataType(tensor.getDataType())};
-    copyToDevice(tensor, src);
   };
   void copyToDevice(MemoryRecord record, void* src) const override {
     auto* buf = reinterpret_cast<CUdeviceptr*>(mAllocator->getPtr(record));

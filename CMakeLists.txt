@@ -11,6 +11,10 @@ set(POLAR_VERSION "${POLAR_MAJOR_VERSION}.${POLAR_MINOR_VERSION}.${POLAR_PATCH_V
 option(POLAR_DISABLE_TESTS "OFF")
 set(POLAR_USE_SANITIZERS "OFF" CACHE STRING "Specify Google Sanitizers")
 
+define_property(GLOBAL PROPERTY POLAR_AVAILABLE_RUNTIMES
+    BRIEF_DOCS "A list of enabled generic runtimes"
+    FULL_DOCS "Depending on system configuration a different set of runtimes may be supported. This property contains a list of enabled runtime targets")
+
 # choose new behaviour for CMP0042
 # see http://www.cmake.org/cmake/help/v3.0/policy/CMP0042.html for more details
 if (POLICY CMP0042)
@@ -59,7 +63,7 @@ add_subdirectory(utils/dialects)
 # add_subdirectory(utils/debugger)
 # add_subdirectory(utils/kernels)
 add_subdirectory(src)
-# add_subdirectory(utils/lspolar)
+add_subdirectory(utils/lspolar)
 
 if (NOT POLAR_DISABLE_TESTS)
     # add_subdirectory(tests)

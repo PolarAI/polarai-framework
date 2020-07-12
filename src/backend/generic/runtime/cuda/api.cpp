@@ -14,7 +14,7 @@
 #include "CudaContext.h"
 
 #include <athena/backend/llvm/runtime/api.h>
-#include <polar_rt_cuda.h>
+#include <polar_rt_cuda_export.h>
 
 using namespace athena::backend::llvm;
 
