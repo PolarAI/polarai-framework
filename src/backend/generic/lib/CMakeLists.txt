@@ -21,14 +21,12 @@ include(TableGen)
 include(AddLLVM)
 include(AddMLIR)
 
-include(HandleLLVMOptions)
-
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 add_subdirectory(jit)
 
-add_athena_library(polar_backend_generic SHARED
+add_polar_library(polar_backend_generic SHARED
         LLVMExecutor.cpp
         GraphPartitionPlanner.cpp
         allocators/LayerAllocator.cpp

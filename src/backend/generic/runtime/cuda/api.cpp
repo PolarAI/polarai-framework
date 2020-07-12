@@ -14,19 +14,13 @@
 #include "CudaContext.h"
 
 #include <athena/backend/llvm/runtime/api.h>
-#include <athena/backend/llvm/runtime/runtime_export.h>
+#include <polar_rt_cuda.h>
 
 using namespace athena::backend::llvm;
 
 extern "C" {
 
-ATH_RT_LLVM_EXPORT Context* initContext() {
-  return new CudaContext();
-}
+POLAR_RT_CUDA_EXPORT Context* initContext() { return new CudaContext(); }
 
-ATH_RT_LLVM_EXPORT void closeContext(Context* ctx) {
-  delete ctx;
+POLAR_RT_CUDA_EXPORT void closeContext(Context* ctx) { delete ctx; }
 }
-
-}
-

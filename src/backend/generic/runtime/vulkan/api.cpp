@@ -14,7 +14,7 @@
 #include "VulkanContext.h"
 
 #include <athena/backend/llvm/runtime/api.h>
-#include <athena/backend/llvm/runtime/runtime_export.h>
+#include <polar_rt_vulkan_export.h>
 
 #include <vulkan/vulkan.h>
 
@@ -22,7 +22,7 @@ using namespace athena::backend::llvm;
 
 extern "C" {
 
-ATH_RT_LLVM_EXPORT auto initContext() -> Context* {
+POLAR_RT_VULKAN_EXPORT auto initContext() -> Context* {
   VkApplicationInfo applicationInfo = {};
   applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   applicationInfo.pNext = nullptr;
@@ -47,5 +47,5 @@ ATH_RT_LLVM_EXPORT auto initContext() -> Context* {
   return new VulkanContext(instance);
 }
 
-ATH_RT_LLVM_EXPORT void closeContext(Context* ctx) { delete ctx; }
+POLAR_RT_VULKAN_EXPORT void closeContext(Context* ctx) { delete ctx; }
 }

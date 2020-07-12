@@ -1,6 +1,6 @@
-set(AthenaJitTarget "PolarJIT" CACHE STRING "" FORCE)
+set(PolarJitTarget "PolarJIT" CACHE STRING "" FORCE)
 
-add_polar_library(${AthenaJitTarget} OBJECT
+add_polar_library(${PolarJitTarget} OBJECT
         AthenaJIT.cpp)
 
 message(STATUS ${PROJECT_BINARY_DIR}/utils/dialects/include)

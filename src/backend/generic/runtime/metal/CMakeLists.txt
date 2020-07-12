@@ -6,20 +6,19 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/contrib/SPIRV-Cross
                  ${PROJECT_BINARY_DIR}/contrib/SPIRV-Cross)
 
 add_definitions("-x objective-c++")
-add_athena_library(${POLAR_RT_LLVM_METAL} SHARED
-        ATH_RT_LLVM # export name
-        backend/llvm/runtime/runtime_export.h # export file name
-
+add_polar_library(polar_rt_metal SHARED
         api.mm
         MetalContext.mm
         MetalDevice.mm
         MetalEvent.mm
         spirv_converter.cpp
         )
+target_include_directories(polar_rt_metal PUBLIC 
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
-target_compile_definitions(${POLAR_RT_LLVM_METAL} PRIVATE SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS=1)
+target_compile_definitions(polar_rt_metal PRIVATE SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS=1)
 
-target_link_libraries(${POLAR_RT_LLVM_METAL} PRIVATE
+target_link_libraries(polar_rt_metal PRIVATE
         "-framework Metal"
         "-framework Cocoa"
         "-framework AppKit"

@@ -15,11 +15,11 @@
 #define ATHENA_LLVMEXECUTOR_H
 
 #include <athena/backend/llvm/BackendAllocator.h>
-#include <athena/backend/llvm/llvm_export.h>
 #include <athena/backend/llvm/runtime/Device.h>
 #include <athena/core/graph/Traversal.h>
 #include <athena/core/internal/Executor.h>
 #include <athena/core/loader/internal/TensorAllocator.h>
+#include <polar_backend_generic_export.h>
 
 namespace athena::backend::llvm {
 
@@ -35,7 +35,7 @@ constexpr auto DefaultDeviceFilter = [](std::shared_ptr<Device>&) {
 /**
  * Execute Graph with LLVM-based backend
  */
-class ATH_BACKEND_LLVM_EXPORT LLVMExecutor
+class POLAR_BACKEND_GENERIC_EXPORT LLVMExecutor
     : public athena::core::internal::Executor {
 public:
   using FilterFunctionT = std::function<bool(std::shared_ptr<Device>&)>;

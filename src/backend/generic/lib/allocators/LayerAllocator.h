@@ -19,7 +19,6 @@
 #include <athena/backend/llvm/AllocatorLayerBase.h>
 #include <athena/backend/llvm/BackendAllocator.h>
 #include <athena/backend/llvm/MemoryRecord.h>
-#include <athena/backend/llvm/llvm_export.h>
 #include <athena/backend/llvm/runtime/Device.h>
 
 #include <list>
@@ -52,7 +51,7 @@ struct LockDescriptor {
 ///    memory domain.
 /// 4. If one of the allocation layers is out of memory, a callback function is
 ///    called to free up some space and copy data to more latent memory.
-class ATH_BACKEND_LLVM_EXPORT LayerAllocator : public BackendAllocator {
+class LayerAllocator : public BackendAllocator {
 private:
   std::mutex mMutex;
 

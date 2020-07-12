@@ -1,14 +1,12 @@
-set(POLAR_RT_LLVM_CUDA "PolarLLVMCudaRT" CACHE STRING "" FORCE)
 set(POLAR_HAS_CUDA "true" CACHE STRING "" FORCE)
 
-add_athena_library(${POLAR_RT_LLVM_CUDA} MODULE
-        ATH_RT_LLVM # export name
-        backend/llvm/runtime/runtime_export.h # export file name
-
+add_polar_library(polar_rt_cuda MODULE
         api.cpp
         CudaContext.cpp
         CudaDevice.cpp
         CudaEvent.cpp
   )
+target_include_directories(polar_rt_cuda PUBLIC 
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
-target_link_libraries(${POLAR_RT_LLVM_CUDA} PRIVATE CUDA::cuda_driver)
+target_link_libraries(polar_rt_cuda PRIVATE CUDA::cuda_driver)

@@ -16,7 +16,6 @@
 
 #include <athena/backend/llvm/AllocatorLayerBase.h>
 #include <athena/backend/llvm/MemoryRecord.h>
-#include <athena/backend/llvm/llvm_export.h>
 #include <athena/backend/llvm/runtime/ProgramDesc.h>
 #include <athena/backend/llvm/runtime/Queue.h>
 #include <athena/core/tensor/internal/TensorInternal.h>
@@ -36,7 +35,7 @@ enum class DeviceProvider { CUDA, HIP, SYCL, OpenCL, VULKAN, METAL, HOST };
 
 enum class DeviceKind { CPU, GPU, FPGA, OTHER_ACCELERATOR, HOST };
 
-class ATH_BACKEND_LLVM_EXPORT Device {
+class Device {
 public:
   Device() = default;
   virtual ~Device() = default;

@@ -1,16 +1,13 @@
-set(ATH_RT_LLVM_SUPPORT "AthenaLLVMSupport" CACHE STRING "" FORCE)
-set(ATH_RT_LLVM_SUPPORT_OBJ "AthenaLLVMSupportObj" CACHE STRING "" FORCE)
-add_athena_library(${ATH_RT_LLVM_SUPPORT_OBJ} OBJECT 
-        ATH_RT_SUPPORT # export name
-        backend/llvm/runtime/support/export.h # export file name
+add_polar_library(polar_rt_support OBJECT 
         routines.cpp)
+add_library(PolarAI::generic_backend_support ALIAS polar_rt_support)
+target_include_directories(polar_rt_support PUBLIC 
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
-add_athena_library(${ATH_RT_LLVM_SUPPORT} STATIC 
-        ATH_RT_SUPPORT # export name
-        backend/llvm/runtime/support/export.h # export file name
-        $<TARGET_OBJECTS:${ATH_RT_LLVM_SUPPORT_OBJ}>)
+add_polar_library(polar_rt_support_static STATIC 
+        $<TARGET_OBJECTS:polar_rt_support>)
 
-install(TARGETS ${ATH_RT_LLVM_SUPPORT} EXPORT AthenaConfig
+install(TARGETS polar_rt_support_static EXPORT AthenaConfig
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         COMPONENT Athena_Runtime
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

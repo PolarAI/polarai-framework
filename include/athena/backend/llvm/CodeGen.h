@@ -11,8 +11,8 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include <athena/backend/llvm/llvm_export.h>
 #include <athena/core/Generator.h>
+#include <polar_backend_generic_export.h>
 
 namespace mlir {
 class OpBuilder;
@@ -20,7 +20,7 @@ class OpBuilder;
 
 namespace athena::backend::llvm {
 /// Feeds Generator with functors to generate correct MLIR.
-ATH_BACKEND_LLVM_EXPORT void
+POLAR_BACKEND_GENERIC_EXPORT void
 populateCodeGenPatterns(core::internal::Generator& generator,
                         mlir::OpBuilder& builder);
 } // namespace athena::backend::llvm

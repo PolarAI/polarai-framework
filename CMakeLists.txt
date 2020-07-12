@@ -55,7 +55,7 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 endif ()
 
 # add_subdirectory(utils/test_runner)
-# add_subdirectory(utils/dialects)
+add_subdirectory(utils/dialects)
 # add_subdirectory(utils/debugger)
 # add_subdirectory(utils/kernels)
 add_subdirectory(src)

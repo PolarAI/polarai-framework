@@ -12,11 +12,10 @@
 //===----------------------------------------------------------------------===//
 
 #include "GraphPartitionPlanner.h"
-#include "ImageManager.h"
 #include "allocators/LayerAllocator.h"
 #include "jit/AthenaJIT.h"
-#include "runtime/driver/RuntimeDriver.h"
-#include "runtime/host/HostDevice.h"
+#include "../runtime/driver/RuntimeDriver.h"
+#include "../runtime/host/HostDevice.h"
 
 #include <Compute/ComputeDialect.h>
 #include <PolarGraph/PolarGraphDialect.h>

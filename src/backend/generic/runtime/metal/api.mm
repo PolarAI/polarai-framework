@@ -14,18 +14,13 @@
 #include "MetalContext.h"
 
 #include <athena/backend/llvm/runtime/api.h>
-#include <athena/backend/llvm/runtime/runtime_export.h>
+#include <polar_rt_metal_export.h>
 
 using namespace athena::backend::llvm;
 
 extern "C" {
 
-ATH_RT_LLVM_EXPORT Context* initContext() {
-  return new MetalContext();
-}
+POLAR_RT_METAL_EXPORT Context *initContext() { return new MetalContext(); }
 
-ATH_RT_LLVM_EXPORT void closeContext(Context* ctx) {
-  delete ctx;
-}
-
+POLAR_RT_METAL_EXPORT void closeContext(Context *ctx) { delete ctx; }
 }
