@@ -16,13 +16,13 @@
 
 #include <athena/core/Generator.h>
 #include <athena/core/context/Context.h>
-#include <athena/core/core_export.h>
 #include <athena/core/graph/Graph.h>
 #include <athena/utils/Index.h>
 #include <athena/utils/Pointer.h>
+#include <polar_core_export.h>
 
 namespace athena::core::internal {
-class ATH_CORE_EXPORT GraphCompiler {
+class POLAR_CORE_EXPORT GraphCompiler {
 public:
   static void compile(Graph& graph, Generator& generator);
 };

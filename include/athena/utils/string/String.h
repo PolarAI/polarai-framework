@@ -15,12 +15,12 @@
 #define ATHENA_STRING_H
 
 #include <athena/utils/allocator/Allocator.h>
-#include <athena/utils/utils_export.h>
+#include <polar_utils_export.h>
 
 #include <cstddef>
 
 namespace athena::utils {
-class ATH_UTILS_EXPORT String {
+class POLAR_UTILS_EXPORT String {
 public:
   String();
   String(const char* string, Allocator allocator = Allocator());

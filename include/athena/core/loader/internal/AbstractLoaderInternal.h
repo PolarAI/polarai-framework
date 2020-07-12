@@ -16,16 +16,16 @@
 
 #include <athena/core/Entity.h>
 #include <athena/core/context/internal/ContextInternal.h>
-#include <athena/core/core_export.h>
 #include <athena/core/loader/internal/TensorAllocator.h>
 #include <athena/core/tensor/Accessor.h>
 #include <athena/utils/string/StringView.h>
+#include <polar_core_export.h>
 
 namespace athena::core::internal {
 /**
  * Loaders is a concept that helps Athena put user data into Graph
  */
-class ATH_CORE_EXPORT AbstractLoaderInternal : public Entity {
+class POLAR_CORE_EXPORT AbstractLoaderInternal : public Entity {
 public:
   AbstractLoaderInternal(utils::WeakPtr<ContextInternal> context,
                          utils::Index publicIndex,

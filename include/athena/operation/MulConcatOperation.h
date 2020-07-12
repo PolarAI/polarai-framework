@@ -16,10 +16,10 @@
 
 #include <athena/core/operation/Operation.h>
 #include <athena/operation/internal/MulConcatOperationInternal.h>
-#include <athena/operation/operation_export.h>
+#include <polar_operation_export.h>
 
 namespace athena::operation {
-class ATH_OPERATION_EXPORT MulConcatOperation : public core::Operation {
+class POLAR_OPERATION_EXPORT MulConcatOperation : public core::Operation {
 public:
   using InternalType = internal::MulConcatOperationInternal;
   enum Arguments { GRADIENT=40, LOCAL_DERIVATIVE };

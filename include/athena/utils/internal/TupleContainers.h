@@ -14,7 +14,6 @@
 #ifndef ATHENA_TUPLECONTAINERS_H
 #define ATHENA_TUPLECONTAINERS_H
 
-#include <athena/core/core_export.h>
 #include <athena/utils/Index.h>
 
 #include <tuple>
@@ -27,12 +26,12 @@ namespace athena::utils::internal {
 //};
 template <template <typename, typename...> typename Map,
           template <typename> typename Value, typename... Args>
-struct ATH_CORE_EXPORT TupleMaps {
+struct TupleMaps {
   using Holder = std::tuple<Map<Index, Value<Args>>...>;
 };
 
 template <template <typename, typename...> typename Container, typename... Args>
-struct ATH_CORE_EXPORT TupleContainers {
+struct TupleContainers {
   using Holder = std::tuple<Container<Args>...>;
 };
 } // namespace athena::utils::internal

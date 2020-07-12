@@ -14,13 +14,13 @@
 #ifndef ATHENA_ABSTRACTLOADER_H
 #define ATHENA_ABSTRACTLOADER_H
 
-#include <athena/core/core_export.h>
+#include <polar_core_export.h>
 
 namespace athena::core {
 namespace internal {
 class AbstractLoaderInternal;
 }
-class ATH_CORE_EXPORT AbstractLoader {
+class POLAR_CORE_EXPORT AbstractLoader {
 public:
   using InternalType = internal::AbstractLoaderInternal;
 };

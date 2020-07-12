@@ -15,7 +15,7 @@
 #define ATHENA_ABSTRACTNODE_H
 
 #include <athena/core/PublicEntity.h>
-#include <athena/core/core_export.h>
+#include <polar_core_export.h>
 
 namespace athena::core {
 namespace internal {
@@ -25,7 +25,7 @@ class AbstractNodeInternal;
 /**
  * A Node represents a piece of computation in Graph
  */
-class ATH_CORE_EXPORT AbstractNode : public PublicEntity {
+class POLAR_CORE_EXPORT AbstractNode : public PublicEntity {
 public:
   using InternalType = internal::AbstractNodeInternal;
 };

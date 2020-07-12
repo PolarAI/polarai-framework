@@ -14,7 +14,7 @@
 #ifndef ATHENA_SHAPEVIEW_H
 #define ATHENA_SHAPEVIEW_H
 
-#include <athena/core/core_export.h>
+#include <polar_core_export.h>
 
 #include <vector>
 
@@ -22,7 +22,7 @@ namespace athena::core {
 
 class TensorShape;
 
-class ATH_CORE_EXPORT ShapeView {
+class POLAR_CORE_EXPORT ShapeView {
 private:
   using Iterator = std::vector<size_t>::const_iterator;
   Iterator mBegin;

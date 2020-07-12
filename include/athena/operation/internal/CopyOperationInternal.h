@@ -16,11 +16,11 @@
 
 #include <athena/core/context/internal/ContextInternal.h>
 #include <athena/core/operation/internal/OperationInternal.h>
-#include <athena/operation/operation_export.h>
 #include <athena/utils/allocator/Allocator.h>
+#include <polar_operation_export.h>
 
 namespace athena::operation::internal {
-class ATH_OPERATION_EXPORT CopyOperationInternal
+class POLAR_OPERATION_EXPORT CopyOperationInternal
     : public core::internal::OperationInternal {
 public:
   CopyOperationInternal(

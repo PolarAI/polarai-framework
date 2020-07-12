@@ -15,9 +15,10 @@
 #define ATHENA_STATELESSMEMORYRESOURCE_H
 
 #include <athena/utils/allocator/AbstractMemoryResource.h>
+#include <polar_utils_export.h>
 
 namespace athena::utils {
-class ATH_UTILS_EXPORT StatelessMemoryResource : public AbstractMemoryResource {
+class POLAR_UTILS_EXPORT StatelessMemoryResource : public AbstractMemoryResource {
 protected:
   byte* doAllocate(size_t size, size_t alignment) override;
   void doDeallocate(const byte* data, size_t size, size_t alignment) override;

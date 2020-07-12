@@ -15,12 +15,12 @@
 #define ATHENA_OUTPUTNODEINTERNAL_H
 
 #include <athena/core/ForwardDeclarations.h>
-#include <athena/core/core_export.h>
 #include <athena/core/node/internal/AbstractNodeInternal.h>
 #include <athena/utils/Pointer.h>
+#include <polar_core_export.h>
 
 namespace athena::core::internal {
-class ATH_CORE_EXPORT OutputNodeInternal : public AbstractNodeInternal {
+class POLAR_CORE_EXPORT OutputNodeInternal : public AbstractNodeInternal {
 public:
   OutputNodeInternal() = delete;
   OutputNodeInternal(const OutputNodeInternal& rhs) = default;

@@ -5,68 +5,46 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
 # --- Global Options ---
-option(ATHENA_BUILD_STATIC "OFF")
-
-set(LIB_TYPE SHARED)
-if (ATHENA_BUILD_STATIC)
-    set(LIB_TYPE STATIC)
-endif ()
-
 if (NOT APPLE)
     set(CMAKE_INSTALL_RPATH $ORIGIN)
 endif ()
 
-# This dummy file is needed to construct archive library
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/null.cpp "")
-
 # --- Library targets ---
-add_athena_library(athena ${LIB_TYPE}
-        ATHENA # export name
-        athena_export.h
-        ${CMAKE_CURRENT_BINARY_DIR}/null.cpp)
-
-add_subdirectory(backend)
+include_directories(${PROJECT_BINARY_DIR}/src/core)
+include_directories(${PROJECT_BINARY_DIR}/src/io)
+include_directories(${PROJECT_BINARY_DIR}/src/loaders)
+include_directories(${PROJECT_BINARY_DIR}/src/operation)
+include_directories(${PROJECT_BINARY_DIR}/src/utils)
+# add_subdirectory(backend)
 add_subdirectory(core)
 add_subdirectory(operation)
 add_subdirectory(loaders)
-add_subdirectory(model)
+add_subdirectory(io)
 add_subdirectory(utils)
 
+add_polar_library(polarai SHARED
+        $<TARGET_OBJECTS:PolarAI::core>
+        $<TARGET_OBJECTS:PolarAI::io>
+        $<TARGET_OBJECTS:PolarAI::loaders>
+        $<TARGET_OBJECTS:PolarAI::operation>
+        )
+add_library(PolarAI::framework ALIAS polarai)
+
+target_link_libraries(polarai PRIVATE PolarAI::utils)
+
 # --- Library options ---
-set_target_properties(athena PROPERTIES
-        SOVERSION ${ATHENA_MAJOR_VERSION}
-        VERSION ${ATHENA_VERSION})
+set_target_properties(polarai PROPERTIES
+        SOVERSION ${POLAR_MAJOR_VERSION}
+        VERSION ${POLAR_VERSION})
 
 # Define headers for this library. PUBLIC headers are used for
 # compiling the library, and will be added to consumers' build
 # paths.
-target_include_directories(athena PUBLIC
+target_include_directories(polarai PUBLIC
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
 
-set(WHOLE_ARCHIVE)
-set(NOWHOLE_ARCHIVE)
-
-if (APPLE)
-    set(WHOLE_ARCHIVE -Wl,-all_load)
-    set(NOWHOLE_ARCHIVE)
-elseif (UNIX)
-    set(WHOLE_ARCHIVE -Wl,--whole-archive)
-    set(NOWHOLE_ARCHIVE -Wl,--no-whole-archive)
-endif ()
-
-target_link_libraries(athena
-        PRIVATE
-        ${WHOLE_ARCHIVE}
-        ${ATH_BACKEND_LLVM}
-        ${ATH_CORE}
-        ${ATH_LOADERS}
-        ${ATH_OPERATION}
-        ${ATH_MODEL}
-        ${ATH_UTILS}
-        ${NOWHOLE_ARCHIVE})
-
-target_compile_features(athena
+target_compile_features(polarai
         PUBLIC
         cxx_inline_namespaces
         cxx_strong_enums
@@ -81,25 +59,25 @@ target_compile_features(athena
         cxx_defaulted_move_initializers)
 
 # --- Library installation ---
-install(TARGETS athena EXPORT AthenaConfig
+install(TARGETS polarai EXPORT PolarAIConfig
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        COMPONENT Athena_Runtime
+        COMPONENT PolarAI_Runtime
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        COMPONENT Athena_Runtime
-        NAMELINK_COMPONENT Athena_Development
+        COMPONENT PolarAI_Runtime
+        NAMELINK_COMPONENT PolarAI_Development
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        COMPONENT Athena_Development
+        COMPONENT PolarAI_Development
         )
 
-install(EXPORT AthenaConfig
-        NAMESPACE Athena::
-        DESTINATION share/athena/cmake)
+install(EXPORT PolarAIConfig
+        NAMESPACE PolarAI::
+        DESTINATION share/polarai/cmake)
 
 write_basic_package_version_file(
-        AthenaConfigVersion.cmake
-        VERSION ${ATHENA_VERSION}
+        PolarAIConfigVersion.cmake
+        VERSION ${POLAR_VERSION}
         COMPATIBILITY SameMajorVersion
 )
 
 # This makes the project importable from the build directory
-export(TARGETS athena ${ATH_CORE} FILE AthenaConfig.cmake)
+export(TARGETS polarai FILE PolarAIConfig.cmake)

@@ -21,6 +21,7 @@
 #include <athena/utils/allocator/Allocator.h>
 #include <athena/utils/internal/TupleContainers.h>
 #include <athena/utils/storages/HeterogeneousVector.h>
+#include <polar_core_export.h>
 
 #include <unordered_map>
 #include <vector>
@@ -36,7 +37,7 @@ using Container = std::vector<utils::HeterogeneousVector<Entity>>;
 
 using Map = std::unordered_map<utils::Index, InternalIndex>;
 
-class ATH_CORE_EXPORT ContextInternal {
+class POLAR_CORE_EXPORT ContextInternal {
 public:
   explicit ContextInternal(utils::Allocator allocator, size_t defaultCapacity,
                            size_t elementAverageSize);

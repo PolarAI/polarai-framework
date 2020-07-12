@@ -15,16 +15,16 @@
 #define ATHENA_ABSTRACTNODEINTERNAL_H
 
 #include <athena/core/Entity.h>
-#include <athena/core/core_export.h>
 #include <athena/core/graph/EdgeMark.h>
 #include <athena/core/node/NodeType.h>
 #include <athena/core/tensor/TensorShape.h>
 #include <athena/core/tensor/internal/TensorInternal.h>
 #include <athena/utils/Index.h>
 #include <athena/utils/string/StringView.h>
+#include <polar_core_export.h>
 
 namespace athena::core::internal {
-class ATH_CORE_EXPORT AbstractNodeInternal : public Entity {
+class POLAR_CORE_EXPORT AbstractNodeInternal : public Entity {
 public:
   explicit AbstractNodeInternal(utils::WeakPtr<ContextInternal> context,
                                 utils::Index publicNodeIndex,

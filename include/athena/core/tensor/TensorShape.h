@@ -14,17 +14,16 @@
 #ifndef ATHENA_TENSORSHAPE_H
 #define ATHENA_TENSORSHAPE_H
 
-#include "athena/utils/error/FatalError.h"
-
-#include <athena/core/core_export.h>
+#include <athena/utils/error/FatalError.h>
 #include <athena/core/tensor/ShapeView.h>
+#include <polar_core_export.h>
 
 #include <initializer_list>
 #include <utility>
 #include <vector>
 
 namespace athena::core {
-class ATH_CORE_EXPORT TensorShape {
+class POLAR_CORE_EXPORT TensorShape {
 private:
   std::vector<size_t> mShape;
   size_t mTotalSize;
@@ -86,7 +85,7 @@ public:
 };
 
 template <typename CopyableIterator>
-ATH_CORE_EXPORT TensorShape::TensorShape(CopyableIterator begin,
+TensorShape::TensorShape(CopyableIterator begin,
                                          CopyableIterator end)
     : mShape(begin, end), mTotalSize(calculateTotalSize()) {}
 

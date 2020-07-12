@@ -15,16 +15,16 @@
 #define ATHENA_NODEINTERNAL_H
 
 #include <athena/core/context/internal/ContextInternal.h>
-#include <athena/core/core_export.h>
 #include <athena/core/node/internal/AbstractNodeInternal.h>
 #include <athena/core/operation/internal/OperationInternal.h>
 #include <athena/utils/Index.h>
+#include <polar_core_export.h>
 
 namespace athena::core::internal {
 /**
  * Special type of Node that can not have predecessors
  */
-class ATH_CORE_EXPORT NodeInternal : public AbstractNodeInternal {
+class POLAR_CORE_EXPORT NodeInternal : public AbstractNodeInternal {
 public:
   NodeInternal(utils::SharedPtr<ContextInternal> context,
                utils::Index publicNodeIndex, utils::Index operationIndex,

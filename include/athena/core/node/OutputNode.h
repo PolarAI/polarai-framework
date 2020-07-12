@@ -14,9 +14,9 @@
 #ifndef ATHENA_OUTPUTNODE_H
 #define ATHENA_OUTPUTNODE_H
 
-#include <athena/core/core_export.h>
 #include <athena/core/node/AbstractNode.h>
 #include <athena/core/node/internal/OutputNodeInternal.h>
+#include <polar_core_export.h>
 
 namespace athena::core {
 namespace internal {
@@ -26,7 +26,7 @@ class OutputNodeInternal;
 /**
  * A Node represents a piece of data loading to graph.
  */
-class ATH_CORE_EXPORT OutputNode : public AbstractNode {
+class POLAR_CORE_EXPORT OutputNode : public AbstractNode {
 public:
   using InternalType = internal::OutputNodeInternal;
 };

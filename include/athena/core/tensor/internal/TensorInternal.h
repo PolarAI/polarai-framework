@@ -15,16 +15,16 @@
 #define ATHENA_TENSORINTERNAL_H
 
 #include <athena/core/Entity.h>
-#include <athena/core/core_export.h>
 #include <athena/core/tensor/DataType.h>
 #include <athena/core/tensor/TensorShape.h>
 #include <athena/utils/Index.h>
 #include <athena/utils/Pointer.h>
+#include <polar_core_export.h>
 
 namespace athena::core::internal {
 class ContextInternal;
 
-class ATH_CORE_EXPORT TensorInternal : public Entity {
+class POLAR_CORE_EXPORT TensorInternal : public Entity {
 public:
   TensorInternal(const TensorInternal& rhs) = default;
   TensorInternal(TensorInternal&& rhs) = default;

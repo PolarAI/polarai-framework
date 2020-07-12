@@ -17,13 +17,13 @@
 #include <athena/utils/Pointer.h>
 #include <athena/utils/allocator/AbstractMemoryResource.h>
 #include <athena/utils/allocator/StatelessMemoryResource.h>
-#include <athena/utils/utils_export.h>
+#include <polar_utils_export.h>
 
 #include <cstddef>
 #include <memory>
 
 namespace athena::utils {
-class ATH_UTILS_EXPORT Allocator {
+class POLAR_UTILS_EXPORT Allocator {
 public:
   //  template <typename MemoryResourceType, typename ...Args>
   //  explicit Allocator(Args&&... args);

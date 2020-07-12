@@ -15,7 +15,7 @@
 #define ATHENA_DOTMODEL_H
 
 #include <athena/core/graph/Graph.h>
-#include <athena/model/model_export.h>
+#include <polar_io_export.h>
 
 #include <ostream>
 
@@ -23,7 +23,7 @@ namespace athena::model {
 /**
  * Print graph to DOT format for debug purposes
  */
-class ATH_MODEL_EXPORT DotModel {
+class POLAR_IO_EXPORT DotModel {
 public:
   static void exportGraph(core::Graph& graph, std::ostream& stream);
 };

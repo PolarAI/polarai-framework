@@ -17,6 +17,7 @@
 #include <athena/core/internal/GenBuiltins.h>
 #include <athena/core/internal/GenValues.h>
 #include <athena/core/tensor/internal/TensorInternal.h>
+#include <polar_core_export.h>
 
 #include <any>
 #include <cstddef>
@@ -28,10 +29,8 @@
 #include <utility>
 #include <variant>
 
-#include <athena/core/core_export.h>
-
 namespace athena::core::internal {
-class ATH_CORE_EXPORT Generator {
+class POLAR_CORE_EXPORT Generator {
 public:
   using SupportedConstantT =
       std::variant<int32_t, int64_t, uint32_t, uint64_t, float, double>;

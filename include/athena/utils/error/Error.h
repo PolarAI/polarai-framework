@@ -17,7 +17,7 @@
 #include <athena/utils/Defines.h>
 #include <athena/utils/Pointer.h>
 #include <athena/utils/string/String.h>
-#include <athena/utils/utils_export.h>
+#include <polar_utils_export.h>
 
 #include <memory>
 #include <ostream>
@@ -29,7 +29,7 @@ namespace athena::utils {
 /**
  * A non-fatal error
  */
-class ATH_UTILS_EXPORT Error {
+class POLAR_UTILS_EXPORT Error {
 protected:
   int32_t mErrorCode;
   String mErrorMessage;
@@ -57,7 +57,7 @@ ATH_FORCE_INLINE Error::Error(int32_t errorCode, Args&&... messages)
     : mErrorCode(errorCode),
       mErrorMessage(mergeToString(std::forward<Args>(messages)...)) {}
 
-ATH_UTILS_EXPORT ATH_FORCE_INLINE std::ostream& operator<<(std::ostream& stream,
+ATH_FORCE_INLINE std::ostream& operator<<(std::ostream& stream,
                                                            const Error& err) {
   stream << err.getMessage().getString() << "\n";
   return stream;

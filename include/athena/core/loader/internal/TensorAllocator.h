@@ -14,8 +14,8 @@
 #ifndef ATHENA_TENSOR_ALLOCATOR_H
 #define ATHENA_TENSOR_ALLOCATOR_H
 
-#include <athena/core/core_export.h>
 #include <athena/core/tensor/internal/TensorInternal.h>
+#include <polar_core_export.h>
 
 #include <cstddef>
 
@@ -23,7 +23,7 @@ namespace athena::core::internal {
 
 enum class LockType { READ, READ_WRITE };
 
-class ATH_CORE_EXPORT TensorAllocator {
+class POLAR_CORE_EXPORT TensorAllocator {
 public:
   virtual ~TensorAllocator() = default;
 

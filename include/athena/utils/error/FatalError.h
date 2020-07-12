@@ -14,9 +14,7 @@
 #ifndef ATHENA_FATALERROR_H
 #define ATHENA_FATALERROR_H
 
-#include "athena/utils/logger/Logger.h"
-
-#include <athena/core/core_export.h>
+#include <athena/utils/logger/Logger.h>
 #include <athena/utils/error/Error.h>
 #include <athena/utils/logger/log.h>
 
@@ -83,13 +81,13 @@ void print_stacktrace() {
 /**
  * A fatal error. Creating instances of this class forces program to stop.
  */
-class ATH_UTILS_EXPORT FatalError : public Error {
+class FatalError : public Error {
 public:
   template <typename... Args>
   explicit FatalError(FatalErrorType errorCode, Args... messages);
 };
 template <typename... Args>
-ATH_UTILS_EXPORT FatalError::FatalError(FatalErrorType errorCode,
+FatalError::FatalError(FatalErrorType errorCode,
                                         Args... messages)
     : Error(errorCode, messages...) {
   err() << mErrorMessage.getString() << "\n";

@@ -16,9 +16,10 @@
 
 #include <athena/core/operation/Operation.h>
 #include <athena/operation/internal/CopyOperationInternal.h>
+#include <polar_operation_export.h>
 
 namespace athena::operation {
-class ATH_OPERATION_EXPORT CopyOperation : public core::Operation {
+class POLAR_OPERATION_EXPORT CopyOperation : public core::Operation {
 public:
 using InternalType = internal::AddOperationInternal;
 enum Arguments { Unmarked=18 };

@@ -1,5 +1,3 @@
-set(ATH_BACKEND_LLVM "AthenaBackendLLVM" CACHE STRING "" FORCE)
-
 if(POLICY CMP0068)
     cmake_policy(SET CMP0068 NEW)
     set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
@@ -23,26 +21,25 @@ include(TableGen)
 include(AddLLVM)
 include(AddMLIR)
 
-# FIXME Ninja doesn't work with this
-# include(HandleLLVMOptions)
+include(HandleLLVMOptions)
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 add_subdirectory(jit)
 
-add_athena_library(${ATH_BACKEND_LLVM} SHARED
-        ATH_BACKEND_LLVM # export name
-        backend/llvm/llvm_export.h
+add_athena_library(polar_backend_generic SHARED
         LLVMExecutor.cpp
         GraphPartitionPlanner.cpp
         allocators/LayerAllocator.cpp
         CodeGen.cpp)
 
-target_include_directories(${ATH_BACKEND_LLVM} PRIVATE 
+add_library(PolarAI::generic_backend ALIAS polar_backend_generic)
+
+target_include_directories(polar_backend_generic PRIVATE 
                           ${LLVM_INCLUDE_DIRS}
                           ${CMAKE_CURRENT_BINARY_DIR})
-target_compile_definitions(${ATH_BACKEND_LLVM} PRIVATE ${LLVM_DEFINITIONS})
+target_compile_definitions(polar_backend_generic PRIVATE ${LLVM_DEFINITIONS})
 
 llvm_map_components_to_libnames(llvm_libs
         core
@@ -58,15 +55,25 @@ llvm_map_components_to_libnames(llvm_libs
         AllTargetsInfos
         lto)
 
-target_link_libraries(${ATH_BACKEND_LLVM} PRIVATE
+target_link_libraries(polar_backend_generic PRIVATE
         ${llvm_libs}
-        ${AthenaJitTarget}
+        ${PolarJitTarget}
         MLIRIR
         MLIRStandardOps
         MLIRPolarGraph
-        ${ATH_RT_LLVM_SUPPORT_OBJ}
-        ${ATH_RT_LLVM_DRIVER}
+        PolarAI::generic_backend_support
+        PolarAI::generic_backend_driver
         )
-target_include_directories(${ATH_BACKEND_LLVM} PRIVATE
+target_include_directories(polar_backend_generic PRIVATE
         ${PROJECT_SOURCE_DIR}/utils/dialects/include
         ${PROJECT_BINARY_DIR}/utils/dialects/include)
+
+install(TARGETS polar_backend_generic EXPORT PolarAIConfig
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT PolarAI_Runtime
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT PolarAI_Runtime
+        NAMELINK_COMPONENT PolarAI_Development
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT PolarAI_Development
+        )

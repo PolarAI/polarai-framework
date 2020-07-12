@@ -15,10 +15,10 @@
 #define ATHENA_CONSTANTLOADERINTERNAL_H
 
 #include <athena/core/loader/internal/AbstractLoaderInternal.h>
-#include <athena/loaders/loaders_export.h>
+#include <polar_loaders_export.h>
 
 namespace athena::loaders::internal {
-class ATH_LOADERS_EXPORT ConstantLoaderInternal
+class POLAR_LOADERS_EXPORT ConstantLoaderInternal
     : public core::internal::AbstractLoaderInternal {
 public:
   ConstantLoaderInternal(

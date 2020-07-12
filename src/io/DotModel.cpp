@@ -14,7 +14,7 @@
 #include <athena/core/node/internal/AbstractNodeInternal.h>
 #include <athena/core/node/internal/NodeInternal.h>
 #include <athena/core/tensor/internal/TensorInternal.h>
-#include <athena/model/DotModel.h>
+#include <athena/io/DotModel.h>
 
 using namespace athena::core;
 

@@ -17,12 +17,12 @@
 #include <athena/core/ForwardDeclarations.h>
 #include <athena/core/Wrapper.h>
 #include <athena/core/context/internal/ContextInternal.h>
-#include <athena/core/core_export.h>
 #include <athena/utils/Index.h>
 #include <athena/utils/allocator/Allocator.h>
+#include <polar_core_export.h>
 
 namespace athena::core {
-class ATH_CORE_EXPORT Context {
+class POLAR_CORE_EXPORT Context {
 public:
   explicit Context(utils::Allocator allocator = utils::Allocator(),
                    size_t defaultCapacity = 100,

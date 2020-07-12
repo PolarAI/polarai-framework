@@ -14,7 +14,6 @@
 #ifndef ATHENA_DATATYPE_H
 #define ATHENA_DATATYPE_H
 
-#include <athena/core/core_export.h>
 #include <athena/utils/error/FatalError.h>
 
 #include <cstddef>

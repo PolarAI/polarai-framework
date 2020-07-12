@@ -16,6 +16,7 @@
 
 #include <athena/core/node/AbstractNode.h>
 #include <athena/core/node/internal/InputNodeInternal.h>
+#include <polar_core_export.h>
 
 namespace athena::core {
 namespace internal {
@@ -25,7 +26,7 @@ class InputNodeInternal;
 /**
  * A Node represents a piece of data loading to graph.
  */
-class ATH_CORE_EXPORT InputNode : public AbstractNode {
+class POLAR_CORE_EXPORT InputNode : public AbstractNode {
 public:
   using InternalType = internal::InputNodeInternal;
 };

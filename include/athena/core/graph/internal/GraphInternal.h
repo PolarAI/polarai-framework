@@ -14,23 +14,23 @@
 #ifndef ATHENA_GRAPHINTERNAL_H
 #define ATHENA_GRAPHINTERNAL_H
 
-#include <athena/core/core_export.h>
-
 #include <athena/core/Entity.h>
 #include <athena/core/context/internal/ContextInternal.h>
 #include <athena/core/graph/EdgeMark.h>
 #include <athena/utils/Index.h>
 #include <athena/utils/internal/TupleContainers.h>
 #include <athena/utils/string/StringView.h>
-
 #include <athena/core/node/internal/InputNodeInternal.h>
+#include <polar_core_export.h>
+
 #include <queue>
 #include <unordered_map>
+#include <vector>
 
 namespace athena::core::internal {
 using Topology = std::vector<Edge>;
 
-class ATH_CORE_EXPORT GraphInternal : public Entity {
+class POLAR_CORE_EXPORT GraphInternal : public Entity {
 public:
   explicit GraphInternal(utils::WeakPtr<ContextInternal> context,
                          utils::Index publicGraphIndex,

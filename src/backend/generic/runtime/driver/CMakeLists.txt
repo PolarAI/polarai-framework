@@ -1,24 +1,23 @@
-set(ATH_RT_LLVM_DRIVER "AthenaLLVMRTDriver" CACHE STRING "" FORCE)
-
 configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h @ONLY)
 
-add_athena_library(${ATH_RT_LLVM_DRIVER} STATIC
-  DONTCARE
-  dontcare.h
+add_polar_library(polar_generic_be_driver STATIC
   DynamicLibrary_posix.cpp
   RuntimeDriver.cpp)
+add_library(PolarAI::generic_backend_driver ALIAS polar_generic_be_driver)
 
-target_include_directories(${ATH_RT_LLVM_DRIVER} PRIVATE 
+target_include_directories(PolarAI::generic_backend_driver PRIVATE 
                            ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(${ATH_RT_LLVM_DRIVER} PRIVATE dl)
+if (UNIX)
+  target_link_libraries(PolarAI::generic_backend_driver PRIVATE dl)
+endif()
 
-install(TARGETS ${ATH_RT_LLVM_DRIVER} EXPORT AthenaConfig
+install(TARGETS PolarAI::generic_backend_driver EXPORT PolarAIConfig
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        COMPONENT Athena_Runtime
+        COMPONENT PolarAI_Runtime
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        COMPONENT Athena_Runtime
-        NAMELINK_COMPONENT Athena_Development
+        COMPONENT PolarAI_Runtime
+        NAMELINK_COMPONENT PolarAI_Development
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        COMPONENT Athena_Development
+        COMPONENT PolarAI_Development
         )

@@ -15,13 +15,14 @@
 #define ATHENA_WRAPPER_H
 
 #include <athena/core/ForwardDeclarations.h>
-#include <athena/core/core_export.h>
 #include <athena/utils/Index.h>
 #include <athena/utils/Pointer.h>
+#include <polar_core_export.h>
+
 #include <iostream>
 
 namespace athena {
-template <typename Type> struct ATH_CORE_EXPORT Wrapper {
+template <typename Type> struct POLAR_CORE_EXPORT Wrapper {
   using PublicType = utils::Index;
 };
 

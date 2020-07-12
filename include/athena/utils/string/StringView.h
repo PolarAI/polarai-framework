@@ -15,9 +15,10 @@
 #define ATHENA_STRINGVIEW_H
 
 #include <athena/utils/string/String.h>
+#include <polar_utils_export.h>
 
 namespace athena::utils {
-class ATH_UTILS_EXPORT StringView {
+class POLAR_UTILS_EXPORT StringView {
 public:
   explicit StringView(const String& string);
   ~StringView() = default;

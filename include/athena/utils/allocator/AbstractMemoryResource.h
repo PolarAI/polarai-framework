@@ -14,13 +14,14 @@
 #ifndef ATHENA_ABSTRACTMEMORYRESOURCE_H
 #define ATHENA_ABSTRACTMEMORYRESOURCE_H
 
-#include <athena/utils/utils_export.h>
+#include <polar_utils_export.h>
+
 #include <cstddef>
 
 namespace athena::utils {
 using byte = void;
 
-class ATH_UTILS_EXPORT AbstractMemoryResource {
+class POLAR_UTILS_EXPORT AbstractMemoryResource {
 public:
   virtual ~AbstractMemoryResource() = default;
   byte* allocate(size_t size, size_t alignment);

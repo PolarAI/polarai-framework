@@ -19,13 +19,13 @@
 #include <athena/loaders/internal/MemcpyLoaderInternal.h>
 #include <athena/core/Wrapper.h>
 #include <athena/core/PublicEntity.h>
-
+#include <polar_loaders_export.h>
 
 namespace athena::loaders {
 namespace internal {
 class MemcpyLoaderInternal;
 }
-class ATH_LOADERS_EXPORT MemcpyLoader : public core::PublicEntity {
+class POLAR_LOADERS_EXPORT MemcpyLoader : public core::PublicEntity {
 public:
   using InternalType = internal::MemcpyLoaderInternal;
 
@@ -42,7 +42,7 @@ private:
 } // namespace athena::loaders
 
 namespace athena {
-template <> struct ATH_CORE_EXPORT Wrapper<loaders::MemcpyLoader> { using PublicType = loaders::MemcpyLoader; };
+template <> struct Wrapper<loaders::MemcpyLoader> { using PublicType = loaders::MemcpyLoader; };
 
 template <> struct Returner<loaders::MemcpyLoader> {
   static typename Wrapper<loaders::MemcpyLoader>::PublicType

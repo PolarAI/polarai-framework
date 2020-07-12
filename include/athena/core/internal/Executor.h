@@ -14,12 +14,12 @@
 #ifndef ATHENA_EXECUTOR_H
 #define ATHENA_EXECUTOR_H
 
-#include <athena/core/core_export.h>
 #include <athena/core/graph/Graph.h>
+#include <polar_core_export.h>
 
 namespace athena::core::internal {
 
-class ATH_CORE_EXPORT Executor {
+class POLAR_CORE_EXPORT Executor {
 public:
   virtual void addGraph(Graph& graph) = 0;
   virtual void evaluate(Graph& graph) = 0;

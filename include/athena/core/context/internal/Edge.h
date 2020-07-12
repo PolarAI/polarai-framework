@@ -14,12 +14,12 @@
 #ifndef ATHENA_EDGE_H
 #define ATHENA_EDGE_H
 
-#include <athena/core/core_export.h>
 #include <athena/core/graph/EdgeMark.h>
 #include <athena/utils/Index.h>
+#include <polar_core_export.h>
 
 namespace athena::core::internal {
-struct ATH_CORE_EXPORT Edge {
+struct POLAR_CORE_EXPORT Edge {
   size_t startNodeIndex;
   size_t endNodeIndex;
   EdgeMark mark;

@@ -14,16 +14,16 @@
 #ifndef ATHENA_LOG_H
 #define ATHENA_LOG_H
 
-#include <athena/core/core_export.h>
 #include <athena/utils/Pointer.h>
 #include <athena/utils/logger/AbstractLogger.h>
 #include <athena/utils/logger/Logger.h>
+#include <polar_utils_export.h>
 
 #include <iostream>
 #include <memory>
 
 namespace athena::utils {
-class ATH_UTILS_EXPORT LogHolder {
+class POLAR_UTILS_EXPORT LogHolder {
   UniquePtr<AbstractLogger> mLog;
   UniquePtr<AbstractLogger> mErr;
 
@@ -53,20 +53,20 @@ public:
   friend AbstractLogger& err();
 };
 
-extern const ATH_UTILS_EXPORT utils::UniquePtr<LogHolder> logHolder;
+extern const POLAR_UTILS_EXPORT utils::UniquePtr<LogHolder> logHolder;
 
 template <typename LoggerType, typename... Args>
-ATH_UTILS_EXPORT void setLogStream(Args&&... args) {
+void setLogStream(Args&&... args) {
   logHolder->setStream<LoggerType>(logHolder->mLog,
                                    std::forward<Args>(args)...);
 }
 template <typename LoggerType, typename... Args>
-ATH_UTILS_EXPORT void setErrStream(Args&&... args) {
+void setErrStream(Args&&... args) {
   logHolder->setStream<LoggerType>(logHolder->mErr,
                                    std::forward<Args>(args)...);
 }
-ATH_UTILS_EXPORT AbstractLogger& log();
-ATH_UTILS_EXPORT AbstractLogger& err();
+POLAR_UTILS_EXPORT AbstractLogger& log();
+POLAR_UTILS_EXPORT AbstractLogger& err();
 } // namespace athena::utils
 
 #endif // ATHENA_LOG_H

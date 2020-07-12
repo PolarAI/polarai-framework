@@ -15,9 +15,10 @@
 #define ATHENA_DUMMYLOADER_H
 
 #include <athena/loaders/internal/DummyLoaderInternal.h>
+#include <polar_loaders_export.h>
 
 namespace athena::loaders {
-class ATH_LOADERS_EXPORT DummyLoader {
+class POLAR_LOADERS_EXPORT DummyLoader {
 public:
 using InternalType = internal::DummyLoaderInternal;
 };

@@ -15,12 +15,12 @@
 #define ATHENA_NODETYPE_H
 
 #include <athena/core/ForwardDeclarations.h>
-#include <athena/core/core_export.h>
 #include <athena/utils/error/FatalError.h>
+
 #include <type_traits>
 
 namespace athena::core {
-enum class ATH_CORE_EXPORT NodeType {
+enum class NodeType {
   UNDEFINED = 0,
   INPUT = 1,
   DEFAULT = 2,

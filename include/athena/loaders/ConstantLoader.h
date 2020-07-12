@@ -18,12 +18,13 @@
 #include <athena/loaders/internal/ConstantLoaderInternal.h>
 #include <athena/core/Wrapper.h>
 #include <athena/core/PublicEntity.h>
+#include <polar_loaders_export.h>
 
 namespace athena::loaders {
 namespace internal {
 class ConstantLoaderInternal;
 }
-class ATH_LOADERS_EXPORT ConstantLoader : public core::PublicEntity {
+class POLAR_LOADERS_EXPORT ConstantLoader : public core::PublicEntity {
 public:
   using InternalType = internal::ConstantLoaderInternal;
 
@@ -40,7 +41,7 @@ private:
 } // namespace athena::loaders
 
 namespace athena {
-template <> struct ATH_CORE_EXPORT Wrapper<loaders::ConstantLoader> { using PublicType = loaders::ConstantLoader; };
+template <> struct Wrapper<loaders::ConstantLoader> { using PublicType = loaders::ConstantLoader; };
 
 template <> struct Returner<loaders::ConstantLoader> {
   static typename Wrapper<loaders::ConstantLoader>::PublicType

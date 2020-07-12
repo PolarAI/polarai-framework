@@ -11,7 +11,7 @@
  * the License.
  */
 
-#include <athena/core/core_export.h>
+#include <polar_core_export.h>
 
 #include <string>
 
@@ -19,10 +19,10 @@
 #define ATHENA_LIBINFO_H
 
 extern "C" {
-ATH_CORE_EXPORT const char* getMajorVersion();
-ATH_CORE_EXPORT const char* getMinorVersion();
-ATH_CORE_EXPORT const char* getPatchVersion();
-ATH_CORE_EXPORT const char* getBuildVersion();
+POLAR_CORE_EXPORT const char* getMajorVersion();
+POLAR_CORE_EXPORT const char* getMinorVersion();
+POLAR_CORE_EXPORT const char* getPatchVersion();
+POLAR_CORE_EXPORT const char* getBuildVersion();
 }
 
 #endif // ATHENA_LIBINFO_H

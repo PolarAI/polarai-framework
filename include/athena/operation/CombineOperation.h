@@ -16,10 +16,10 @@
 
 #include <athena/core/operation/Operation.h>
 #include <athena/operation/internal/CombineOperationInternal.h>
-#include <athena/operation/operation_export.h>
+#include <polar_operation_export.h>
 
 namespace athena::operation {
-class ATH_OPERATION_EXPORT CombineOperation : public core::Operation {
+class POLAR_OPERATION_EXPORT CombineOperation : public core::Operation {
 public:
 using InternalType = internal::CombineOperationInternal;
 enum Arguments { ALPHA=14, BETA };

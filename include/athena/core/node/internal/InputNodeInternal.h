@@ -15,16 +15,16 @@
 #define ATHENA_INPUTNODEINTERNAL_H
 
 #include <athena/core/context/Context.h>
-#include <athena/core/core_export.h>
 #include <athena/core/loader/internal/AbstractLoaderInternal.h>
 #include <athena/core/node/internal/AbstractNodeInternal.h>
 #include <athena/core/tensor/DataType.h>
+#include <polar_core_export.h>
 
 namespace athena::core::internal {
 /**
  * Special type of Node that can not have predecessors
  */
-class ATH_CORE_EXPORT InputNodeInternal : public AbstractNodeInternal {
+class POLAR_CORE_EXPORT InputNodeInternal : public AbstractNodeInternal {
 public:
   InputNodeInternal(utils::SharedPtr<ContextInternal> context,
                     utils::Index publicNodeIndex, TensorShape tensorShape,

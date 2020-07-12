@@ -14,17 +14,17 @@
 #ifndef ATHENA_ENTITY_H
 #define ATHENA_ENTITY_H
 
-#include <athena/core/core_export.h>
 #include <athena/utils/Index.h>
 #include <athena/utils/Pointer.h>
 #include <athena/utils/string/String.h>
 #include <athena/utils/string/StringView.h>
+#include <polar_core_export.h>
 
 namespace athena::core {
 namespace internal {
 class ContextInternal;
 }
-class ATH_CORE_EXPORT Entity {
+class POLAR_CORE_EXPORT Entity {
 public:
   Entity(utils::WeakPtr<internal::ContextInternal> context,
          utils::Index publicIndex, utils::String name = "");

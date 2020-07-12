@@ -13,18 +13,18 @@
 #ifndef ATHENA_LOGGER_H
 #define ATHENA_LOGGER_H
 
-#include <athena/core/core_export.h>
 #include <athena/utils/logger/AbstractLogger.h>
+#include <polar_utils_export.h>
 
 #include <ostream>
 
 namespace athena::utils {
 #ifdef DEBUG
 namespace internal {
-ATH_UTILS_EXPORT void debugLoggerFatalError();
+POLAR_UTILS_EXPORT void debugLoggerFatalError();
 }
 #endif
-class ATH_UTILS_EXPORT Logger : public AbstractLogger {
+class Logger : public AbstractLogger {
 public:
   explicit Logger(std::ostream& stream) : mOutStream(&stream){};
   ~Logger() override = default;

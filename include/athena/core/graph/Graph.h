@@ -15,13 +15,13 @@
 #define ATHENA_GRAPH_H
 
 #include <athena/core/context/Context.h>
-#include <athena/core/core_export.h>
 #include <athena/core/graph/internal/GraphInternal.h>
 #include <athena/core/node/AbstractNode.h>
 #include <athena/utils/Index.h>
+#include <polar_core_export.h>
 
 namespace athena::core {
-class ATH_CORE_EXPORT Graph : public PublicEntity {
+class POLAR_CORE_EXPORT Graph : public PublicEntity {
 public:
   using InternalType = internal::GraphInternal;
 
@@ -65,7 +65,7 @@ private:
 } // namespace athena::core
 
 namespace athena {
-template <> struct ATH_CORE_EXPORT Wrapper<core::Graph> { using PublicType = core::Graph; };
+template <> struct Wrapper<core::Graph> { using PublicType = core::Graph; };
 
 template <> struct Returner<core::Graph> {
   static typename Wrapper<core::Graph>::PublicType
@@ -75,6 +75,5 @@ template <> struct Returner<core::Graph> {
   }
 };
 }
-
 
 #endif // ATHENA_GRAPH_H

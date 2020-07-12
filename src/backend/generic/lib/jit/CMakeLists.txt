@@ -1,8 +1,6 @@
-set(AthenaJitTarget "AthenaJIT" CACHE STRING "" FORCE)
+set(AthenaJitTarget "PolarJIT" CACHE STRING "" FORCE)
 
-add_athena_library(${AthenaJitTarget} OBJECT
-        DONT_CATE
-        dontcare.h
+add_polar_library(${AthenaJitTarget} OBJECT
         AthenaJIT.cpp)
 
 message(STATUS ${PROJECT_BINARY_DIR}/utils/dialects/include)
@@ -17,15 +15,15 @@ llvm_map_components_to_libnames(llvm_libs
         orcjit
         AllTargetsCodeGens AllTargetsAsmParsers AllTargetsDescs AllTargetsInfos
         lto)
-target_include_directories(${AthenaJitTarget} PUBLIC 
+target_include_directories(${PolarJitTarget} PUBLIC 
                            ${PROJECT_BINARY_DIR}/utils/dialects/include
                            ${PROJECT_SOURCE_DIR}/utils/dialects/include)
-target_include_directories(${AthenaJitTarget} PUBLIC ${LLVM_INCLUDE_DIRS})
-target_compile_definitions(${AthenaJitTarget} PRIVATE ${LLVM_DEFINITIONS})
+target_include_directories(${PolarJitTarget} PUBLIC ${LLVM_INCLUDE_DIRS})
+target_compile_definitions(${PolarJitTarget} PRIVATE ${LLVM_DEFINITIONS})
 
 get_property(dialect_libs GLOBAL PROPERTY MLIR_DIALECT_LIBS)
 get_property(conversion_libs GLOBAL PROPERTY MLIR_CONVERSION_LIBS)
-target_link_libraries(${AthenaJitTarget} PUBLIC
+target_link_libraries(${PolarJitTarget} PUBLIC
                       ${llvm_libs}
                       MLIRIR
                       MLIRPolarGraph

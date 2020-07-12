@@ -16,12 +16,13 @@
 
 #include <athena/core/node/AbstractNode.h>
 #include <athena/core/node/internal/NodeInternal.h>
+#include <polar_core_export.h>
 
 namespace athena::core {
 /**
  * A Node represents a piece of data loading to graph.
  */
-class ATH_CORE_EXPORT Node {
+class POLAR_CORE_EXPORT Node {
 public:
   using InternalType = internal::NodeInternal;
 };

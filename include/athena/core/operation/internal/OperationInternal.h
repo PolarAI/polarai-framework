@@ -16,15 +16,15 @@
 
 #include <athena/core/Entity.h>
 #include <athena/core/Generator.h>
-#include <athena/core/core_export.h>
 #include <athena/core/graph/Graph.h>
 #include <athena/utils/string/StringView.h>
+#include <polar_core_export.h>
 
 #include <tuple>
 #include <vector>
 
 namespace athena::core::internal {
-class ATH_CORE_EXPORT OperationInternal : public Entity {
+class POLAR_CORE_EXPORT OperationInternal : public Entity {
 public:
   OperationInternal(utils::WeakPtr<ContextInternal> context,
                     utils::Index publicNodeIndex,

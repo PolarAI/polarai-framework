@@ -15,15 +15,15 @@
 #define ATHENA_PUBLICENTITY_H
 
 #include <athena/core/context/Context.h>
-#include <athena/core/core_export.h>
 #include <athena/utils/Index.h>
 #include <athena/utils/Pointer.h>
+#include <polar_core_export.h>
 
 namespace athena::core {
 namespace internal {
 class ContextInternal;
 }
-class ATH_CORE_EXPORT PublicEntity {
+class POLAR_CORE_EXPORT PublicEntity {
 public:
   PublicEntity(utils::SharedPtr<internal::ContextInternal> context,
                utils::Index publicIndex);

@@ -14,7 +14,7 @@
 #ifndef ATHENA_OPERATION_H
 #define ATHENA_OPERATION_H
 
-#include <athena/core/core_export.h>
+#include <polar_core_export.h>
 
 namespace athena::core {
 namespace internal {
@@ -23,7 +23,7 @@ class OperationInternal;
 /**
  * Operation is an abstract computation, like addition or multiplication
  */
-class ATH_CORE_EXPORT Operation {
+class POLAR_CORE_EXPORT Operation {
 public:
   enum Arguments { Unmarked };
   using InternalType = internal::OperationInternal;

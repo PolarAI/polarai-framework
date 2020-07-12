@@ -14,8 +14,6 @@
 #ifndef ATHENA_FORWARDDECLARATIONS_H
 #define ATHENA_FORWARDDECLARATIONS_H
 
-#include <athena/core/core_export.h>
-
 namespace athena::core {
 class AbstractNode;
 class Node;

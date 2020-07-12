@@ -14,7 +14,6 @@
 #ifndef ATHENA_TRAVERSAL_H
 #define ATHENA_TRAVERSAL_H
 
-#include <athena/core/core_export.h>
 #include <athena/utils/internal/TupleContainers.h>
 #include <athena/utils/error/FatalError.h>
 
@@ -22,7 +21,7 @@
 #include <vector>
 
 namespace athena::core {
-struct ATH_CORE_EXPORT Dependency {
+struct Dependency {
   size_t nodeIndex;
   size_t nodeStateIndex;
   size_t clusterIndex;
@@ -31,7 +30,7 @@ struct ATH_CORE_EXPORT Dependency {
       : nodeIndex(nodeIndex), nodeStateIndex{}, clusterIndex{}, mark(mark) {}
 };
 
-struct ATH_CORE_EXPORT NodeState {
+struct NodeState {
   explicit NodeState(bool isWayToFrozen)
       : nodeIndex{}, inputsCount{},
         isWayToFrozen{isWayToFrozen}, input{}, output{} {}
@@ -60,7 +59,7 @@ struct ATH_CORE_EXPORT NodeState {
   std::vector<Dependency> output;
 };
 
-struct ATH_CORE_EXPORT Cluster {
+struct Cluster {
   size_t nodeCount;
   std::vector<NodeState> content;
 };
@@ -70,7 +69,7 @@ using Clusters = std::vector<Cluster>;
 /**
  * Graph traversal
  */
-class ATH_CORE_EXPORT Traversal {
+class Traversal {
 private:
   Clusters mClusters;
   bool mIsValidTraversal;

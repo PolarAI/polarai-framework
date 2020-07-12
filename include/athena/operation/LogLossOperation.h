@@ -16,10 +16,10 @@
 
 #include <athena/core/operation/Operation.h>
 #include <athena/operation/internal/LogLossOperationInternal.h>
-#include <athena/operation/operation_export.h>
+#include <polar_operation_export.h>
 
 namespace athena::operation {
-class ATH_OPERATION_EXPORT LogLossOperation : public core::Operation {
+class POLAR_OPERATION_EXPORT LogLossOperation : public core::Operation {
 public:
 using InternalType = internal::LogLossOperationInternal;
 enum Arguments { GROUND_TRUTH=30, PREDICTED };
