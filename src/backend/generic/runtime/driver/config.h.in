@@ -3,8 +3,8 @@
 #include <vector>
 #include <string>
 
-constexpr static auto HasOpenCL = @ATH_HAS_OPENCL@;
-constexpr static auto HasSYCL = @ATH_HAS_SYCL@;
+constexpr static auto HasOpenCL = @POLAR_HAS_OPENCL@;
+constexpr static auto HasSYCL = @POLAR_HAS_SYCL@;
 constexpr static auto HasCUDA = @POLAR_HAS_CUDA@;
 constexpr static auto HasHIP = @POLAR_HAS_HIP@;
 constexpr static auto HasVulkan = @POLAR_HAS_VULKAN@;

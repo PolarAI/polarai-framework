@@ -1,4 +1,3 @@
-option(ATHENA_ENABLE_EXPERIMENTAL_SYCL "Enable experimental SYCL Runtime" ON)
 set(ATH_BACKEND_LLVM "AthenaBackendLLVM" CACHE STRING "" FORCE)
 
 if(POLICY CMP0068)
@@ -30,71 +29,15 @@ include(AddMLIR)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
-add_subdirectory(runtime/support)
 add_subdirectory(jit)
 
-set(ATH_HAS_OPENCL "false" CACHE STRING "" FORCE)
-
-add_athena_library(${ATH_BACKEND_LLVM} STATIC
+add_athena_library(${ATH_BACKEND_LLVM} SHARED
         ATH_BACKEND_LLVM # export name
         backend/llvm/llvm_export.h
         LLVMExecutor.cpp
         GraphPartitionPlanner.cpp
         allocators/LayerAllocator.cpp
         CodeGen.cpp)
-
-if (ATHENA_ENABLE_EXPERIMENTAL_SYCL)
-  set(ATH_HAS_SYCL "true" CACHE STRING "" FORCE)
-  add_subdirectory(runtime/sycl)
-  add_dependencies(${ATH_BACKEND_LLVM} ${ATH_RT_LLVM_SYCL})
-else()
-  set(ATH_HAS_SYCL "false" CACHE STRING "" FORCE)
-endif()
-
-find_package(CUDAToolkit)
-if (CUDAToolkit_FOUND)
-  add_subdirectory(runtime/cuda)
-  add_dependencies(${ATH_BACKEND_LLVM} ${POLAR_RT_LLVM_CUDA})
-else()
-  set(POLAR_HAS_CUDA "false" CACHE STRING "" FORCE)
-endif()
-
-if (UNIX AND NOT APPLE)
-  if (NOT DEFINED ROCM_PATH)
-    if (NOT DEFINED ENV{ROCM_PATH})
-      set(ROCM_PATH "/opt/rocm" CACHE PATH "Path to which ROCm has been installed")
-    else()
-      set(ROCM_PATH $ENV{ROCM_PATH} CACHE PATH "Path to which ROCm has been installed")
-    endif()
-    set(HIP_PATH "${ROCM_PATH}/hip" CACHE PATH " Path to which HIP has been installed")
-  endif()
-  set(CMAKE_MODULE_PATH "${HIP_PATH}/cmake" ${CMAKE_MODULE_PATH})
-  find_package(HIP)
-  #if (HIP_FOUND)
-  #  add_subdirectory(runtime/hip)
-  #  add_dependencies(${ATH_BACKEND_LLVM} ${POLAR_RT_LLVM_HIP})
-  #else()
-    set(POLAR_HAS_HIP "false" CACHE STRING "" FORCE)
-  #endif()
-endif()
-  set(POLAR_HAS_HIP "false" CACHE STRING "" FORCE)
-
-find_package(Vulkan)
-if (Vulkan_FOUND)
-  add_subdirectory(runtime/vulkan)
-  add_dependencies(${ATH_BACKEND_LLVM} ${POLAR_RT_LLVM_VULKAN})
-else()
-  set(POLAR_HAS_VULKAN "false" CACHE STRING "" FORCE)
-endif()
-
-if (APPLE)
-  add_subdirectory(runtime/metal)
-  add_dependencies(${ATH_BACKEND_LLVM} ${POLAR_RT_LLVM_METAL})
-else()
-  set(POLAR_HAS_METAL "false" CACHE STRING "" FORCE)
-endif()
-
-add_subdirectory(runtime/driver)
 
 target_include_directories(${ATH_BACKEND_LLVM} PRIVATE 
                           ${LLVM_INCLUDE_DIRS}
