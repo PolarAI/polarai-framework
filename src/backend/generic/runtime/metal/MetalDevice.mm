@@ -11,14 +11,14 @@
 //===----------------------------------------------------------------------===//
 
 #include "MetalDevice.hh"
-#include "../utils/utils.hh"
+#include "../utils/utils.hpp"
 #include "MetalAllocator.hh"
 #include "MetalEvent.hh"
 #include "spirv_converter.hpp"
 
 #include <polarai/backend/generic/BackendAllocator.hpp>
 #include <polarai/backend/generic/runtime/Event.hpp>
-#include <polarai/backend/generic/runtime/LaunchCommand.hpp>
+#include <polarai/backend/generic/runtime/LaunchCommand.h>
 
 namespace polarai::backend::generic {
 MetalDevice::MetalDevice(id<MTLDevice> device) : mDevice(device) {
