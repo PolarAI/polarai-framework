@@ -13,7 +13,9 @@
 #pragma once
 
 #include <polar_core_export.h>
+#include <polarai/core/loader/internal/TensorAllocator.hpp>
 #include <polarai/core/node/AbstractNode.hpp>
+#include <polarai/core/node/OutputNodeAccessor.hpp>
 #include <polarai/core/node/internal/OutputNodeInternal.hpp>
 
 namespace polarai::core {
@@ -27,5 +29,13 @@ class OutputNodeInternal;
 class POLAR_CORE_EXPORT OutputNode : public AbstractNode {
 public:
   using InternalType = internal::OutputNodeInternal;
+
+  template <typename T>
+  OutputNodeAccessor<T> getAccess(internal::TensorAllocator& allocator) {
+    auto tensorIdx =
+        mContext->getRef<InternalType>(mPublicIndex).getTensorIndex();
+    auto& tensorRef = mContext->getRef<internal::TensorInternal>(tensorIdx);
+    return OutputNodeAccessor<T>(allocator, tensorRef);
+  }
 };
 } // namespace polarai::core

@@ -32,7 +32,5 @@ public:
   OutputNodeInternal& operator=(OutputNodeInternal&& rhs) = delete;
 
   [[nodiscard]] NodeType getType() const override;
-
-  //  template <typename T> Accessor<T> getAccessor() {}
 };
 } // namespace polarai::core::internal

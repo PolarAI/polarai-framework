@@ -23,8 +23,24 @@ public:
   virtual auto operator()(std::initializer_list<size_t> idx) -> T& = 0;
   virtual auto operator()(size_t idx) -> T& = 0;
 
-  virtual auto getShape() -> std::vector<size_t>& = 0;
+  virtual auto getShape() -> const std::vector<size_t>& = 0;
 
   virtual auto getRawPtr() -> T* = 0;
+
+protected:
+  auto linearIndex(std::initializer_list<size_t> idx,
+                   const std::vector<size_t>& shape) -> size_t {
+    std::vector<size_t> unwrappedIdx{idx};
+
+    size_t index = 0;
+    size_t mul = 1;
+
+    for (size_t i = 0; i != shape.size(); ++i) {
+      index += unwrappedIdx[i] * mul;
+      mul *= shape[i];
+    }
+
+    return index;
+  }
 };
 } // namespace polarai::core
