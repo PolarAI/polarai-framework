@@ -19,9 +19,9 @@
 #include <Compute/ComputeDialect.h>
 #include <PolarGraph/PolarGraphDialect.h>
 #include <PolarRuntime/PolarRuntimeDialect.h>
-#include <polarai/backend/llvm/CodeGen.hpp>
-#include <polarai/backend/llvm/GenericExecutor.hpp>
-#include <polarai/backend/llvm/runtime/GraphHandle.hpp>
+#include <polarai/backend/generic/CodeGen.hpp>
+#include <polarai/backend/generic/GenericExecutor.hpp>
+#include <polarai/backend/generic/runtime/GraphHandle.hpp>
 #include <polarai/core/Generator.hpp>
 #include <polarai/core/graph/internal/GraphCompiler.hpp>
 #include <polarai/utils/error/FatalError.hpp>
@@ -65,7 +65,7 @@ void GenericExecutor::addGraph(Graph& graph) {
 
 void GenericExecutor::evaluate(Graph& graph) {
   auto sym = mJITCompiler->lookupSymbol(graph.getName().getString());
-  utils::athena_assert((bool)sym, "Failed to find graph function. ",
+  utils::polarai_assert((bool)sym, "Failed to find graph function. ",
                        "Did you forget to add Graph?");
 
   GraphHandle handle;
@@ -96,7 +96,7 @@ void GenericExecutor::evaluate(Graph& graph) {
   evaluateFunction(&handle);
 }
 
-GenericExecutor::LLVMExecutor(bool enableDebugOutput, FilterFunctionT filter)
+GenericExecutor::GenericExecutor(bool enableDebugOutput, FilterFunctionT filter)
     : mFilter(std::move(filter)) {
   mlir::registerAllDialects();
   mlir::registerAllPasses();
@@ -111,9 +111,9 @@ GenericExecutor::LLVMExecutor(bool enableDebugOutput, FilterFunctionT filter)
   ::llvm::InitializeAllAsmParsers();
 
 #ifdef DEBUG
-  mJITCompiler = AthenaJIT::createWithDebugging();
+  mJITCompiler = PolarJIT::createWithDebugging();
 #else
-  mJITCompiler = AthenaJIT::create();
+  mJITCompiler = PolarJIT::create();
 #endif
   if (!mJITCompiler) {
     new utils::FatalError(utils::ATH_FATAL_OTHER,
@@ -145,14 +145,14 @@ void GenericExecutor::addModule(std::string_view module) {
 
 void GenericExecutor::execute(std::string_view name, void* userData) {
   auto sym = mJITCompiler->lookupSymbol(name.data());
-  utils::athena_assert((bool)sym, "Failed to find function.");
+  utils::polarai_assert((bool)sym, "Failed to find function.");
 
   auto evaluateFunction = func_cast<void(void*)>(sym);
   evaluateFunction(userData);
 }
 
-llvm::BackendAllocator& GenericExecutor::getAllocator() { return *mAllocator; }
-std::shared_ptr<BackendAllocator> LLVMExecutor::getAllocatorPtr() {
+BackendAllocator& GenericExecutor::getAllocator() { return *mAllocator; }
+std::shared_ptr<BackendAllocator> GenericExecutor::getAllocatorPtr() {
   return mAllocator;
 }
 

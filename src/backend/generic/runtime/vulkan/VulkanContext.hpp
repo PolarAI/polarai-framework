@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <polarai/backend/llvm/runtime/Context.hpp>
+#include <polarai/backend/generic/runtime/Context.hpp>
 
 #include <vulkan/vulkan.h>
 

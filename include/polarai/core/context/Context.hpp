@@ -51,5 +51,3 @@ typename Wrapper<Type>::PublicType Context::create(Args&&... args) {
   return Returner<Type>::returner(mInternal, index);
 }
 } // namespace polarai::core
-
-#endif // ATHENA_CONTEXT_H

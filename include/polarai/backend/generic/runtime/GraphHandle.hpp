@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <polarai/backend/llvm/runtime/Device.hpp>
+#include <polarai/backend/generic/runtime/Device.hpp>
 
 #include <memory>
 #include <set>

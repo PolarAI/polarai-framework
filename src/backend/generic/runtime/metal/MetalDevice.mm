@@ -16,9 +16,9 @@
 #include "MetalEvent.hh"
 #include "spirv_converter.hpp"
 
-#include <polarai/backend/llvm/BackendAllocator.hpp>
-#include <polarai/backend/llvm/runtime/Event.hpp>
-#include <polarai/backend/llvm/runtime/LaunchCommand.hpp>
+#include <polarai/backend/generic/BackendAllocator.hpp>
+#include <polarai/backend/generic/runtime/Event.hpp>
+#include <polarai/backend/generic/runtime/LaunchCommand.hpp>
 
 namespace polarai::backend::generic {
 MetalDevice::MetalDevice(id<MTLDevice> device) : mDevice(device) {

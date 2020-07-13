@@ -13,7 +13,7 @@
 #pragma once
 
 #include "VulkanDevice.hpp"
-#include <polarai/backend/llvm/runtime/Event.hpp>
+#include <polarai/backend/generic/runtime/Event.hpp>
 
 #include <vulkan/vulkan.h>
 

@@ -12,14 +12,14 @@
 
 #pragma once
 
-#include <polarai/backend/llvm/AllocatorLayerBase.hpp>
-#include <polarai/backend/llvm/MemoryRecord.hpp>
+#include <polarai/backend/generic/AllocatorLayerBase.hpp>
+#include <polarai/backend/generic/MemoryRecord.hpp>
 #include <polarai/utils/error/FatalError.hpp>
 
 #include <unordered_map>
 #include <unordered_set>
 
-namespace polarai::backend::llvm {
+namespace polarai::backend::generic {
 class TrivialAllocator : public AllocatorLayerBase {
 private:
   MemoryOffloadCallbackT mOffloadCallback;
@@ -92,5 +92,3 @@ public:
   void setTag(MemoryRecord record, size_t tag) override { mTags[record] = tag; }
 };
 } // namespace polarai::backend::llvm
-
-#endif // ATHENA_TRIVIALALLOCATOR_H

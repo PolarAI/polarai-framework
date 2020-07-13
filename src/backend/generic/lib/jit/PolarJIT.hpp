@@ -22,8 +22,8 @@ class PolarJIT {
 public:
   PolarJIT(std::unique_ptr<::llvm::orc::LLJIT> jit);
 
-  static auto create() -> std::shared_ptr<AthenaJIT>;
-  static auto createWithDebugging() -> std::shared_ptr<AthenaJIT>;
+  static auto create() -> std::shared_ptr<PolarJIT>;
+  static auto createWithDebugging() -> std::shared_ptr<PolarJIT>;
 
   void addModule(const mlir::OwningModuleRef& ref);
   auto lookupSymbol(::llvm::StringRef symbolName) -> ::llvm::JITTargetAddress;

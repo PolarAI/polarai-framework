@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <polarai/backend/llvm/runtime/Context.hpp>
+#include <polarai/backend/generic/runtime/Context.hpp>
 
 namespace polarai::backend::generic {
 class MetalContext : public Context {

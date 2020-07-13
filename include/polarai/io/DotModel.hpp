@@ -12,12 +12,12 @@
 
 #pragma once
 
-#include <polarai/core/graph/Graph.h>
+#include <polarai/core/graph/Graph.hpp>
 #include <polar_io_export.h>
 
 #include <ostream>
 
-namespace polarai::model {
+namespace polarai::io {
 /**
  * Print graph to DOT format for debug purposes
  */

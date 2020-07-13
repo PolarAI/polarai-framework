@@ -1,5 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <polarai/core/tensor/Accessor.h>
+#include <polarai/core/tensor/Accessor.hpp>
 
 #include <cstddef>
 #include <cstdint>

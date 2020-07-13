@@ -10,15 +10,15 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "../utils/utils.h"
+#include "../utils/utils.hpp"
 
-#include <polarai/backend/llvm/BackendAllocator.hpp>
-#include <polarai/backend/llvm/runtime/BackendAccessor.hpp>
-#include <polarai/backend/llvm/runtime/Device.hpp>
-#include <polarai/backend/llvm/runtime/Event.hpp>
-#include <polarai/backend/llvm/runtime/GraphHandle.hpp>
-#include <polarai/backend/llvm/runtime/LaunchCommand.hpp>
-#include <polarai/backend/llvm/runtime/TensorInfo.hpp>
+#include <polarai/backend/generic/BackendAllocator.hpp>
+#include <polarai/backend/generic/runtime/BackendAccessor.hpp>
+#include <polarai/backend/generic/runtime/Device.hpp>
+#include <polarai/backend/generic/runtime/Event.hpp>
+#include <polarai/backend/generic/runtime/GraphHandle.hpp>
+#include <polarai/backend/generic/runtime/LaunchCommand.h>
+#include <polarai/backend/generic/runtime/TensorInfo.h>
 #include <polarai/core/loader/internal/AbstractLoaderInternal.hpp>
 #include <polarai/utils/error/FatalError.hpp>
 #include <polar_rt_support_export.h>

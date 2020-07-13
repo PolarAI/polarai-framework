@@ -13,7 +13,7 @@
 #pragma once
 
 #include "MetalAllocator.hh"
-#include <polarai/backend/llvm/runtime/Device.hpp>
+#include <polarai/backend/generic/runtime/Device.hpp>
 
 #import <Metal/Metal.h>
 

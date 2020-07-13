@@ -12,7 +12,7 @@
 
 #include "VulkanContext.hpp"
 
-#include <polarai/backend/llvm/runtime/api.hpp>
+#include <polarai/backend/generic/runtime/api.h>
 #include <polar_rt_vulkan_export.h>
 
 #include <vulkan/vulkan.h>

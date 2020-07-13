@@ -17,7 +17,7 @@
 
 using namespace polarai::utils;
 
-namespace polarai::backend::llvm {
+namespace polarai::backend::generic {
 void LayerAllocator::allocate(const core::internal::TensorInternal& tensor,
                               Device& device) {
   MemoryRecord record{tensor.getVirtualAddress(),

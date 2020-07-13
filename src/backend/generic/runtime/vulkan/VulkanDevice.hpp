@@ -14,8 +14,8 @@
 
 #include "VulkanAllocator.hpp"
 
-#include <polarai/backend/llvm/runtime/Device.hpp>
-#include <polarai/backend/llvm/runtime/Event.hpp>
+#include <polarai/backend/generic/runtime/Device.hpp>
+#include <polarai/backend/generic/runtime/Event.hpp>
 
 #include <string>
 #include <vulkan/vulkan.h>

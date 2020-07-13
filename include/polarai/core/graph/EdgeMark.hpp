@@ -14,6 +14,6 @@
 
 #include <cstddef>
 
-namespace athena::core {
+namespace polarai::core {
 using EdgeMark = size_t;
 }

@@ -11,7 +11,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "PolarJIT.hpp"
-#include <polarai/backend/llvm/runtime/Device.hpp>
+#include <polarai/backend/generic/runtime/Device.hpp>
 
 #include "Compute/ComputeOps.h"
 #include "Conversion/GraphToRuntimePass.h"
@@ -54,7 +54,7 @@ static mlir::OwnedBlob processPtx(const std::string& data, mlir::Location,
 }
 
 namespace polarai::backend::generic {
-PolarJIT::AthenaJIT(std::unique_ptr<::llvm::orc::LLJIT> jit)
+PolarJIT::PolarJIT(std::unique_ptr<::llvm::orc::LLJIT> jit)
     : mJITInstance(std::move(jit)), mMlirPassManager(&mContext) {
 #ifdef DEBUG
   auto ec = ::llvm::sys::fs::getPotentiallyUniqueTempFileName("graph", "mlir",
@@ -98,7 +98,7 @@ auto PolarJIT::createWithDebugging() -> std::shared_ptr<PolarJIT> {
       ::llvm::orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(
           JIT->getDataLayout().getGlobalPrefix())));
 
-  return std::make_shared<AthenaJIT>(std::move(JIT));
+  return std::make_shared<PolarJIT>(std::move(JIT));
 }
 
 void PolarJIT::addModule(const mlir::OwningModuleRef& ref) {
@@ -128,7 +128,7 @@ void PolarJIT::addModule(const mlir::OwningModuleRef& ref) {
     }
   }
 }
-auto AthenaJIT::lookupSymbol(::llvm::StringRef symbolName)
+auto PolarJIT::lookupSymbol(::llvm::StringRef symbolName)
     -> ::llvm::JITTargetAddress {
   if (mInternalModule) {
     compileModule();
@@ -137,7 +137,7 @@ auto AthenaJIT::lookupSymbol(::llvm::StringRef symbolName)
 
   return ExitOnErr(mJITInstance->lookup(symbolName)).getAddress();
 }
-void AthenaJIT::setupMlirPassManager() {
+void PolarJIT::setupMlirPassManager() {
   auto saveKernelCallback = [&](ProgramDesc prog) {
     mCompiledPrograms.push_back(std::make_shared<ProgramDesc>(prog));
   };

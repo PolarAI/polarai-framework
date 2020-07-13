@@ -12,12 +12,12 @@
 
 #pragma once
 
-#include <athena/core/context/internal/ContextInternal.hpp>
-#include <athena/core/operation/internal/OperationInternal.hpp>
-#include <athena/utils/allocator/Allocator.hpp>
+#include <polarai/core/context/internal/ContextInternal.hpp>
+#include <polarai/core/operation/internal/OperationInternal.hpp>
+#include <polarai/utils/allocator/Allocator.hpp>
 #include <polar_operation_export.h>
 
-namespace athena::operation::internal {
+namespace polarai::operation::internal {
 class POLAR_OPERATION_EXPORT DivideOperationInternal
     : public core::internal::OperationInternal {
 public:
@@ -52,4 +52,4 @@ public:
 
   [[nodiscard]] size_t getOperandsCount() const override;
 };
-} // namespace athena::operation::internal
+} // namespace polarai::operation::internal

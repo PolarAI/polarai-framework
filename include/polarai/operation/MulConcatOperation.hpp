@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include <polarai/core/operation/Operation.h>
-#include <polarai/operation/internal/MulConcatOperationInternal.h>
+#include <polarai/core/operation/Operation.hpp>
+#include <polarai/operation/internal/MulConcatOperationInternal.hpp>
 #include <polar_operation_export.h>
 
 namespace polarai::operation {

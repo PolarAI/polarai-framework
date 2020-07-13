@@ -12,7 +12,7 @@
 
 #include "MetalContext.hh"
 
-#include <polarai/backend/llvm/runtime/api.hpp>
+#include <polarai/backend/generic/runtime/api.hpp>
 #include <polar_rt_metal_export.h>
 
 using namespace polarai::backend::generic;

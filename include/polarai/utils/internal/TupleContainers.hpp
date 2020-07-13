@@ -12,11 +12,11 @@
 
 #pragma once
 
-#include <athena/utils/Index.hpp>
+#include <polarai/utils/Index.hpp>
 
 #include <tuple>
 
-namespace athena::utils::internal {
+namespace polarai::utils::internal {
 template <template <typename, typename...> typename Map,
           template <typename> typename Value, typename... Args>
 struct TupleMaps {
@@ -27,4 +27,4 @@ template <template <typename, typename...> typename Container, typename... Args>
 struct TupleContainers {
   using Holder = std::tuple<Container<Args>...>;
 };
-} // namespace athena::utils::internal
+} // namespace polarai::utils::internal

@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,11 +10,11 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "RuntimeDriver.h"
+#include "RuntimeDriver.hpp"
 
 #include <iostream>
 
-using namespace athena::backend::llvm;
+using namespace polarai::backend::generic;
 
 static std::string providerToString(DeviceProvider provider) {
   switch (provider) {
@@ -54,7 +53,7 @@ static std::string kindToString(DeviceKind kind) {
 }
 
 int main() {
-  athena::backend::llvm::RuntimeDriver driver(/*debugOutput*/ true);
+  RuntimeDriver driver(/*debugOutput*/ true);
   auto devices = driver.getDeviceList();
 
   std::cout << "Total device count: " << devices.size() << "\n\n";

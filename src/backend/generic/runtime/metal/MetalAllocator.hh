@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include <polarai/backend/llvm/AllocatorLayerBase.hpp>
-#include <polarai/backend/llvm/MemoryRecord.hpp>
+#include <polarai/backend/generic/AllocatorLayerBase.hpp>
+#include <polarai/backend/generic/MemoryRecord.hpp>
 #include <polarai/utils/error/FatalError.hpp>
 
 #include <unordered_map>

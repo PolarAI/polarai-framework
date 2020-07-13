@@ -13,7 +13,7 @@
 #include <polarai/core/node/internal/AbstractNodeInternal.hpp>
 #include <polarai/core/node/internal/NodeInternal.hpp>
 #include <polarai/core/tensor/internal/TensorInternal.hpp>
-#include <polarai/io/DotModel.h>
+#include <polarai/io/DotModel.hpp>
 
 using namespace polarai::core;
 

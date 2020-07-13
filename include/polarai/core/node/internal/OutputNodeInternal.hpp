@@ -13,9 +13,9 @@
 #pragma once
 
 #include <polar_core_export.h>
-#include <polarai/core/ForwardDeclarations.h>
-#include <polarai/core/node/internal/AbstractNodeInternal.h>
-#include <polarai/utils/Pointer.h>
+#include <polarai/core/ForwardDeclarations.hpp>
+#include <polarai/core/node/internal/AbstractNodeInternal.hpp>
+#include <polarai/utils/Pointer.hpp>
 
 namespace polarai::core::internal {
 class POLAR_CORE_EXPORT OutputNodeInternal : public AbstractNodeInternal {

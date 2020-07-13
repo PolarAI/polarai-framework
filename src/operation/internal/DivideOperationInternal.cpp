@@ -10,15 +10,15 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include <athena/core/node/internal/AbstractNodeInternal.hpp>
-#include <athena/core/node/internal/NodeInternal.hpp>
-#include <athena/loaders/DummyLoader.hpp>
-#include <athena/operation/DivideOperation.hpp>
-#include <athena/operation/internal/DivideOperationInternal.hpp>
+#include <polarai/core/node/internal/AbstractNodeInternal.hpp>
+#include <polarai/core/node/internal/NodeInternal.hpp>
+#include <polarai/loaders/DummyLoader.hpp>
+#include <polarai/operation/DivideOperation.hpp>
+#include <polarai/operation/internal/DivideOperationInternal.hpp>
 
-using namespace athena::core::internal;
+using namespace polarai::core::internal;
 
-namespace athena::operation::internal {
+namespace polarai::operation::internal {
 DivideOperationInternal::DivideOperationInternal(
     utils::WeakPtr<core::internal::ContextInternal> context,
     utils::Index publicNodeIndex, utils::String name)
@@ -79,4 +79,4 @@ DivideOperationInternal::genDerivative(
 }
 
 size_t DivideOperationInternal::getOperandsCount() const { return 2; }
-} // namespace athena::operation::internal
+} // namespace polarai::operation::internal

@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -17,7 +16,7 @@
 #include <functional>
 #include <memory>
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 struct ProgramDesc;
 }
 namespace mlir {
@@ -29,7 +28,7 @@ class GPUModuleOp;
 }
 
 using SaveKernelCallback =
-    std::function<void(athena::backend::llvm::ProgramDesc)>;
+    std::function<void(polarai::backend::generic::ProgramDesc)>;
 
 std::unique_ptr<OperationPass<ModuleOp>> createDeployDefaultFunctionsPass();
 std::unique_ptr<OperationPass<ModuleOp>> createGraphRelationDestructorPass();

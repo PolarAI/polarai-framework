@@ -16,8 +16,8 @@
 #include "VulkanEvent.hpp"
 #include "utils.hpp"
 
-#include <polarai/backend/llvm/runtime/Event.hpp>
-#include <polarai/backend/llvm/runtime/LaunchCommand.h>
+#include <polarai/backend/generic/runtime/Event.hpp>
+#include <polarai/backend/generic/runtime/LaunchCommand.h>
 
 #include <vulkan/vulkan.h>
 

@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <polarai/backend/llvm/runtime/Device.hpp>
+#include <polarai/backend/generic/runtime/Device.hpp>
 
 namespace polarai::backend::generic {
 class HostDevice : public Device {
@@ -52,5 +52,3 @@ public:
   selectBinary(std::vector<std::shared_ptr<ProgramDesc>>& programs) override{};
 };
 } // namespace polarai::backend::llvm
-
-#endif // ATHENA_HOSTDEVICE_H

@@ -12,17 +12,17 @@
 
 #pragma once
 
-#include <polarai/backend/llvm/BackendAllocator.hpp>
-#include <polarai/backend/llvm/runtime/Device.hpp>
+#include <polarai/backend/generic/BackendAllocator.hpp>
+#include <polarai/backend/generic/runtime/Device.hpp>
 #include <polarai/core/graph/Traversal.hpp>
 #include <polarai/core/internal/Executor.hpp>
 #include <polarai/core/loader/internal/TensorAllocator.hpp>
 #include <polar_backend_generic_export.h>
 
-namespace polarai::backend::llvm {
+namespace polarai::backend::generic {
 
 // Forward declarations
-class AthenaJIT;
+class PolarJIT;
 class RuntimeDriver;
 
 /// Default device filter. Selects all devices.
@@ -66,7 +66,7 @@ private:
   std::shared_ptr<RuntimeDriver> mRuntimeDriver;
   std::vector<std::shared_ptr<Device>> mDevices;
 
-  std::shared_ptr<AthenaJIT> mJITCompiler{nullptr};
+  std::shared_ptr<PolarJIT> mJITCompiler{nullptr};
   std::shared_ptr<BackendAllocator> mAllocator;
 };
 } // namespace polarai::backend::llvm

@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Polar. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -14,7 +13,7 @@
 #include "Passes/Passes.h"
 #include "PolarRuntime/PolarRuntimeDialect.h"
 #include "PolarRuntime/PolarRuntimeOps.h"
-#include <athena/backend/llvm/runtime/ProgramDesc.h>
+#include <polarai/backend/generic/runtime/ProgramDesc.hpp>
 
 #include "mlir/Conversion/AffineToStandard/AffineToStandard.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
@@ -45,8 +44,8 @@ protected:
   void runOnOperation() override {
     auto module = getOperation();
 
-    auto fillKernels = [](auto func, athena::backend::llvm::ProgramDesc& desc) {
-      athena::backend::llvm::KernelDesc kernel;
+    auto fillKernels = [](auto func, polarai::backend::generic::ProgramDesc& desc) {
+      polarai::backend::generic::KernelDesc kernel;
       // todo use constant
       auto gs = func.template getAttrOfType<ArrayAttr>("global_size");
       auto gsArr = gs.getValue();
@@ -66,8 +65,8 @@ protected:
     module.walk([this, fillKernels](gpu::GPUModuleOp module) {
       auto ptx = module.getAttrOfType<StringAttr>("nvvm.ptx");
 
-      athena::backend::llvm::ProgramDesc desc;
-      desc.type = athena::backend::llvm::ProgramDesc::Type::PTX;
+      polarai::backend::generic::ProgramDesc desc;
+      desc.type = polarai::backend::generic::ProgramDesc::Type::PTX;
       desc.data = std::vector(ptx.getValue().begin(), ptx.getValue().end());
 
       module.walk([&](gpu::GPUFuncOp func) { fillKernels(func, desc); });
@@ -82,8 +81,8 @@ protected:
       auto begin = reinterpret_cast<char*>(binary.data());
       std::vector<char> data(begin, begin + binary.size() * sizeof(uint32_t));
 
-      athena::backend::llvm::ProgramDesc desc;
-      desc.type = athena::backend::llvm::ProgramDesc::Type::SPIRV_SHADER;
+      polarai::backend::generic::ProgramDesc desc;
+      desc.type = polarai::backend::generic::ProgramDesc::Type::SPIRV_SHADER;
       desc.data = std::move(data);
 
       module.walk([&](spirv::FuncOp func) {

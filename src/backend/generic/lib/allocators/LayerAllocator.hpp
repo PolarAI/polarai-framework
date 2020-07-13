@@ -14,10 +14,10 @@
 
 #include "TrivialAllocator.hpp"
 
-#include <polarai/backend/llvm/AllocatorLayerBase.hpp>
-#include <polarai/backend/llvm/BackendAllocator.hpp>
-#include <polarai/backend/llvm/MemoryRecord.hpp>
-#include <polarai/backend/llvm/runtime/Device.hpp>
+#include <polarai/backend/generic/AllocatorLayerBase.hpp>
+#include <polarai/backend/generic/BackendAllocator.hpp>
+#include <polarai/backend/generic/MemoryRecord.hpp>
+#include <polarai/backend/generic/runtime/Device.hpp>
 
 #include <list>
 #include <map>
@@ -25,7 +25,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace polarai::backend::llvm {
+namespace polarai::backend::generic {
 
 enum class MemoryDomain { Swap, RAM, Device };
 

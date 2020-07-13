@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include <polarai/backend/llvm/runtime/Device.hpp>
-#include <polarai/core/graph/Graph.h>
+#include <polarai/backend/generic/runtime/Device.hpp>
+#include <polarai/core/graph/Graph.hpp>
 
 namespace polarai::backend::generic {
 class GraphPartitionPlanner {
@@ -28,5 +28,3 @@ public:
   std::unordered_map<std::string_view, Device*> getGraphPartitioning();
 };
 } // namespace polarai::backend::llvm
-
-#endif // ATHENA_GRAPHPARTITIONPLANNER_H

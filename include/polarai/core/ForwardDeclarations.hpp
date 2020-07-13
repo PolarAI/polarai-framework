@@ -11,7 +11,7 @@
 //===----------------------------------------------------------------------===//
 
 #pragma once
-namespace athena::core {
+namespace polarai::core {
 class AbstractNode;
 class Node;
 class InputNode;
@@ -34,4 +34,4 @@ class NodeInternal;
 class InputNodeInternal;
 class OutputNodeInternal;
 } // namespace internal
-} // namespace athena::core
+} // namespace polarai::core
