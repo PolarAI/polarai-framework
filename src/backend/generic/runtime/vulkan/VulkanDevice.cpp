@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,14 +10,14 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "VulkanDevice.h"
-#include "../utils/utils.h"
-#include "VulkanAllocator.h"
-#include "VulkanEvent.h"
+#include "VulkanDevice.hpp"
+#include "../utils/utils.hpp"
+#include "VulkanAllocator.hpp"
+#include "VulkanEvent.hpp"
 #include "utils.hpp"
 
-#include <athena/backend/llvm/runtime/Event.h>
-#include <athena/backend/llvm/runtime/LaunchCommand.h>
+#include <polarai/backend/llvm/runtime/Event.hpp>
+#include <polarai/backend/llvm/runtime/LaunchCommand.h>
 
 #include <vulkan/vulkan.h>
 
@@ -48,7 +47,7 @@ static uint32_t getComputeQueueFamilyIndex(VkPhysicalDevice physicalDevice) {
   return i;
 }
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 VulkanDevice::VulkanDevice(VkPhysicalDevice device) : mPhysicalDevice(device) {
   VkDeviceQueueCreateInfo queueCreateInfo = {};
   queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -294,4 +293,4 @@ Event* VulkanDevice::launch(BackendAllocator& allocator, LaunchCommand& cmd,
   // check(vkWaitForFences(mDevice, 1, &fence, VK_TRUE, 10000000000000));
   return new VulkanEvent(this, fence);
 }
-} // namespace athena::backend::llvm
+} // namespace polarai::backend::llvm

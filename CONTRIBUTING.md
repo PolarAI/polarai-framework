@@ -1,6 +1,7 @@
 # How to contribute
 
-Everyone is welcome to contribute to Athena project. There are several ways to get involved.
+Everyone is welcome to contribute to PolarAI project. There are several ways to 
+get involved.
 
 ## Community Guidelines
 
@@ -11,13 +12,24 @@ to foster an open and welcoming environment.
 
 To report a bug, please use [Github Issues](https://github.com/PolarAI/polarai-framework/issues).
 
-If you want to contribute to the project, start looking for issues with `good first issue`
-label. If you decide to start working on issue, leave a comment, so that other
-community members are aware of work in progress.
+If you want to contribute to the project, start looking for issues with 
+`good first issue` label. If you decide to start working on issue, leave a 
+comment, so that other community members are aware of work in progress.
 
 ## Contributing code
 
 ### Code style
+
+PolarAI is written in multiple programming languages. Below is a brief overview
+of what they are:
+
+| Language      | Source extension | Header extension | Code style                 |
+|---------------|------------------|------------------|----------------------------|
+| ANSI C        | `.c`             | `.h`             | [LLVM] with exceptions (1) |
+| C++ 17        | `.cpp`           | `.hpp`           | [LLVM] with exceptions (1) |
+| Objective-C++ | `.mm`            | `.hh`            | [LLVM] with exceptions (1) |
+
+#### (1) Exceptions to the LLVM Code style
 
 PolarAI mostly follows the [LLVM style](https://llvm.org/docs/CodingStandards.html) 
 guide with a few exceptions:
@@ -109,7 +121,7 @@ reference GitHub issues that this commit **Closes**.
 
 ## Examples of source headers
 
-### C++
+### C/C++/Objective-C++
 ```
 //===----------------------------------------------------------------------===//
 // Copyright (c) 2020 PolarAI. All rights reserved.
@@ -123,3 +135,5 @@ reference GitHub issues that this commit **Closes**.
 // the License.
 //===----------------------------------------------------------------------===//
 ```
+
+[LLVM]: https://llvm.org/docs/CodingStandards.html

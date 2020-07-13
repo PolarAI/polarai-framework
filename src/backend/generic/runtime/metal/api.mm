@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,15 +10,14 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "MetalContext.h"
+#include "MetalContext.hh"
 
-#include <athena/backend/llvm/runtime/api.h>
+#include <polarai/backend/llvm/runtime/api.hpp>
 #include <polar_rt_metal_export.h>
 
-using namespace athena::backend::llvm;
+using namespace polarai::backend::generic;
 
 extern "C" {
-
 POLAR_RT_METAL_EXPORT Context *initContext() { return new MetalContext(); }
 
 POLAR_RT_METAL_EXPORT void closeContext(Context *ctx) { delete ctx; }

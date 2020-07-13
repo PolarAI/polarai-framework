@@ -1,29 +1,28 @@
-/*
- * Copyright (c) 2018 Athena. All rights reserved.
- * https://getathena.ml
- *
- * Licensed under MIT license.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2020 PolarAI. All rights reserved.
+//
+// Licensed under MIT license.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+//===----------------------------------------------------------------------===//
 
-#include <athena/core/node/internal/AbstractNodeInternal.h>
-#include <athena/core/node/internal/NodeInternal.h>
-#include <athena/operation/MatMulOperation.h>
-#include <athena/operation/MulOperation.h>
-#include <athena/operation/MulConcatOperation.h>
-#include <athena/operation/internal/MulOperationInternal.h>
-#include <athena/core/tensor/internal/TensorInternal.h>
-#include <athena/loaders/internal/ConstantLoaderInternal.h>
-#include <athena/loaders/internal/DummyLoaderInternal.h>
+#include <polarai/core/node/internal/AbstractNodeInternal.hpp>
+#include <polarai/core/node/internal/NodeInternal.hpp>
+#include <polarai/operation/MatMulOperation.hpp>
+#include <polarai/operation/MulOperation.hpp>
+#include <polarai/operation/MulConcatOperation.hpp>
+#include <polarai/operation/internal/MulOperationInternal.hpp>
+#include <polarai/core/tensor/internal/TensorInternal.hpp>
+#include <polarai/loaders/internal/ConstantLoaderInternal.hpp>
+#include <polarai/loaders/internal/DummyLoaderInternal.hpp>
 
-using namespace athena::core::internal;
+using namespace polarai::core::internal;
 
-namespace athena::operation::internal {
+namespace polarai::operation::internal {
 MatMulOperationInternal::MatMulOperationInternal(
     utils::WeakPtr<core::internal::ContextInternal> context,
     utils::Index publicNodeIndex, bool isLeftTranspose, bool isRightTranspose, utils::String name)
@@ -177,4 +176,4 @@ MatMulOperationInternal::genDerivative(
 }
 
 size_t MatMulOperationInternal::getOperandsCount() const { return 2; }
-} // namespace athena::operation::internal
+} // namespace polarai::operation::internal

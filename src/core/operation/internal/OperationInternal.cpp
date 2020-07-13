@@ -1,19 +1,18 @@
-/*
- * Copyright (c) 2018 Athena. All rights reserved.
- * https://getathena.ml
- *
- * Licensed under MIT license.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2020 PolarAI. All rights reserved.
+//
+// Licensed under MIT license.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+//===----------------------------------------------------------------------===//
 
-#include <athena/core/operation/internal/OperationInternal.h>
+#include <polarai/core/operation/internal/OperationInternal.hpp>
 
-namespace athena::core::internal {
+namespace polarai::core::internal {
 OperationInternal::OperationInternal(utils::WeakPtr<ContextInternal> context,
                                      utils::Index publicNodeIndex,
                                      utils::String name)
@@ -38,4 +37,4 @@ void OperationInternal::releaseTensors(core::internal::Generator& generator, std
     generator.callBuiltin<builtin::Release>(genValue);
   }
 }
-} // namespace athena::core::internal
+} // namespace polarai::core::internal

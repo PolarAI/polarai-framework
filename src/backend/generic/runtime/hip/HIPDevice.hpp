@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,48 +10,49 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_HOSTDEVICE_H
-#define ATHENA_HOSTDEVICE_H
+#include <polarai/backend/llvm/runtime/Device.hpp>
 
-#include <athena/backend/llvm/runtime/Device.h>
+#include <hip/hip_runtime.h>
+#include <string>
 
-namespace athena::backend::llvm {
-class HostDevice : public Device {
+namespace polarai::backend::generic {
+class HIPDevice : public Device {
 public:
-  HostDevice() = default;
-  ///@{ \name Device information
+  HIPDevice(hipDevice_t device);
   auto getProvider() const -> DeviceProvider override {
-    return DeviceProvider::HOST;
+    return DeviceProvider::HIP;
   }
-  auto getKind() const -> DeviceKind override { return DeviceKind::HOST; }
-  std::string getDeviceName() const override { return "host"; }
+  auto getKind() const -> DeviceKind override { return DeviceKind::GPU; }
+  std::string getDeviceName() const override;
   bool isPartitionSupported(PartitionDomain domain) override { return false; }
   bool hasAllocator() override { return false; }
-  ///@}
+
   std::vector<std::shared_ptr<Device>>
   partition(PartitionDomain domain) override {
     return std::vector<std::shared_ptr<Device>>{};
-  }
+  };
   std::shared_ptr<AllocatorLayerBase> getAllocator() override {
     return nullptr;
-  }
+  };
 
   bool operator==(const Device& device) const override {
-    return device.getDeviceName() == getDeviceName();
-  }
+    return mDeviceName == device.getDeviceName();
+  };
 
-  void copyToHost(MemoryRecord record, void* dest) const override {}
-  void copyToDevice(MemoryRecord record, void* src) const override {}
+  void copyToHost(MemoryRecord record, void* dest) const override{};
+  void copyToDevice(MemoryRecord record, void* src) const override{};
 
   Event* launch(BackendAllocator&, LaunchCommand&, Event*) override {
     return nullptr;
-  }
+  };
 
-  void consumeEvent(Event*) override {}
+  void consumeEvent(Event*) override{};
 
   void
-  selectBinary(std::vector<std::shared_ptr<ProgramDesc>>& programs) override{};
-};
-} // namespace athena::backend::llvm
+  selectBinary(std::vector<std::shared_ptr<ProgramDesc>>& programs) override {};
 
-#endif // ATHENA_HOSTDEVICE_H
+private:
+  hipDevice_t mDevice;
+  std::string mDeviceName;
+};
+} // namespace polarai::backend::llvm

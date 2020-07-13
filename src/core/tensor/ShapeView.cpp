@@ -1,20 +1,19 @@
-/*
- * Copyright (c) 2018 Athena. All rights reserved.
- * https://getathena.ml
- *
- * Licensed under MIT license.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2020 PolarAI. All rights reserved.
+//
+// Licensed under MIT license.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+//===----------------------------------------------------------------------===//
 
-#include <athena/core/tensor/ShapeView.h>
-#include <athena/core/tensor/TensorShape.h>
+#include <polarai/core/tensor/ShapeView.hpp>
+#include <polarai/core/tensor/TensorShape.hpp>
 
-namespace athena::core {
+namespace polarai::core {
 ShapeView::ShapeView(Iterator begin, Iterator end) : mBegin(begin), mEnd(end) {}
 ShapeView::ShapeView(const TensorShape& shape)
     : mBegin(shape.begin()), mEnd(shape.end()) {}
@@ -56,4 +55,4 @@ size_t ShapeView::getTotalSize() const {
 ShapeView ShapeView::getSubShapeView(size_t offset) const {
   return ShapeView(mBegin + offset, mEnd);
 }
-} // namespace athena::core
+} // namespace polarai::core

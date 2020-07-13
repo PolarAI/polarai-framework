@@ -1,19 +1,31 @@
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2020 PolarAI. All rights reserved.
+//
+// Licensed under MIT license.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+//===----------------------------------------------------------------------===//
+
 #include "../utils/utils.h"
 
-#include <athena/backend/llvm/BackendAllocator.h>
-#include <athena/backend/llvm/runtime/BackendAccessor.h>
-#include <athena/backend/llvm/runtime/Device.h>
-#include <athena/backend/llvm/runtime/Event.h>
-#include <athena/backend/llvm/runtime/GraphHandle.h>
-#include <athena/backend/llvm/runtime/LaunchCommand.h>
-#include <athena/backend/llvm/runtime/TensorInfo.h>
-#include <athena/core/loader/internal/AbstractLoaderInternal.h>
-#include <athena/utils/error/FatalError.h>
+#include <polarai/backend/llvm/BackendAllocator.hpp>
+#include <polarai/backend/llvm/runtime/BackendAccessor.hpp>
+#include <polarai/backend/llvm/runtime/Device.hpp>
+#include <polarai/backend/llvm/runtime/Event.hpp>
+#include <polarai/backend/llvm/runtime/GraphHandle.hpp>
+#include <polarai/backend/llvm/runtime/LaunchCommand.hpp>
+#include <polarai/backend/llvm/runtime/TensorInfo.hpp>
+#include <polarai/core/loader/internal/AbstractLoaderInternal.hpp>
+#include <polarai/utils/error/FatalError.hpp>
 #include <polar_rt_support_export.h>
 
 #include <iostream>
 
-using namespace athena::backend::llvm;
+using namespace polarai::backend::generic;
 
 extern "C" {
 
@@ -44,7 +56,7 @@ POLAR_RT_SUPPORT_EXPORT void ath_release(GraphHandle* handle, Device& device,
 
 POLAR_RT_SUPPORT_EXPORT void ath_lock(GraphHandle* handle, Device& device,
                                       TensorInfo* tensor,
-                                      athena::core::internal::LockType type) {
+                                      polarai::core::internal::LockType type) {
   auto record = tensorInfoToRecord(tensor);
   if (device.getDeviceName() == "host") {
     handle->allocator->lock(record, type);
@@ -80,13 +92,13 @@ POLAR_RT_SUPPORT_EXPORT void ath_load(GraphHandle* handle, uint64_t nodeId,
   auto* loader = handle->mLoaders[nodeId];
   auto record = tensorInfoToRecord(tensor);
   auto* ptr = handle->allocator->get(record);
-  auto dataType = static_cast<athena::core::DataType>(tensor->dataType);
-  if (dataType == athena::core::DataType::FLOAT) {
+  auto dataType = static_cast<polarai::core::DataType>(tensor->dataType);
+  if (dataType == polarai::core::DataType::FLOAT) {
     BackendAccessor<float> acc(static_cast<float*>(ptr), tensor->dims,
                                tensor->shape);
     loader->load(acc);
-  } else if (dataType == athena::core::DataType::DOUBLE) {
-    athena::utils::FatalError(athena::utils::ATH_FATAL_OTHER,
+  } else if (dataType == polarai::core::DataType::DOUBLE) {
+    polarai::utils::FatalError(polarai::utils::ATH_FATAL_OTHER,
                               "Double is not supported.");
     //    BackendAccessor<double> acc(static_cast<double*>(ptr), tensor->dims,
     //                                tensor->shape);

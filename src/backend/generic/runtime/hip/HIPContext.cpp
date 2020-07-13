@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,13 +10,13 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "HIPContext.h"
-#include "HIPDevice.h"
+#include "HIPContext.hpp"
+#include "HIPDevice.hpp"
 #include "utils.hpp"
 
 #include <hip/hip_runtime.h>
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 HIPContext::HIPContext() {
   hipError_t err = hipInit(0);
 
@@ -47,4 +46,4 @@ HIPContext::HIPContext() {
 std::vector<std::shared_ptr<Device>>& HIPContext::getDevices() {
   return mDevices;
 }
-} // namespace athena::backend::llvm
+} // namespace polarai::backend::generic

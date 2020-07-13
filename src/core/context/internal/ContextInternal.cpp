@@ -1,21 +1,21 @@
-/*
- * Copyright (c) 2018 Athena. All rights reserved.
- * https://getathena.ml
- *
- * Licensed under MIT license.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2020 PolarAI. All rights reserved.
+//
+// Licensed under MIT license.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+//===----------------------------------------------------------------------===//
 
-#include <athena/core/context/internal/ContextInternal.h>
-#include <athena/core/graph/internal/GraphInternal.h>
+#include <polarai/core/context/internal/ContextInternal.hpp>
+#include <polarai/core/graph/internal/GraphInternal.hpp>
+
 #include <iostream>
 
-namespace athena::core::internal {
+namespace polarai::core::internal {
 ContextInternal::ContextInternal(utils::Allocator allocator,
                                  size_t defaultCapacity,
                                  size_t elementAverageSize)
@@ -44,4 +44,4 @@ utils::Index ContextInternal::registerTensor(const TensorInternal& tensor) {
   mNextTensorVirtualAddress += requiredSize;
   return returnedIndex;
 }
-} // namespace athena::core::internal
+} // namespace polarai::core::internal

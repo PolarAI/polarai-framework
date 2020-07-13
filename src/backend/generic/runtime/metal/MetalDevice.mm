@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,17 +10,17 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "MetalDevice.h"
-#include "../utils/utils.h"
-#include "MetalAllocator.h"
-#include "MetalEvent.h"
+#include "MetalDevice.hh"
+#include "../utils/utils.hh"
+#include "MetalAllocator.hh"
+#include "MetalEvent.hh"
 #include "spirv_converter.hpp"
 
-#include <athena/backend/llvm/BackendAllocator.h>
-#include <athena/backend/llvm/runtime/Event.h>
-#include <athena/backend/llvm/runtime/LaunchCommand.h>
+#include <polarai/backend/llvm/BackendAllocator.hpp>
+#include <polarai/backend/llvm/runtime/Event.hpp>
+#include <polarai/backend/llvm/runtime/LaunchCommand.hpp>
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 MetalDevice::MetalDevice(id<MTLDevice> device) : mDevice(device) {
   mDeviceName = std::string([device.name UTF8String]);
 

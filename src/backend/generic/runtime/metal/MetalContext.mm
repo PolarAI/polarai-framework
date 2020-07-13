@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,11 +10,12 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "MetalContext.h"
-#include "MetalDevice.h"
+#include "MetalContext.hh"
+#include "MetalDevice.hh"
+
 #import <Metal/Metal.h>
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 MetalContext::MetalContext() {
   NSArray<id<MTLDevice>> *deviceList = MTLCopyAllDevices();
 

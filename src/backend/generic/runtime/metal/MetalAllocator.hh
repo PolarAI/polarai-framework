@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -13,16 +12,16 @@
 
 #pragma once
 
-#include <athena/backend/llvm/AllocatorLayerBase.h>
-#include <athena/backend/llvm/MemoryRecord.h>
-#include <athena/utils/error/FatalError.h>
+#include <polarai/backend/llvm/AllocatorLayerBase.hpp>
+#include <polarai/backend/llvm/MemoryRecord.hpp>
+#include <polarai/utils/error/FatalError.hpp>
 
 #include <unordered_map>
 #include <unordered_set>
 
 #import <Metal/Metal.h>
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 class MetalAllocator : public AllocatorLayerBase {
 private:
   MemoryOffloadCallbackT mOffloadCallback;
@@ -90,4 +89,4 @@ public:
 
   void setTag(MemoryRecord record, size_t tag) override { mTags[record] = tag; }
 };
-} // namespace athena::backend::llvm
+} // namespace polarai::backend::llvm

@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -13,16 +12,19 @@
 
 #pragma once
 
-#include "VulkanDevice.h"
-#include <athena/backend/llvm/runtime/Event.h>
+#include <polarai/backend/llvm/runtime/Event.hpp>
 
-#include <vulkan/vulkan.h>
+#import "Metal/Metal.h"
 
-namespace athena::backend::llvm {
-class VulkanEvent final : public Event {
+#include <future>
+#include <vector>
+
+namespace polarai::backend::generic {
+class MetalDevice;
+class MetalEvent : public Event {
 public:
-  VulkanEvent(VulkanDevice* device, VkFence fence);
-  ~VulkanEvent() override;
+  explicit MetalEvent(MetalDevice* device, id<MTLCommandBuffer> cmdBuf);
+  ~MetalEvent() override;
 
   void wait() override;
 
@@ -30,15 +32,11 @@ public:
     mCallbacks.push_back(std::move(callback));
   }
 
-  auto getNativeEvent() -> VkFence& { return mFence; }
-
   auto getDevice() -> Device* override;
 
 private:
-  VkFence mFence;
-  VulkanDevice* mDevice;
+  id<MTLCommandBuffer> mCmdBuf;
+  MetalDevice* mDevice;
   std::vector<std::function<void()>> mCallbacks;
 };
-} // namespace athena::backend::llvm
-
-
+} // namespace polarai::backend::llvm

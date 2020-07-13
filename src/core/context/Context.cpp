@@ -1,20 +1,19 @@
-/*
- * Copyright (c) 2018 Athena. All rights reserved.
- * https://getathena.ml
- *
- * Licensed under MIT license.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2020 PolarAI. All rights reserved.
+//
+// Licensed under MIT license.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+//===----------------------------------------------------------------------===//
 
-#include <athena/core/context/Context.h>
-#include <athena/core/context/internal/ContextInternal.h>
+#include <polarai/core/context/Context.hpp>
+#include <polarai/core/context/internal/ContextInternal.hpp>
 
-namespace athena::core {
+namespace polarai::core {
 Context::Context(utils::Allocator allocator, size_t defaultCapacity,
                  size_t elementAverageSize)
     : mInternal(utils::makeShared<internal::ContextInternal>(
@@ -34,4 +33,4 @@ utils::SharedPtr<const internal::ContextInternal> Context::internal() const {
 }
 
 utils::Allocator& Context::getAllocator() { return mInternal->getAllocator(); }
-} // namespace athena::core
+} // namespace polarai::core

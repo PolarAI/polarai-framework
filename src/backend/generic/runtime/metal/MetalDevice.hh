@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -13,13 +12,14 @@
 
 #pragma once
 
-#include "MetalAllocator.h"
-#include <athena/backend/llvm/runtime/Device.h>
+#include "MetalAllocator.hh"
+#include <polarai/backend/llvm/runtime/Device.hpp>
 
 #import <Metal/Metal.h>
+
 #include <string>
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 class MetalDevice : public Device {
 public:
   MetalDevice(id<MTLDevice> device);
@@ -70,4 +70,4 @@ private:
   std::shared_ptr<ProgramDesc> mProgram;
   id<MTLLibrary> mLibrary;
 };
-} // namespace athena::backend::llvm
+} // namespace polarai::backend::llvm

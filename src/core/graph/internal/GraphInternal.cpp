@@ -1,27 +1,27 @@
-/*
- * Copyright (c) 2018 Athena. All rights reserved.
- * https://getathena.ml
- *
- * Licensed under MIT license.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2020 PolarAI. All rights reserved.
+//
+// Licensed under MIT license.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+//===----------------------------------------------------------------------===//
 
-#include <athena/core/graph/internal/GraphInternal.h>
-#include <athena/core/node/internal/NodeInternal.h>
-#include <athena/loaders/internal/ConstantLoaderInternal.h>
-#include <athena/loaders/internal/DummyLoaderInternal.h>
-#include <athena/operation/AddOperation.h>
-#include <athena/operation/MulOperation.h>
-#include <athena/operation/internal/AddOperationInternal.h>
-#include <athena/operation/internal/MulOperationInternal.h>
+#include <polarai/core/graph/internal/GraphInternal.hpp>
+#include <polarai/core/node/internal/NodeInternal.hpp>
+#include <polarai/loaders/internal/ConstantLoaderInternal.hpp>
+#include <polarai/loaders/internal/DummyLoaderInternal.hpp>
+#include <polarai/operation/AddOperation.hpp>
+#include <polarai/operation/MulOperation.hpp>
+#include <polarai/operation/internal/AddOperationInternal.hpp>
+#include <polarai/operation/internal/MulOperationInternal.hpp>
+
 #include <queue>
 
-namespace athena::core::internal {
+namespace polarai::core::internal {
 GraphInternal::GraphInternal(utils::WeakPtr<ContextInternal> context,
                              utils::Index publicGraphIndex, utils::String name)
     : Entity(std::move(context), publicGraphIndex, std::move(name)),
@@ -481,9 +481,5 @@ std::tuple<utils::Index, utils::Index> GraphInternal::getGradient(utils::Index t
   auto weightChangingGraphIndex = createWeightChangingGraph(mapInputNodes);
   return std::make_tuple(gradientCalculatingGraphIndex,
                          weightChangingGraphIndex);
-
-//  return std::make_tuple(gradientCalculatingGraphIndex,
-//                         0);
 }
-
-} // namespace athena::core::internal
+} // namespace polarai::core::internal

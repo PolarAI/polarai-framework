@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,11 +10,11 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include <athena/loaders/internal/MemcpyLoaderInternal.h>
+#include <polarai/loaders/internal/MemcpyLoaderInternal.hpp>
 
 #include <cstring>
 
-namespace athena::loaders::internal {
+namespace polarai::loaders::internal {
 MemcpyLoaderInternal::MemcpyLoaderInternal(
     utils::WeakPtr<core::internal::ContextInternal> context,
     utils::Index publicIndex, void* source, size_t len, utils::String name)
@@ -33,4 +32,4 @@ void MemcpyLoaderInternal::setPointer(void* source, size_t size) {
   mSource = source;
   mLen = size;
 }
-} // namespace athena::loaders::internal
+} // namespace polarai::loaders::internal

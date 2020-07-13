@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,14 +10,14 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include <athena/core/graph/internal/GraphCompiler.h>
-#include <athena/core/node/internal/AbstractNodeInternal.h>
-#include <athena/core/node/internal/NodeInternal.h>
-#include <athena/utils/STLExtras.h>
+#include <polarai/core/graph/internal/GraphCompiler.hpp>
+#include <polarai/core/node/internal/AbstractNodeInternal.hpp>
+#include <polarai/core/node/internal/NodeInternal.hpp>
+#include <polarai/utils/STLExtras.hpp>
 
 #include <map>
 
-namespace athena::core::internal {
+namespace polarai::core::internal {
 void GraphCompiler::compile(Graph& graph, Generator& generator) {
   auto& traversal = graph.traverse();
   const auto& clusters = traversal.getClusters();
@@ -109,4 +108,4 @@ void GraphCompiler::compile(Graph& graph, Generator& generator) {
     clusterId++;
   }
 }
-} // namespace athena::core::internal
+} // namespace polarai::core::internal

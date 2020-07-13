@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,12 +10,12 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "VulkanEvent.h"
+#include "VulkanEvent.hpp"
 #include "utils.hpp"
 
 #include <utility>
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 VulkanEvent::VulkanEvent(VulkanDevice* device, VkFence fence)
     : mFence(fence), mDevice(device) {}
 
@@ -33,4 +32,4 @@ auto VulkanEvent::getDevice() -> Device* { return mDevice; };
 VulkanEvent::~VulkanEvent() {
   vkDestroyFence(mDevice->getVirtualDevice(), mFence, nullptr);
 }
-} // namespace athena::backend::llvm
+} // namespace polarai::backend::llvm

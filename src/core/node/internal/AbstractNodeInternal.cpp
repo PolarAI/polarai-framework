@@ -1,20 +1,19 @@
-/*
- * Copyright (c) 2018 Athena. All rights reserved.
- * https://getathena.ml
- *
- * Licensed under MIT license.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2020 PolarAI. All rights reserved.
+//
+// Licensed under MIT license.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+//===----------------------------------------------------------------------===//
 
-#include <athena/core/context/internal/ContextInternal.h>
-#include <athena/core/node/internal/AbstractNodeInternal.h>
+#include <polarai/core/context/internal/ContextInternal.hpp>
+#include <polarai/core/node/internal/AbstractNodeInternal.hpp>
 
-namespace athena::core::internal {
+namespace polarai::core::internal {
 AbstractNodeInternal::AbstractNodeInternal(
     utils::WeakPtr<ContextInternal> context, utils::Index publicNodeIndex,
     utils::String name)
@@ -60,4 +59,4 @@ utils::Index AbstractNodeInternal::getTensorIndex() const {
 void AbstractNodeInternal::setTensorIndex(utils::Index tensorIndex) {
   mTensorIndex = tensorIndex;
 }
-} // namespace athena::core::internal
+} // namespace polarai::core::internal

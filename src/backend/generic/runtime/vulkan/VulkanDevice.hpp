@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -13,15 +12,15 @@
 
 #pragma once
 
-#include "VulkanAllocator.h"
+#include "VulkanAllocator.hpp"
 
-#include <athena/backend/llvm/runtime/Device.h>
-#include <athena/backend/llvm/runtime/Event.h>
+#include <polarai/backend/llvm/runtime/Device.hpp>
+#include <polarai/backend/llvm/runtime/Event.hpp>
 
 #include <string>
 #include <vulkan/vulkan.h>
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 class VulkanDevice : public Device {
 public:
   VulkanDevice(VkPhysicalDevice device);
@@ -83,4 +82,4 @@ private:
   VkShaderModule mShaderModule;
   std::string mDeviceName;
 };
-} // namespace athena::backend::llvm
+} // namespace polarai::backend::llvm

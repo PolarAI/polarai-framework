@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,12 +10,12 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "HIPContext.h"
+#include "HIPContext.hpp"
 
-#include <athena/backend/llvm/runtime/api.h>
 #include <polar_rt_hip_export.h>
+#include <polarai/backend/llvm/runtime/api.hpp>
 
-using namespace athena::backend::llvm;
+using namespace polarai::backend::generic;
 
 extern "C" {
 

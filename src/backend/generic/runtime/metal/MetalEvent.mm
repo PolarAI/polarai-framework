@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,10 +10,10 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "MetalEvent.h"
-#include "MetalDevice.h"
+#include "MetalEvent.hh"
+#include "MetalDevice.hh"
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 MetalEvent::MetalEvent(MetalDevice* device, id<MTLCommandBuffer> cmdBuf)
     : mCmdBuf(cmdBuf), mDevice(device) {}
 
@@ -28,4 +27,4 @@ void MetalEvent::wait() {
 }
 auto MetalEvent::getDevice() -> Device* { return mDevice; };
 MetalEvent::~MetalEvent() { /* todo free buffer */ }
-} // namespace athena::backend::llvm
+} // namespace polarai::backend::llvm

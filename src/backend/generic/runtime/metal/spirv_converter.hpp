@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,11 +10,8 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#ifndef ATHENA_SPIRV_CONVERTER_HPP
-#define ATHENA_SPIRV_CONVERTER_HPP
+#pragma once
 
 #include "spirv_msl.hpp"
 
 std::string convertSpvToMetal(std::vector<char>& module);
-
-#endif // ATHENA_SPIRV_CONVERTER_HPP

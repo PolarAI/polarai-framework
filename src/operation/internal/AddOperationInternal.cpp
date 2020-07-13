@@ -1,25 +1,24 @@
-/*
- * Copyright (c) 2018 Athena. All rights reserved.
- * https://getathena.ml
- *
- * Licensed under MIT license.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2020 PolarAI. All rights reserved.
+//
+// Licensed under MIT license.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+//===----------------------------------------------------------------------===//
 
-#include <athena/core/node/internal/AbstractNodeInternal.h>
-#include <athena/core/node/internal/NodeInternal.h>
-#include <athena/loaders/internal/ConstantLoaderInternal.h>
-#include <athena/operation/internal/AddOperationInternal.h>
-#include <athena/operation/AddOperation.h>
+#include <polarai/core/node/internal/AbstractNodeInternal.hpp>
+#include <polarai/core/node/internal/NodeInternal.hpp>
+#include <polarai/loaders/internal/ConstantLoaderInternal.hpp>
+#include <polarai/operation/internal/AddOperationInternal.hpp>
+#include <polarai/operation/AddOperation.hpp>
 
-using namespace athena::core::internal;
+using namespace polarai::core::internal;
 
-namespace athena::operation::internal {
+namespace polarai::operation::internal {
 AddOperationInternal::AddOperationInternal(
     utils::WeakPtr<core::internal::ContextInternal> context,
     utils::Index publicNodeIndex, utils::String name)
@@ -79,4 +78,4 @@ AddOperationInternal::genDerivative(
 }
 
 size_t AddOperationInternal::getOperandsCount() const { return 2; }
-} // namespace athena::operation::internal
+} // namespace polarai::operation::internal

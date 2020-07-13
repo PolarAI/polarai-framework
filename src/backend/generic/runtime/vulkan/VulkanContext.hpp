@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -13,15 +12,18 @@
 
 #pragma once
 
-#include <athena/backend/llvm/runtime/Context.h>
+#include <polarai/backend/llvm/runtime/Context.hpp>
 
-namespace athena::backend::llvm {
-class HIPContext : public Context {
+#include <vulkan/vulkan.h>
+
+namespace polarai::backend::generic {
+class VulkanContext : public Context {
 public:
-  HIPContext();
+  VulkanContext(VkInstance instance);
   std::vector<std::shared_ptr<Device>>& getDevices() override;
 
 private:
   std::vector<std::shared_ptr<Device>> mDevices;
+  VkInstance mInstance; 
 };
-}
+} // namespace polarai::backend::llvm

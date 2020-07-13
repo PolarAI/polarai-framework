@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,10 +10,10 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "VulkanContext.h"
-#include "VulkanDevice.h"
+#include "VulkanContext.hpp"
+#include "VulkanDevice.hpp"
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 VulkanContext::VulkanContext(VkInstance instance) : mInstance(instance) {
   uint32_t deviceCount;
   vkEnumeratePhysicalDevices(mInstance, &deviceCount, nullptr);
@@ -29,4 +28,4 @@ VulkanContext::VulkanContext(VkInstance instance) : mInstance(instance) {
 std::vector<std::shared_ptr<Device>>& VulkanContext::getDevices() {
   return mDevices;
 }
-} // namespace athena::backend::llvm
+} // namespace polarai::backend::llvm

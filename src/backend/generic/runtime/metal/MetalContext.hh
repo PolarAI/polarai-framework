@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -13,9 +12,9 @@
 
 #pragma once
 
-#include <athena/backend/llvm/runtime/Context.h>
+#include <polarai/backend/llvm/runtime/Context.hpp>
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 class MetalContext : public Context {
 public:
   MetalContext();
@@ -26,4 +25,4 @@ public:
 private:
   std::vector<std::shared_ptr<Device>> mDevices;
 };
-} // namespace athena::backend::llvm
+} // namespace polarai::backend::llvm

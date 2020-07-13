@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -14,16 +13,16 @@
 #pragma once
 
 #include "utils.hpp"
-#include <athena/backend/llvm/AllocatorLayerBase.h>
-#include <athena/backend/llvm/MemoryRecord.h>
-#include <athena/utils/error/FatalError.h>
+#include <polarai/backend/llvm/AllocatorLayerBase.hpp>
+#include <polarai/backend/llvm/MemoryRecord.hpp>
+#include <polarai/utils/error/FatalError.hpp>
 
 #include <vulkan/vulkan.h>
 
 #include <unordered_map>
 #include <unordered_set>
 
-namespace athena::backend::llvm {
+namespace polarai::backend::generic {
 class VulkanAllocator : public AllocatorLayerBase {
 public:
   struct MemDescriptor {
@@ -145,4 +144,4 @@ public:
     return mMemMap[record];
   }
 };
-} // namespace athena::backend::llvm
+} // namespace polarai::backend::llvm

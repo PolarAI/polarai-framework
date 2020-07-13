@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,9 +10,9 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include <athena/loaders/MemcpyLoader.h>
+#include <polarai/loaders/MemcpyLoader.hpp>
 
-using namespace athena::loaders;
+using namespace polarai::loaders;
 
 MemcpyLoader::MemcpyLoader(utils::SharedPtr<core::internal::ContextInternal> context,
   utils::Index publicIndex) : core::PublicEntity(std::move(context), publicIndex) {}
