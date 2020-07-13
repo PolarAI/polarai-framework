@@ -6,4 +6,6 @@ target_include_directories(lspolar PRIVATE
 
 target_link_libraries(lspolar PRIVATE PolarAI::generic_backend_driver)
 get_property(AVAILABLE_RT GLOBAL PROPERTY POLAR_AVAILABLE_RUNTIMES)
-add_dependencies(lspolar ${AVAILABLE_RT})
+if (AVAILABLE_RT)
+  add_dependencies(lspolar ${AVAILABLE_RT})
+endif()
