@@ -21,7 +21,7 @@ AthenaAddDependency(
 AthenaAddDependency(
         TARGET_NAME googletest
         GIT_URL https://github.com/google/googletest.git
-        GIT_TAG release-1.8.1
+        GIT_TAG release-1.10.0
         PACKAGE GTest
         LIBRARIES gtest gtest_main
         INCLUDE_PATH googletest/include

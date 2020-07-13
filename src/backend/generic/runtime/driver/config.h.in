@@ -17,7 +17,7 @@ inline std::vector<std::string> getListOfLibraries() {
     // fixme find a better way to extract libnames
     libraries.emplace_back("libpolar_rt_sycl.so");
   }
-  if constexpr (HasCUDA) {
+  if constexpr (false && HasCUDA) {
     // fixme find a better way to extract libnames
     libraries.emplace_back("libpolar_rt_cuda.so");
   }

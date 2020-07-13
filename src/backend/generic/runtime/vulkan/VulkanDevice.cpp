@@ -67,7 +67,7 @@ VulkanDevice::VulkanDevice(VkPhysicalDevice device) : mPhysicalDevice(device) {
   deviceCreateInfo.queueCreateInfoCount = 1;
   deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
 
-  vkCreateDevice(mPhysicalDevice, &deviceCreateInfo, nullptr, &mDevice);
+  check(vkCreateDevice(mPhysicalDevice, &deviceCreateInfo, nullptr, &mDevice));
   vkGetDeviceQueue(mDevice, mQueueFamilyIndex, 0, &mQueue);
 
   VkPhysicalDeviceProperties props;

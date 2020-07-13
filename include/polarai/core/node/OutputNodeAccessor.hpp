@@ -21,7 +21,7 @@ public:
   OutputNodeAccessor(internal::TensorAllocator& allocator,
                      internal::TensorInternal& tensor)
       : mAllocator(&allocator), mTensor(&tensor) {
-    mAllocator->lock(*mTensor, internal::LockType::READ);
+    mAllocator->lock(*mTensor, internal::LockType::READ_WRITE);
     mData = static_cast<T*>(mAllocator->get(*mTensor));
   }
 
