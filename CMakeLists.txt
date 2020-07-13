@@ -42,8 +42,7 @@ enable_testing()
 enable_sanitizers()
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/athena DESTINATION include)
-install(DIRECTORY ${CMAKE_BINARY_DIR}/export/athena DESTINATION include)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/polarai DESTINATION include)
 
 add_definitions(-DATHENA_MAJOR_VERSION="${POLAR_MAJOR_VERSION}")
 add_definitions(-DATHENA_MINOR_VERSION="${POLAR_MINOR_VERSION}")
