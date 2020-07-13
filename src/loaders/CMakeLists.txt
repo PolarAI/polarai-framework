@@ -6,5 +6,5 @@ add_library(PolarAI::loaders ALIAS polar_loaders)
 target_include_directories(polar_loaders PUBLIC 
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
-install(FILES ${PROJECT_BINARY_DIR}/polar_loaders_export.h
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/polar_loaders_export.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
