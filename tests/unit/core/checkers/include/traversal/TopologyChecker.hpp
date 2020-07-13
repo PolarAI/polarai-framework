@@ -12,16 +12,8 @@
 
 #pragma once
 
-#include <polarai/core/node/AbstractNode.hpp>
-#include <polarai/core/node/internal/NodeInternal.hpp>
-#include <polar_core_export.h>
+#include <polarai/core/graph/Traversal.hpp>
 
-namespace polarai::core {
-/**
- * A Node represents a piece of data loading to graph.
- */
-class POLAR_CORE_EXPORT Node {
-public:
-  using InternalType = internal::NodeInternal;
-};
-} // namespace polarai::core
+namespace polarai::tests::unit {
+bool checkTopology(const core::Traversal& traversal);
+}

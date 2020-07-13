@@ -18,6 +18,7 @@
 #include <polarai/backend/generic/BackendAllocator.hpp>
 #include <polarai/backend/generic/MemoryRecord.hpp>
 #include <polarai/backend/generic/runtime/Device.hpp>
+#include <polar_backend_generic_export.h>
 
 #include <list>
 #include <map>
@@ -49,7 +50,7 @@ struct LockDescriptor {
 ///    memory domain.
 /// 4. If one of the allocation layers is out of memory, a callback function is
 ///    called to free up some space and copy data to more latent memory.
-class LayerAllocator : public BackendAllocator {
+class POLAR_BACKEND_GENERIC_EXPORT LayerAllocator : public BackendAllocator {
 private:
   std::mutex mMutex;
 

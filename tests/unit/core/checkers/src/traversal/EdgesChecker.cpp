@@ -1,21 +1,21 @@
-/*
- * Copyright (c) 2018 Athena. All rights reserved.
- * https://getathena.ml
- *
- * Licensed under MIT license.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2020 PolarAI. All rights reserved.
+//
+// Licensed under MIT license.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+//===----------------------------------------------------------------------===//
+
+#include <traversal/EdgesChecker.hpp>
+#include <traversal/Utils.hpp>
 
 #include <iostream>
-#include <traversal/EdgesChecker.h>
-#include <traversal/Utils.h>
 
-namespace athena::tests::unit {
+namespace polarai::tests::unit {
 std::ostream& operator<<(std::ostream& stream, const Edge& edge) {
   stream << edge.startNode << ' ' << edge.endNode << ' ' << edge.mark
          << std::endl;
@@ -61,4 +61,4 @@ bool checkEdges(const core::Traversal& traversal, const std::set<Edge>& edges) {
   }
   return true;
 }
-} // namespace athena::tests::unit
+} // namespace polarai::tests::unit

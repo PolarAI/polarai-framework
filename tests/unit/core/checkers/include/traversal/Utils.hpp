@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,18 +10,20 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "../../../../src/backend/llvm/allocators/TrivialAllocator.h"
+#pragma once
 
-#include <gtest/gtest.h>
+#include <polarai/utils/Index.hpp>
+#include <iostream>
+#include <set>
 
-using namespace athena::backend::llvm;
-
-TEST(LLVMBackend, TrivialAllocatorSimple) {
-  TrivialAllocator allocator;
-
-  MemoryRecord record{1, 30};
-  allocator.allocate(record);
-  auto ptr = allocator.getPtr(record);
-
-  ASSERT_NE(ptr, nullptr);
+namespace polarai::tests::unit {
+template <typename Type, template <typename, typename...> typename Container>
+void showContainer(std::ostream& stream, const Container<Type>& set,
+                   const char* message) {
+  stream << message << std::endl;
+  for (auto& val : set) {
+    stream << val << std::endl;
+  }
+  stream << std::endl;
 }
+}; // namespace polarai::tests::unit

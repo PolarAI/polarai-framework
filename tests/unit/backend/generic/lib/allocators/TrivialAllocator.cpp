@@ -10,18 +10,18 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#pragma once
+#include "lib/allocators/TrivialAllocator.hpp"
 
-#include <polarai/core/node/AbstractNode.hpp>
-#include <polarai/core/node/internal/NodeInternal.hpp>
-#include <polar_core_export.h>
+#include <gtest/gtest.h>
 
-namespace polarai::core {
-/**
- * A Node represents a piece of data loading to graph.
- */
-class POLAR_CORE_EXPORT Node {
-public:
-  using InternalType = internal::NodeInternal;
-};
-} // namespace polarai::core
+using namespace polarai::backend::generic;
+
+TEST(GenericBackendAllocators, TrivialAllocatorSimple) {
+  TrivialAllocator allocator;
+
+  MemoryRecord record{1, 30};
+  allocator.allocate(record);
+  auto ptr = allocator.getPtr(record);
+
+  ASSERT_NE(ptr, nullptr);
+}

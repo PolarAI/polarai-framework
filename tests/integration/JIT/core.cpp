@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,22 +10,22 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include <athena/backend/llvm/LLVMExecutor.h>
-#include <athena/backend/llvm/runtime/GraphHandle.h>
-#include <athena/core/context/Context.h>
-#include <athena/core/graph/Graph.h>
-#include <athena/core/node/InputNode.h>
-#include <athena/core/node/Node.h>
-#include <athena/core/node/OutputNode.h>
-#include <athena/loaders/MemcpyLoader.h>
-#include <athena/operation/AddOperation.h>
-#include <athena/operation/CombineOperation.h>
-#include <athena/operation/DivideOperation.h>
-#include <athena/operation/LogLossOperation.h>
-#include <athena/operation/MulOperation.h>
-#include <athena/operation/SigmoidOperation.h>
-#include <athena/operation/MatMulOperation.h>
-#include <athena/operation/MulConcatOperation.h>
+#include <polarai/backend/generic/GenericExecutor.hpp>
+#include <polarai/backend/generic/runtime/GraphHandle.hpp>
+#include <polarai/core/context/Context.hpp>
+#include <polarai/core/graph/Graph.hpp>
+#include <polarai/core/node/InputNode.hpp>
+#include <polarai/core/node/Node.hpp>
+#include <polarai/core/node/OutputNode.hpp>
+#include <polarai/loaders/MemcpyLoader.hpp>
+#include <polarai/operation/AddOperation.hpp>
+#include <polarai/operation/CombineOperation.hpp>
+#include <polarai/operation/DivideOperation.hpp>
+#include <polarai/operation/LogLossOperation.hpp>
+#include <polarai/operation/MulOperation.hpp>
+#include <polarai/operation/SigmoidOperation.hpp>
+#include <polarai/operation/MatMulOperation.hpp>
+#include <polarai/operation/MulConcatOperation.hpp>
 
 #include <gtest/gtest.h>
 
@@ -39,10 +38,10 @@
 
 #include <unistd.h>
 
-using namespace athena;
-using namespace athena::core;
-using namespace athena::operation;
-using namespace athena::backend::llvm;
+using namespace polarai;
+using namespace polarai::core;
+using namespace polarai::operation;
+using namespace polarai::backend::generic;
 
 namespace {
 const float eps = 1e-5;
@@ -79,7 +78,7 @@ TEST(JITIntegration, DISABLED_AddOperationSample) {
   auto out = graph.create<OutputNode>("out");
   graph.connect(node, out, Operation::Unmarked);
 
-  LLVMExecutor executor;
+  GenericExecutor executor;
   executor.addGraph(graph);
   executor.evaluate(graph);
 
@@ -154,7 +153,7 @@ TEST(JITIntegration, DISABLED_CombineOperationSample) {
   auto out = graph.create<OutputNode>("out");
   graph.connect(node, out, Operation::Unmarked);
 
-  LLVMExecutor executor;
+  GenericExecutor executor;
   executor.addGraph(graph);
   executor.evaluate(graph);
 
@@ -228,7 +227,7 @@ TEST(JITIntegration, DISABLED_DivideOperationSample) {
   auto out = graph.create<OutputNode>("out");
   graph.connect(node, out, Operation::Unmarked);
 
-  LLVMExecutor executor;
+  GenericExecutor executor;
   executor.addGraph(graph);
   executor.evaluate(graph);
 
@@ -304,7 +303,7 @@ TEST(JITIntegration, DISABLED_LogLossOperationSample) {
   auto out = graph.create<OutputNode>("out");
   graph.connect(node, out, Operation::Unmarked);
 
-  LLVMExecutor executor;
+  GenericExecutor executor;
   executor.addGraph(graph);
   executor.evaluate(graph);
 
@@ -379,7 +378,7 @@ TEST(JITIntegration, DISABLED_MulOperationSample) {
   auto out = graph.create<OutputNode>("out");
   graph.connect(node, out, Operation::Unmarked);
 
-  LLVMExecutor executor;
+  GenericExecutor executor;
   executor.addGraph(graph);
   executor.evaluate(graph);
 
@@ -481,7 +480,7 @@ TEST(JITIntegration, DISABLED_MatMulNNOperationSample) {
   auto out = graph.create<OutputNode>("out");
   graph.connect(node, out, Operation::Unmarked);
 
-  LLVMExecutor executor;
+  GenericExecutor executor;
   executor.addGraph(graph);
   executor.evaluate(graph);
 
@@ -548,7 +547,7 @@ TEST(JITIntegration, DISABLED_MatMulNNSquareOperationSample) {
   auto out = graph.create<OutputNode>("out");
   graph.connect(node, out, Operation::Unmarked);
 
-  LLVMExecutor executor;
+  GenericExecutor executor;
   executor.addGraph(graph);
   executor.evaluate(graph);
 
@@ -622,7 +621,7 @@ TEST(JITIntegration, DISABLED_MatMulNNRectOperationSample) {
   auto out = graph.create<OutputNode>("out");
   graph.connect(node, out, Operation::Unmarked);
 
-  LLVMExecutor executor;
+  GenericExecutor executor;
   executor.addGraph(graph);
   executor.evaluate(graph);
 
@@ -702,7 +701,7 @@ TEST(JITIntegration, DISABLED_MatMulTNRectOperationSample) {
   auto out = graph.create<OutputNode>("out");
   graph.connect(node, out, Operation::Unmarked);
 
-  LLVMExecutor executor;
+  GenericExecutor executor;
   executor.addGraph(graph);
   executor.evaluate(graph);
 
@@ -759,7 +758,7 @@ TEST(JITIntegration, DISABLED_MatMulNTRectOperationSample) {
   auto out = graph.create<OutputNode>("out");
   graph.connect(node, out, Operation::Unmarked);
 
-  LLVMExecutor executor;
+  GenericExecutor executor;
   executor.addGraph(graph);
   executor.evaluate(graph);
 
@@ -822,7 +821,7 @@ TEST(JITIntegration, DISABLED_SigmoidOperationSample) {
   auto out = graph.create<OutputNode>("out");
   graph.connect(node, out, Operation::Unmarked);
 
-  LLVMExecutor executor;
+  GenericExecutor executor;
   executor.addGraph(graph);
   executor.evaluate(graph);
 
@@ -893,7 +892,7 @@ TEST(JITIntegration, DISABLED_MulConcatOperationSample) {
   auto out = graph.create<OutputNode>("out");
   graph.connect(node, out, Operation::Unmarked);
 
-  LLVMExecutor executor;
+  GenericExecutor executor;
   executor.addGraph(graph);
   executor.evaluate(graph);
 
@@ -937,7 +936,7 @@ std::vector<float> readDataset(const char* filename) {
   return res;
 }
 
-float testModel(LLVMExecutor& executor, Graph& graph, TensorInternal* lossTensorPtr, loaders::MemcpyLoader& inputLoader, loaders::MemcpyLoader& groundTruthLoader,
+float testModel(GenericExecutor& executor, Graph& graph, TensorInternal* lossTensorPtr, loaders::MemcpyLoader& inputLoader, loaders::MemcpyLoader& groundTruthLoader,
                 std::vector<float>& dataset, size_t sampleSize, size_t rowsCount) {
   float sumError = 0;
   for (size_t index = 0; index < rowsCount; ++index) {
@@ -1010,7 +1009,7 @@ TEST(JITIntegration, DISABLED_TopologyLogReg) {
 
   auto [graphGradient, graphConnector] = graph.getGradient(loss);
 
-  LLVMExecutor executor;
+  GenericExecutor executor;
   executor.addGraph(graph);
   executor.addGraph(graphGradient);
   executor.addGraph(graphConnector);

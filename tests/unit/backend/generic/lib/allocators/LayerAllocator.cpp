@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -11,15 +10,15 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#include "../../../../src/backend/llvm/allocators/LayerAllocator.h"
-#include <athena/backend/llvm/runtime/Device.h>
-#include <athena/core/tensor/internal/TensorInternal.h>
+#include "lib/allocators/LayerAllocator.hpp"
+#include <polarai/backend/generic/runtime/Device.hpp>
+#include <polarai/core/tensor/internal/TensorInternal.hpp>
+#include <polarai/core/context/Context.hpp>
 
-#include <athena/core/context/Context.h>
 #include <gtest/gtest.h>
 
-using namespace athena::backend::llvm;
-using namespace athena::core;
+using namespace polarai::backend::generic;
+using namespace polarai::core;
 
 class MockDevice : public Device {
 public:
@@ -40,11 +39,7 @@ public:
   bool operator==(const Device& device) const override {
     return device.getDeviceName() == getDeviceName();
   }
-  void copyToHost(const internal::TensorInternal& tensor,
-                  void* dest) const override{};
   void copyToHost(MemoryRecord record, void* dest) const override{};
-  void copyToDevice(const internal::TensorInternal& tensor,
-                    void* src) const override{};
   void copyToDevice(MemoryRecord record, void* src) const override{};
   Event* launch(BackendAllocator&, LaunchCommand&, Event*) override {
     return nullptr;
@@ -54,7 +49,7 @@ public:
   selectBinary(std::vector<std::shared_ptr<ProgramDesc>>& programs) override{};
 };
 
-TEST(LLVMBackend, LayerAllocatorSimple) {
+TEST(GenericBackendAllocators, LayerAllocatorSimple) {
   LayerAllocator allocator;
 
   Context ctx;
@@ -70,7 +65,7 @@ TEST(LLVMBackend, LayerAllocatorSimple) {
   allocator.deallocate(tensor);
 }
 
-TEST(LLVMBackend, LayerAllocatorDevice) {
+TEST(GenericBackendAllocators, LayerAllocatorDevice) {
   LayerAllocator allocator;
   MockDevice device;
 

@@ -1,21 +1,21 @@
-/*
- * Copyright (c) 2018 Athena. All rights reserved.
- * https://getathena.ml
- *
- * Licensed under MIT license.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2020 PolarAI. All rights reserved.
+//
+// Licensed under MIT license.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+//===----------------------------------------------------------------------===//
+
+#include <traversal/ContentChecker.hpp>
+#include <traversal/Utils.hpp>
 
 #include <iostream>
-#include <traversal/ContentChecker.h>
-#include <traversal/Utils.h>
 
-namespace athena::tests::unit {
+namespace polarai::tests::unit {
 std::set<utils::Index> getSetOfNodes(const core::Cluster& cluster) {
   std::set<utils::Index> result;
   for (auto& nodeState : cluster.content) {
@@ -45,4 +45,4 @@ bool checkTraversalContent(const core::Traversal& traversal,
   }
   return true;
 }
-} // namespace athena::tests::unit
+} // namespace polarai::tests::unit

@@ -1,12 +1,9 @@
 file(GLOB_RECURSE MODEL_TEST_SRC "*.cpp")
 
-add_athena_executable(TestUnitModelRunnable ${MODEL_TEST_SRC})
+add_polar_executable(TestUnitModelRunnable ${MODEL_TEST_SRC})
 target_link_libraries(TestUnitModelRunnable PUBLIC
-        AthenaCore
-        AthenaOperation
-        AthenaLoaders
-        AthenaUtils
-        AthenaModel
+        PolarAI::framework
+        PolarAI::utils
         Threads::Threads
         AthenaDep::googletest)
 

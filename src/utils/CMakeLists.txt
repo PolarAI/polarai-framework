@@ -8,3 +8,13 @@ target_include_directories(polar_utils PUBLIC
 
 install(FILES ${PROJECT_BINARY_DIR}/polar_utils_export.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(TARGETS polar_utils EXPORT PolarAIConfig
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT PolarAI_Runtime
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT PolarAI_Runtime
+        NAMELINK_COMPONENT PolarAI_Development
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT PolarAI_Development
+        )
+export(TARGETS polar_utils FILE PolarAIConfig.cmake)

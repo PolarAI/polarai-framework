@@ -1,18 +1,31 @@
-#include <athena/core/context/Context.h>
-#include <athena/core/graph/Graph.h>
-#include <athena/core/node/InputNode.h>
-#include <athena/core/node/Node.h>
-#include <athena/core/node/OutputNode.h>
-#include <athena/model/DotModel.h>
-#include <athena/operation/AddOperation.h>
-#include <athena/operation/LogLossOperation.h>
-#include <athena/operation/MatMulOperation.h>
-#include <athena/operation/SigmoidOperation.h>
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2020 PolarAI. All rights reserved.
+//
+// Licensed under MIT license.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+//===----------------------------------------------------------------------===//
+
+#include <polarai/core/context/Context.hpp>
+#include <polarai/core/graph/Graph.hpp>
+#include <polarai/core/node/InputNode.hpp>
+#include <polarai/core/node/Node.hpp>
+#include <polarai/core/node/OutputNode.hpp>
+#include <polarai/io/DotModel.hpp>
+#include <polarai/operation/AddOperation.hpp>
+#include <polarai/operation/LogLossOperation.hpp>
+#include <polarai/operation/MatMulOperation.hpp>
+#include <polarai/operation/SigmoidOperation.hpp>
+
 #include <gtest/gtest.h>
 
-using namespace athena;
-using namespace athena::core;
-using namespace athena::operation;
+using namespace polarai;
+using namespace polarai::core;
+using namespace polarai::operation;
 
 namespace {
 TEST(DotModel, Topology1) {
@@ -30,11 +43,11 @@ TEST(DotModel, Topology1) {
   graph.connect(node, out, Operation::Unmarked);
   auto [graphGradient, graphConnector] = graph.getGradient(node);
   std::cout << "*** Function: ***" << std::endl;
-  model::DotModel::exportGraph(graph, std::cout);
+  io::DotModel::exportGraph(graph, std::cout);
   std::cout << "*** Gradient: ***" << std::endl;
-  model::DotModel::exportGraph(graphGradient, std::cout);
+  io::DotModel::exportGraph(graphGradient, std::cout);
   std::cout << "*** Connector: ***" << std::endl;
-  model::DotModel::exportGraph(graphConnector, std::cout);
+  io::DotModel::exportGraph(graphConnector, std::cout);
 }
 
 TEST(DotModel, Topology2) {
@@ -57,11 +70,11 @@ TEST(DotModel, Topology2) {
   graph.connect(node2, out, Operation::Unmarked);
   auto [graphGradient, graphConnector] = graph.getGradient(node2);
   std::cout << "*** Function: ***" << std::endl;
-  model::DotModel::exportGraph(graph, std::cout);
+  io::DotModel::exportGraph(graph, std::cout);
   std::cout << "*** Gradient: ***" << std::endl;
-  model::DotModel::exportGraph(graphGradient, std::cout);
+  io::DotModel::exportGraph(graphGradient, std::cout);
   std::cout << "*** Connector: ***" << std::endl;
-  model::DotModel::exportGraph(graphConnector, std::cout);
+  io::DotModel::exportGraph(graphConnector, std::cout);
 }
 
 TEST(DotModel, TopologyLogReg) {
@@ -79,48 +92,18 @@ TEST(DotModel, TopologyLogReg) {
   auto operationSigmoidId = context.create<SigmoidOperation>("gemm");
   auto nodeSigmoid = graph.create<Node>(operationSigmoidId, "nodeSigmoid");
   graph.connect(nodeMatMul, nodeSigmoid, SigmoidOperation::Unmarked);
-//  auto outLogRegValue = graph.create<OutputNode>("outFunc");
-//  graph.connect(nodeSigmoid, outLogRegValue, Operation::Unmarked);
   auto operationLogLossId = context.create<LogLossOperation>("logloss");
   auto loss = graph.create<Node>(operationLogLossId, "loss");
   auto inpGroundTruth = graph.create<InputNode>(TensorShape{1, 1}, DataType::FLOAT, true,
                                                 0, "groundTruth");
   graph.connect(nodeSigmoid, loss, LogLossOperation::PREDICTED);
   graph.connect(inpGroundTruth, loss, LogLossOperation::GROUND_TRUTH);
-//  auto outLogLossValue = graph.create<OutputNode>("outLoss");
-//  graph.connect(loss, outLogLossValue, Operation::Unmarked);
   auto [graphGradient, graphConnector] = graph.getGradient(loss);
   std::cout << "*** Function: ***" << std::endl;
-  model::DotModel::exportGraph(graph, std::cout);
+  io::DotModel::exportGraph(graph, std::cout);
   std::cout << "*** Gradient: ***" << std::endl;
-  model::DotModel::exportGraph(graphGradient, std::cout);
+  io::DotModel::exportGraph(graphGradient, std::cout);
   std::cout << "*** Connector: ***" << std::endl;
-  model::DotModel::exportGraph(graphConnector, std::cout);
+  io::DotModel::exportGraph(graphConnector, std::cout);
 }
-//
-//TEST(DotModel, TopologyLinReg) {
-//  Context context;
-//  auto graph = context.create<Graph>("graph1");
-//  size_t size = 3;
-//  auto inp1 = graph.create<InputNode>(TensorShape{1, size}, DataType::FLOAT, false,
-//                                      0, "inpVector");
-//  auto inp2 = graph.create<InputNode>(TensorShape{size, 1}, DataType::FLOAT, true,
-//                                      0, "weightsVector");
-//  auto operationGemmId = context.create<GEMMOperation>("gemm");
-//  auto node1 = graph.create<Node>(operationGemmId, "nodeGemm");
-//  graph.connect(inp1, node1, AddOperation::LEFT);
-//  graph.connect(inp2, node1, AddOperation::RIGHT);
-//  auto operationSigmoidId = context.create<SigmoidOperation>("gemm");
-//  auto node2 = graph.create<Node>(operationSigmoidId, "nodeSigmoid");
-//  graph.connect(node1, node2, Operation::Unmarked);
-//  auto out = graph.create<OutputNode>("out");
-//  graph.connect(node2, out, Operation::Unmarked);
-//  auto [graphGradient, graphConnector] = graph.getGradient();
-//  std::cout << "*** Function: ***" << std::endl;
-//  model::DotModel::exportGraph(graph, std::cout);
-//  std::cout << "*** Gradient: ***" << std::endl;
-//  model::DotModel::exportGraph(graphGradient, std::cout);
-//  std::cout << "*** Connector: ***" << std::endl;
-//  model::DotModel::exportGraph(graphConnector, std::cout);
-//}
 } // namespace

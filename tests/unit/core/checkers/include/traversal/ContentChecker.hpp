@@ -12,16 +12,11 @@
 
 #pragma once
 
-#include <polarai/core/node/AbstractNode.hpp>
-#include <polarai/core/node/internal/NodeInternal.hpp>
-#include <polar_core_export.h>
+#include <polarai/core/graph/Traversal.hpp>
+#include <polarai/utils/Index.hpp>
 
-namespace polarai::core {
-/**
- * A Node represents a piece of data loading to graph.
- */
-class POLAR_CORE_EXPORT Node {
-public:
-  using InternalType = internal::NodeInternal;
-};
-} // namespace polarai::core
+namespace polarai::tests::unit {
+bool checkTraversalContent(
+    const core::Traversal& traversal,
+    const std::vector<std::set<polarai::utils::Index>>& target);
+}

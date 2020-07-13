@@ -1,31 +1,31 @@
-/*
- * Copyright (c) 2018 Athena. All rights reserved.
- * https://getathena.ml
- *
- * Licensed under MIT license.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2020 PolarAI. All rights reserved.
+//
+// Licensed under MIT license.
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+//===----------------------------------------------------------------------===//
 
-#include <athena/core/context/Context.h>
-#include <athena/core/graph/Graph.h>
-#include <athena/core/node/InputNode.h>
-#include <athena/core/node/Node.h>
-#include <athena/core/node/OutputNode.h>
-#include <athena/operation/AddOperation.h>
+#include <polarai/core/context/Context.hpp>
+#include <polarai/core/graph/Graph.hpp>
+#include <polarai/core/node/InputNode.hpp>
+#include <polarai/core/node/Node.hpp>
+#include <polarai/core/node/OutputNode.hpp>
+#include <polarai/operation/AddOperation.hpp>
+#include <traversal/ContentChecker.hpp>
+#include <traversal/EdgesChecker.hpp>
+#include <traversal/TopologyChecker.hpp>
+
 #include <gtest/gtest.h>
-#include <traversal/ContentChecker.h>
-#include <traversal/EdgesChecker.h>
-#include <traversal/TopologyChecker.h>
 
-using namespace athena;
-using namespace athena::core;
-using namespace athena::operation;
-using namespace athena::tests::unit;
+using namespace polarai;
+using namespace polarai::core;
+using namespace polarai::operation;
+using namespace polarai::tests::unit;
 
 namespace {
 TEST(Traverse, Topology1) {

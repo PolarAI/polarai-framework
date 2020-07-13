@@ -1,14 +1,14 @@
 set(INT_TEST_SRC 
-  core.cpp
-  ir.cpp)
+  core.cpp)
 
-add_athena_executable(
+add_polar_executable(
         TestIntegrationJITRunnable
         ${INT_TEST_SRC})
 
 find_package(Threads)
 target_link_libraries(TestIntegrationJITRunnable PRIVATE
-        athena
+        PolarAI::framework
+        PolarAI::generic_backend
         AthenaDep::googletest
         Threads::Threads)
 

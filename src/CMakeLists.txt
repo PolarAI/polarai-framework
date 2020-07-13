@@ -32,7 +32,8 @@ add_polar_library(polarai SHARED
         )
 add_library(PolarAI::framework ALIAS polarai)
 
-target_link_libraries(polarai PRIVATE PolarAI::utils)
+target_link_libraries(polarai PRIVATE PolarAI::core PolarAI::io PolarAI::loaders
+                              PolarAI::operation PolarAI::utils)
 
 # --- Library options ---
 set_target_properties(polarai PROPERTIES
