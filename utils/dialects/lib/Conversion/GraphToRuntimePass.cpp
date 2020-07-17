@@ -94,11 +94,11 @@ struct GraphReturnConversionPattern
     std::vector<Operation*> launches;
     std::copy_if(
         users.begin(), users.end(), std::back_inserter(launches),
-        [](Operation* op) { return llvm::isa<polar_rt::LaunchFuncOp>(op); });
+        [](Operation* op) { return llvm::isa<polar_rt::ApplyOp>(op); });
 
     // fixme may be incorrect
     if (!launches.empty()) {
-      auto launchOp = llvm::cast<polar_rt::LaunchFuncOp>(launches.back());
+      auto launchOp = llvm::cast<polar_rt::ApplyOp>(launches.back());
       retVal = launchOp.getResult();
     } else {
       retVal = rewriter.create<polar_rt::NullEventOp>(

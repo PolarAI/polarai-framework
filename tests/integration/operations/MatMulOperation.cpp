@@ -83,17 +83,18 @@ TEST_F(OperationTest, MatMulNN) {
   auto out = graph.create<OutputNode>("out");
   graph.connect(node, out, Operation::Unmarked);
 
-  withEachDeviceDo([&graph, out, &context, &target](GenericExecutor& executor) {
-    executor.addGraph(graph);
-    executor.evaluate(graph);
+  withEachDeviceDo(
+      [&graph, out, &context, &target, m, n](GenericExecutor& executor) {
+        executor.addGraph(graph);
+        executor.evaluate(graph);
 
-    auto accessor =
-        context.internal()->getRef<OutputNode>(out).getAccess<float>(
-            executor.getAllocator());
-    for (int i = 0; i < 4; i++) {
-      EXPECT_FLOAT_EQ(accessor(i), target[i]);
-    }
-  });
+        auto accessor =
+            context.internal()->getRef<OutputNode>(out).getAccess<float>(
+                executor.getAllocator());
+        for (int i = 0; i < m * n; i++) {
+          EXPECT_FLOAT_EQ(accessor(i), target[i]);
+        }
+      });
 }
 
 TEST_F(OperationTest, MatMulNNSquare) {
