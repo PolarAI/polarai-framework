@@ -478,7 +478,7 @@ struct LaunchFuncOpLoweringPattern
       auto stringType = LLVM::LLVMType::getArrayTy(
           LLVM::LLVMType::getInt8Ty(llvmDialect), kernelNameStr.size() + 1);
       char* strData = new char[kernelNameStr.size() + 1];
-      strcpy(strData, kernelNameStr.data());
+      memcpy(strData, kernelNameStr.data(), kernelNameStr.size()*sizeof(char));
       strData[kernelNameStr.size()] = '\00';
       auto kernelNameAttr = builder.getStringAttr(
           llvm::StringRef(strData, kernelNameStr.size() + 1));
@@ -522,7 +522,7 @@ struct LaunchFuncOpLoweringPattern
           LLVM::LLVMType::getArrayTy(LLVM::LLVMType::getInt8Ty(llvmDialect),
                                      nativeKernelNameStr.size() + 1);
       char* strData = new char[nativeKernelNameStr.size() + 1];
-      strcpy(strData, nativeKernelNameStr.data());
+      memcpy(strData, nativeKernelNameStr.data(), nativeKernelNameStr.size() * sizeof(char));
       strData[nativeKernelNameStr.size()] = '\00';
       auto kernelNameAttr = builder.getStringAttr(
           llvm::StringRef(strData, nativeKernelNameStr.size() + 1));

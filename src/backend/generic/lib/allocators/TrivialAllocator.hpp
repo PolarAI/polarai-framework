@@ -43,7 +43,11 @@ private:
   }
 
 public:
-  ~TrivialAllocator() override = default;
+  ~TrivialAllocator() override {
+    for (auto& record : mMemMap) {
+      delete [] static_cast<unsigned char*>(record.second);
+    }
+  };
 
   void registerMemoryOffloadCallback(MemoryOffloadCallbackT function) override {
   }
@@ -69,6 +73,7 @@ public:
     }
 
     delete[] reinterpret_cast<unsigned char*>(mMemMap[record]);
+    mMemMap.erase(record);
 
     if (mReleasedAllocations.count(record)) {
       mReleasedAllocations.erase(record);
