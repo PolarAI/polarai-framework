@@ -10,6 +10,7 @@ add_mlir_dialect_library(MLIRPolarGraph
         kernels/MulConcatOp.cpp
         kernels/MulOp.cpp
         kernels/SigmoidOp.cpp
+        kernels/ReLUOp.cpp
 
         ADDITIONAL_HEADER_DIRS
         ${PROJECT_SOURCE_DIR}/include

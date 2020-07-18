@@ -240,6 +240,25 @@ def AddOp : PolarGraph_Op<"add", [ComputationalOpInterface]> {
   }];
 }
 
+def Conv2DOp : PolarGraph_Op<"conv2d", [ComputationalOpInterface]> {
+  let summary = "2D convolution";
+  let description = [{TBD}];
+
+  let arguments = (ins AnyTensor:$input, AnyTensor:$conv_kernel, AnyTensor:$out);
+
+  let skipDefaultBuilders = 1;
+  let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
+                            "Value input, Value kernel, Value out", [{
+    result.addOperands({input, kernel, out});
+  }]>];
+  let extraClassDeclaration = [{
+    llvm::StringRef getKernelName() {
+      return "fconv2d";
+    }
+    void produceKernel(OpBuilder&, Block::BlockArgListType);
+  }];
+}
+
 def CopyOp : PolarGraph_Op<"copy", [ComputationalOpInterface]> {
   let summary = "Element-wise copy operation";
   let description = [{ TBD }];
@@ -377,6 +396,61 @@ def MulConcatOp : PolarGraph_Op<"mulconcat", [ComputationalOpInterface]> {
   }];
 }
 
+def POOL_P_MAX : I64EnumAttrCase<"max", 0, "max">;
+
+def PoolPredicateAttr : I64EnumAttr<"PoolPredicate", "", 
+    [POOL_P_MAX]> {
+  let cppNamespace = "::mlir::polar_graph";
+}
+
+def PoolOp : PolarGraph_Op<"pool", [ComputationalOpInterface, 
+                                    SameTypeOperands]> {
+  let summary = "N-D pooling operation";
+  let description = [{TBD}];
+
+  let arguments = (ins 
+    AnyTensor:$input, 
+    AnyTensor:$out, 
+    PoolPredicateAttr:$predicate,
+    I64ArrayAttr:$window
+  );
+  let skipDefaultBuilders = 1;
+  let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
+                            "Value input, Value out, PoolPredicate predicate, "
+                            "ArrayRef<uint64_t> sizes", 
+                            [{
+    result.addOperands({input, out});
+  }]>];
+  let extraClassDeclaration = [{
+    llvm::StringRef getKernelName() {
+      return "fpool";
+    }
+    void produceKernel(OpBuilder&, Block::BlockArgListType);
+  }];
+
+  let assemblyFormat = "$predicate $input `,` $out attr-dict `:` type($out)";
+}
+
+def ReLUOp : PolarGraph_Op<"relu", [ComputationalOpInterface]> {
+  let summary = "ReLU operation";
+  let description = [{ TBD }];
+
+  let arguments = (ins AnyTensor:$input, AnyTensor:$out);
+
+  let skipDefaultBuilders = 1;
+  let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
+                            "Value input, Value out", [{
+    result.addOperands({input, out});
+  }]>];
+
+  let extraClassDeclaration = [{
+    llvm::StringRef getKernelName() {
+      return "ftranspose";
+    }
+    void produceKernel(OpBuilder&, Block::BlockArgListType);
+  }];
+}
+
 def SigmoidOp : PolarGraph_Op<"sigmoid", [ComputationalOpInterface]> {
   let summary = "Element-wise sigmoid operation";
   let description = [{ TBD }];
@@ -396,6 +470,25 @@ def SigmoidOp : PolarGraph_Op<"sigmoid", [ComputationalOpInterface]> {
   }];
 }
 
+def SoftmaxOp : PolarGraph_Op<"softmax", [ComputationalOpInterface]> {
+  let summary = "Softmax operation";
+  let description = [{ TBD }];
+
+  let arguments = (ins AnyTensor:$input, AnyTensor:$out);
+
+  let skipDefaultBuilders = 1;
+  let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
+                            "Value input, Value out", [{
+    result.addOperands({input, out});
+  }]>];
+
+  let extraClassDeclaration = [{
+    llvm::StringRef getKernelName() {
+      return "ftranspose";
+    }
+    void produceKernel(OpBuilder&, Block::BlockArgListType);
+  }];
+}
 
 def TransposeOp : PolarGraph_Op<"transpose", [ComputationalOpInterface]> {
   let summary = "Matrix transposition operation";
