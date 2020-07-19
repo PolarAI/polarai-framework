@@ -398,6 +398,16 @@ void populateCodeGenPatterns(polarai::core::internal::Generator& generator,
       };
   generator.registerFunctor<builtin::MulConcat>(mulConcatFunctor);
 
+  builtin_functor_t<builtin::ReLU> reluFunctor = [&](GenValue input,
+                                                           GenValue out) {
+    auto inputVal = input.value<MlirValueImpl>().value;
+    auto outVal = out.value<MlirValueImpl>().value;
+
+    builder.create<mlir::polar_graph::ReLUOp>(builder.getUnknownLoc(),
+                                                 inputVal, outVal);
+  };
+  generator.registerFunctor<builtin::ReLU>(reluFunctor);
+
   builtin_functor_t<builtin::Sigmoid> sigmoidFunctor = [&](GenValue input,
                                                            GenValue out) {
     auto inputVal = input.value<MlirValueImpl>().value;
@@ -407,6 +417,16 @@ void populateCodeGenPatterns(polarai::core::internal::Generator& generator,
                                                  inputVal, outVal);
   };
   generator.registerFunctor<builtin::Sigmoid>(sigmoidFunctor);
+
+  builtin_functor_t<builtin::Softmax> softmaxFunctor = [&](GenValue input,
+                                                           GenValue out) {
+    auto inputVal = input.value<MlirValueImpl>().value;
+    auto outVal = out.value<MlirValueImpl>().value;
+
+    builder.create<mlir::polar_graph::SoftmaxOp>(builder.getUnknownLoc(),
+                                                 inputVal, outVal);
+  };
+  generator.registerFunctor<builtin::Softmax>(softmaxFunctor);
 
   builtin_functor_t<builtin::Fill> fillFunctor = [&](GenValue pattern,
                                                      GenValue out) {

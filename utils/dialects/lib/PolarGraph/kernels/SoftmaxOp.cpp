@@ -59,7 +59,7 @@ void SoftmaxOp::produceKernel(OpBuilder& builder,
 
     auto exp = builder.create<ExpOp>(loc, inp);
 
-    auto div = builder.create<DivFOp>(loc, inp, total);
+    auto div = builder.create<DivFOp>(loc, exp, total);
 
     builder.create<AffineStoreOp>(loc, div, args[1], idx);
   };

@@ -343,7 +343,10 @@ protected:
     target.addIllegalOp<polar_graph::MulOp>();
     target.addIllegalOp<polar_graph::MulConcatOp>();
     target.addIllegalOp<polar_graph::MatMulOp>();
+    target.addIllegalOp<polar_graph::ReLUOp>();
     target.addIllegalOp<polar_graph::SigmoidOp>();
+    target.addIllegalOp<polar_graph::SoftmaxOp>();
+    target.addIllegalOp<polar_graph::TransposeOp>();
     target.addIllegalOp<polar_graph::TransposeOp>();
     target.addIllegalOp<polar_graph::FillOp>();
 
@@ -375,7 +378,9 @@ void populateGraphToRuntimeConversionPatterns(
       BuiltinConversionPattern<polar_graph::MulOp>,
       BuiltinConversionPattern<polar_graph::MulConcatOp>,
       BuiltinConversionPattern<polar_graph::MatMulOp>,
+      BuiltinConversionPattern<polar_graph::ReLUOp>,
       BuiltinConversionPattern<polar_graph::SigmoidOp>,
+      BuiltinConversionPattern<polar_graph::SoftmaxOp>,
       BuiltinConversionPattern<polar_graph::FillOp>,
       BuiltinConversionPattern<polar_graph::TransposeOp>
       // clang-format on

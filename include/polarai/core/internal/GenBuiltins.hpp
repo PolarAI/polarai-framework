@@ -41,7 +41,9 @@ enum class builtin {
   Mul,       ///< Element-wise multiplication.
   MulConcat, ///< Gradient concatenation.
   Fill,      ///< Fill tensor with constant pattern.
+  ReLU,      ///< Rectified linear unit.
   Sigmoid,   ///< Element-wise sigmoid.
+  Softmax,   ///< Softmax.
   Slice,     ///< Get subtensor.
   Transpose  /// Transpose 2D tensor (matrix).
   ///}
@@ -114,7 +116,15 @@ template <> struct builtin_functor<builtin::MulConcat> {
   using type = std::function<void(GenValue, GenValue, GenValue)>;
 };
 
+template <> struct builtin_functor<builtin::ReLU> {
+  using type = std::function<void(GenValue, GenValue)>;
+};
+
 template <> struct builtin_functor<builtin::Sigmoid> {
+  using type = std::function<void(GenValue, GenValue)>;
+};
+
+template <> struct builtin_functor<builtin::Softmax> {
   using type = std::function<void(GenValue, GenValue)>;
 };
 
@@ -150,7 +160,9 @@ using BuiltinMap = std::tuple<
     builtin_functor_t<builtin::Mul>,
     builtin_functor_t<builtin::MulConcat>,
     builtin_functor_t<builtin::Fill>,
+    builtin_functor_t<builtin::ReLU>,
     builtin_functor_t<builtin::Sigmoid>,
+    builtin_functor_t<builtin::Softmax>,
     builtin_functor_t<builtin::Slice>,
     builtin_functor_t<builtin::Transpose>>;
 // clang-format on
