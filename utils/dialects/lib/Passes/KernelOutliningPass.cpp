@@ -46,7 +46,8 @@ protected:
 
       builder.setInsertionPointToStart(&kernelsModule.body().front());
 
-      auto kernelName = parentNode.getName() + "_" + launchOp.kernel_name();
+      std::string kernelName =
+          parentNode.getName().str() + "_" + launchOp.kernel_name().str();
 
       llvm::SmallVector<mlir::Type, 5> argTypes;
       for (auto type : launchOp.body().front().getArgumentTypes()) {
@@ -55,7 +56,7 @@ protected:
       FunctionType funcType =
           FunctionType::get(argTypes, {}, launchOp.getContext());
       auto kernel = builder.create<gpu::GPUFuncOp>(launchOp.getLoc(),
-                                                   kernelName.str(), funcType);
+                                                   kernelName, funcType);
       kernel.setAttr(gpu::GPUDialect::getKernelFuncAttrName(),
                      builder.getUnitAttr());
       // todo should this be real local size?
