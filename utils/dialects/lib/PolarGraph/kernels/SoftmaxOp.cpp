@@ -13,11 +13,14 @@
 #include "PolarGraph/PolarGraphOps.h"
 
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
+#include "mlir/Dialect/SCF/SCF.h"
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "mlir/IR/Builders.h"
 
 namespace mlir::polar_graph {
-void ReLUOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
+// Fixme only single channel is supported
+void SoftmaxOp::produceKernel(OpBuilder& builder,
+                              Block::BlockArgListType args) {
   auto memrefTy = args.back().getType().cast<MemRefType>();
   auto tensorTy = out().getType().cast<RankedTensorType>();
   auto zero = builder.create<ConstantIndexOp>(builder.getUnknownLoc(), 0);
@@ -32,15 +35,33 @@ void ReLUOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
     ubs.push_back(dim);
   }
 
-  auto bodyBuilder = [args, &memrefTy](OpBuilder& builder, Location loc,
-                                       ValueRange idx) {
-    auto inp = builder.create<AffineLoadOp>(loc, args[0], idx);
+  auto bodyBuilder = [args, &memrefTy, lbs, ubs,
+                      steps](OpBuilder& builder, Location loc, ValueRange idx) {
     auto fzero = builder.create<ConstantFloatOp>(
         loc, APFloat(0.f), memrefTy.getElementType().cast<FloatType>());
-    auto cmp = builder.create<CmpFOp>(loc, CmpFPredicate::OGT, inp, fzero);
-    auto res = builder.create<SelectOp>(loc, cmp, inp, fzero);
+    builder.create<AffineStoreOp>(loc, fzero, args[1], idx);
 
-    builder.create<AffineStoreOp>(loc, res, args[1], idx);
+    auto reduceBody = [args, outerIdx = idx](OpBuilder& builder, Location loc,
+                                             ValueRange idx) {
+      auto inp = builder.create<AffineLoadOp>(loc, args[0], idx);
+      auto exp = builder.create<ExpOp>(loc, inp);
+
+      auto out = builder.create<AffineLoadOp>(loc, args[1], outerIdx);
+
+      auto res = builder.create<AddFOp>(loc, exp, out);
+
+      builder.create<StoreOp>(loc, res, args[1], outerIdx);
+    };
+    buildAffineLoopNest(builder, builder.getUnknownLoc(), lbs, ubs, steps,
+                        reduceBody);
+    auto total = builder.create<AffineLoadOp>(loc, args[1], idx);
+    auto inp = builder.create<AffineLoadOp>(loc, args[0], idx);
+
+    auto exp = builder.create<ExpOp>(loc, inp);
+
+    auto div = builder.create<DivFOp>(loc, inp, total);
+
+    builder.create<AffineStoreOp>(loc, div, args[1], idx);
   };
   buildAffineLoopNest(builder, builder.getUnknownLoc(), lbs, ubs, steps,
                       bodyBuilder);

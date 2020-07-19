@@ -11,6 +11,9 @@ add_mlir_dialect_library(MLIRPolarGraph
         kernels/MulOp.cpp
         kernels/SigmoidOp.cpp
         kernels/ReLUOp.cpp
+        kernels/Conv2DOp.cpp
+        kernels/Pool2DOp.cpp
+        kernels/SoftmaxOp.cpp
 
         ADDITIONAL_HEADER_DIRS
         ${PROJECT_SOURCE_DIR}/include

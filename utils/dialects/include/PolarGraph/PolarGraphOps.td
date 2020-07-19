@@ -213,7 +213,7 @@ def BarrierOp : PolarGraph_Op<"barrier", [IsolatedFromAbove]> {
 }
 
 //===----------------------------------------------------------------------===//
-// Athena Graph builtins
+// PolarAI Graph builtins
 //===----------------------------------------------------------------------===//
 
 def AddOp : PolarGraph_Op<"add", [ComputationalOpInterface]> {
@@ -403,9 +403,9 @@ def PoolPredicateAttr : I64EnumAttr<"PoolPredicate", "",
   let cppNamespace = "::mlir::polar_graph";
 }
 
-def PoolOp : PolarGraph_Op<"pool", [ComputationalOpInterface, 
+def Pool2DOp : PolarGraph_Op<"pool2D", [ComputationalOpInterface, 
                                     SameTypeOperands]> {
-  let summary = "N-D pooling operation";
+  let summary = "2D pooling operation";
   let description = [{TBD}];
 
   let arguments = (ins 
@@ -417,11 +417,18 @@ def PoolOp : PolarGraph_Op<"pool", [ComputationalOpInterface,
   let skipDefaultBuilders = 1;
   let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
                             "Value input, Value out, PoolPredicate predicate, "
-                            "ArrayRef<uint64_t> sizes", 
+                            "ArrayRef<int64_t> sizes", 
                             [{
     result.addOperands({input, out});
+    result.addAttribute(getWindowAttrName(), builder.getI64ArrayAttr(sizes));
   }]>];
   let extraClassDeclaration = [{
+    static llvm::StringRef getPredicateAttrName() {
+      return "predicate";
+    }
+    static llvm::StringRef getWindowAttrName() {
+      return "predicate";
+    }
     llvm::StringRef getKernelName() {
       return "fpool";
     }
