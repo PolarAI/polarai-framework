@@ -20,12 +20,17 @@ function(add_polar_library target_name modifier)
                 BUILD_RPATH "${CMAKE_BUILD_RPATH};${PROJECT_BINARY_DIR}/lib"
                 LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib 
                 RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
-    target_compile_definitions(${target_name} PRIVATE 
-                               polar_core_EXPORTS 
-                               polar_operation_EXPORTS 
-                               polar_io_EXPORTS
-                               polar_utils_EXPORTS
-                               polar_loaders_EXPORTS)
+    
+    # TODO this is a workaround for windows, which has concept of 
+    # imported symbols. It must be removed in future.
+    if (${modifier} MATCHES "OBJECT")
+        target_compile_definitions(${target_name} PRIVATE 
+                            polar_core_EXPORTS 
+                            polar_operation_EXPORTS 
+                            polar_io_EXPORTS
+                            polar_utils_EXPORTS
+                            polar_loaders_EXPORTS)
+    endif()
 
     find_package(codecov)
     add_coverage(${target_name})
