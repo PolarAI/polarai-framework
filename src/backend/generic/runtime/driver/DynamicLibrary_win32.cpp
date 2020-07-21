@@ -10,27 +10,26 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
-#pragma once
+#include "DynamicLibrary.hpp"
 
-#include <memory>
-#include <string_view>
+#include <windows.h>
 #include <string>
 
 namespace polarai::backend::generic {
-class DynamicLibrary {
-public:
-  static auto create(std::string_view libName)
-      -> std::unique_ptr<DynamicLibrary>;
-  auto lookup(std::string_view symbolName) -> void*;
+std::unique_ptr<DynamicLibrary>
+DynamicLibrary::create(std::string_view libName) {
+  HINSTANCE libHandle = LoadLibrary(TEXT(libName.data()));
 
-  auto isValid() -> bool { return mHandle != nullptr; }
+  return std::make_unique<DynamicLibrary>(static_cast<void*>(libHandle));
+}
 
-  auto getLastError() -> std::string;
+void* DynamicLibrary::lookup(std::string_view symbolName) {
+  return reinterpret_cast<void*>(GetProcAddress(reinterpret_cast<HINSTANCE>(mHandle), symbolName.data()));
+}
 
-  ~DynamicLibrary();
+auto DynamicLibrary::getLastError() -> std::string {
+  return std::string("Not implemented");
+}
 
-  DynamicLibrary(void* handle) : mHandle(handle){};
-private:
-  void* mHandle;
-};
+DynamicLibrary::~DynamicLibrary() { FreeLibrary(reinterpret_cast<HINSTANCE>(mHandle)); }
 } // namespace polarai::backend::llvm

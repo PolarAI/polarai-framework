@@ -1,7 +1,13 @@
 configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h @ONLY)
 
+if (WIN32)
+  set(DL_SRC DynamicLibrary_win32.cpp)
+else()
+  set(DL_SRC DynamicLibrary_posix.cpp)
+endif()
+
 add_polar_library(polar_generic_be_driver STATIC
-  DynamicLibrary_posix.cpp
+  ${DL_SRC}
   RuntimeDriver.cpp)
 add_library(PolarAI::generic_backend_driver ALIAS polar_generic_be_driver)
 target_include_directories(polar_generic_be_driver PUBLIC 
