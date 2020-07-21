@@ -10,28 +10,30 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
+#include <polar_core_export.h>
+
 #pragma once
 namespace polarai::core {
-class AbstractNode;
-class Node;
-class InputNode;
-class OutputNodeInternal;
-class LossNode;
+class POLAR_CORE_EXPORT AbstractNode;
+class POLAR_CORE_EXPORT Node;
+class POLAR_CORE_EXPORT InputNode;
+class POLAR_CORE_EXPORT OutputNodeInternal;
+class POLAR_CORE_EXPORT LossNode;
 namespace impl {
-class GraphImpl;
-class ContextImpl;
+class POLAR_CORE_EXPORT GraphImpl;
+class POLAR_CORE_EXPORT ContextImpl;
 
-class AbstractNodeImpl;
-class NodeImpl;
-class OutputNodeImpl;
+class POLAR_CORE_EXPORT AbstractNodeImpl;
+class POLAR_CORE_EXPORT NodeImpl;
+class POLAR_CORE_EXPORT OutputNodeImpl;
 } // namespace impl
 namespace internal {
-class GraphInternal;
-class ContextInternal;
+class POLAR_CORE_EXPORT GraphInternal;
+class POLAR_CORE_EXPORT ContextInternal;
 
-class AbstractNodeInternal;
-class NodeInternal;
-class InputNodeInternal;
-class OutputNodeInternal;
+class POLAR_CORE_EXPORT AbstractNodeInternal;
+class POLAR_CORE_EXPORT NodeInternal;
+class POLAR_CORE_EXPORT InputNodeInternal;
+class POLAR_CORE_EXPORT OutputNodeInternal;
 } // namespace internal
 } // namespace polarai::core

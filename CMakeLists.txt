@@ -57,7 +57,9 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     add_definitions(-DDEBUG)
 endif ()
 
-add_subdirectory(utils/dialects)
+if (NOT POLAR_NO_LLVM)
+  add_subdirectory(utils/dialects)
+endif()
 add_subdirectory(src)
 add_subdirectory(utils/lspolar)
 

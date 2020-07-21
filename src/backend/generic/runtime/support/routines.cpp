@@ -11,6 +11,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "../utils/utils.hpp"
+#include "api.hpp"
 
 #include <polarai/backend/generic/BackendAllocator.hpp>
 #include <polarai/backend/generic/runtime/BackendAccessor.hpp>

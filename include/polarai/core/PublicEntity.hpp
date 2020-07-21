@@ -19,7 +19,7 @@
 
 namespace polarai::core {
 namespace internal {
-class ContextInternal;
+class POLAR_CORE_EXPORT ContextInternal;
 }
 class POLAR_CORE_EXPORT PublicEntity {
 public:

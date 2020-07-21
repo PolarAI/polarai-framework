@@ -20,7 +20,7 @@
 #include <polarai/utils/Pointer.hpp>
 
 namespace polarai::core::internal {
-class ContextInternal;
+class POLAR_CORE_EXPORT ContextInternal;
 
 class POLAR_CORE_EXPORT TensorInternal : public Entity {
 public:

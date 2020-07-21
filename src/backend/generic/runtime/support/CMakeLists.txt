@@ -3,6 +3,7 @@ add_polar_library(polar_rt_support OBJECT
 add_library(PolarAI::generic_backend_support ALIAS polar_rt_support)
 target_include_directories(polar_rt_support PUBLIC 
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+target_compile_definitions(polar_rt_support PRIVATE BUILD_DLL)
 
 add_polar_library(polar_rt_support_static STATIC 
         $<TARGET_OBJECTS:polar_rt_support>)

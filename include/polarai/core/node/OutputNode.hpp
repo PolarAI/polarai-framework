@@ -20,7 +20,7 @@
 
 namespace polarai::core {
 namespace internal {
-class OutputNodeInternal;
+class POLAR_CORE_EXPORT OutputNodeInternal;
 }
 
 /**

@@ -30,6 +30,7 @@ public:
   ~HeterogeneousVector();
 
   HeterogeneousVector(HeterogeneousVector&&);
+  HeterogeneousVector(const HeterogeneousVector&) = default;
 
   template <typename Type, typename... Args>
   utils::Index emplaceBack(Args&&... args);
