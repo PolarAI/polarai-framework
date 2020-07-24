@@ -13,7 +13,7 @@
 #include <polarai/core/node/internal/AbstractNodeInternal.hpp>
 #include <polarai/core/node/internal/NodeInternal.hpp>
 #include <polarai/operation/MulOperation.hpp>
-#include <polarai/operation/SoftmaxOperation.hpp>
+#include <polarai/operation/Pool2DOperation.hpp>
 #include <polarai/operation/CombineOperation.hpp>
 #include <polarai/loaders/DummyLoader.hpp>
 #include <polarai/loaders/ConstantLoader.hpp>
@@ -21,24 +21,28 @@
 using namespace polarai::core::internal;
 
 namespace polarai::operation::internal {
-SoftmaxOperationInternal::SoftmaxOperationInternal(
+Pool2DOperationInternal::Pool2DOperationInternal(
     utils::WeakPtr<core::internal::ContextInternal> context,
-    utils::Index publicNodeIndex, utils::String name)
+    utils::Index publicNodeIndex, std::initializer_list<int64_t> sizes, 
+    std::initializer_list<int64_t> stride, utils::String name)
     : core::internal::OperationInternal(std::move(context), publicNodeIndex,
-                                        std::move(name)) {}
+                                        std::move(name)), mSizes(sizes), 
+                                        mStrides(stride) {}
 
-utils::Index SoftmaxOperationInternal::createResultTensor(
+utils::Index Pool2DOperationInternal::createResultTensor(
     utils::SharedPtr<core::internal::ContextInternal> context,
     const std::unordered_map<int64_t, utils::Index>& mapMarkToLocalTensorIndex,
     const std::vector<core::internal::TensorInternal*>& tensors) const {
   auto dataType = tensors[0]->getDataType();
-  auto tensorShape = tensors[0]->getShape();
+  size_t dim0 = (tensors[0]->getShapeView().dim(0) - mSizes[0]) / mStrides[0] + 1;
+  size_t dim1 = (tensors[0]->getShapeView().dim(1) - mSizes[1]) / mStrides[1] + 1;
+  core::TensorShape tensorShape{dim0, dim1};
   // TODO check preconditions
   return context->create<core::internal::TensorInternal>(
       context, context->getNextPublicIndex(), dataType, std::move(tensorShape));
 }
 
-core::internal::GenValue SoftmaxOperationInternal::gen(
+core::internal::GenValue Pool2DOperationInternal::gen(
     utils::SharedPtr<core::internal::ContextInternal> context,
     core::internal::Generator& generator,
     const std::unordered_map<int64_t, utils::Index>& mapMarkToLocalTensorIndex,
@@ -57,7 +61,7 @@ core::internal::GenValue SoftmaxOperationInternal::gen(
 
   lockTensors(generator, argMap, resultMap);
 
-  generator.callBuiltin<builtin::Softmax>(input, out);
+  generator.callBuiltin<builtin::Pool2D>(input, out, mSizes, mStrides);
 
   releaseTensors(generator, argMap, resultMap);
 
@@ -66,11 +70,11 @@ core::internal::GenValue SoftmaxOperationInternal::gen(
 
 std::tuple<utils::Index, std::vector<core::internal::Edge>,
            std::vector<utils::Index>>
-SoftmaxOperationInternal::genDerivative(
+Pool2DOperationInternal::genDerivative(
     const core::NodeState* inputNodeState, const core::NodeState* currentNodeState, size_t indexOfOutputDependence,
     utils::Index gradientGraphFinalNodeIndex) const {
   return {};
 }
 
-size_t SoftmaxOperationInternal::getOperandsCount() const { return 2; }
+size_t Pool2DOperationInternal::getOperandsCount() const { return 2; }
 } // namespace polarai::operation::internal

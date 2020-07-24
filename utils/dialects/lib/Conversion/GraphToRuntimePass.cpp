@@ -343,6 +343,7 @@ protected:
     target.addIllegalOp<polar_graph::MulOp>();
     target.addIllegalOp<polar_graph::MulConcatOp>();
     target.addIllegalOp<polar_graph::MatMulOp>();
+    target.addIllegalOp<polar_graph::Pool2DOp>();
     target.addIllegalOp<polar_graph::ReLUOp>();
     target.addIllegalOp<polar_graph::SigmoidOp>();
     target.addIllegalOp<polar_graph::SoftmaxOp>();
@@ -378,6 +379,7 @@ void populateGraphToRuntimeConversionPatterns(
       BuiltinConversionPattern<polar_graph::MulOp>,
       BuiltinConversionPattern<polar_graph::MulConcatOp>,
       BuiltinConversionPattern<polar_graph::MatMulOp>,
+      BuiltinConversionPattern<polar_graph::Pool2DOp>,
       BuiltinConversionPattern<polar_graph::ReLUOp>,
       BuiltinConversionPattern<polar_graph::SigmoidOp>,
       BuiltinConversionPattern<polar_graph::SoftmaxOp>,

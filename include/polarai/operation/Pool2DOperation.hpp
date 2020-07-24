@@ -14,12 +14,12 @@
 
 #include <polar_operation_export.h>
 #include <polarai/core/operation/Operation.hpp>
-#include <polarai/operation/internal/ReLUOperationInternal.hpp>
+#include <polarai/operation/internal/Pool2DOperationInternal.hpp>
 
 namespace polarai::operation {
-class POLAR_OPERATION_EXPORT ReLUOperation : public core::Operation {
+class POLAR_OPERATION_EXPORT Pool2DOperation : public core::Operation {
 public:
-  using InternalType = internal::ReLUOperationInternal;
+  using InternalType = internal::Pool2DOperationInternal;
   enum Arguments { Unmarked = 50 };
 };
 } // namespace polarai::operation

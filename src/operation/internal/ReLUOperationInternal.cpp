@@ -74,5 +74,3 @@ ReLUOperationInternal::genDerivative(
 
 size_t ReLUOperationInternal::getOperandsCount() const { return 2; }
 } // namespace polarai::operation::internal
-
-

@@ -398,6 +398,18 @@ void populateCodeGenPatterns(polarai::core::internal::Generator& generator,
       };
   generator.registerFunctor<builtin::MulConcat>(mulConcatFunctor);
 
+  builtin_functor_t<builtin::Pool2D> pool2dFunctor =
+      [&](GenValue input, GenValue out, const std::vector<int64_t>& sizes,
+          const std::vector<int64_t>& strides) {
+        auto inputVal = input.value<MlirValueImpl>().value;
+        auto outVal = out.value<MlirValueImpl>().value;
+
+        builder.create<mlir::polar_graph::Pool2DOp>(
+            builder.getUnknownLoc(), inputVal, outVal, 
+            mlir::polar_graph::PoolPredicate::max, sizes, strides);
+      };
+  generator.registerFunctor<builtin::Pool2D>(pool2dFunctor);
+
   builtin_functor_t<builtin::ReLU> reluFunctor = [&](GenValue input,
                                                            GenValue out) {
     auto inputVal = input.value<MlirValueImpl>().value;

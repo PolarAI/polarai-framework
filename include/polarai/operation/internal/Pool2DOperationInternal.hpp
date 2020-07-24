@@ -18,14 +18,16 @@
 #include <polar_operation_export.h>
 
 namespace polarai::operation::internal {
-class POLAR_OPERATION_EXPORT ReLUOperationInternal
+class POLAR_OPERATION_EXPORT Pool2DOperationInternal
     : public core::internal::OperationInternal {
 public:
-  ReLUOperationInternal(
+  Pool2DOperationInternal(
       utils::WeakPtr<core::internal::ContextInternal> context,
-      utils::Index publicNodeIndex, utils::String name = utils::String(""));
+      utils::Index publicNodeIndex, std::initializer_list<int64_t> windowSizes,
+      std::initializer_list<int64_t> stride,
+      utils::String name = utils::String(""));
 
-  ~ReLUOperationInternal() override = default;
+  ~Pool2DOperationInternal() override = default;
 
   [[nodiscard]] utils::Index
   createResultTensor(utils::SharedPtr<core::internal::ContextInternal> context,
@@ -52,5 +54,9 @@ public:
                 utils::Index gradientGraphFinalNodeIndex) const override;
 
   [[nodiscard]] size_t getOperandsCount() const override;
+
+private:
+  std::vector<int64_t> mSizes;
+  std::vector<int64_t> mStrides;
 };
 } // namespace polarai::operation::internal

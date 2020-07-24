@@ -6,6 +6,7 @@ set(INT_TEST_SRC
   DivideOperation.cpp
   LogLossOperation.cpp
   MatMulOperation.cpp
+  Pool2DOperation.cpp
   ReLUOperation.cpp
   SigmoidOperation.cpp
   SoftmaxOperation.cpp

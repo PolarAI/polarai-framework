@@ -403,8 +403,7 @@ def PoolPredicateAttr : I64EnumAttr<"PoolPredicate", "",
   let cppNamespace = "::mlir::polar_graph";
 }
 
-def Pool2DOp : PolarGraph_Op<"pool2D", [ComputationalOpInterface, 
-                                    SameTypeOperands]> {
+def Pool2DOp : PolarGraph_Op<"pool2d", [ComputationalOpInterface]> {
   let summary = "2D pooling operation";
   let description = [{TBD}];
 
@@ -412,22 +411,30 @@ def Pool2DOp : PolarGraph_Op<"pool2D", [ComputationalOpInterface,
     AnyTensor:$input, 
     AnyTensor:$out, 
     PoolPredicateAttr:$predicate,
-    I64ArrayAttr:$window
+    I64ArrayAttr:$window,
+    I64ArrayAttr:$stride
   );
   let skipDefaultBuilders = 1;
   let builders = [OpBuilder<"OpBuilder& builder, OperationState& result, "
                             "Value input, Value out, PoolPredicate predicate, "
-                            "ArrayRef<int64_t> sizes", 
+                            "ArrayRef<int64_t> sizes, ArrayRef<int64_t> stride", 
                             [{
     result.addOperands({input, out});
+    result.addAttribute(
+      getPredicateAttrName(), 
+      builder.getI64IntegerAttr(static_cast<int64_t>(predicate)));
     result.addAttribute(getWindowAttrName(), builder.getI64ArrayAttr(sizes));
+    result.addAttribute(getStrideAttrName(), builder.getI64ArrayAttr(stride));
   }]>];
   let extraClassDeclaration = [{
     static llvm::StringRef getPredicateAttrName() {
       return "predicate";
     }
     static llvm::StringRef getWindowAttrName() {
-      return "predicate";
+      return "window";
+    }
+    static llvm::StringRef getStrideAttrName() {
+      return "stride";
     }
     llvm::StringRef getKernelName() {
       return "fpool";
@@ -435,7 +442,7 @@ def Pool2DOp : PolarGraph_Op<"pool2D", [ComputationalOpInterface,
     void produceKernel(OpBuilder&, Block::BlockArgListType);
   }];
 
-  let assemblyFormat = "$predicate $input `,` $out attr-dict `:` type($out)";
+  let assemblyFormat = "$predicate $input `,` $out attr-dict `:` type($input) `->` type($out)";
 }
 
 def ReLUOp : PolarGraph_Op<"relu", [ComputationalOpInterface]> {

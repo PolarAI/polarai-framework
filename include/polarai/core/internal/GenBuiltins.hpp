@@ -40,6 +40,7 @@ enum class builtin {
   MatMul,    ///< Matrix-matrix multiplication.
   Mul,       ///< Element-wise multiplication.
   MulConcat, ///< Gradient concatenation.
+  Pool2D,    ///< 2D pooling.
   Fill,      ///< Fill tensor with constant pattern.
   ReLU,      ///< Rectified linear unit.
   Sigmoid,   ///< Element-wise sigmoid.
@@ -116,6 +117,11 @@ template <> struct builtin_functor<builtin::MulConcat> {
   using type = std::function<void(GenValue, GenValue, GenValue)>;
 };
 
+template <> struct builtin_functor<builtin::Pool2D> {
+  using type = std::function<void(GenValue, GenValue, 
+    const std::vector<int64_t>&, const std::vector<int64_t>&)>;
+};
+
 template <> struct builtin_functor<builtin::ReLU> {
   using type = std::function<void(GenValue, GenValue)>;
 };
@@ -159,6 +165,7 @@ using BuiltinMap = std::tuple<
     builtin_functor_t<builtin::MatMul>,
     builtin_functor_t<builtin::Mul>,
     builtin_functor_t<builtin::MulConcat>,
+    builtin_functor_t<builtin::Pool2D>,
     builtin_functor_t<builtin::Fill>,
     builtin_functor_t<builtin::ReLU>,
     builtin_functor_t<builtin::Sigmoid>,

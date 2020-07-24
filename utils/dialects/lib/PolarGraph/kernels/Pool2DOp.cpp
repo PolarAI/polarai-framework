@@ -15,6 +15,7 @@
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "mlir/IR/Builders.h"
+#include "mlir/IR/AffineMap.h"
 
 namespace mlir::polar_graph {
 // Fixme only single channel is supported
@@ -38,7 +39,11 @@ void Pool2DOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
   for (auto& attr : window().getValue()) {
     windowSize.push_back(attr.cast<IntegerAttr>().getInt());
   }
-  auto bodyBuilder = [args, &memrefTy, windowSize](
+  SmallVector<int64_t, 2> strides;
+  for (auto& attr : stride().getValue()) {
+    strides.push_back(attr.cast<IntegerAttr>().getInt());
+  }
+  auto bodyBuilder = [args, &memrefTy, windowSize, strides](
                          OpBuilder& builder, Location loc, ValueRange idx) {
     auto verySmallNumber = builder.create<ConstantFloatOp>(
         loc, APFloat(-10e5), memrefTy.getElementType().cast<FloatType>());
@@ -46,15 +51,28 @@ void Pool2DOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
     SmallVector<int64_t, 2> lbs(2, 0);
     const SmallVector<int64_t, 2>& ubs = windowSize;
     SmallVector<int64_t, 2> steps(2, 1);
-    auto innerBuilder = [args, windowSize, outerIdx = idx](
+    auto innerBuilder = [args, windowSize, strides, outerIdx = idx](
                             OpBuilder& builder, Location loc, ValueRange idx) {
-      auto winSize0 = builder.create<ConstantIndexOp>(loc, windowSize[0]);
-      auto winSize1 = builder.create<ConstantIndexOp>(loc, windowSize[1]);
+      auto idxDim = getAffineDimExpr(0, builder.getContext());
+      auto outerIdxDim = getAffineDimExpr(1, builder.getContext());
+      auto strideSym = getAffineSymbolExpr(0, builder.getContext());
 
-      auto window0 = builder.create<MulFOp>(loc, winSize0, outerIdx[0]);
-      auto idx0 = builder.create<AddFOp>(loc, window0, idx[0]);
-      auto window1 = builder.create<MulFOp>(loc, winSize0, outerIdx[1]);
-      auto idx1 = builder.create<AddFOp>(loc, window0, idx[1]);
+      auto expr = outerIdxDim * strideSym + idxDim;
+
+      auto map = AffineMap::get(2, 1, expr);
+
+      auto stride0 = builder.create<ConstantIndexOp>(loc, strides[0]);
+      auto stride1 = builder.create<ConstantIndexOp>(loc, strides[1]);
+      
+      auto idx0 = builder.create<AffineApplyOp>(loc, map, 
+                                      ValueRange{idx[0], outerIdx[0], stride0});
+      auto idx1 = builder.create<AffineApplyOp>(loc, map, 
+                                      ValueRange{idx[1], outerIdx[1], stride1});
+
+      // auto window0 = builder.create<MulIOp>(loc, stride0, outerIdx[0]);
+      // auto idx0 = builder.create<AddIOp>(loc, window0, idx[0]);
+      // auto window1 = builder.create<MulIOp>(loc, stride0, outerIdx[1]);
+      // auto idx1 = builder.create<AddIOp>(loc, window0, idx[1]);
 
       auto inp =
           builder.create<AffineLoadOp>(loc, args[0], ValueRange{idx0, idx1});
