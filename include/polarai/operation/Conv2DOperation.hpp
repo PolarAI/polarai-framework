@@ -23,4 +23,3 @@ public:
   enum Arguments { INPUT = 110, KERNEL };
 };
 } // namespace polarai::operation
-

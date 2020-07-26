@@ -12,11 +12,11 @@
 
 #include <polarai/core/node/internal/AbstractNodeInternal.hpp>
 #include <polarai/core/node/internal/NodeInternal.hpp>
+#include <polarai/loaders/ConstantLoader.hpp>
+#include <polarai/loaders/DummyLoader.hpp>
+#include <polarai/operation/CombineOperation.hpp>
 #include <polarai/operation/MulOperation.hpp>
 #include <polarai/operation/SoftmaxOperation.hpp>
-#include <polarai/operation/CombineOperation.hpp>
-#include <polarai/loaders/DummyLoader.hpp>
-#include <polarai/loaders/ConstantLoader.hpp>
 
 using namespace polarai::core::internal;
 
@@ -67,7 +67,8 @@ core::internal::GenValue SoftmaxOperationInternal::gen(
 std::tuple<utils::Index, std::vector<core::internal::Edge>,
            std::vector<utils::Index>>
 SoftmaxOperationInternal::genDerivative(
-    const core::NodeState* inputNodeState, const core::NodeState* currentNodeState, size_t indexOfOutputDependence,
+    const core::NodeState* inputNodeState,
+    const core::NodeState* currentNodeState, size_t indexOfOutputDependence,
     utils::Index gradientGraphFinalNodeIndex) const {
   return {};
 }

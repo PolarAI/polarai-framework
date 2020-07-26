@@ -33,17 +33,8 @@ TEST_F(OperationTest, Conv2D) {
 
   auto graph = context.create<Graph>("mainGraph");
 
-  std::vector<float> input{
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1
-  };
-  std::vector<float> kernel{
-    0.1, 0.1, 0.1,
-    0.1, 0.1, 0.1,
-    0.1, 0.1, 0.1
-  };
+  std::vector<float> input{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+  std::vector<float> kernel{0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
   std::vector<float> target{0.9, 0.9, 0.9, 0.9};
 
   TensorShape shape{4, 4};
@@ -58,11 +49,12 @@ TEST_F(OperationTest, Conv2D) {
   TensorShape kernelShape{3, 3};
   size_t kersize = kernelShape.getTotalSize();
 
-  auto kerLoader =
-      context.create<loaders::MemcpyLoader>(kernel.data(), kersize * sizeof(float));
+  auto kerLoader = context.create<loaders::MemcpyLoader>(
+      kernel.data(), kersize * sizeof(float));
 
-  auto kernelInp = graph.create<InputNode>(kernelShape, DataType::FLOAT, false,
-                                     kerLoader.getPublicIndex(), "kerinp");
+  auto kernelInp =
+      graph.create<InputNode>(kernelShape, DataType::FLOAT, false,
+                              kerLoader.getPublicIndex(), "kerinp");
   auto operationId = context.create<Conv2DOperation>();
   auto node = graph.create<Node>(operationId, "conv2d");
 
@@ -84,4 +76,3 @@ TEST_F(OperationTest, Conv2D) {
     }
   });
 }
-

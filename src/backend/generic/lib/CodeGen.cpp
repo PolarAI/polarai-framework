@@ -331,17 +331,15 @@ void populateCodeGenPatterns(polarai::core::internal::Generator& generator,
   };
   generator.registerFunctor<builtin::Add>(addFunctor);
 
-  builtin_functor_t<builtin::Conv2D> conv2dFunctor = [&](GenValue input,
-  GenValue kernel,
-                                                     GenValue out) {
-    auto inputVal = input.value<MlirValueImpl>().value;
-    auto kernelVal = kernel.value<MlirValueImpl>().value;
-    auto outVal = out.value<MlirValueImpl>().value;
+  builtin_functor_t<builtin::Conv2D> conv2dFunctor =
+      [&](GenValue input, GenValue kernel, GenValue out) {
+        auto inputVal = input.value<MlirValueImpl>().value;
+        auto kernelVal = kernel.value<MlirValueImpl>().value;
+        auto outVal = out.value<MlirValueImpl>().value;
 
-    builder.create<mlir::polar_graph::Conv2DOp>(builder.getUnknownLoc(), inputVal,
-    kernelVal,
-                                              outVal);
-  };
+        builder.create<mlir::polar_graph::Conv2DOp>(
+            builder.getUnknownLoc(), inputVal, kernelVal, outVal);
+      };
   generator.registerFunctor<builtin::Conv2D>(conv2dFunctor);
 
   builtin_functor_t<builtin::Copy> copyFunctor = [&](GenValue input,
@@ -418,18 +416,18 @@ void populateCodeGenPatterns(polarai::core::internal::Generator& generator,
         auto outVal = out.value<MlirValueImpl>().value;
 
         builder.create<mlir::polar_graph::Pool2DOp>(
-            builder.getUnknownLoc(), inputVal, outVal, 
+            builder.getUnknownLoc(), inputVal, outVal,
             mlir::polar_graph::PoolPredicate::max, sizes, strides);
       };
   generator.registerFunctor<builtin::Pool2D>(pool2dFunctor);
 
   builtin_functor_t<builtin::ReLU> reluFunctor = [&](GenValue input,
-                                                           GenValue out) {
+                                                     GenValue out) {
     auto inputVal = input.value<MlirValueImpl>().value;
     auto outVal = out.value<MlirValueImpl>().value;
 
-    builder.create<mlir::polar_graph::ReLUOp>(builder.getUnknownLoc(),
-                                                 inputVal, outVal);
+    builder.create<mlir::polar_graph::ReLUOp>(builder.getUnknownLoc(), inputVal,
+                                              outVal);
   };
   generator.registerFunctor<builtin::ReLU>(reluFunctor);
 

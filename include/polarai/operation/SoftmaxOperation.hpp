@@ -23,4 +23,3 @@ public:
   enum Arguments { Unmarked = 50 };
 };
 } // namespace polarai::operation
-

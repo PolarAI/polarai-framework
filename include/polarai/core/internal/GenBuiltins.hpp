@@ -123,8 +123,9 @@ template <> struct builtin_functor<builtin::MulConcat> {
 };
 
 template <> struct builtin_functor<builtin::Pool2D> {
-  using type = std::function<void(GenValue, GenValue, 
-    const std::vector<int64_t>&, const std::vector<int64_t>&)>;
+  using type =
+      std::function<void(GenValue, GenValue, const std::vector<int64_t>&,
+                         const std::vector<int64_t>&)>;
 };
 
 template <> struct builtin_functor<builtin::ReLU> {

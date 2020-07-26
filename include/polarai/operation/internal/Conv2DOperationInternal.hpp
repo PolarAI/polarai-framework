@@ -12,10 +12,10 @@
 
 #pragma once
 
+#include <polar_operation_export.h>
 #include <polarai/core/context/internal/ContextInternal.hpp>
 #include <polarai/core/operation/internal/OperationInternal.hpp>
 #include <polarai/utils/allocator/Allocator.hpp>
-#include <polar_operation_export.h>
 
 namespace polarai::operation::internal {
 class POLAR_OPERATION_EXPORT Conv2DOperationInternal
@@ -29,14 +29,16 @@ public:
 
   [[nodiscard]] utils::Index
   createResultTensor(utils::SharedPtr<core::internal::ContextInternal> context,
-                     const std::unordered_map<int64_t, utils::Index>& mapMarkToLocalTensorIndex,
-                     const std::vector<core::internal::TensorInternal*>& tensors)
-      const override;
+                     const std::unordered_map<int64_t, utils::Index>&
+                         mapMarkToLocalTensorIndex,
+                     const std::vector<core::internal::TensorInternal*>&
+                         tensors) const override;
 
   core::internal::GenValue
   gen(utils::SharedPtr<core::internal::ContextInternal> context,
       core::internal::Generator& generator,
-      const std::unordered_map<int64_t, utils::Index>& mapMarkToLocalTensorIndex,
+      const std::unordered_map<int64_t, utils::Index>&
+          mapMarkToLocalTensorIndex,
       const std::vector<core::internal::TensorInternal*>& tensors,
       const core::internal::TensorInternal* resultTensor,
       core::internal::GenNode parentNode) const override;
@@ -52,4 +54,3 @@ public:
   [[nodiscard]] size_t getOperandsCount() const override;
 };
 } // namespace polarai::operation::internal
-

@@ -14,8 +14,8 @@
 
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
-#include "mlir/IR/Builders.h"
 #include "mlir/IR/AffineMap.h"
+#include "mlir/IR/Builders.h"
 
 namespace mlir::polar_graph {
 // Fixme only single channel is supported
@@ -29,9 +29,8 @@ void Pool2DOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
   SmallVector<int64_t, 3> steps(memrefTy.getRank(), 1);
 
   for (int i = 0; i < memrefTy.getRank(); i++) {
-    auto dim = builder.create<ConstantIndexOp>(
-        builder.getUnknownLoc(),
-        tensorTy.getDimSize(i));
+    auto dim = builder.create<ConstantIndexOp>(builder.getUnknownLoc(),
+                                               tensorTy.getDimSize(i));
     ubs.push_back(dim);
   }
 
@@ -63,11 +62,11 @@ void Pool2DOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
 
       auto stride0 = builder.create<ConstantIndexOp>(loc, strides[0]);
       auto stride1 = builder.create<ConstantIndexOp>(loc, strides[1]);
-      
-      auto idx0 = builder.create<AffineApplyOp>(loc, map, 
-                                      ValueRange{idx[0], outerIdx[0], stride0});
-      auto idx1 = builder.create<AffineApplyOp>(loc, map, 
-                                      ValueRange{idx[1], outerIdx[1], stride1});
+
+      auto idx0 = builder.create<AffineApplyOp>(
+          loc, map, ValueRange{idx[0], outerIdx[0], stride0});
+      auto idx1 = builder.create<AffineApplyOp>(
+          loc, map, ValueRange{idx[1], outerIdx[1], stride1});
 
       auto inp =
           builder.create<AffineLoadOp>(loc, args[0], ValueRange{idx0, idx1});
@@ -85,4 +84,3 @@ void Pool2DOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
                       bodyBuilder);
 }
 } // namespace mlir::polar_graph
-

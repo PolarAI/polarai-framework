@@ -65,5 +65,3 @@ TEST_F(OperationTest, ReLU) {
     }
   });
 }
-
-

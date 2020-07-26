@@ -12,10 +12,10 @@
 
 #pragma once
 
+#include <polar_operation_export.h>
 #include <polarai/core/context/internal/ContextInternal.hpp>
 #include <polarai/core/operation/internal/OperationInternal.hpp>
 #include <polarai/utils/allocator/Allocator.hpp>
-#include <polar_operation_export.h>
 
 namespace polarai::operation::internal {
 class POLAR_OPERATION_EXPORT Pool2DOperationInternal

@@ -12,30 +12,32 @@
 
 #include <polarai/core/node/internal/AbstractNodeInternal.hpp>
 #include <polarai/core/node/internal/NodeInternal.hpp>
+#include <polarai/loaders/ConstantLoader.hpp>
+#include <polarai/loaders/DummyLoader.hpp>
+#include <polarai/operation/CombineOperation.hpp>
 #include <polarai/operation/MulOperation.hpp>
 #include <polarai/operation/Pool2DOperation.hpp>
-#include <polarai/operation/CombineOperation.hpp>
-#include <polarai/loaders/DummyLoader.hpp>
-#include <polarai/loaders/ConstantLoader.hpp>
 
 using namespace polarai::core::internal;
 
 namespace polarai::operation::internal {
 Pool2DOperationInternal::Pool2DOperationInternal(
     utils::WeakPtr<core::internal::ContextInternal> context,
-    utils::Index publicNodeIndex, std::initializer_list<int64_t> sizes, 
+    utils::Index publicNodeIndex, std::initializer_list<int64_t> sizes,
     std::initializer_list<int64_t> stride, utils::String name)
     : core::internal::OperationInternal(std::move(context), publicNodeIndex,
-                                        std::move(name)), mSizes(sizes), 
-                                        mStrides(stride) {}
+                                        std::move(name)),
+      mSizes(sizes), mStrides(stride) {}
 
 utils::Index Pool2DOperationInternal::createResultTensor(
     utils::SharedPtr<core::internal::ContextInternal> context,
     const std::unordered_map<int64_t, utils::Index>& mapMarkToLocalTensorIndex,
     const std::vector<core::internal::TensorInternal*>& tensors) const {
   auto dataType = tensors[0]->getDataType();
-  size_t dim0 = (tensors[0]->getShapeView().dim(0) - mSizes[0]) / mStrides[0] + 1;
-  size_t dim1 = (tensors[0]->getShapeView().dim(1) - mSizes[1]) / mStrides[1] + 1;
+  size_t dim0 =
+      (tensors[0]->getShapeView().dim(0) - mSizes[0]) / mStrides[0] + 1;
+  size_t dim1 =
+      (tensors[0]->getShapeView().dim(1) - mSizes[1]) / mStrides[1] + 1;
   core::TensorShape tensorShape{dim0, dim1};
   // TODO check preconditions
   return context->create<core::internal::TensorInternal>(
@@ -71,7 +73,8 @@ core::internal::GenValue Pool2DOperationInternal::gen(
 std::tuple<utils::Index, std::vector<core::internal::Edge>,
            std::vector<utils::Index>>
 Pool2DOperationInternal::genDerivative(
-    const core::NodeState* inputNodeState, const core::NodeState* currentNodeState, size_t indexOfOutputDependence,
+    const core::NodeState* inputNodeState,
+    const core::NodeState* currentNodeState, size_t indexOfOutputDependence,
     utils::Index gradientGraphFinalNodeIndex) const {
   return {};
 }

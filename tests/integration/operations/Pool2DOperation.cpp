@@ -33,12 +33,7 @@ TEST_F(OperationTest, Pool2D) {
 
   auto graph = context.create<Graph>("mainGraph");
 
-  std::vector<float> input{
-    1, 0, 2, 3,
-    4, 6, 6, 8,
-    3, 1, 1, 0,
-    1, 2, 2, 4
-  };
+  std::vector<float> input{1, 0, 2, 3, 4, 6, 6, 8, 3, 1, 1, 0, 1, 2, 2, 4};
   std::vector<float> target{6, 8, 3, 4};
 
   TensorShape shape{4, 4};

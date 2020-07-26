@@ -12,9 +12,9 @@
 
 #include <polarai/core/node/internal/AbstractNodeInternal.hpp>
 #include <polarai/core/node/internal/NodeInternal.hpp>
+#include <polarai/loaders/DummyLoader.hpp>
 #include <polarai/operation/Conv2DOperation.hpp>
 #include <polarai/operation/internal/Conv2DOperationInternal.hpp>
-#include <polarai/loaders/DummyLoader.hpp>
 
 using namespace polarai::core::internal;
 
@@ -32,8 +32,10 @@ utils::Index Conv2DOperationInternal::createResultTensor(
   // TODO support multiple channels
   // TODO support different paddings
   auto dataType = tensors[0]->getDataType();
-  size_t x = tensors[0]->getShapeView().dim(0) - tensors[1]->getShapeView().dim(0) + 1;
-  size_t y = tensors[0]->getShapeView().dim(1) - tensors[1]->getShapeView().dim(1) + 1;
+  size_t x =
+      tensors[0]->getShapeView().dim(0) - tensors[1]->getShapeView().dim(0) + 1;
+  size_t y =
+      tensors[0]->getShapeView().dim(1) - tensors[1]->getShapeView().dim(1) + 1;
   core::TensorShape tensorShape({x, y});
   // TODO check preconditions
   return context->create<core::internal::TensorInternal>(
@@ -50,10 +52,14 @@ core::internal::GenValue Conv2DOperationInternal::gen(
   generator.setInsertionPoint(parentNode);
 
   std::unordered_map<utils::Index, GenValue> argMap;
-  GenValue a = parentNode.getOperand(mapMarkToLocalTensorIndex.at(Conv2DOperation::INPUT));
-  argMap[tensors.at(mapMarkToLocalTensorIndex.at(Conv2DOperation::INPUT))->getPublicIndex()] = a;
-  GenValue b = parentNode.getOperand(mapMarkToLocalTensorIndex.at(Conv2DOperation::KERNEL));
-  argMap[tensors.at(mapMarkToLocalTensorIndex.at(Conv2DOperation::KERNEL))->getPublicIndex()] = b;
+  GenValue a = parentNode.getOperand(
+      mapMarkToLocalTensorIndex.at(Conv2DOperation::INPUT));
+  argMap[tensors.at(mapMarkToLocalTensorIndex.at(Conv2DOperation::INPUT))
+             ->getPublicIndex()] = a;
+  GenValue b = parentNode.getOperand(
+      mapMarkToLocalTensorIndex.at(Conv2DOperation::KERNEL));
+  argMap[tensors.at(mapMarkToLocalTensorIndex.at(Conv2DOperation::KERNEL))
+             ->getPublicIndex()] = b;
 
   std::unordered_map<utils::Index, GenValue> resultMap;
   GenValue out = parentNode.getResult();
@@ -71,11 +77,11 @@ core::internal::GenValue Conv2DOperationInternal::gen(
 std::tuple<utils::Index, std::vector<core::internal::Edge>,
            std::vector<utils::Index>>
 Conv2DOperationInternal::genDerivative(
-    const core::NodeState* inputNodeState, const core::NodeState* currentNodeState, size_t indexOfOutputDependence,
+    const core::NodeState* inputNodeState,
+    const core::NodeState* currentNodeState, size_t indexOfOutputDependence,
     utils::Index gradientGraphFinalNodeIndex) const {
-      return {};
+  return {};
 }
 
 size_t Conv2DOperationInternal::getOperandsCount() const { return 2; }
 } // namespace polarai::operation::internal
-
