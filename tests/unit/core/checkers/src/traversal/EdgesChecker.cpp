@@ -49,14 +49,14 @@ bool checkEdges(const core::Traversal& traversal, const std::set<Edge>& edges) {
     std::cerr << "Edges count: " << edges.size() << std::endl;
     std::cerr << "Traversal edges count: " << traversalEdges.size()
               << std::endl;
-    showContainer(std::cerr, edges, "Edges: ");
-    showContainer(std::cerr, traversalEdges, "Traversed edges: ");
+    //showContainer(std::cerr, edges, "Edges: ");
+    //showContainer(std::cerr, traversalEdges, "Traversed edges: ");
     return false;
   }
   if (edges != traversalEdges) {
     std::cerr << "Edges doesn't equal to traversal edges" << std::endl;
-    showContainer(std::cerr, edges, "Edges: ");
-    showContainer(std::cerr, traversalEdges, "Traversal edges: ");
+    //showContainer(std::cerr, edges, "Edges: ");
+    //showContainer(std::cerr, traversalEdges, "Traversal edges: ");
     return false;
   }
   return true;

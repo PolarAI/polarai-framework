@@ -169,7 +169,7 @@ void populateCodeGenPatterns(polarai::core::internal::Generator& generator,
         }
 
         auto node = builder.create<mlir::polar_graph::NodeOp>(
-            builder.getUnknownLoc(), name, nodeType, nodeId, clusterId);
+            builder.getUnknownLoc(), llvm::StringRef(name.data(), name.size()), nodeType, nodeId, clusterId);
         mlir::OpBuilder::InsertionGuard guard{builder};
         builder.setInsertionPointToStart(&node.getBody().front());
 
@@ -187,7 +187,7 @@ void populateCodeGenPatterns(polarai::core::internal::Generator& generator,
       [&](std::string_view name, size_t graphId) {
         // fixme set graph ID
         auto graph = builder.create<mlir::polar_graph::GraphOp>(
-            builder.getUnknownLoc(), name);
+            builder.getUnknownLoc(), llvm::StringRef(name.data(), name.size()));
         return GenGraph{std::make_shared<MlirGraphImpl>(graph)};
       };
   generator.registerGraphFunctor(graphFunctor);

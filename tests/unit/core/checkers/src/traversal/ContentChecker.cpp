@@ -38,8 +38,8 @@ bool checkTraversalContent(const core::Traversal& traversal,
     auto currentSetNodes = getSetOfNodes(clusters[index]);
     if (target[index] != currentSetNodes) {
       std::cerr << "Clusters aren't equal" << std::endl;
-      showContainer(std::cerr, target[index], "Target");
-      showContainer(std::cerr, currentSetNodes, "Cluster");
+      //showContainer(std::cerr, target[index], "Target");
+      //showContainer(std::cerr, currentSetNodes, "Cluster");
       return false;
     }
   }
