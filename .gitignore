@@ -59,3 +59,8 @@ msbuild.wrn
 
 # Visual Studio 2015
 .vs/
+
+
+compile_commands.json
+
+.ccls-cache/

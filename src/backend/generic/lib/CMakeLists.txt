@@ -30,7 +30,8 @@ add_polar_library(polar_backend_generic SHARED
         GenericExecutor.cpp
         GraphPartitionPlanner.cpp
         allocators/LayerAllocator.cpp
-        CodeGen.cpp)
+        CodeGen.cpp
+        ScriptOperationInternal.cpp)
 
 add_library(PolarAI::generic_backend ALIAS polar_backend_generic)
 

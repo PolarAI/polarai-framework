@@ -1,6 +1,5 @@
 //===----------------------------------------------------------------------===//
-// Copyright (c) 2020 Athena. All rights reserved.
-// https://getathena.ml
+// Copyright (c) 2020 PolarAI. All rights reserved.
 //
 // Licensed under MIT license.
 //
@@ -180,3 +179,5 @@ void CreateTensorOp::build(OpBuilder& builder, OperationState& result,
 #define GET_OP_CLASSES
 #include "PolarGraph/PolarGraphOps.cpp.inc"
 } // namespace mlir::polar_graph
+
+#include "PolarGraph/PolarGraphOpsEnums.cpp.inc"

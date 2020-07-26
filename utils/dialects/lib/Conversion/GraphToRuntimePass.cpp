@@ -338,12 +338,18 @@ protected:
     target.addIllegalOp<polar_graph::ReleaseOp>();
     target.addIllegalOp<polar_graph::LockOp>();
     target.addIllegalOp<polar_graph::AddOp>();
+    target.addIllegalOp<polar_graph::Conv2DOp>();
+    target.addIllegalOp<polar_graph::CopyOp>();
     target.addIllegalOp<polar_graph::DivideOp>();
     target.addIllegalOp<polar_graph::LogLossOp>();
     target.addIllegalOp<polar_graph::MulOp>();
     target.addIllegalOp<polar_graph::MulConcatOp>();
     target.addIllegalOp<polar_graph::MatMulOp>();
+    target.addIllegalOp<polar_graph::Pool2DOp>();
+    target.addIllegalOp<polar_graph::ReLUOp>();
     target.addIllegalOp<polar_graph::SigmoidOp>();
+    target.addIllegalOp<polar_graph::SoftmaxOp>();
+    target.addIllegalOp<polar_graph::TransposeOp>();
     target.addIllegalOp<polar_graph::TransposeOp>();
     target.addIllegalOp<polar_graph::FillOp>();
 
@@ -370,12 +376,17 @@ void populateGraphToRuntimeConversionPatterns(
       LockOpConversionPattern,
       ReleaseOpConversionPattern,
       BuiltinConversionPattern<polar_graph::AddOp>,
+      BuiltinConversionPattern<polar_graph::Conv2DOp>,
+      BuiltinConversionPattern<polar_graph::CopyOp>,
       BuiltinConversionPattern<polar_graph::DivideOp>,
       BuiltinConversionPattern<polar_graph::LogLossOp>,
       BuiltinConversionPattern<polar_graph::MulOp>,
       BuiltinConversionPattern<polar_graph::MulConcatOp>,
       BuiltinConversionPattern<polar_graph::MatMulOp>,
+      BuiltinConversionPattern<polar_graph::Pool2DOp>,
+      BuiltinConversionPattern<polar_graph::ReLUOp>,
       BuiltinConversionPattern<polar_graph::SigmoidOp>,
+      BuiltinConversionPattern<polar_graph::SoftmaxOp>,
       BuiltinConversionPattern<polar_graph::FillOp>,
       BuiltinConversionPattern<polar_graph::TransposeOp>
       // clang-format on
