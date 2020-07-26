@@ -11,8 +11,8 @@ function(add_polar_library target_name modifier)
 
     if (UNIX)
         target_compile_options(${target_name} PRIVATE -fPIC -Werror)
-    elif(WIN32)
-        target_compile_definitions(${target_name} PUBLIC _ITERATOR_DEBUG_LEVEL=0 _HAS_ITERATOR_DEBUGGING=0)
+    elseif(WIN32)
+        target_compile_definitions(${target_name} PUBLIC /D_ITERATOR_DEBUG_LEVEL=0 /D_HAS_ITERATOR_DEBUGGING=0)
         target_compile_options(${target_name} PRIVATE /Zp8)
     endif ()
 
