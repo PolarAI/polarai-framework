@@ -23,7 +23,7 @@ function(add_polar_library target_name modifier)
     
     # TODO this is a workaround for windows, which has concept of 
     # imported symbols. It must be removed in future.
-    if (${modifier} MATCHES "OBJECT")
+    if (${modifier} MATCHES "OBJECT" AND NOT "${target_name}" MATCHES "polar_rt_support")
         target_compile_definitions(${target_name} PRIVATE 
                             polar_core_EXPORTS 
                             polar_operation_EXPORTS 

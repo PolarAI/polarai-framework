@@ -20,6 +20,10 @@
 #include <polarai/backend/generic/runtime/GraphHandle.hpp>
 #include <polarai/backend/generic/runtime/LaunchCommand.h>
 #include <polarai/backend/generic/runtime/TensorInfo.h>
+
+#ifdef BUILD_DLL
+#undef BUILD_DLL
+#endif
 #include <polarai/core/loader/internal/AbstractLoaderInternal.hpp>
 #include <polarai/utils/error/FatalError.hpp>
 #include <polar_rt_support_export.h>
