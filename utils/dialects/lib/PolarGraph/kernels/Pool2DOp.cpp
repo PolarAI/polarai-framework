@@ -46,7 +46,7 @@ void Pool2DOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
   auto bodyBuilder = [args, &memrefTy, windowSize, strides](
                          OpBuilder& builder, Location loc, ValueRange idx) {
     auto verySmallNumber = builder.create<ConstantFloatOp>(
-        loc, APFloat(-10e5), memrefTy.getElementType().cast<FloatType>());
+        loc, APFloat(-10e5f), memrefTy.getElementType().cast<FloatType>());
     builder.create<AffineStoreOp>(loc, verySmallNumber, args[1], idx);
     SmallVector<int64_t, 2> lbs(2, 0);
     const SmallVector<int64_t, 2>& ubs = windowSize;
@@ -68,11 +68,6 @@ void Pool2DOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
                                       ValueRange{idx[0], outerIdx[0], stride0});
       auto idx1 = builder.create<AffineApplyOp>(loc, map, 
                                       ValueRange{idx[1], outerIdx[1], stride1});
-
-      // auto window0 = builder.create<MulIOp>(loc, stride0, outerIdx[0]);
-      // auto idx0 = builder.create<AddIOp>(loc, window0, idx[0]);
-      // auto window1 = builder.create<MulIOp>(loc, stride0, outerIdx[1]);
-      // auto idx1 = builder.create<AddIOp>(loc, window0, idx[1]);
 
       auto inp =
           builder.create<AffineLoadOp>(loc, args[0], ValueRange{idx0, idx1});
