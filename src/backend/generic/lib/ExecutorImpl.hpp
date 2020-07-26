@@ -12,7 +12,6 @@
 
 #pragma once
 
-#include <polar_backend_generic_export.h>
 #include <polarai/backend/generic/BackendAllocator.hpp>
 #include <polarai/backend/generic/runtime/Device.hpp>
 #include <polarai/core/graph/Traversal.hpp>
@@ -30,7 +29,7 @@ class RuntimeDriver;
 /**
  * Execute Graph with LLVM-based backend
  */
-class POLAR_BACKEND_GENERIC_EXPORT ExecutorImpl {
+class ExecutorImpl {
 public:
   using FilterFunctionT =
       std::function<bool(polarai::utils::SharedPtr<Device>&)>;
