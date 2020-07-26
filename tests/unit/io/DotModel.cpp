@@ -27,8 +27,10 @@ using namespace polarai;
 using namespace polarai::core;
 using namespace polarai::operation;
 
-namespace {
 TEST(DotModel, Topology1) {
+  #ifdef _WIN32
+  GTEST_SKIP();
+  #endif
   Context context;
   auto graph = context.create<Graph>("mygraph");
   auto inp1 = graph.create<InputNode>(TensorShape{2, 2}, DataType::FLOAT, true,
@@ -51,6 +53,9 @@ TEST(DotModel, Topology1) {
 }
 
 TEST(DotModel, Topology2) {
+  #ifdef _WIN32
+  GTEST_SKIP();
+  #endif
   Context context;
   auto graph = context.create<Graph>("graph1");
   auto inp1 = graph.create<InputNode>(TensorShape{2, 2}, DataType::FLOAT, false,
@@ -78,6 +83,9 @@ TEST(DotModel, Topology2) {
 }
 
 TEST(DotModel, TopologyLogReg) {
+  #ifdef _WIN32
+  GTEST_SKIP();
+  #endif
   Context context;
   auto graph = context.create<Graph>("graph1");
   size_t size = 3;
@@ -106,4 +114,3 @@ TEST(DotModel, TopologyLogReg) {
   std::cout << "*** Connector: ***" << std::endl;
   io::DotModel::exportGraph(graphConnector, std::cout);
 }
-} // namespace

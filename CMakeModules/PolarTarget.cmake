@@ -11,6 +11,9 @@ function(add_polar_library target_name modifier)
 
     if (UNIX)
         target_compile_options(${target_name} PRIVATE -fPIC -Werror)
+    elif(WIN32)
+        target_compile_definitions(${target_name} PUBLIC _ITERATOR_DEBUG_LEVEL=0 _HAS_ITERATOR_DEBUGGING=0)
+        target_compile_options(${target_name} PRIVATE /Zp8)
     endif ()
 
     include(GenerateExportHeader)
@@ -44,4 +47,9 @@ function(add_polar_executable target_name)
     set_target_properties(${target_name} PROPERTIES
                 BUILD_RPATH "${CMAKE_BUILD_RPATH};${PROJECT_BINARY_DIR}/lib"
                 RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+
+    if(WIN32)
+        target_compile_definitions(${target_name} PRIVATE -D_ITERATOR_DEBUG_LEVEL=0)
+        target_compile_options(${target_name} PRIVATE /Zp8)
+    endif ()
 endfunction()

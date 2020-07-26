@@ -32,7 +32,11 @@ include(AddMLIR)
 
 # fixme Ninja doesn't work with this
 #include(HandleLLVMOptions)
-add_compile_options(-fPIC)
+if (UNIX)
+  add_compile_options(-fPIC)
+elif(WIN32)
+    add_definitions(_ITERATOR_DEBUG_LEVEL=0 _HAS_ITERATOR_DEBUGGING=0)
+endif ()
 
 include_directories(${LLVM_INCLUDE_DIRS})
 include_directories(${MLIR_INCLUDE_DIRS})

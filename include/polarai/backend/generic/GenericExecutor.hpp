@@ -33,8 +33,7 @@ constexpr auto DefaultDeviceFilter = [](std::shared_ptr<Device>&) {
 /**
  * Execute Graph with LLVM-based backend
  */
-class POLAR_BACKEND_GENERIC_EXPORT GenericExecutor
-    : public polarai::core::internal::Executor {
+class POLAR_BACKEND_GENERIC_EXPORT GenericExecutor {
 public:
   using FilterFunctionT = std::function<bool(std::shared_ptr<Device>&)>;
   GenericExecutor(bool enableDebugOutput = false,
@@ -43,12 +42,12 @@ public:
   /// Adds Graph to compilable module.
   ///
   /// \param graph is a valid Graph to be compiled.
-  void addGraph(polarai::core::Graph& graph) override;
+  void addGraph(polarai::core::Graph& graph);
 
   /// Executes particular graph.
   ///
   /// \param graph is a valid Graph, that has been previously added.
-  void evaluate(polarai::core::Graph& graph) override;
+  void evaluate(polarai::core::Graph& graph);
 
   BackendAllocator& getAllocator();
   std::shared_ptr<BackendAllocator> getAllocatorPtr();

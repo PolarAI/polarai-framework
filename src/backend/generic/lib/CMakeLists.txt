@@ -62,8 +62,8 @@ target_link_libraries(polar_backend_generic PRIVATE
         PolarAI::generic_backend_support
         PolarAI::generic_backend_driver
         PUBLIC
-        PolarAI::utils
         PolarAI::framework
+        PolarAI::utils
         )
 target_include_directories(polar_backend_generic PRIVATE
         ${PROJECT_SOURCE_DIR}/utils/dialects/include

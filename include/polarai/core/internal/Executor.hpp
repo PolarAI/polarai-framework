@@ -19,6 +19,13 @@ namespace polarai::core::internal {
 
 class POLAR_CORE_EXPORT Executor {
 public:
+  Executor() = default;
+  Executor(const Executor&) = default;
+  Executor(Executor&&) = default;
+  Executor& operator=(const Executor&) = default;
+  Executor& operator=(Executor&&) = default;
+
+  virtual ~Executor() = default;
   virtual void addGraph(Graph& graph) = 0;
   virtual void evaluate(Graph& graph) = 0;
 };

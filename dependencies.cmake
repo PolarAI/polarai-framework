@@ -1,6 +1,7 @@
 # This file contains mandatory dependencies
 
 # Google test is the primary testing framework for the project
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 AthenaAddDependency(
         TARGET_NAME googletest
         GIT_URL https://github.com/google/googletest.git
