@@ -45,17 +45,32 @@ void Conv2DOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
     SmallVector<int64_t, 2> steps(2, 1);
     auto innerBuilder = [args, offset0, offset1, outerIdx = idx](
                             OpBuilder& builder, Location loc, ValueRange idx) {
-      auto weight =
-          builder.create<AffineLoadOp>(loc, args[1], idx);
-
       auto idxDim = getAffineDimExpr(0, builder.getContext());
+      auto offsetSym = getAffineSymbolExpr(0, builder.getContext());
+
+      auto weightExpr = idxDim + offsetSym;
+      auto weightMap = AffineMap::get(1, 1, weightExpr);
+
+      auto offset0Const = builder.create<ConstantIndexOp>(loc, offset0);
+      auto offset1Const = builder.create<ConstantIndexOp>(loc, offset1);
+
+      auto weightIdx0 = builder.create<AffineApplyOp>(
+          loc, weightMap, ValueRange{idx[0], offset0Const});
+      auto weightIdx1 = builder.create<AffineApplyOp>(
+          loc, weightMap, ValueRange{idx[1], offset1Const});
+
+      auto weight = builder.create<AffineLoadOp>(
+          loc, args[1], ValueRange{weightIdx0, weightIdx1});
+
       auto outerIdxDim = getAffineDimExpr(1, builder.getContext());
-      auto expr = outerIdxDim + idxDim;
+      auto expr = outerIdxDim + idxDim + offsetSym;
 
-      auto map = AffineMap::get(2, 0, expr);
+      auto map = AffineMap::get(2, 1, expr);
 
-      auto outIdx0 = builder.create<AffineApplyOp>(loc, map, ValueRange{outerIdx[0], idx[0]});
-      auto outIdx1 = builder.create<AffineApplyOp>(loc, map, ValueRange{outerIdx[1], idx[1]});
+      auto outIdx0 = builder.create<AffineApplyOp>(
+          loc, map, ValueRange{outerIdx[0], idx[0], offset0Const});
+      auto outIdx1 = builder.create<AffineApplyOp>(
+          loc, map, ValueRange{outerIdx[1], idx[1], offset1Const});
 
       auto inp = builder.create<AffineLoadOp>(loc, args[0],
                                               ValueRange{outIdx0, outIdx1});

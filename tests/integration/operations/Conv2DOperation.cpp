@@ -52,7 +52,7 @@ TEST_F(OperationTest, Conv2D) {
   auto loader =
       context.create<loaders::MemcpyLoader>(input.data(), size * sizeof(float));
 
-  auto inp = graph.create<InputNode>(shape, DataType::FLOAT, false,
+  auto inp = graph.create<InputNode>(shape, DataType::FLOAT, true,
                                      loader.getPublicIndex(), "inp");
 
   TensorShape kernelShape{3, 3};
@@ -62,7 +62,7 @@ TEST_F(OperationTest, Conv2D) {
       context.create<loaders::MemcpyLoader>(kernel.data(), kersize * sizeof(float));
 
   auto kernelInp = graph.create<InputNode>(kernelShape, DataType::FLOAT, false,
-                                     loader.getPublicIndex(), "kerinp");
+                                     kerLoader.getPublicIndex(), "kerinp");
   auto operationId = context.create<Conv2DOperation>();
   auto node = graph.create<Node>(operationId, "conv2d");
 
