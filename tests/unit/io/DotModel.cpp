@@ -27,7 +27,7 @@ using namespace polarai;
 using namespace polarai::core;
 using namespace polarai::operation;
 
-TEST(DotModel, Topology1) {
+TEST(DotModel, DISABLED_Topology1) {
   #ifdef _WIN32
   GTEST_SKIP();
   #endif
@@ -52,7 +52,7 @@ TEST(DotModel, Topology1) {
   io::DotModel::exportGraph(graphConnector, std::cout);
 }
 
-TEST(DotModel, Topology2) {
+TEST(DotModel, DISABLED_Topology2) {
   #ifdef _WIN32
   GTEST_SKIP();
   #endif
@@ -82,7 +82,7 @@ TEST(DotModel, Topology2) {
   io::DotModel::exportGraph(graphConnector, std::cout);
 }
 
-TEST(DotModel, TopologyLogReg) {
+TEST(DotModel, DISABLED_TopologyLogReg) {
   #ifdef _WIN32
   GTEST_SKIP();
   #endif
