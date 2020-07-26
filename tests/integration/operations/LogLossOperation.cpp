@@ -61,7 +61,7 @@ TEST_F(OperationTest, DISABLED_LogLoss) {
   auto out = graph.create<OutputNode>("out");
   graph.connect(node, out, Operation::Unmarked);
 
-  withEachDeviceDo([&graph, out, &context, &target](GenericExecutor& executor) {
+  withEachDeviceDo([&graph, out, &context, &target](Executor& executor) {
     executor.addGraph(graph);
     executor.evaluate(graph);
 

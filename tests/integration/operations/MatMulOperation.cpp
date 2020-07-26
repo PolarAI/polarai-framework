@@ -84,7 +84,7 @@ TEST_F(OperationTest, MatMulNN) {
   graph.connect(node, out, Operation::Unmarked);
 
   withEachDeviceDo(
-      [&graph, out, &context, &target, m, n](GenericExecutor& executor) {
+      [&graph, out, &context, &target, m, n](Executor& executor) {
         executor.addGraph(graph);
         executor.evaluate(graph);
 
@@ -130,7 +130,7 @@ TEST_F(OperationTest, MatMulNNSquare) {
   auto out = graph.create<OutputNode>("out");
   graph.connect(node, out, Operation::Unmarked);
 
-  withEachDeviceDo([&graph, out, &context, &target](GenericExecutor& executor) {
+  withEachDeviceDo([&graph, out, &context, &target](Executor& executor) {
     executor.addGraph(graph);
     executor.evaluate(graph);
 
@@ -177,7 +177,7 @@ TEST_F(OperationTest, MatMulNNRect) {
   graph.connect(node, out, Operation::Unmarked);
 
   withEachDeviceDo(
-      [&graph, out, &context, &target, m, n](GenericExecutor& executor) {
+      [&graph, out, &context, &target, m, n](Executor& executor) {
         executor.addGraph(graph);
         executor.evaluate(graph);
 
@@ -223,7 +223,7 @@ TEST_F(OperationTest, MatMulTNRect) {
   auto out = graph.create<OutputNode>("out");
   graph.connect(node, out, Operation::Unmarked);
   withEachDeviceDo(
-      [&graph, out, &context, &target, m, n](GenericExecutor& executor) {
+      [&graph, out, &context, &target, m, n](Executor& executor) {
         executor.addGraph(graph);
         executor.evaluate(graph);
 
@@ -270,7 +270,7 @@ TEST_F(OperationTest, MatMulNTRect) {
   graph.connect(node, out, Operation::Unmarked);
 
   withEachDeviceDo(
-      [&graph, out, &context, &target, m, n](GenericExecutor& executor) {
+      [&graph, out, &context, &target, m, n](Executor& executor) {
         executor.addGraph(graph);
         executor.evaluate(graph);
 

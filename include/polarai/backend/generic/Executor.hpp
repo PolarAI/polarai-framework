@@ -12,32 +12,33 @@
 
 #pragma once
 
+#include <polar_backend_generic_export.h>
 #include <polarai/backend/generic/BackendAllocator.hpp>
 #include <polarai/backend/generic/runtime/Device.hpp>
+#include <polarai/core/graph/Graph.hpp>
 #include <polarai/core/graph/Traversal.hpp>
-#include <polarai/core/internal/Executor.hpp>
 #include <polarai/core/loader/internal/TensorAllocator.hpp>
-#include <polar_backend_generic_export.h>
+#include <polarai/utils/Pointer.hpp>
+#include <polarai/utils/storages/Vector.hpp>
 
 namespace polarai::backend::generic {
 
 // Forward declarations
-class PolarJIT;
-class RuntimeDriver;
-
+class ExecutorImpl;
 /// Default device filter. Selects all devices.
-constexpr auto DefaultDeviceFilter = [](std::shared_ptr<Device>&) {
+constexpr auto DefaultDeviceFilter = [](polarai::utils::SharedPtr<Device>&) {
   return true;
 };
 
 /**
  * Execute Graph with LLVM-based backend
  */
-class POLAR_BACKEND_GENERIC_EXPORT GenericExecutor {
+class POLAR_BACKEND_GENERIC_EXPORT Executor {
 public:
-  using FilterFunctionT = std::function<bool(std::shared_ptr<Device>&)>;
-  GenericExecutor(bool enableDebugOutput = false,
-               FilterFunctionT filter = DefaultDeviceFilter);
+  using FilterFunctionT =
+      std::function<bool(polarai::utils::SharedPtr<Device>&)>;
+  Executor(bool enableDebugOutput = false,
+           FilterFunctionT filter = DefaultDeviceFilter);
 
   /// Adds Graph to compilable module.
   ///
@@ -50,22 +51,12 @@ public:
   void evaluate(polarai::core::Graph& graph);
 
   BackendAllocator& getAllocator();
-  std::shared_ptr<BackendAllocator> getAllocatorPtr();
-  void setAllocator(std::shared_ptr<BackendAllocator>& allocator);
+  polarai::utils::SharedPtr<BackendAllocator> getAllocatorPtr();
+  void setAllocator(polarai::utils::SharedPtr<BackendAllocator>& allocator);
 
-  std::vector<std::shared_ptr<Device>>& getDevices();
-
-  void addModule(std::string_view module);
-
-  void execute(std::string_view name, void* userData);
+  polarai::utils::Vector<std::shared_ptr<Device>>& getDevices();
 
 private:
-  FilterFunctionT mFilter;
-  // Driver must come first to ensure proper shutdown
-  std::shared_ptr<RuntimeDriver> mRuntimeDriver;
-  std::vector<std::shared_ptr<Device>> mDevices;
-
-  std::shared_ptr<PolarJIT> mJITCompiler{nullptr};
-  std::shared_ptr<BackendAllocator> mAllocator;
+  polarai::utils::SharedPtr<ExecutorImpl> mImpl;
 };
-} // namespace polarai::backend::llvm
+} // namespace polarai::backend::generic

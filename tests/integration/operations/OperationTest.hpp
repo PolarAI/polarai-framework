@@ -1,6 +1,6 @@
 #pragma once
 
-#include <polarai/backend/generic/GenericExecutor.hpp>
+#include <polarai/backend/generic/Executor.hpp>
 #include <runtime/driver/RuntimeDriver.hpp>
 
 #include <gtest/gtest.h>
@@ -8,7 +8,7 @@
 class OperationTest : public ::testing::Test {
 private:
   using CallbackT =
-      std::function<void(polarai::backend::generic::GenericExecutor&)>;
+      std::function<void(polarai::backend::generic::Executor&)>;
 
 protected:
   polarai::backend::generic::RuntimeDriver mDriver{false};
@@ -27,7 +27,7 @@ protected:
                    dev->getDeviceName() == device->getDeviceName();
           };
 
-      polarai::backend::generic::GenericExecutor executor(true, selector);
+      polarai::backend::generic::Executor executor(true, selector);
       cb(executor);
     }
   }

@@ -10,6 +10,7 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
+#include "ExecutorImpl.hpp"
 #include "../runtime/driver/RuntimeDriver.hpp"
 #include "../runtime/host/HostDevice.hpp"
 #include "GraphPartitionPlanner.hpp"
@@ -20,7 +21,6 @@
 #include <PolarGraph/PolarGraphDialect.h>
 #include <PolarRuntime/PolarRuntimeDialect.h>
 #include <polarai/backend/generic/CodeGen.hpp>
-#include <polarai/backend/generic/GenericExecutor.hpp>
 #include <polarai/backend/generic/runtime/GraphHandle.hpp>
 #include <polarai/core/Generator.hpp>
 #include <polarai/core/graph/internal/GraphCompiler.hpp>
@@ -49,7 +49,7 @@ template <typename FuncT, typename T> static FuncT* func_cast(T x) {
 
 namespace polarai::backend::generic {
 
-void GenericExecutor::addGraph(Graph& graph) {
+void ExecutorImpl::addGraph(Graph& graph) {
   Generator generator;
 
   mlir::OpBuilder opBuilder(mJITCompiler->getContext());
@@ -63,10 +63,10 @@ void GenericExecutor::addGraph(Graph& graph) {
   mJITCompiler->addModule(ref);
 }
 
-void GenericExecutor::evaluate(Graph& graph) {
+void ExecutorImpl::evaluate(Graph& graph) {
   auto sym = mJITCompiler->lookupSymbol(graph.getName().getString());
   utils::polarai_assert((bool)sym, "Failed to find graph function. ",
-                       "Did you forget to add Graph?");
+                        "Did you forget to add Graph?");
 
   GraphHandle handle;
   handle.allocator = mAllocator;
@@ -96,7 +96,7 @@ void GenericExecutor::evaluate(Graph& graph) {
   evaluateFunction(&handle);
 }
 
-GenericExecutor::GenericExecutor(bool enableDebugOutput, FilterFunctionT filter)
+ExecutorImpl::ExecutorImpl(bool enableDebugOutput, FilterFunctionT filter)
     : mFilter(std::move(filter)) {
   mlir::registerAllDialects();
   mlir::registerAllPasses();
@@ -136,32 +136,16 @@ GenericExecutor::GenericExecutor(bool enableDebugOutput, FilterFunctionT filter)
   }
 }
 
-void GenericExecutor::addModule(std::string_view module) {
-  auto moduleRef =
-      mlir::parseSourceString(module.data(), mJITCompiler->getContext());
-
-  mJITCompiler->addModule(moduleRef);
-}
-
-void GenericExecutor::execute(std::string_view name, void* userData) {
-  auto sym = mJITCompiler->lookupSymbol(name.data());
-  utils::polarai_assert((bool)sym, "Failed to find function.");
-
-  auto evaluateFunction = func_cast<void(void*)>(sym);
-  evaluateFunction(userData);
-}
-
-BackendAllocator& GenericExecutor::getAllocator() { return *mAllocator; }
-std::shared_ptr<BackendAllocator> GenericExecutor::getAllocatorPtr() {
+BackendAllocator& ExecutorImpl::getAllocator() { return *mAllocator; }
+std::shared_ptr<BackendAllocator> ExecutorImpl::getAllocatorPtr() {
   return mAllocator;
 }
 
-void GenericExecutor::setAllocator(
-    std::shared_ptr<BackendAllocator>& allocator) {
+void ExecutorImpl::setAllocator(std::shared_ptr<BackendAllocator>& allocator) {
   mAllocator = std::move(allocator);
 }
 
-std::vector<std::shared_ptr<Device>>& GenericExecutor::getDevices() {
+std::vector<std::shared_ptr<Device>>& ExecutorImpl::getDevices() {
   return mDevices;
 }
 } // namespace polarai::backend::generic
