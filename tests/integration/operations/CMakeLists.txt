@@ -2,6 +2,7 @@ include_directories(${PROJECT_SOURCE_DIR}/src/backend/generic)
 
 set(INT_TEST_SRC 
   AddOperation.cpp
+  Conv2DOperation.cpp
   CombineOperation.cpp
   DivideOperation.cpp
   LogLossOperation.cpp

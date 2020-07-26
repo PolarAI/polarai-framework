@@ -34,6 +34,7 @@ enum class builtin {
   ///@{
   /// \name Operation builtins
   Add,       ///< Element-wise addition.
+  Conv2D,    ///< 2D convolution.
   Copy,      ///< Element-wise copying.
   Divide,    ///< Element-wise division.
   LogLoss,   ///< Element-wise logistic loss function.
@@ -93,6 +94,10 @@ template <> struct builtin_functor<builtin::Add> {
       std::function<void(GenValue, GenValue, GenValue, GenValue, GenValue)>;
 };
 
+template <> struct builtin_functor<builtin::Conv2D> {
+  using type = std::function<void(GenValue, GenValue, GenValue)>;
+};
+
 template <> struct builtin_functor<builtin::Copy> {
   using type = std::function<void(GenValue, GenValue)>;
 };
@@ -149,6 +154,7 @@ template <> struct builtin_functor<builtin::Transpose> {
 template <builtin B>
 using builtin_functor_t = typename builtin_functor<B>::type;
 
+// NOTE: It is important to preserve the same order as in builtin enum class.
 using BuiltinMap = std::tuple<
     // clang-format off
     builtin_functor_t<builtin::Alloc>,
@@ -159,6 +165,7 @@ using BuiltinMap = std::tuple<
     builtin_functor_t<builtin::InvokeLoader>,
     builtin_functor_t<builtin::Return>,
     builtin_functor_t<builtin::Add>,
+    builtin_functor_t<builtin::Conv2D>,
     builtin_functor_t<builtin::Copy>,
     builtin_functor_t<builtin::Divide>,
     builtin_functor_t<builtin::LogLoss>,

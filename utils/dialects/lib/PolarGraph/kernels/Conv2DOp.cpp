@@ -45,15 +45,17 @@ void Conv2DOp::produceKernel(OpBuilder& builder, Block::BlockArgListType args) {
     SmallVector<int64_t, 2> steps(2, 1);
     auto innerBuilder = [args, offset0, offset1, outerIdx = idx](
                             OpBuilder& builder, Location loc, ValueRange idx) {
-      auto constOffset0 = builder.create<ConstantIndexOp>(loc, offset0);
-      auto constOffset1 = builder.create<ConstantIndexOp>(loc, offset0);
-      auto idx0 = builder.create<SubFOp>(loc, idx[0], constOffset0);
-      auto idx1 = builder.create<SubFOp>(loc, idx[1], constOffset1);
       auto weight =
-          builder.create<AffineLoadOp>(loc, args[1], ValueRange{idx0, idx1});
+          builder.create<AffineLoadOp>(loc, args[1], idx);
 
-      auto outIdx0 = builder.create<SubFOp>(loc, outerIdx[0], constOffset0);
-      auto outIdx1 = builder.create<SubFOp>(loc, outerIdx[1], constOffset1);
+      auto idxDim = getAffineDimExpr(0, builder.getContext());
+      auto outerIdxDim = getAffineDimExpr(1, builder.getContext());
+      auto expr = outerIdxDim + idxDim;
+
+      auto map = AffineMap::get(2, 0, expr);
+
+      auto outIdx0 = builder.create<AffineApplyOp>(loc, map, ValueRange{outerIdx[0], idx[0]});
+      auto outIdx1 = builder.create<AffineApplyOp>(loc, map, ValueRange{outerIdx[1], idx[1]});
 
       auto inp = builder.create<AffineLoadOp>(loc, args[0],
                                               ValueRange{outIdx0, outIdx1});

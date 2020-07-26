@@ -331,6 +331,19 @@ void populateCodeGenPatterns(polarai::core::internal::Generator& generator,
   };
   generator.registerFunctor<builtin::Add>(addFunctor);
 
+  builtin_functor_t<builtin::Conv2D> conv2dFunctor = [&](GenValue input,
+  GenValue kernel,
+                                                     GenValue out) {
+    auto inputVal = input.value<MlirValueImpl>().value;
+    auto kernelVal = kernel.value<MlirValueImpl>().value;
+    auto outVal = out.value<MlirValueImpl>().value;
+
+    builder.create<mlir::polar_graph::Conv2DOp>(builder.getUnknownLoc(), inputVal,
+    kernelVal,
+                                              outVal);
+  };
+  generator.registerFunctor<builtin::Conv2D>(conv2dFunctor);
+
   builtin_functor_t<builtin::Copy> copyFunctor = [&](GenValue input,
                                                      GenValue out) {
     auto inputVal = input.value<MlirValueImpl>().value;
