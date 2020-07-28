@@ -36,6 +36,14 @@ The following node types are available in Athena:
 * `OutputNode` is a no-op node indicating that output of its predecessor will
 be used after graph execution is finished. Any other node chain can be removed
 by the backend to save up compute resources.
+* `Transfer` is a node type that "transfers" tensor from one graph to another 
+without additional memory allocations. Different types of transfers are 
+available:
+  - `nop transfer` simply prevents tensor from being deallocated. Primarily used
+  to transfer nodes between graph and its gradient.
+  - `swap transfer` is used to share a tensor between two threads, allowing
+  graph level parallelizm.
+  - `network transfer` allows graph to be splitted across different machines.
 
 Nodes can be added to graph like this:
 
@@ -89,3 +97,49 @@ Athena backends work with a graph traversal that is formed taking into account
 node dependencies and possible execution parallelism.
 
 TODO describe traversal algorithm.
+
+## Execution Graph Differentiation
+
+Athena uses chain rule and recursion to differentiate the execution graph. 
+
+Each operation node in Athena Graph can be considered as a function that takes
+some inputs and produces an output. Each operation knows how to differentiate
+itself, thus can emit necessary nodes to the graph. This operation is applied to
+each node in execution graph. To compute a gradient, a starting point must be
+specified.
+
+Algorithm pseudocode for node differentiating:
+
+```
+function differentiate(node) {
+  if (node has inputs) {
+    gradients = {differentiate(arguments)}
+    return gradients * node.derivative
+  } else {
+    return unit node
+  }
+}
+```
+
+**Example**
+
+Take the following function:
+
+```
+f(x) = sin(x^2 + 2^y)
+```
+Its gradient can be written as
+```
+grad(f(x)) = {2*x*cos(x^2 + y^2), 2*y*cos(x^2+y^2)}
+```
+
+And the graph would look like this:
+
+![Graph example](graph_grad_sample_pre.svg)
+
+So, first Athena takes `sin` node and computes its derivative using pre-defined 
+rules. Then, it takes the argument of `sin` and differentiates it. Gradient of a
+sum is a vector of gradients of both sum arguments. `cos(g)` is now multiplied
+by both of the vector elements.
+
+![Graph sample](graph_grad_sample_post.svg)

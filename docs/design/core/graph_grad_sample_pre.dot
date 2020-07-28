@@ -1,0 +1,20 @@
+digraph f {
+x [label = "x"];
+y [label = "y"];
+two [label = "2"];
+sin [label = "sin"];
+pow1 [label = "pow"];
+pow2 [labe = "pow"];
+sum [label = "+"];
+
+x -> pow1;
+two -> pow1;
+
+y -> pow2;
+two -> pow2;
+
+pow1 -> sum;
+pow2 -> sum;
+
+sum -> sin;
+}

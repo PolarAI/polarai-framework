@@ -1,0 +1,23 @@
+digraph grad_f {
+cos [label = "cos(g)"];
+x [label = "x"];
+y [label = "y"];
+two [label = "2"];
+
+mul1 [label = "*"];
+two -> mul1;
+x -> mul1;
+
+mul2 [label = "*"];
+two -> mul2;
+y -> mul2;
+
+mul3 [label = "*"];
+
+cos -> mul3;
+mul1 -> mul3;
+
+mul4 [label = "*"];
+cos -> mul4;
+mul2 -> mul4;
+}
