@@ -21,6 +21,9 @@
 namespace polarai::utils {
 void* bare_allocate(size_t size, size_t alignment, size_t offset) {
 #ifdef HAS_MIMALLOC
+  if (alignment % sizeof(void*) != 0) {
+    alignment = alignof(std::max_align_t);
+  }
   return mi_malloc_aligned_at(size, alignment, offset);
 #else
   return aligned_alloc(alignment, size);
@@ -29,7 +32,7 @@ void* bare_allocate(size_t size, size_t alignment, size_t offset) {
 POLAR_UTILS_EXPORT void bare_deallocate(void* ptr, size_t size,
                                         size_t alignment) {
 #ifdef HAS_MIMALLOC
-  (void)alignment;
+  (void)size;
   return mi_free_aligned(ptr, alignment);
 #else
   return std::free(ptr);

@@ -22,7 +22,7 @@
 #include <type_traits>
 
 namespace polarai::utils {
-template <typename T = byte> class POLAR_UTILS_EXPORT Allocator {
+template <typename T> class POLAR_UTILS_EXPORT Allocator {
 public:
   using value_type = T;
   using size_type = std::size_t;
@@ -50,7 +50,7 @@ public:
 
   template <typename U, typename... Args>
   void construct(U* ptr, Args&&... args) {
-    new (ptr) U(std::forward<Args>(ptr)...);
+    new (ptr) U(std::forward<Args&&>(args)...);
   }
 
   template <typename U> void destroy(U* ptr) { ptr->~U(); }
