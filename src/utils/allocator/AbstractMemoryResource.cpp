@@ -14,10 +14,10 @@
 
 namespace polarai::utils {
 byte* AbstractMemoryResource::allocate(size_t size, size_t alignment) {
-  return doAllocate(size, alignment);
+  return static_cast<byte*>(doAllocate(size, alignment));
 }
 
-void AbstractMemoryResource::deallocate(const byte* data, size_t size,
+void AbstractMemoryResource::deallocate(byte* data, size_t size,
                                         size_t alignment) {
   doDeallocate(data, size, alignment);
 }

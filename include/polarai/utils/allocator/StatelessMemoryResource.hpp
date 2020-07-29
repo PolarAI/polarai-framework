@@ -19,8 +19,8 @@ namespace polarai::utils {
 class POLAR_UTILS_EXPORT StatelessMemoryResource
     : public AbstractMemoryResource {
 protected:
-  byte* doAllocate(size_t size, size_t alignment) override;
-  void doDeallocate(const byte* data, size_t size, size_t alignment) override;
+  void* doAllocate(size_t size, size_t alignment) override;
+  void doDeallocate(void* data, size_t size, size_t alignment) override;
 };
 
 } // namespace polarai::utils

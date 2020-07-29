@@ -10,18 +10,16 @@
 // the License.
 //===----------------------------------------------------------------------===//
 
+#include <polarai/utils/Memory.hpp>
 #include <polarai/utils/allocator/StatelessMemoryResource.hpp>
 
-#include <iostream>
-
 namespace polarai::utils {
-byte* StatelessMemoryResource::doAllocate(size_t size, size_t alignment) {
-  auto tmp = new unsigned char[size];
-  return tmp;
+void* StatelessMemoryResource::doAllocate(size_t size, size_t alignment) {
+  return utils::allocate(size, alignment);
 }
 
-void StatelessMemoryResource::doDeallocate(const byte* data, size_t size,
+void StatelessMemoryResource::doDeallocate(void* data, size_t size,
                                            size_t alignment) {
-  delete[] reinterpret_cast<const char*>(data);
+  utils::deallocate(data, size, alignment);
 }
 } // namespace polarai::utils

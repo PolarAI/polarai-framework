@@ -32,7 +32,7 @@ public:
 
   explicit Allocator(SharedPtr<AbstractMemoryResource> memoryResource =
                          makeShared<StatelessMemoryResource>())
-      : mMemoryResource(memoryResource) {}
+      : mMemoryResource(std::move(memoryResource)) {}
 
   Allocator(const Allocator&) = default;
 
@@ -55,11 +55,13 @@ public:
 
   template <typename U> void destroy(U* ptr) { ptr->~U(); }
 
-  [[nodiscard]] void* allocate_bytes(size_t size, size_t alignment = 64) {
+  [[nodiscard]] void*
+  allocate_bytes(size_t size, size_t alignment = alignof(std::max_align_t)) {
     return mMemoryResource->allocate(size, alignment);
   }
 
-  void deallocate_bytes(byte* data, size_t size, size_t alignment = 64) {
+  void deallocate_bytes(byte* data, size_t size,
+                        size_t alignment = alignof(std::max_align_t)) {
     mMemoryResource->deallocate(data, size, alignment);
   }
 
@@ -70,5 +72,4 @@ public:
 private:
   SharedPtr<AbstractMemoryResource> mMemoryResource;
 };
-
 } // namespace polarai::utils

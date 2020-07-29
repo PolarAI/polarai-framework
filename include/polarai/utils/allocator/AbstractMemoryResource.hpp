@@ -23,11 +23,10 @@ class POLAR_UTILS_EXPORT AbstractMemoryResource {
 public:
   virtual ~AbstractMemoryResource() = default;
   byte* allocate(size_t size, size_t alignment);
-  void deallocate(const byte* data, size_t size, size_t alignment);
+  void deallocate(byte* data, size_t size, size_t alignment);
 
 protected:
-  virtual byte* doAllocate(size_t size, size_t alignment) = 0;
-  virtual void doDeallocate(const byte* data, size_t size,
-                            size_t alignment) = 0;
+  virtual void* doAllocate(size_t size, size_t alignment) = 0;
+  virtual void doDeallocate(void* data, size_t size, size_t alignment) = 0;
 };
 } // namespace polarai::utils
