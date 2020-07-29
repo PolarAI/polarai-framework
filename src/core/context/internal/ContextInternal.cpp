@@ -16,7 +16,7 @@
 #include <iostream>
 
 namespace polarai::core::internal {
-ContextInternal::ContextInternal(utils::Allocator allocator,
+ContextInternal::ContextInternal(utils::Allocator<utils::byte> allocator,
                                  size_t defaultCapacity,
                                  size_t elementAverageSize)
     : mAllocator(std::move(allocator)), mContainer(),
@@ -32,7 +32,9 @@ const Traversal& ContextInternal::traverse(utils::Index publicGraphIndex) {
   return graph.traverse();
 }
 
-utils::Allocator& ContextInternal::getAllocator() { return mAllocator; }
+utils::Allocator<utils::byte>& ContextInternal::getAllocator() {
+  return mAllocator;
+}
 
 utils::Index ContextInternal::getNextPublicIndex() const {
   return mInstancesCounter;

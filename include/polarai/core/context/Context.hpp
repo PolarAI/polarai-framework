@@ -22,9 +22,9 @@
 namespace polarai::core {
 class POLAR_CORE_EXPORT Context {
 public:
-  explicit Context(utils::Allocator allocator = utils::Allocator(),
-                   size_t defaultCapacity = 100,
-                   size_t elementAverageSize = 32);
+  explicit Context(
+      utils::Allocator<utils::byte> allocator = utils::Allocator<utils::byte>(),
+      size_t defaultCapacity = 100, size_t elementAverageSize = 32);
 
   explicit Context(utils::SharedPtr<internal::ContextInternal> ptr);
 
@@ -33,7 +33,7 @@ public:
   template <typename Type, typename... Args>
   typename Wrapper<Type>::PublicType create(Args&&... args);
 
-  utils::Allocator& getAllocator();
+  utils::Allocator<utils::byte>& getAllocator();
 
   utils::SharedPtr<internal::ContextInternal> internal();
 

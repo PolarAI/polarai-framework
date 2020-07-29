@@ -19,12 +19,20 @@
 
 #include <cstddef>
 #include <memory>
+#include <type_traits>
 
 namespace polarai::utils {
-class POLAR_UTILS_EXPORT Allocator {
+template <typename T = byte> class POLAR_UTILS_EXPORT Allocator {
 public:
+  using value_type = T;
+  using size_type = std::size_t;
+  using difference_type = std::ptrdiff_t;
+  using propagate_on_container_move_assignment = std::true_type;
+  using is_always_equal = std::false_type;
+
   explicit Allocator(SharedPtr<AbstractMemoryResource> memoryResource =
-                         makeShared<StatelessMemoryResource>());
+                         makeShared<StatelessMemoryResource>())
+      : mMemoryResource(memoryResource) {}
 
   Allocator(const Allocator&) = default;
 
@@ -32,11 +40,32 @@ public:
 
   ~Allocator() = default;
 
-  byte* allocateBytes(size_t size, size_t alignment = 64);
+  [[nodiscard]] T* allocate(size_t n) {
+    return static_cast<T*>(allocate_bytes(n * sizeof(T), alignof(T)));
+  }
 
-  void deallocateBytes(const byte* data, size_t size, size_t alignment = 64);
+  void deallocate(T* ptr, size_t n) {
+    deallocate_bytes(ptr, n * sizeof(T), alignof(T));
+  }
 
-  SharedPtr<AbstractMemoryResource>& getMemoryResource();
+  template <typename U, typename... Args>
+  void construct(U* ptr, Args&&... args) {
+    new (ptr) U(std::forward<Args>(ptr)...);
+  }
+
+  template <typename U> void destroy(U* ptr) { ptr->~U(); }
+
+  [[nodiscard]] void* allocate_bytes(size_t size, size_t alignment = 64) {
+    return mMemoryResource->allocate(size, alignment);
+  }
+
+  void deallocate_bytes(byte* data, size_t size, size_t alignment = 64) {
+    mMemoryResource->deallocate(data, size, alignment);
+  }
+
+  SharedPtr<AbstractMemoryResource>& getMemoryResource() {
+    return mMemoryResource;
+  }
 
 private:
   SharedPtr<AbstractMemoryResource> mMemoryResource;

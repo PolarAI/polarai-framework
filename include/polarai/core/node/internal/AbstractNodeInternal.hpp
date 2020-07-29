@@ -32,7 +32,7 @@ public:
   void before(const AbstractNodeInternal& node, EdgeMark mark) const;
   [[nodiscard]] virtual NodeType getType() const = 0;
   virtual void clear();
-  utils::Allocator getAllocator();
+  utils::Allocator<utils::byte> getAllocator();
   [[nodiscard]] const TensorInternal* getTensorPtr() const;
   TensorInternal* getTensorPtr();
   utils::Index getTensorIndex() const;

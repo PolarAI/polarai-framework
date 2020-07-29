@@ -37,8 +37,8 @@ using Map = std::unordered_map<utils::Index, InternalIndex>;
 
 class POLAR_CORE_EXPORT ContextInternal {
 public:
-  explicit ContextInternal(utils::Allocator allocator, size_t defaultCapacity,
-                           size_t elementAverageSize);
+  explicit ContextInternal(utils::Allocator<utils::byte> allocator,
+                           size_t defaultCapacity, size_t elementAverageSize);
 
   ~ContextInternal();
 
@@ -46,7 +46,7 @@ public:
   template <typename InternalType, typename... Args>
   utils::Index create(Args&&... args);
 
-  utils::Allocator& getAllocator();
+  utils::Allocator<utils::byte>& getAllocator();
 
   const Traversal& traverse(utils::Index publicGraphIndex);
 
@@ -65,7 +65,7 @@ public:
   utils::Index registerTensor(const TensorInternal& tensor);
 
 private:
-  utils::Allocator mAllocator;
+  utils::Allocator<utils::byte> mAllocator;
   Container mContainer;
   Map mPublicIndexToPrivateIndex;
   utils::Index mInstancesCounter;

@@ -25,7 +25,7 @@ template <typename BaseClass> class HeterogeneousVector {
 public:
   // TODO doesn't work if capacity is 0
   explicit HeterogeneousVector(size_t capacity, size_t elementAverageSize,
-                               Allocator allocator = Allocator());
+                               Allocator<byte> allocator = Allocator<byte>());
 
   ~HeterogeneousVector();
 
@@ -54,7 +54,7 @@ private:
 
   void resize(size_t capacity = 0);
 
-  Allocator mAllocator;
+  Allocator<byte> mAllocator;
   size_t mElementAverageSize;
   size_t mNextIndex;
   size_t mCapacity;
@@ -94,7 +94,7 @@ utils::Index HeterogeneousVector<BaseClass>::emplaceBack(Args&&... args) {
 template <typename BaseClass>
 HeterogeneousVector<BaseClass>::HeterogeneousVector(size_t capacity,
                                                     size_t elementAverageSize,
-                                                    Allocator allocator)
+                                                    Allocator<byte> allocator)
     : mAllocator(std::move(allocator)), mElementAverageSize(elementAverageSize),
       mCapacity(0), mNextIndex(0), mOffsets(nullptr), mBytes(nullptr) {
   resize(capacity);
@@ -117,8 +117,8 @@ void HeterogeneousVector<BaseClass>::destroy(bool isDestruct) {
           ->~BaseClass();
     }
   }
-  mAllocator.deallocateBytes(mOffsets, (mCapacity + 1) * sizeof(OffsetType));
-  mAllocator.deallocateBytes(mBytes, mCapacity * mElementAverageSize);
+  mAllocator.deallocate_bytes(mOffsets, (mCapacity + 1) * sizeof(OffsetType));
+  mAllocator.deallocate_bytes(mBytes, mCapacity * mElementAverageSize);
 }
 
 template <typename BaseClass>
@@ -145,9 +145,9 @@ void HeterogeneousVector<BaseClass>::resize(size_t capacity) {
     return;
   }
   auto offsets = static_cast<OffsetType*>(
-      mAllocator.allocateBytes((capacity + 1) * sizeof(OffsetType)));
+      mAllocator.allocate_bytes((capacity + 1) * sizeof(OffsetType)));
   auto bytes = static_cast<byte*>(
-      mAllocator.allocateBytes(capacity * mElementAverageSize));
+      mAllocator.allocate_bytes(capacity * mElementAverageSize));
   if (mBytes != nullptr && mOffsets != nullptr) {
     std::memcpy(offsets, mOffsets, (mCapacity + 1) * sizeof(OffsetType));
     std::memcpy(bytes, mBytes, mCapacity * mElementAverageSize);

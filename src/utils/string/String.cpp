@@ -17,12 +17,12 @@
 #include <iostream>
 
 namespace polarai::utils {
-String::String() : mSize(0), mAllocator(Allocator()), mData(nullptr) {}
+String::String() : mSize(0), mAllocator(Allocator<byte>()), mData(nullptr) {}
 
-String::String(const char* const string, Allocator allocator)
+String::String(const char* const string, Allocator<byte> allocator)
     : mSize(strlen(string)), mAllocator(std::move(allocator)),
       mData(reinterpret_cast<const char*>(
-          mAllocator.allocateBytes((mSize + 1) * sizeof(char)))) {
+          mAllocator.allocate_bytes((mSize + 1) * sizeof(char)))) {
 #ifdef DEBUG
   if (mData == nullptr) {
     FatalError(ATH_ASSERT, "Memory allocation for string ", this,
@@ -35,7 +35,7 @@ String::String(const char* const string, Allocator allocator)
 String::String(const String& rhs)
     : mSize(rhs.mSize), mAllocator(rhs.mAllocator),
       mData(reinterpret_cast<const char*>(
-          mAllocator.allocateBytes((mSize + 1) * sizeof(char)))) {
+          mAllocator.allocate_bytes((mSize + 1) * sizeof(char)))) {
   memcpy((void*)mData, rhs.mData, (mSize + 1) * sizeof(char));
 }
 
@@ -51,7 +51,8 @@ String::~String() {
     return;
   }
   // TODO add define for safety mode with memory filling by zeros
-  mAllocator.deallocateBytes(mData, (mSize + 1) * sizeof(char));
+  mAllocator.deallocate_bytes(const_cast<char*>(mData),
+                              (mSize + 1) * sizeof(char));
 }
 
 const char* String::getString() const {

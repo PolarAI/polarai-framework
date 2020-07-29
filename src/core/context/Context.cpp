@@ -14,8 +14,8 @@
 #include <polarai/core/context/internal/ContextInternal.hpp>
 
 namespace polarai::core {
-Context::Context(utils::Allocator allocator, size_t defaultCapacity,
-                 size_t elementAverageSize)
+Context::Context(utils::Allocator<utils::byte> allocator,
+                 size_t defaultCapacity, size_t elementAverageSize)
     : mInternal(utils::makeShared<internal::ContextInternal>(
           std::move(allocator), defaultCapacity, elementAverageSize)) {}
 
@@ -32,5 +32,7 @@ utils::SharedPtr<const internal::ContextInternal> Context::internal() const {
   return mInternal;
 }
 
-utils::Allocator& Context::getAllocator() { return mInternal->getAllocator(); }
+utils::Allocator<utils::byte>& Context::getAllocator() {
+  return mInternal->getAllocator();
+}
 } // namespace polarai::core

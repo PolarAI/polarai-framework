@@ -40,7 +40,7 @@ void AbstractNodeInternal::clear() {
   // TODO
 }
 
-utils::Allocator AbstractNodeInternal::getAllocator() {
+utils::Allocator<utils::byte> AbstractNodeInternal::getAllocator() {
   return mContext.lock()->getAllocator();
 }
 

@@ -21,7 +21,7 @@ namespace polarai::utils {
 class POLAR_UTILS_EXPORT String {
 public:
   String();
-  String(const char* string, Allocator allocator = Allocator());
+  String(const char* string, Allocator<byte> allocator = Allocator<byte>());
   String(const String&);
   String(String&&) noexcept;
   ~String();
@@ -30,7 +30,7 @@ public:
 
 private:
   size_t mSize;
-  Allocator mAllocator;
+  Allocator<byte> mAllocator;
   const char* mData;
 };
 } // namespace polarai::utils
