@@ -13,6 +13,8 @@
 #pragma once
 
 #include <polarai/utils/Defines.hpp>
+#include <polarai/utils/storages/SharedPtr.hpp>
+#include <polarai/utils/storages/WeakPtr.hpp>
 
 #include <memory>
 
@@ -23,15 +25,6 @@ template <typename Type, typename... Args>
 ATH_FORCE_INLINE UniquePtr<Type> makeUnique(Args&&... args) {
   return std::make_unique<Type>(std::forward<Args>(args)...);
 }
-
-template <typename Type> using SharedPtr = std::shared_ptr<Type>;
-
-template <typename Type, typename... Args>
-ATH_FORCE_INLINE SharedPtr<Type> makeShared(Args&&... args) {
-  return std::make_shared<Type>(std::forward<Args>(args)...);
-}
-
-template <typename Type> using WeakPtr = std::weak_ptr<Type>;
 
 template <typename Type> void SharedDeleter(Type* ptr) {}
 } // namespace polarai::utils

@@ -26,7 +26,7 @@ namespace polarai::backend::generic {
 // Forward declarations
 class ExecutorImpl;
 /// Default device filter. Selects all devices.
-constexpr auto DefaultDeviceFilter = [](polarai::utils::SharedPtr<Device>&) {
+constexpr auto DefaultDeviceFilter = [](std::shared_ptr<Device>&) {
   return true;
 };
 
@@ -36,7 +36,7 @@ constexpr auto DefaultDeviceFilter = [](polarai::utils::SharedPtr<Device>&) {
 class POLAR_BACKEND_GENERIC_EXPORT Executor {
 public:
   using FilterFunctionT =
-      std::function<bool(polarai::utils::SharedPtr<Device>&)>;
+      std::function<bool(std::shared_ptr<Device>&)>;
   Executor(bool enableDebugOutput = false,
            FilterFunctionT filter = DefaultDeviceFilter);
 
@@ -51,8 +51,8 @@ public:
   void evaluate(polarai::core::Graph& graph);
 
   BackendAllocator& getAllocator();
-  polarai::utils::SharedPtr<BackendAllocator> getAllocatorPtr();
-  void setAllocator(polarai::utils::SharedPtr<BackendAllocator>& allocator);
+  std::shared_ptr<BackendAllocator> getAllocatorPtr();
+  void setAllocator(std::shared_ptr<BackendAllocator>& allocator);
 
   polarai::utils::Vector<std::shared_ptr<Device>>& getDevices();
 

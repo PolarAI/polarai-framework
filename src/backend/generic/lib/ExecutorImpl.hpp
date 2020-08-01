@@ -32,7 +32,7 @@ class RuntimeDriver;
 class ExecutorImpl {
 public:
   using FilterFunctionT =
-      std::function<bool(polarai::utils::SharedPtr<Device>&)>;
+      std::function<bool(std::shared_ptr<Device>&)>;
   ExecutorImpl(bool enableDebugOutput, FilterFunctionT filter);
 
   /// Adds Graph to compilable module.
@@ -46,10 +46,10 @@ public:
   void evaluate(polarai::core::Graph& graph);
 
   BackendAllocator& getAllocator();
-  polarai::utils::SharedPtr<BackendAllocator> getAllocatorPtr();
-  void setAllocator(polarai::utils::SharedPtr<BackendAllocator>& allocator);
+  std::shared_ptr<BackendAllocator> getAllocatorPtr();
+  void setAllocator(std::shared_ptr<BackendAllocator>& allocator);
 
-  polarai::utils::Vector<polarai::utils::SharedPtr<Device>>& getDevices();
+  polarai::utils::Vector<std::shared_ptr<Device>>& getDevices();
 
 private:
   FilterFunctionT mFilter;

@@ -13,12 +13,11 @@
 #pragma once
 
 #include <polar_utils_export.h>
+#include <polarai/utils/Memory.hpp>
 
 #include <cstddef>
 
 namespace polarai::utils {
-using byte = void;
-
 class POLAR_UTILS_EXPORT AbstractMemoryResource {
 public:
   virtual ~AbstractMemoryResource() = default;

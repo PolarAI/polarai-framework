@@ -17,6 +17,8 @@
 #include <cstddef>
 
 namespace polarai::utils {
+using byte = void;
+
 /// Allocate memory without any checks.
 ///
 /// \param size is a size of allocation in bytes.
